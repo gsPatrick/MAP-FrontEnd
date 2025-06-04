@@ -47,23 +47,23 @@ const HeroSection = () => {
           {/* Coluna de Texto */}
           <Col xs={24} md={12} className="hero-text-col">
             <Title level={1} className="hero-headline hero-animate">
-              Controle Total, <span className="highlight-orange">Zero Complicação</span>.
+              Controle Total, <span className="highlight-orange-new">Zero Complicação</span>.
               Seu Assistente Pessoal Inteligente.
             </Title>
             <Paragraph className="hero-subheadline hero-animate">
-              Com o <strong className="highlight-brand">No Controle</strong>, gerencie suas finanças,
+              Com o <strong className="highlight-brand-new">No Controle</strong>, gerencie suas finanças,
               tarefas e até o estoque do seu negócio diretamente pelo WhatsApp.
               Inteligência Artificial que trabalha para você, 24/7.
             </Paragraph>
             <div className="hero-features-preview hero-animate">
               <div className="feature-item">
-                <SafetyCertificateOutlined className="feature-icon" /> Segurança Avançada
+                <SafetyCertificateOutlined className="feature-icon-new" /> Segurança Avançada
               </div>
               <div className="feature-item">
-                <AimOutlined className="feature-icon" /> IA Precisa
+                <AimOutlined className="feature-icon-new" /> IA Precisa
               </div>
               <div className="feature-item">
-                <WhatsAppOutlined className="feature-icon" /> Gestão via WhatsApp
+                <WhatsAppOutlined className="feature-icon-new" /> Gestão via WhatsApp
               </div>
             </div>
             <Button
@@ -96,7 +96,7 @@ const HeroSection = () => {
                       <Paragraph strong>MAP:</Paragraph>
                       <Paragraph>Seu resumo diário está pronto! Alguma despesa nova hoje?</Paragraph>
                     </div>
-                    <div className="chat-message sent">
+                    <div className="chat-message sent"> {/* Estilo do balão "sent" será atualizado no CSS */}
                       <Paragraph>Sim, paguei o fornecedor X, R$150.</Paragraph>
                     </div>
                     <div className="chat-message received">
@@ -112,7 +112,7 @@ const HeroSection = () => {
 
               {/* Elementos de UI Flutuantes */}
               <Card className="floating-ui-element ui-card-1 graphic-element-animate" style={{animationDelay: '0.4s'}}>
-                <PieChartOutlined style={{ fontSize: '24px', color: 'var(--map-dourado)', marginRight: '10px' }} />
+                <PieChartOutlined className="ui-card-icon-1" style={{ fontSize: '24px', marginRight: '10px' }} /> {/* Classe para cor específica */}
                 <div>
                   <Title level={5} style={{ margin: 0 }}>Despesas do Mês</Title>
                   <Paragraph style={{ margin: 0, fontSize: '12px' }}>R$ 1.235,50</Paragraph>
@@ -120,14 +120,14 @@ const HeroSection = () => {
               </Card>
 
               <Card className="floating-ui-element ui-card-2 graphic-element-animate" style={{animationDelay: '0.6s'}}>
-                <SafetyCertificateOutlined style={{ fontSize: '24px', color: 'var(--map-laranja)', marginRight: '10px' }} />
+                <SafetyCertificateOutlined className="ui-card-icon-2" style={{ fontSize: '24px', marginRight: '10px' }} /> {/* Classe para cor específica */}
                 <div>
                   <Title level={5} style={{ margin: 0 }}>Dados Protegidos</Title>
                   <Paragraph style={{ margin: 0, fontSize: '12px' }}>Criptografia Ativa</Paragraph>
                 </div>
               </Card>
               
-              <div className="floating-ui-element ui-bubble-1 graphic-element-animate" style={{animationDelay: '0.8s'}}>
+              <div className="floating-ui-element ui-bubble-1 graphic-element-animate" style={{animationDelay: '0.8s'}}> {/* Estilo do bubble será atualizado no CSS */}
                 <WhatsAppOutlined /> Saldo Atualizado!
               </div>
 

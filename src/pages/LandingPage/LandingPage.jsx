@@ -6,13 +6,14 @@ import HeroSection from '../../componentsLP/HeroSection/HeroSection';
 import FeaturesSection from '../../componentsLP/FeaturesSection/FeaturesSection';
 import HowItWorksSection from '../../componentsLP/HowItWorksSection/HowItWorksSection';
 import PricingSection from '../../componentsLP/PricingSection/PricingSection';
-import FaqSection from '../../componentsLP/FaqSection/FaqSection'; // Importar
-import ContactPromptSection from '../../componentsLP/ContactPromptSection/ContactPromptSection'; // Importar a nova seção
-import BenefitsSection from '../../componentsLP/BenefitsSection/BenefitsSection'; // Importar a nova seção
+import FaqSection from '../../componentsLP/FaqSection/FaqSection';
+import ContactPromptSection from '../../componentsLP/ContactPromptSection/ContactPromptSection';
+import BenefitsSection from '../../componentsLP/BenefitsSection/BenefitsSection';
 import TargetAudienceSection from '../../componentsLP/TargetAudienceSection/TargetAudienceSection';
 import GoogleCalendarSection from '../../componentsLP/GoogleCalendarSection/GoogleCalendarSection';
 import WhatsAppIntegrationSection from '../../componentsLP/WhatsAppIntegrationSection/WhatsAppIntegrationSection';
-import FooterLP from '../../componentsLP/FooterLP/FooterLP'; // Importar o FooterLP
+import AboutCreatorSection from '../../componentsLP/AboutCreatorSection/AboutCreatorSection';
+import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import './LandingPage.css';
 
 const { Content } = Layout;
@@ -22,22 +23,53 @@ const LandingPage = () => {
     <Layout className="landing-page-layout">
       <Header />
       <Content className="landing-page-main-content">
-        <HeroSection />
-        <FeaturesSection />
+        {/* O HeroSection geralmente é o topo, não precisa de ID para navegação do menu, a menos que haja um link "Home" */}
+        <HeroSection /> 
+        
+        <GoogleCalendarSection/>
+        
+        {/* Adicionando IDs para navegação do menu */}
+        <div id="funcionalidades">
+          <FeaturesSection />
+        </div>
+        
         <HowItWorksSection />
-        <PricingSection />
-        <BenefitsSection /> {/* Adicionar a nova seção de benefícios aqui */}
+
+
+          <div id="sobre">
+              <AboutCreatorSection />
+          </div>
+        
+        <div id="beneficios">
+          <BenefitsSection />
+        </div>
+        
         <TargetAudienceSection />
-        < GoogleCalendarSection/>
-        < WhatsAppIntegrationSection />
-        {/* Outras seções da Landing Page virão aqui abaixo (ex: Depoimentos) */}
-        <FaqSection /> {/* Adicionar a FaqSection aqui */}
-        <ContactPromptSection /> {/* Adicionar a nova seção de contato aqui */}
-        {/* Outras seções da Landing Page virão aqui abaixo (ex: Footer) */}
+        <WhatsAppIntegrationSection />
+        
+        <div id="planos">
+          <PricingSection />
+        </div>
+
+        {/* 
+          Para o item de menu "Depoimentos" funcionar, 
+          você precisaria de uma seção como a abaixo:
+          <div id="depoimentos">
+            <TestimonialsSection />  // Componente de depoimentos a ser criado
+          </div>
+        */}
+        
+        <div id="faq"> {/* Adicionado ID para a seção FAQ, caso queira linkar a ela */}
+          <FaqSection />
+        </div>
+        
+        <ContactPromptSection />
+        
+        {/* Espaço vazio mantido do original */}
         <div>
         </div>
       </Content>
-      <FooterLP /> {/* Adicionar o FooterLP aqui, fora do Content principal */}
+      <FooterLP />
     </Layout>
   );
 };

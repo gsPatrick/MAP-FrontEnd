@@ -1,0 +1,289 @@
+/* src/componentsLP/AboutCreatorSection/AboutCreatorSection.css - MODERN LAYOUT WITH CARDS */
+
+ :root {
+  --cor-preto-absoluto: #000000;
+  --cor-preto-azulado-cards: #0d1117; /* Um preto levemente azulado para os cards */
+  --cor-cinza-bordas-cards: #21262d; /* Cinza escuro para bordas */
+  --cor-branco: #FFFFFF;
+  --map-laranja: #ff7f00;
+  --map-laranja-rgb: 255, 127, 0;
+  --map-dourado: #e3be62;
+  --map-dourado-rgb: 227, 190, 98;
+  --texto-cinza-claro: #c9d1d9; /* Texto principal nos cards e seção */
+  --texto-cinza-medio: #8b949e; /* Texto secundário */
+} 
+
+.about-creator-section-wrapper {
+  background-color: var(--cor-preto-absoluto, #000000);
+  color: var(--texto-cinza-claro, #c9d1d9);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(var(--map-dourado-rgb, 227, 190, 98), 0.2);
+}
+
+.about-creator-container {
+  max-width: 1150px; /* Aumentado um pouco para acomodar cards */
+  position: relative;
+  z-index: 1;
+}
+
+/* Elementos Gráficos de Fundo */
+.background-ring {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+.about-creator-section-wrapper .animate-on-scroll.visible ~ .background-ring, /* Se os cards estiverem visíveis */
+.about-creator-header-row .animate-on-scroll.visible ~ .background-ring { /* Se o header estiver visível */
+  opacity: 1; /* Torna os anéis visíveis quando o conteúdo principal aparece */
+}
+
+.ring1 {
+  width: 350px; height: 350px;
+  border-width: 1px;
+  border-color: rgba(var(--map-dourado-rgb, 227, 190, 98), 0.1);
+  top: 5%; left: 2%;
+  animation: subtleMove 20s infinite alternate ease-in-out 0s;
+}
+.ring2 {
+  width: 500px; height: 500px;
+  border-width: 1px;
+  border-color: rgba(var(--map-laranja-rgb, 255, 127, 0), 0.07);
+  bottom: 10%; right: 5%;
+  animation: subtleMove 25s infinite alternate ease-in-out 1s;
+}
+.modern-blob1 { /* Elemento gráfico diferente */
+  width: 250px; height: 250px;
+  background: radial-gradient(circle, rgba(var(--map-dourado-rgb, 227,190,98),0.08) 0%, transparent 70%);
+  top: 30%; left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 40% 60% 70% 30% / 30% 50% 50% 70%; /* Forma de blob orgânico */
+  animation: subtleMorph 15s infinite alternate ease-in-out 2s;
+  opacity: 0; /* Começa invisível, aparece com a animação */
+}
+.about-creator-section-wrapper .animate-on-scroll.visible ~ .modern-blob1 {
+    opacity: 0.5; /* Opacidade quando visível */
+}
+
+
+@keyframes subtleMove {
+  0% { transform: translate(0, 0) scale(0.95); }
+  100% { transform: translate(10px, -15px) scale(1.05); }
+}
+@keyframes subtleMorph {
+  0% { border-radius: 40% 60% 70% 30% / 30% 50% 50% 70%; transform: translate(-50%, -50%) rotate(45deg) scale(0.9); }
+  50% { border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%; transform: translate(-45%, -55%) rotate(60deg) scale(1); }
+  100% { border-radius: 40% 60% 70% 30% / 30% 50% 50% 70%; transform: translate(-50%, -50%) rotate(45deg) scale(0.9); }
+}
+
+
+/* Animações de entrada dos elementos */
+.about-creator-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 0.7s cubic-bezier(0.215, 0.610, 0.355, 1), transform 0.8s cubic-bezier(0.215, 0.610, 0.355, 1), filter 0.8s ease;
+  filter: blur(3px);
+}
+.about-creator-section-wrapper .animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+}
+
+/* Header da Seção: Imagem e Título */
+.about-creator-header-row {
+  margin-bottom: 60px; /* Espaço antes dos cards */
+  align-items: center;
+}
+.about-creator-image-col { /* Mantido de antes, pode precisar de ajustes */
+  display: flex; justify-content: center; align-items: center;
+}
+.about-creator-image-outer-ring {
+  padding: 7px; border-radius: 50%;
+  background: linear-gradient(145deg, rgba(var(--map-dourado-rgb, 227, 190, 98), 0.1), rgba(var(--map-laranja-rgb, 255, 127, 0), 0.08));
+  box-shadow: 0 0 20px -8px rgba(var(--map-dourado-rgb, 227, 190, 98), 0.1);
+  transition: transform 0.4s ease;
+}
+.about-creator-image-outer-ring:hover { transform: scale(1.04); }
+.about-creator-image-container {
+  width: clamp(180px, 18vw, 240px); height: clamp(180px, 18vw, 240px); /* Imagem um pouco menor */
+  border-radius: 50%; overflow: hidden; position: relative;
+  background-color: #222; border: 2px solid var(--cor-preto-absoluto, #000000);
+}
+.image-placeholder-creator {
+  width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
+  color: var(--map-dourado, #e3be62); font-size: clamp(50px, 8vw, 70px); font-weight: 300;
+  background: radial-gradient(circle, rgba(var(--map-dourado-rgb,227,190,98),0.04) 0%, transparent 70%);
+}
+.creator-image-actual { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.about-creator-title-col {
+  padding-left: 30px !important; /* Espaço entre imagem e título */
+}
+@media (max-width: 767px) { /* md */
+  .about-creator-header-row { text-align: center; }
+  .about-creator-image-outer-ring { margin-bottom: 25px; }
+  .about-creator-title-col { padding-left: 0 !important; }
+}
+
+.about-creator-main-title {
+  font-size: clamp(28px, 4vw, 40px) !important;
+  font-weight: 700 !important;
+  color: var(--cor-branco, #FFFFFF) !important;
+  margin-bottom: 10px !important;
+  line-height: 1.25 !important;
+}
+.title-heart-icon {
+  color: var(--map-laranja, #ff7f00); font-size: 0.8em; margin: 0 3px;
+  animation: heartbeatSoft 1.8s infinite ease-in-out 0.2s; display: inline-block;
+}
+@keyframes heartbeatSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+.about-creator-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--texto-cinza-medio, #8b949e) !important;
+  font-weight: 300 !important;
+  line-height: 1.6 !important;
+  max-width: 550px;
+}
+@media (max-width: 767px) { /* md */
+  .about-creator-subtitle { margin-left: auto; margin-right: auto; }
+}
+
+/* Grid de Cards */
+.about-cards-grid {
+  margin-bottom: 60px; /* Espaço antes da conclusão */
+}
+
+.modern-feature-card {
+  background-color: var(--cor-preto-azulado-cards, #0d1117);
+  border: 1px solid var(--cor-cinza-bordas-cards, #21262d);
+  border-radius: 12px;
+  padding: 25px 30px;
+  height: 100%; /* Para alinhar cards de mesma altura na linha */
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: transform 0.35s cubic-bezier(0.075, 0.82, 0.165, 1),
+              box-shadow 0.35s cubic-bezier(0.075, 0.82, 0.165, 1),
+              border-color 0.35s ease;
+  position: relative; /* Para pseudo-elementos de brilho */
+  overflow: hidden; /* Para o brilho não vazar */
+}
+.modern-feature-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(var(--map-dourado-rgb, 227, 190, 98), 0.5);
+  box-shadow: 0 10px 30px -5px rgba(var(--map-dourado-rgb, 227, 190, 98), 0.1),
+              0 0 0 3px rgba(var(--map-dourado-rgb, 227, 190, 98), 0.05); /* Simula um brilho */
+}
+/* Efeito de brilho sutil no hover */
+.modern-feature-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 80%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(var(--map-dourado-rgb,227,190,98),0.08), transparent);
+  transition: left 0.6s ease-in-out;
+  transform: skewX(-25deg);
+  opacity: 0;
+}
+.modern-feature-card:hover::before {
+  left: 120%;
+  opacity: 1;
+}
+
+
+.card-icon-wrapper {
+  font-size: 30px;
+  color: var(--map-laranja, #ff7f00);
+  margin-bottom: 18px;
+  width: 50px;
+  height: 50px;
+  background-color: rgba(var(--map-laranja-rgb, 255, 127, 0), 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(var(--map-laranja-rgb, 255,127,0),0.1);
+}
+
+.card-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--cor-branco, #FFFFFF) !important;
+  margin-bottom: 12px !important;
+  line-height: 1.3 !important;
+}
+
+.card-text {
+  font-size: 14.5px !important;
+  color: var(--texto-cinza-medio, #8b949e) !important;
+  line-height: 1.7 !important;
+  font-weight: 300 !important;
+  flex-grow: 1; /* Para que o texto ocupe espaço e alinhe botões/links no final se houver */
+}
+
+/* Conclusão e Frase de Impacto */
+.about-creator-conclusion-row {
+  text-align: center;
+}
+.about-creator-idealizer {
+  font-size: clamp(15px, 2vw, 17px) !important;
+  color: var(--texto-cinza-claro, #c9d1d9) !important;
+  line-height: 1.75 !important;
+  margin-bottom: 30px !important;
+  font-weight: 300;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.creator-name {
+  color: var(--map-dourado, #e3be62);
+  font-weight: 500;
+  /* Efeito sutil de sublinhado animado */
+  background-image: linear-gradient(var(--map-dourado, #e3be62), var(--map-dourado, #e3be62));
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  padding-bottom: 1px;
+  transition: background-size 0.3s ease-in-out;
+}
+.about-creator-idealizer:hover .creator-name {
+  background-size: 80% 1px;
+}
+
+.about-creator-impact-phrase-wrapper { /* Mantido de antes, pode precisar de ajustes */
+  margin-top: 20px; padding: 15px 20px;
+  border: 1px dashed rgba(var(--map-laranja-rgb, 255, 127, 0), 0.25);
+  border-radius: 10px; position: relative; display: flex;
+  align-items: center; justify-content: center;
+  background-color: rgba(var(--map-laranja-rgb, 255,127,0), 0.015);
+  max-width: 800px; margin-left: auto; margin-right: auto;
+}
+.quote-icon {
+  font-family: 'Georgia', serif; font-size: clamp(28px, 4.5vw, 40px);
+  color: var(--map-laranja, #ff7f00); opacity: 0.6; line-height: 1;
+}
+.left-quote { margin-right: 12px; }
+.right-quote { margin-left: 12px; }
+.about-creator-impact-phrase {
+  font-size: clamp(18px, 2.5vw, 22px) !important; font-weight: 500 !important;
+  color: var(--cor-branco, #FFFFFF) !important; line-height: 1.5 !important;
+  margin-bottom: 0 !important; text-align: center; flex-grow: 1;
+}
+.about-creator-impact-phrase .highlight-control {
+  color: var(--map-laranja, #ff7f00); font-weight: 700;
+  text-shadow: 0 0 10px rgba(var(--map-laranja-rgb, 255,127,0), 0.25);
+}
+
+/* Responsividade Adicional */
+@media (max-width: 767px) { /* sm */
+  .modern-feature-card { padding: 20px 25px; }
+  .card-icon-wrapper { font-size: 26px; width: 45px; height: 45px; margin-bottom: 15px; }
+  .card-title { font-size: 18px !important; }
+  .card-text { font-size: 14px !important; }
+}

@@ -45,13 +45,13 @@ const agendaFeaturesData = [
     key: '5',
     icon: <ShareAltOutlined />,
     title: 'Compartilhamento Fácil',
-    color: '#7c4dff', // Purple
+    color: '#7c4dff', // Purple (cor exemplo, pode ajustar se quiser manter padrão Google)
   },
   {
     key: '6',
     icon: <SettingOutlined />,
     title: 'Visual Personalizável',
-    color: '#ff6d00', // Orange
+    color: '#ff6d00', // Orange (cor exemplo)
   },
 ];
 
@@ -74,12 +74,12 @@ const GoogleCalendarSection = () => {
           }
         });
       },
-      { threshold: 0.05 } // Reduzido para pegar elementos mais cedo
+      { threshold: 0.05 }
     );
 
     if (section) observer.observe(section);
     if (mainIconContainer) {
-        mainIconContainer.style.transitionDelay = '0.1s'; // Mais rápido
+        mainIconContainer.style.transitionDelay = '0.1s';
         observer.observe(mainIconContainer);
     }
     if (title) {
@@ -91,7 +91,7 @@ const GoogleCalendarSection = () => {
         observer.observe(subtitle);
     }
     featureItems.forEach((item, index) => {
-      item.style.transitionDelay = `${0.5 + index * 0.08}s`; // Mais rápido
+      item.style.transitionDelay = `${0.5 + index * 0.08}s`;
       observer.observe(item);
     });
     
@@ -101,7 +101,7 @@ const GoogleCalendarSection = () => {
   }, []);
 
   return (
-    <div className="gcal-focused-section-wrapper section-padding-large"> {/* Padding maior */}
+    <div className="gcal-focused-section-wrapper section-padding-large">
       <div className="section-container gcal-focused-container">
         <div className="gcal-main-icon-container">
           <div className="gcal-main-icon-rings">
@@ -122,10 +122,10 @@ const GoogleCalendarSection = () => {
           agora integrados à sua gestão completa.
         </Paragraph>
 
-        <Row gutter={[20, 30]} className="gcal-features-grid"> {/* Gutter ajustado */}
+        <Row gutter={[20, 30]} className="gcal-features-grid">
           {agendaFeaturesData.map((feature) => (
             <Col xs={12} sm={8} md={6} lg={4} key={feature.key} className="gcal-focused-feature-item">
-              <div className="gcal-feature-icon-wrapper-focused" style={{ '--feature-color': feature.color }}>
+              <div className="gcal-feature-icon-wrapper-focused" style={{ '--feature-color': feature.color, '--feature-color-rgb': feature.color === '#4285F4' ? '66,133,244' : feature.color === '#DB4437' ? '219,68,55' : feature.color === '#F4B400' ? '244,180,0' : feature.color === '#0F9D58' ? '15,157,88' : feature.color === '#7c4dff' ? '124,77,255' : '255,109,0' }}>
                 {React.cloneElement(feature.icon, { className: 'gcal-feature-icon-inner' })}
               </div>
               <Paragraph className="gcal-feature-title-focused">{feature.title}</Paragraph>

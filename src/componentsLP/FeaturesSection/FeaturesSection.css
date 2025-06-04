@@ -1,17 +1,26 @@
 /* src/componentsLP/FeaturesSection/FeaturesSection.css */
 
-/* Adicionando '-refined' aos nomes das classes para evitar conflitos se o CSS antigo ainda estiver carregado */
+/* Suas variáveis de cor globais (exemplo, ajuste conforme sua definição real) */
+:root {
+    --map-dourado: #e3be62; /* Cor 1 */
+    --map-laranja: #b24a0a; /* Cor 2 - Usada como Terracota */
+    --map-laranja-escuro: #903b07; /* Cor 3 */
+    --map-preto: #000000; /* Cor 4 */
+    --map-branco: #FFFFFF;
+    --map-cinza-texto: #555; 
+}
+
+
 .features-section-wrapper-refined {
-    padding: 80px 0; /* Aumentar padding vertical */
-    background-color: #f8f9fa; /* Um cinza bem claro, quase branco */
-    /* background-color: var(--map-branco); */
-    overflow: hidden; /* Para conter animações */
+    padding: 80px 0;
+    background-color: #f8f9fa; 
+    overflow: hidden;
   }
   
   .features-section-container-refined {
-    max-width: 1100px; /* Levemente reduzido para mais respiro nas laterais */
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 0 var(--header-padding-x, 25px); /* Default se --header-padding-x não estiver definido */
+    padding: 0 var(--header-padding-x, 25px);
     text-align: center;
   }
   
@@ -28,23 +37,21 @@
     transition-delay: inherit !important;
   }
   
-  
   .features-main-title-refined {
-    font-size: 34px !important; /* Um pouco menor */
+    font-size: 34px !important;
     font-weight: 700 !important;
     color: var(--map-preto) !important;
     margin-bottom: 18px !important;
   }
   
-  .features-main-title-refined .highlight-brand { /* Usar a cor da marca mais forte aqui */
-    color: var(--map-laranja);
-    /* Ou var(--map-dourado); */
+  .features-main-title-refined .highlight-brand {
+    color: var(--map-laranja); 
   }
   
   .features-main-subtitle-refined {
     font-size: 17px !important;
-    color: #5f6c7b !important; /* Cinza azulado suave */
-    margin-bottom: 60px !important; /* Mais espaço abaixo do subtítulo */
+    color: #5f6c7b !important; 
+    margin-bottom: 60px !important;
     max-width: 650px;
     margin-left: auto;
     margin-right: auto;
@@ -53,13 +60,13 @@
   
   .feature-card-item-refined {
     opacity: 0;
-    transform: translateY(30px); /* Começa um pouco mais de baixo */
+    transform: translateY(30px);
   }
   
   .feature-card-item-refined.visible {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Animação mais rápida */
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
     transition-delay: inherit !important;
   }
   
@@ -68,78 +75,93 @@
     display: flex;
     flex-direction: column;
     text-align: left;
-    border-radius: 10px !important; /* Bordas um pouco menos arredondadas */
-    /* box-shadow: 0 5px 15px rgba(0,0,0,0.03) !important; BEM sutil */
-    box-shadow: none !important; /* Sem sombra por padrão */
-    border: 1px solid #e9ecef !important; /* Borda clara */
-    background-color: var(--map-branco) !important;
-    padding: 25px !important; /* Padding direto no card */
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+    border-radius: 12px !important; /* Aumentei um pouco o border-radius */
+    
+    background-color: var(--map-laranja) !important; /* FUNDO DO CARD EM TERRACOTA (Cor 2) */
+    border: 1px solid var(--map-laranja-escuro) !important; /* Borda sutil mais escura (Cor 3) */
+    
+    padding: 30px !important; /* Aumentei o padding interno */
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                background-color 0.3s ease !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important; 
   }
   
   .feature-card-refined .ant-card-body {
-    padding: 0 !important; /* Remover padding do body, já que está no card pai */
+    padding: 0 !important;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
   }
   
   .feature-card-refined:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.06) !important; /* Sombra mais pronunciada no hover */
-    border-color: transparent !important; /* Esconder borda no hover se tiver sombra */
-    /* border-color: var(--map-laranja) !important; Ou destacar a borda */
+    transform: translateY(-10px) scale(1.02); /* Efeito de elevação e leve zoom */
+    box-shadow: 0 14px 35px rgba(0,0,0,0.18) !important;
+    background-color: var(--map-laranja-escuro) !important; /* Escurece o fundo no hover (Cor 3) */
+    border-color: var(--map-laranja) !important; /* Borda clareia um pouco para Cor 2 */
   }
   
   .feature-card-icon-refined {
-    font-size: 30px !important; /* Ícone um pouco maior */
-    margin-bottom: 20px;
-    /* A cor é definida inline no JSX pela feature.highlightColor */
-    /* Ex: color: var(--map-laranja); */
-    align-self: flex-start; /* Alinha o ícone à esquerda */
-    padding: 8px; /* Um pequeno padding em volta do ícone */
-    background-color: #f8f9fa; /* Fundo MUITO sutil para o ícone */
-    border-radius: 8px;
-    display: inline-block; /* Para o padding funcionar bem */
+    font-size: 28px !important; /* Reduzi um pouco o tamanho do ícone */
+    margin-bottom: 22px; /* Ajustei a margem */
+    color: var(--map-branco) !important; /* ÍCONE BRANCO */
+    align-self: flex-start;
+    padding: 12px; 
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Fundo do wrapper do ícone: branco translúcido */
+    border-radius: 10px; /* Ajustei o border-radius */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px; 
+    height: 54px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .feature-card-refined:hover .feature-card-icon-refined {
+    background-color: rgba(255, 255, 255, 0.2) !important; /* Fica mais opaco no hover do card */
+    transform: scale(1.05) rotate(-3deg); /* Leve animação no ícone também */
   }
   
   .feature-card-title-refined {
-    font-size: 18px !important; /* Título do card um pouco menor */
+    font-size: 19px !important; /* Aumentei um pouco */
     font-weight: 600 !important;
-    color: var(--map-preto) !important;
-    margin-bottom: 12px !important;
-    line-height: 1.45 !important;
+    color: var(--map-branco) !important; 
+    margin-bottom: 10px !important; /* Reduzi a margem */
+    line-height: 1.4;
   }
   
   .feature-card-description-refined {
-    font-size: 14.5px !important; /* Descrição um pouco maior para leitura */
-    color: #495057 !important; /* Cinza mais escuro e legível */
-    line-height: 1.65 !important;
+    font-size: 15px !important; /* Aumentei um pouco */
+    color: rgba(255, 255, 255, 0.85) !important; /* DESCRIÇÃO BRANCA com menos transparência */
+    line-height: 1.7 !important; /* Aumentei o line-height */
     flex-grow: 1;
-    margin-bottom: 20px !important; /* Mais espaço antes das tags */
+    margin-bottom: 22px !important; /* Ajustei a margem */
   }
   
   .feature-card-tags-refined {
     margin-top: auto;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px; /* Espaçamento entre as tags */
+    gap: 8px; /* Aumentei o gap */
   }
   
   .feature-tag-refined.ant-tag {
-    background-color: transparent !important;
-    border: 1px solid #ced4da !important; /* Borda da tag mais sutil */
-    color: #495057 !important; /* Texto da tag mais escuro */
-    font-size: 11px !important;
-    border-radius: 4px !important;
-    padding: 3px 8px !important;
-    margin: 0 !important; /* Remover margem padrão da tag */
+    background-color: transparent !important; 
+    border: 1px solid rgba(255, 255, 255, 0.35) !important; /* Borda da tag branca mais visível */
+    color: rgba(255, 255, 255, 0.85) !important; 
+    font-size: 11.5px !important; /* Aumentei um pouco */
+    border-radius: 5px !important; /* Ajustei o radius */
+    padding: 4px 10px !important; /* Aumentei o padding */
+    margin: 0 !important;
     font-weight: 500;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
   }
-  /* Opcional: destacar a tag no hover */
+
   .feature-tag-refined.ant-tag:hover {
-    border-color: var(--map-laranja) !important;
-    color: var(--map-laranja) !important;
+    background-color: var(--map-branco) !important; /* FUNDO BRANCO NO HOVER DA TAG */
+    border-color: var(--map-branco) !important; /* Borda branca sólida */
+    color: var(--map-laranja-escuro) !important; /* TEXTO DA TAG COM Cor 3 (Laranja Escuro) no hover */
+    transform: scale(1.05); /* Leve aumento da tag */
   }
   
   
@@ -153,7 +175,7 @@
       margin-bottom: 50px !important;
     }
     .feature-card-refined {
-      padding: 20px !important;
+      padding: 25px !important; /* Ajuste do padding */
     }
   }
   
@@ -172,13 +194,16 @@
   
   @media (max-width: 575px) { /* sm */
     .feature-card-title-refined {
-      font-size: 17px !important;
+      font-size: 18px !important;
     }
     .feature-card-description-refined {
-      font-size: 14px !important;
+      font-size: 14.5px !important;
     }
     .feature-card-icon-refined {
-      font-size: 26px !important;
-      margin-bottom: 15px;
+      font-size: 24px !important;
+      width: 50px;
+      height: 50px;
+      padding: 10px;
+      margin-bottom: 18px;
     }
   }

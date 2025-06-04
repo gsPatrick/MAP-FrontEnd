@@ -1,7 +1,7 @@
 // src/componentsLP/FooterLP/FooterLP.jsx
 import React, { useEffect } from 'react';
 import { Layout, Row, Col, Typography, Space, Divider } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'; // Importado useNavigate e useLocation
 import {
   MailOutlined,
   WhatsAppOutlined,
@@ -18,9 +18,10 @@ const { Title, Paragraph, Text } = Typography;
 
 const FooterLP = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  const location = useLocation(); // Para verificar se já estamos na Landing Page
 
   useEffect(() => {
-    // Animação para os créditos do desenvolvedor
     const devCreditsElement = document.querySelector('.footer-dev-credits');
     if (devCreditsElement) {
       const observer = new IntersectionObserver(
@@ -32,13 +33,52 @@ const FooterLP = () => {
             }
           });
         },
-        { threshold: 0.5 } // Dispara quando 50% do elemento está visível
+        { threshold: 0.5 }
       );
       observer.observe(devCreditsElement);
       return () => observer.disconnect();
     }
   }, []);
 
+  const handleFooterLinkClick = (e, targetId) => {
+    e.preventDefault(); // Previne a navegação padrão do link
+    
+    // Verifica se o targetId é uma rota completa ou um ID de seção
+    if (targetId.startsWith('/')) {
+      navigate(targetId); // Navega para a rota se for uma URL completa
+      window.scrollTo({ top: 0, behavior: 'auto' }); // Rola para o topo da nova página
+    } else {
+      // Se estamos na Landing Page (path '/'), rola para a seção
+      if (location.pathname === '/') {
+        const section = document.getElementById(targetId);
+        if (section) {
+          const headerOffset = document.querySelector('.lp-header')?.offsetHeight || 70;
+          const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - headerOffset - 10;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        } else {
+          console.warn(`Seção com id "${targetId}" não encontrada na Landing Page.`);
+          // Poderia navegar para a raiz e tentar ancorar, mas pode ser confuso se a seção não existir
+          // navigate(`/#${targetId}`); 
+        }
+      } else {
+        // Se não estamos na Landing Page, navega para ela com o hash
+        navigate(`/#${targetId}`);
+        // A rolagem para o hash será tratada pelo navegador ou por um useEffect na LandingPage se necessário
+      }
+    }
+  };
+
+
+  const footerLinks = [
+    { to: 'funcionalidades', label: 'Funcionalidades' },
+    { to: 'planos', label: 'Planos' },
+    { to: 'faq', label: 'Perguntas Frequentes' }, // ID de seção
+  ];
 
   return (
     <AntFooter className="lp-footer-wrapper">
@@ -73,11 +113,17 @@ const FooterLP = () => {
           <Col xs={24} sm={12} md={6} lg={5} className="footer-col">
             <Title level={5} className="footer-col-title">Links Rápidos</Title>
             <ul className="footer-links-list">
-              <li><Link to="/#funcionalidades">Funcionalidades</Link></li>
-              <li><Link to="/#planos">Planos</Link></li>
-              <li><Link to="/termos-de-uso">Termos de Uso</Link></li>
-              <li><Link to="/politica-de-privacidade">Política de Privacidade</Link></li>
-              <li><Link to="/faq">Perguntas Frequentes</Link></li>
+              {footerLinks.map(link => (
+                <li key={link.to}>
+                  {/* 
+                    Usamos <a> com onClick para links de seção para ter controle total sobre a rolagem.
+                    Para rotas completas, podemos usar RouterLink ou <a> com onClick que chama navigate.
+                  */}
+                  <a href={link.to.startsWith('/') ? link.to : `#${link.to}`} onClick={(e) => handleFooterLinkClick(e, link.to)}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </Col>
 

@@ -1,141 +1,164 @@
 /* src/componentsLP/BenefitsSection/BenefitsSection.css */
 
+/* Adicionando as novas variáveis de cor e a cor terracota */
+:root {
+  /* Suas cores previamente definidas (se não estiverem em um global) */
+  /* --map-dourado: #E0BC63;
+  --map-laranja: #CC6633;
+  --map-laranja-escuro: #994C00;
+  --map-preto: #2c3e50;
+  --map-cinza-texto: #555;
+  --map-branco: #FFFFFF; */
+  
+  /* Novas cores da paleta fornecida (assumindo que estão disponíveis globalmente ou defina-as aqui) */
+  --nova-cor-dourado: #e3be62;
+  --nova-cor-laranja: #b24a0a;
+  --nova-cor-laranja-escuro: #903b07;
+  --nova-cor-preto: #000000;
+  
+  /* Cor Terracota (ajuste conforme necessário) */
+  --map-terracota: #A0522D; /* Exemplo: Sienna. Outra opção: #b24a0a (Cor 2) se preferir */
+  --map-branco-texto-card: #FFFFFF; /* Branco puro para textos e ícones nos cards terracota */
+  /* Ou um off-white para melhor leitura em alguns casos: #f8f8f8; */
+}
+
+
 .benefits-section-wrapper {
-    background-color: #f8f9fa; /* Fundo levemente acinzentado, similar à Hero */
-    /* Para efeitos de background mais elaborados, pode-se usar pseudo-elementos ou SVGs */
-    position: relative;
-    overflow: hidden; /* Para conter elementos decorativos se houver */
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
-  }
+  background-color: #f8f9fa; /* Fundo levemente acinzentado para a seção */
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.benefits-section-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.benefits-section-container {
+  max-width: 1100px;
+}
+
+.section-header-centered {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+/* Usando a nova cor laranja para o destaque no título da seção */
+.benefits-title .highlight-brand-title {
+  color: var(--nova-cor-laranja); /* Cor 2 da sua paleta */
+}
+
+.benefits-subtitle {
+  max-width: 700px;
+  color: #555; /* Mantendo o cinza para o subtítulo da seção */
+}
+
+/* Animação de entrada para os cards */
+.benefit-card-item {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+}
+.benefit-card-item.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  /* animation-delay é setado via JS */
+}
+
+/* Estilo dos Cards de Benefício com fundo terracota e texto branco */
+.benefit-card {
+  background-color: var(--map-terracota); /* NOVA COR DE FUNDO */
+  border-radius: 10px;
+  padding: 30px 25px; /* Aumentar um pouco o padding para respiro */
+  text-align: center;
+  height: 100%;
+  /* Sombra sutil mais escura para contraste com terracota, ou remova se preferir */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.benefit-card:hover {
+  transform: translateY(-10px) scale(1.02); /* Efeito de hover mais pronunciado */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.benefit-icon-wrapper {
+  font-size: 40px; /* Tamanho do ícone */
+  /* A cor do ícone (SVG/fonte) será definida abaixo */
+  margin-bottom: 25px;
+  display: inline-block;
   
-  .benefits-section-wrapper.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  /* Fundo do wrapper do ícone: transparente ou um tom sutil */
+  background-color: rgba(255, 255, 255, 0.1); /* Branco bem sutil para destacar o ícone do fundo terracota */
+  /* Ou: background-color: transparent; */
+  /* Ou um tom mais escuro do terracota: background-color: color-mix(in srgb, var(--map-terracota) 80%, black); */
   
-  .benefits-section-container {
-    max-width: 1100px; /* Um pouco mais largo para acomodar a grade */
-  }
-  
-  /* Header da Seção Centralizado (Pode ser um componente reutilizável) */
-  .section-header-centered {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-  
-  .benefits-title .highlight-brand-title {
-    color: var(--map-laranja); /* Destaque no nome da marca no título */
-    /* Ou usar um gradiente:
-    background: linear-gradient(to right, var(--map-laranja), var(--map-dourado));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    */
-  }
-  
-  .benefits-subtitle {
-    max-width: 700px; /* Limita a largura do subtítulo */
-  }
-  
-  /* Estilo dos Cards de Benefício */
-  .benefit-card-item { /* Para aplicar animação de entrada em cascata */
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-    /* transition é aplicada pela classe .visible */
-  }
-  .benefit-card-item.visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    /* animation-delay é setado via JS */
-  }
-  
-  
-  .benefit-card {
-    background-color: var(--map-branco);
-    border-radius: 10px;
-    padding: 25px 20px;
-    text-align: center;
-    height: 100%; /* Para que todos os cards na mesma linha tenham a mesma altura se o conteúdo variar */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column; /* Para alinhar o conteúdo e garantir que o card ocupe a altura */
-  }
-  
-  .benefit-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
-  }
-  
-  .benefit-icon-wrapper {
-    font-size: 42px; /* Tamanho do ícone */
-    color: var(--map-laranja); /* Cor principal para os ícones */
-    margin-bottom: 20px;
-    display: inline-block; /* Para centralizar o ícone */
-    /* Efeito de fundo para o ícone (opcional) */
-    background-color: rgba(204, 102, 51, 0.08); /* Laranja bem suave */
-    width: 80px;
-    height: 80px;
-    line-height: 80px; /* Centraliza o ícone verticalmente */
-    border-radius: 50%; /* Círculo */
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-  
-  .benefit-card:hover .benefit-icon-wrapper {
-    background-color: rgba(204, 102, 51, 0.15);
-    transform: scale(1.05) rotate(5deg);
-  }
-  
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Cor dos ícones (Ant Design Icons) para branco */
+.benefit-icon-wrapper .anticon {
+  color: var(--map-branco-texto-card) !important;
+}
+
+.benefit-card:hover .benefit-icon-wrapper {
+  background-color: rgba(255, 255, 255, 0.18); /* Mais destaque no hover */
+  transform: scale(1.1) rotate(4deg);
+}
+
+.benefit-card-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--map-branco-texto-card) !important; /* TEXTO BRANCO */
+  margin-bottom: 15px !important; /* Aumentada margem */
+}
+
+.benefit-card-description {
+  font-size: 15px !important;
+  color: var(--map-branco-texto-card) !important; /* TEXTO BRANCO */
+  /* Para melhor contraste, um branco levemente off-white pode ser considerado:
+     color: #f0f0f0 !important; */
+  line-height: 1.7 !important; /* Aumentada a entrelinha */
+  flex-grow: 1;
+}
+
+/* Responsividade */
+@media (max-width: 991px) { /* md */
   .benefit-card-title {
-    font-size: 20px !important;
-    font-weight: 600 !important;
-    color: var(--map-preto) !important;
-    margin-bottom: 12px !important;
+    font-size: 19px !important;
   }
-  
+}
+
+@media (max-width: 767px) { /* sm */
+  .section-header-centered {
+    margin-bottom: 40px;
+  }
+  .benefit-card {
+    padding: 25px 20px;
+  }
+  .benefit-icon-wrapper {
+    font-size: 36px;
+    width: 70px;
+    height: 70px;
+    line-height: 70px;
+  }
+  .benefit-card-title {
+    font-size: 18px !important;
+  }
   .benefit-card-description {
-    font-size: 15px !important;
-    color: var(--map-cinza-texto) !important;
-    line-height: 1.65 !important;
-    flex-grow: 1; /* Faz com que a descrição ocupe o espaço restante, alinhando os botões (se houver) */
+    font-size: 14.5px !important; /* Ajuste fino */
   }
-  
-  /* Responsividade */
-  @media (max-width: 991px) { /* md */
-    .benefit-card-title {
-      font-size: 19px !important;
-    }
-  }
-  
-  @media (max-width: 767px) { /* sm - os cards já vão para 1 coluna por causa do Col sm={12} */
-    .benefits-section-container {
-      /* padding: 0 15px;  O section-container já tem padding, não precisa repetir */
-    }
-    .section-header-centered {
-      margin-bottom: 40px;
-    }
-    .benefit-card {
-      padding: 20px 15px;
-    }
-    .benefit-icon-wrapper {
-      font-size: 38px;
-      width: 70px;
-      height: 70px;
-      line-height: 70px;
-    }
-    .benefit-card-title {
-      font-size: 18px !important;
-    }
-    .benefit-card-description {
-      font-size: 14px !important;
-    }
-  }
-  @media (max-width: 575px) { /* Ajuste para xs se o Col sm={12} não for suficiente */
-     /* Se cada card ainda ocupar 50% da largura (devido ao sm=12),
-        e você quiser 100% em telas menores que sm,
-        não precisa de ajuste aqui, pois xs={24} já faz isso.
-        Se sm fosse maior, por exemplo sm={8}, aí um Col xs={24} md={12} sm={24} seria necessário
-        para garantir uma coluna única em sm. No nosso caso, xs={24} já cobre isso. */
-  }
+}
+
+@media (max-width: 575px) { /* xs */
+    /* Se necessário, mais ajustes para telas muito pequenas */
+}

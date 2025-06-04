@@ -1,16 +1,20 @@
 // src/componentsLP/PricingSection/PricingSection.jsx
 import React, { useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag } from 'antd'; // Switch removido
+import { Row, Col, Card, Typography, Button, List, Tag } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined } from '@ant-design/icons';
 import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Cores definidas para fácil referência, embora a maioria dos estilos estará no CSS
+// Cor 1 (Dourado): #e3be62
+// Cor 3 (Terracota Escuro): #903b07
+
 const plansData = [
   {
     id: 'personal',
-    name: 'Plano Pessoal Essencial',
-    icon: <UserOutlined />, // Ícone para o plano pessoal
+    name: 'Plano Pessoal - MENSAL',
+    icon: <UserOutlined />,
     price: 'R$39',
     priceSuffix: ',90',
     period: '/mês',
@@ -25,20 +29,21 @@ const plansData = [
       'Suporte Prioritário por Email',
     ],
     buttonText: 'Assinar Plano Pessoal',
-    checkoutUrl: 'https://pay.hotmart.com/A100084659B',
-    isFeatured: false, // Pode destacar um se quiser
+    checkoutUrl: 'https://pay.hotmart.com/K100108898C',
+    isFeatured: false,
     tagText: null,
   },
   {
     id: 'business',
     name: 'Plano Total Control (Pessoal + Empresarial)',
-    icon: <ShopOutlined />, // Ícone para o plano empresarial/completo
+    icon: <ShopOutlined />,
     price: 'R$49',
     priceSuffix: ',90',
     period: '/mês',
     description: 'A solução completa para gerenciar suas finanças pessoais e do seu negócio (MEI/PJ).',
     features: [
-      <Text strong style={{color: 'var(--map-laranja)'}}>Tudo do Plano Pessoal Essencial, e mais:</Text>,
+      // Usaremos classe CSS para estilizar este item em vez de Text strong inline
+      'Tudo do Plano Pessoal Essencial, e mais:',
       'Perfis Financeiros Empresariais (PJ/MEI) Ilimitados',
       'Controle de Contas a Pagar/Receber Empresarial',
       'Cadastro de Produtos e Serviços',
@@ -48,8 +53,8 @@ const plansData = [
       'Suporte Dedicado (WhatsApp & Email)',
     ],
     buttonText: 'Assinar Plano Total Control',
-    checkoutUrl: 'https://pay.hotmart.com/A100084673V',
-    isFeatured: true, // Destaque para o plano mais completo
+    checkoutUrl: 'https://pay.hotmart.com/F100110333E',
+    isFeatured: true,
     tagText: 'Mais Completo',
   },
 ];
@@ -69,11 +74,9 @@ const PricingSection = () => {
     }, { threshold: 0.1 });
 
     sectionElements.forEach((el, index) => {
-      // Aplicar delay escalonado para os cards
       if (el.classList.contains('pricing-card-wrapper')) {
         el.style.transitionDelay = `${0.2 + index * 0.15}s`;
       } else {
-        // Delay para título e subtítulo
         el.style.transitionDelay = `${index * 0.1}s`;
       }
       observer.observe(el);
@@ -82,11 +85,11 @@ const PricingSection = () => {
   }, []);
 
   const handlePlanSelect = (url) => {
-    window.open(url, '_blank'); // Abre o link da Hotmart em nova aba
+    window.open(url, '_blank');
   };
 
   return (
-    <div className="pricing-section-wrapper">
+    <div className="pricing-section-wrapper"> {/* Fundo da seção será branco */}
       <div className="pricing-section-container">
         <Title level={2} className="pricing-main-title pricing-section-animate">
           Escolha o Plano <span className="highlight-brand">Perfeito para Você</span>
@@ -95,22 +98,20 @@ const PricingSection = () => {
           Acesse todas as ferramentas para ter o controle total das suas finanças, seja pessoal ou do seu negócio.
         </Paragraph>
 
-        {/* Toggle de ciclo de pagamento removido */}
-
         <Row gutter={[32, 32]} justify="center" align="stretch" className="pricing-cards-row">
           {plansData.map((plan) => (
-            <Col xs={24} md={12} lg={10} xl={8} key={plan.id} className="pricing-card-wrapper pricing-section-animate"> {/* Ajuste de colunas para 2 planos */}
+            <Col xs={24} md={12} lg={10} xl={8} key={plan.id} className="pricing-card-wrapper pricing-section-animate">
               <Card
                 className={`pricing-card ${plan.isFeatured ? 'featured' : ''}`}
-                bordered={false}
+                bordered={false} // Manter sem borda padrão, a borda do featured será CSS
                 hoverable
               >
                 {plan.isFeatured && plan.tagText && (
-                  <Tag icon={<StarFilled />} color="volcano" className="featured-tag">
+                  <Tag icon={<StarFilled />} className="featured-tag"> {/* Cor será definida no CSS */}
                     {plan.tagText}
                   </Tag>
                 )}
-                <div className="plan-icon-header"> {/* Novo container para ícone do plano */}
+                <div className="plan-icon-header">
                   {plan.icon && React.cloneElement(plan.icon, {className: 'plan-title-icon'})}
                 </div>
                 <Title level={3} className="plan-name">{plan.name}</Title>
@@ -127,19 +128,21 @@ const PricingSection = () => {
                 <List
                   className="plan-features-list"
                   dataSource={plan.features}
-                  renderItem={(item) => (
-                    <List.Item>
-                      {typeof item === 'string' && <CheckCircleFilled className="feature-icon" />} {item}
+                  renderItem={(item, index) => (
+                    <List.Item className={index === 0 && plan.id ==='business' ? 'feature-item-highlighted' : ''}>
+                      {/* Para o item "Tudo do Plano Pessoal...", não mostramos o ícone */}
+                      {!(index === 0 && plan.id ==='business') && <CheckCircleFilled className="feature-icon" />} 
+                      {item}
                     </List.Item>
                   )}
                 />
                 <Button
-                  type={plan.isFeatured ? 'primary' : 'default'}
+                  type="default" // O tipo será estilizado no CSS para diferenciar normal e featured
                   size="large"
                   block
-                  className="plan-cta-button"
+                  className={`plan-cta-button ${plan.isFeatured ? 'featured-button' : 'normal-button'}`}
                   onClick={() => handlePlanSelect(plan.checkoutUrl)}
-                  style={plan.isFeatured ? {background: 'var(--map-laranja)', borderColor: 'var(--map-laranja)'} : {}}
+                  // Estilo inline removido, será tratado no CSS
                 >
                   {plan.buttonText}
                 </Button>
@@ -147,7 +150,7 @@ const PricingSection = () => {
             </Col>
           ))}
         </Row>
-         <Paragraph className="pricing-footer-note pricing-section-animate" style={{transitionDelay: '0.5s'}}> {/* Delay ajustado */}
+         <Paragraph className="pricing-footer-note pricing-section-animate" style={{transitionDelay: '0.5s'}}>
             Pagamento seguro processado pela Hotmart. Dúvidas? <a href="#faq">Consulte nossa FAQ</a> ou <a href="#contato">fale conosco</a>.
         </Paragraph>
       </div>

@@ -17,10 +17,21 @@ code {
 
 /* Variáveis de cor baseadas na identidade visual */
 :root {
-  --map-dourado: #E0BC63;
-  --map-laranja: #CC6633;
-  --map-laranja-escuro: #994C00; /* Usado como fundo principal em algumas referências */
-  --map-preto: #000000;
+  /* Suas cores antigas... */
+  --map-dourado: #E0BC63; /* Cor antiga, será substituída ou mantida se ainda usada */
+  --map-laranja: #CC6633; /* Cor antiga, será substituída ou mantida se ainda usada */
+  --map-laranja-escuro: #994C00;
+  --map-preto: #2c3e50; /* Preto antigo da marca, pode ser diferente do novo preto absoluto */
+  --map-cinza-texto: #555;
   --map-branco: #FFFFFF;
-  --map-texto-claro: #f1f1f1;
+
+  /* Novas Cores */
+  --brand-cor-1-dourado: #e3be62;
+  --brand-cor-2-laranja-ferrugem: #b24a0a;
+  --brand-cor-3-terracota-escuro: #903b07;
+  --brand-cor-4-preto: #000000;
+
+  /* Cores de texto para fundos escuros */
+  --text-on-dark-primary: #FFFFFF;
+  --text-on-dark-secondary: #e0e0e0; /* Um cinza claro para textos secundários */
 }

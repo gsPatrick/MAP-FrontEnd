@@ -1,241 +1,258 @@
 /* src/componentsLP/PricingSection/PricingSection.css */
 
+/* Cores da paleta fornecida (para referência dentro do CSS) */
+/* Cor 1 (Dourado): #e3be62 */
+/* Cor 2 (Laranja Ferrugem): #b24a0a */
+/* Cor 3 (Terracota Escuro): #903b07 */
+/* Cor 4 (Preto Absoluto): #000000 */
+
 .pricing-section-wrapper {
-    padding: 70px 0 80px;
-    background-color: #f8f9fa; /* Cinza claro para diferenciar das seções brancas */
-    overflow: hidden;
-  }
-  
-  .pricing-section-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 var(--header-padding-x, 25px);
-    text-align: center;
-  }
-  
-  /* Animação de entrada geral */
-  .pricing-section-animate {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-  .pricing-section-animate.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    transition-delay: inherit !important;
-  }
-  
-  .pricing-main-title {
-    font-size: 32px !important;
-    font-weight: 700 !important;
-    color: var(--map-preto) !important;
-    margin-bottom: 15px !important;
-  }
-  .pricing-main-title .highlight-brand {
-    color: var(--map-laranja);
-  }
-  
-  .pricing-main-subtitle {
-    font-size: 17px !important;
-    color: #5f6c7b !important;
-    margin-bottom: 40px !important;
-    max-width: 650px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
-  }
-  
-  .billing-cycle-toggle {
-    margin-bottom: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-  }
-  .billing-cycle-toggle .ant-switch {
-    background-color: var(--map-dourado); /* Cor quando desligado */
-  }
-  .billing-cycle-toggle .ant-switch-checked {
-    background-color: var(--map-laranja) !important; /* Cor quando ligado (Anual) */
-  }
-  .billing-cycle-toggle .ant-typography {
-    font-size: 15px;
-    font-weight: 500;
-    color: #868e96; /* Cinza para texto inativo */
-    transition: color 0.3s ease;
-  }
-  .billing-cycle-toggle .ant-typography.active {
-    color: var(--map-preto); /* Preto para texto ativo */
-    font-weight: 600;
-  }
-  
-  
-  .pricing-cards-row {
-    /* align-items: stretch; já está no JSX */
-  }
-  
-  .pricing-card-wrapper {
-    display: flex; /* Para o card ocupar 100% da altura do Col */
-  }
-  
-  .pricing-card {
-    width: 100%;
-    background-color: var(--map-branco) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05) !important;
-    padding: 30px 25px !important; /* Padding interno do card */
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative; /* Para a tag de destaque */
-  }
-  .pricing-card .ant-card-body {
-    padding: 0 !important; /* Remover padding padrão do body */
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Faz o corpo crescer */
-  }
-  
-  .pricing-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 35px rgba(0,0,0,0.08) !important;
-  }
-  
+  padding: 70px 0 80px;
+  background-color: var(--map-branco); /* Fundo da seção agora é branco */
+  overflow: hidden;
+}
+
+.pricing-section-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--header-padding-x, 25px);
+  text-align: center;
+}
+
+.pricing-section-animate {
+  opacity: 0;
+  transform: translateY(25px);
+}
+.pricing-section-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition-delay: inherit !important;
+}
+
+.pricing-main-title {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: var(--map-preto) !important; /* Título da seção em preto sobre fundo branco */
+  margin-bottom: 15px !important;
+}
+.pricing-main-title .highlight-brand {
+  color: var(--map-laranja); /* Mantém destaque da marca */
+}
+
+.pricing-main-subtitle {
+  font-size: 17px !important;
+  color: #5f6c7b !important; /* Subtítulo em cinza sobre fundo branco */
+  margin-bottom: 40px !important;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.pricing-card-wrapper {
+  display: flex;
+}
+
+.pricing-card {
+  width: 100%;
+  background-color: #903b07 !important; /* Fundo dos cards em Terracota Escuro */
+  border-radius: 12px !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05) !important;
+  padding: 30px 25px !important;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+.pricing-card .ant-card-body {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(144, 59, 7, 0.25) !important; /* Sombra com tom terracota */
+}
+
+/* Estilização para o card destacado */
+.pricing-card.featured {
+  border: 2px solid #e3be62 !important; /* Borda Dourada */
+  box-shadow: 0 10px 40px rgba(227, 190, 98, 0.2) !important; /* Sombra com tom dourado */
+  transform: scale(1.03);
+}
+.pricing-card.featured:hover {
+  transform: translateY(-8px) scale(1.05);
+}
+
+.featured-tag {
+  position: absolute !important;
+  top: -2px; /* Ajustar para alinhar com a borda dourada */
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  font-size: 12px !important;
+  padding: 5px 14px !important;
+  border-radius: 15px !important;
+  font-weight: bold;
+  background-color: #e3be62 !important; /* Fundo Dourado */
+  color: #903b07 !important; /* Texto Terracota Escuro */
+  border: 1px solid #903b07; /* Borda sutil terracota na tag */
+}
+.featured-tag .anticon {
+  margin-right: 5px;
+  color: #903b07 !important; /* Ícone da estrela também terracota */
+}
+
+.plan-icon-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.plan-title-icon {
+  font-size: 38px;
+  color: #e3be62; /* Ícones dos planos em Dourado */
+  padding: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1); /* Fundo sutil para o ícone */
+}
+
+.plan-name {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: #e3be62 !important; /* Título do plano em Dourado */
+  margin-bottom: 10px !important;
+}
+
+.plan-description {
+  font-size: 14px !important;
+  color: #f0f0f0 !important; /* Descrição em branco ou cinza claro */
+  margin-bottom: 25px !important;
+  min-height: 60px;
+}
+
+.plan-price-container {
+  margin-bottom: 25px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+}
+
+.plan-price {
+  font-size: 38px !important;
+  font-weight: 700 !important;
+  color: #e3be62 !important; /* Preço em Dourado */
+}
+.plan-price-suffix {
+  font-size: 0.7em; /* Sufixo menor */
+  color: #e3be62 !important; /* Sufixo do preço também em dourado */
+}
+.plan-period {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #f0f0f0 !important; /* Período em branco ou cinza claro */
+}
+
+.plan-features-list {
+  text-align: left;
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+.plan-features-list .ant-list-item {
+  padding: 8px 0 !important;
+  border-bottom: 1px dashed rgba(227, 190, 98, 0.3) !important; /* Linha divisória Dourada suave */
+  font-size: 14.5px;
+  color: #ffffff !important; /* Texto das features em Branco */
+}
+.plan-features-list .ant-list-item:last-child {
+  border-bottom: none !important;
+}
+.plan-features-list .feature-icon {
+  color: #e3be62 !important; /* Ícone de check em Dourado */
+  margin-right: 10px;
+  font-size: 16px;
+}
+/* Estilo para o primeiro item da lista do plano business */
+.plan-features-list .feature-item-highlighted {
+  color: #e3be62 !important; /* Dourado para o texto destacado */
+  font-weight: 600; /* Negrito */
+}
+
+
+/* Botões CTA */
+.plan-cta-button {
+  font-weight: bold !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+
+.plan-cta-button.normal-button {
+  background-color: #e3be62 !important;
+  border: 2px solid #e3be62 !important; /* Borda Dourada */
+  color: #903b07 !important; /* Texto Terracota no hover */
+}
+.plan-cta-button.normal-button:hover,
+.plan-cta-button.normal-button:focus {
+  background-color: #e3be62 !important;
+  border-color: #e3be62 !important;
+  color: #903b07 !important; /* Texto Terracota no hover */
+}
+
+.plan-cta-button.featured-button {
+  background-color: #e3be62 !important; /* Fundo Dourado */
+  border-color: #e3be62 !important; /* Borda Dourada */
+  color: #903b07 !important; /* Texto Terracota Escuro */
+}
+.plan-cta-button.featured-button:hover,
+.plan-cta-button.featured-button:focus {
+  background-color: #d4ae5f !important; /* Dourado um pouco mais escuro no hover */
+  border-color: #d4ae5f !important;
+  color: #903b07 !important;
+  transform: scale(1.03);
+}
+
+
+.pricing-footer-note {
+  margin-top: 50px !important;
+  font-size: 14px !important;
+  color: #5f6c7b !important; /* Nota de rodapé em cinza sobre fundo branco */
+}
+.pricing-footer-note a {
+  color: var(--map-laranja); /* Links na nota em laranja padrão */
+  font-weight: 500;
+  text-decoration: none;
+}
+.pricing-footer-note a:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 991px) { /* md */
   .pricing-card.featured {
-    border: 2px solid var(--map-laranja) !important;
-    box-shadow: 0 10px 40px rgba(204, 102, 51, 0.15) !important; /* Sombra com cor da marca */
-    transform: scale(1.03); /* Levemente maior */
+    transform: scale(1);
   }
-  .pricing-card.featured:hover {
-    transform: translateY(-8px) scale(1.05); /* Um pouco mais de efeito no hover do destacado */
+  .pricing-card-wrapper {
+    margin-bottom: 0;
   }
-  
-  .featured-tag {
-    position: absolute !important;
-    top: -1px; /* Ajustar para alinhar com a borda */
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%); /* Centraliza e move para cima da borda */
-    font-size: 12px !important;
-    padding: 4px 12px !important;
-    border-radius: 15px !important;
-    font-weight: bold;
-    /* A cor é definida no JSX, ex: color="volcano" ou "gold" */
+  .pricing-cards-row .ant-col {
+    margin-bottom: 24px;
   }
-  .featured-tag .anticon {
-    margin-right: 5px;
+  .pricing-cards-row .ant-col:last-child {
+    margin-bottom: 0;
   }
-  
-  
-  .plan-name {
-    font-size: 22px !important;
-    font-weight: 600 !important;
-    color: var(--map-preto) !important;
-    margin-bottom: 10px !important;
-  }
-  
-  .plan-description {
-    font-size: 14px !important;
-    color: #5f6c7b !important;
-    margin-bottom: 25px !important;
-    min-height: 60px; /* Para alinhar os preços, ajuste conforme necessário */
-  }
-  
-  .plan-price-container {
-    margin-bottom: 25px;
-    display: flex;
-    align-items: baseline; /* Alinha preço e período */
-    justify-content: center;
-    gap: 5px;
-  }
-  .original-price {
-    font-size: 16px !important;
-    color: #adb5bd !important; /* Cinza claro para preço original */
-    font-weight: 500;
-  }
-  .plan-price {
-    font-size: 38px !important;
-    font-weight: 700 !important;
-    color: var(--map-laranja) !important; /* Cor de destaque para o preço */
-  }
-  .pricing-card.featured .plan-price {
-    color: var(--map-laranja) !important;
-  }
-  .plan-period {
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: #495057 !important;
-  }
-  
-  .plan-features-list {
-    text-align: left;
-    margin-bottom: 30px;
-    flex-grow: 1; /* Ocupa o espaço restante antes do botão */
-  }
-  .plan-features-list .ant-list-item {
-    padding: 8px 0 !important;
-    border-bottom: 1px dashed #e9ecef !important;
-    font-size: 14.5px;
-    color: #343a40;
-  }
-  .plan-features-list .ant-list-item:last-child {
-    border-bottom: none !important;
-  }
-  .plan-features-list .feature-icon {
-    color: var(--map-dourado); /* Cor para o ícone de check */
-    margin-right: 10px;
-    font-size: 16px;
-  }
-  
-  .plan-cta-button {
-    font-weight: bold !important;
-    border-radius: 8px !important;
-    /* Estilos específicos para featured são aplicados inline no JSX */
-  }
-  .plan-cta-button.ant-btn-default:hover {
-    color: var(--map-laranja) !important;
-    border-color: var(--map-laranja) !important;
-  }
-  
-  .pricing-footer-note {
-      margin-top: 50px !important;
-      font-size: 14px !important;
-      color: #5f6c7b !important;
-  }
-  .pricing-footer-note a {
-      color: var(--map-laranja);
-      font-weight: 500;
-      text-decoration: none;
-  }
-  .pricing-footer-note a:hover {
-      text-decoration: underline;
-  }
-  
-  /* Responsividade */
-  @media (max-width: 991px) { /* md */
-    .pricing-card.featured {
-      transform: scale(1); /* Remove o scale em telas menores se estiver causando problemas de layout */
-    }
-    .pricing-card-wrapper {
-        margin-bottom: 0; /* Gutter da row já lida com isso */
-    }
-    .pricing-cards-row .ant-col { /* Garante que os cards tenham espaço */
-        margin-bottom: 24px;
-    }
-    .pricing-cards-row .ant-col:last-child {
-        margin-bottom: 0;
-    }
-  }
-  
-  @media (max-width: 767px) { /* sm */
-    .pricing-main-title { font-size: 28px !important; }
-    .pricing-main-subtitle { font-size: 16px !important; margin-bottom: 30px !important;}
-    .billing-cycle-toggle { margin-bottom: 40px; }
-    .plan-description { min-height: auto; } /* Remove altura mínima para telas menores */
-  }
-  
-  @media (max-width: 575px) { /* xs */
-    .pricing-card { padding: 25px 20px !important; }
-    .plan-name { font-size: 20px !important; }
-    .plan-price { font-size: 32px !important; }
-    .plan-features-list .ant-list-item { font-size: 14px; }
-  }
+}
+
+@media (max-width: 767px) { /* sm */
+  .pricing-main-title { font-size: 28px !important; }
+  .pricing-main-subtitle { font-size: 16px !important; margin-bottom: 30px !important;}
+  .plan-description { min-height: auto; }
+}
+
+@media (max-width: 575px) { /* xs */
+  .pricing-card { padding: 25px 20px !important; }
+  .plan-name { font-size: 20px !important; }
+  .plan-price { font-size: 32px !important; }
+  .plan-features-list .ant-list-item { font-size: 14px; }
+}

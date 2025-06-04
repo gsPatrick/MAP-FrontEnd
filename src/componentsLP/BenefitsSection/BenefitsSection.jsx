@@ -1,4 +1,3 @@
-
 // src/componentsLP/BenefitsSection/BenefitsSection.jsx
 import React, { useEffect } from 'react';
 import { Typography, Row, Col, Card } from 'antd';
@@ -121,6 +120,7 @@ const BenefitsSection = () => {
             <Col xs={24} sm={12} md={8} key={benefit.key} className="benefit-card-item">
               <Card bordered={false} className="benefit-card">
                 <div className="benefit-icon-wrapper">
+                  {/* O ícone em si será estilizado para branco via CSS */}
                   {benefit.icon}
                 </div>
                 <Title level={4} className="benefit-card-title">

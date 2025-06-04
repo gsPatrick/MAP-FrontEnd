@@ -1,169 +1,188 @@
 /* src/componentsLP/ContactPromptSection/ContactPromptSection.css */
 
-.section-padding-enhanced { /* Padding um pouco maior para dar mais respiro */
-    padding-top: 70px;
-    padding-bottom: 80px;
-  }
-  
-  .contact-prompt-section-wrapper {
-    background-color: #f4f7f9; /* Tom de cinza azulado muito claro para o fundo da seção */
+.section-padding-enhanced {
+  padding-top: 70px;
+  padding-bottom: 80px;
+}
+
+.contact-prompt-section-wrapper {
+  /* NOVA COR DE FUNDO DA SEÇÃO */
+  background-color: var(--brand-cor-4-preto); /* Preto Absoluto */
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1),
+              transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.contact-prompt-section-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.contact-prompt-container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 0 var(--header-padding-x, 20px); /* Usando var global se existir, senão fallback */
+}
+
+.contact-prompt-card.elevated {
+  /* NOVA COR DE FUNDO DO CARD */
+  background: #1A1A1A; /* Cinza bem escuro, para destacar do fundo preto da seção */
+  border-radius: 16px;
+  /* NOVA SOMBRA PARA FUNDO ESCURO - pode ser mais sutil ou um brilho */
+  box-shadow: 0 0 35px rgba(var(--brand-cor-1-dourado-rgb, 227, 190, 98), 0.1), /* Adicione --brand-cor-1-dourado-rgb: 227,190,98 nas suas vars globais */
+              0 5px 15px rgba(0, 0, 0, 0.2);
+  padding: 40px 30px;
+  text-align: center;
+  border: 1px solid rgba(var(--brand-cor-1-dourado-rgb, 227, 190, 98), 0.2); /* Borda sutil dourada */
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+/* Se não quiser definir --brand-cor-1-dourado-rgb, use diretamente: */
+/* box-shadow: 0 0 35px rgba(227, 190, 98, 0.1), 0 5px 15px rgba(0, 0, 0, 0.2); */
+/* border: 1px solid rgba(227, 190, 98, 0.2); */
+
+
+.contact-prompt-card.elevated:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 0 45px rgba(var(--brand-cor-1-dourado-rgb, 227, 190, 98), 0.15),
+              0 8px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(var(--brand-cor-1-dourado-rgb, 227, 190, 98), 0.4);
+}
+
+/* Ícone de Acento no Card */
+.card-icon-accent {
+  width: 70px;
+  height: 70px;
+  /* GRADIENTE COM NOVAS CORES - Cor 2 (Laranja Ferrugem) e Cor 1 (Dourado) */
+  background: linear-gradient(135deg, var(--brand-cor-2-laranja-ferrugem), var(--brand-cor-1-dourado));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px auto;
+  /* SOMBRA DO ÍCONE */
+  box-shadow: 0 6px 15px rgba(0,0,0, 0.3); /* Sombra mais escura, já que o card é escuro */
+}
+.card-icon-accent .anticon {
+  font-size: 32px;
+  color: var(--text-on-dark-primary); /* Branco */
+}
+
+
+.contact-prompt-title {
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  /* NOVA COR DO TÍTULO */
+  color: var(--brand-cor-1-dourado) !important; /* Dourado */
+  margin-bottom: 15px !important;
+  line-height: 1.3;
+}
+
+.contact-prompt-text {
+  font-size: 17px !important;
+  /* NOVA COR DO TEXTO */
+  color: var(--text-on-dark-secondary) !important; /* Cinza claro */
+  line-height: 1.7 !important;
+  margin-bottom: 35px !important;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contact-prompt-button.gradient-button {
+  /* NOVO GRADIENTE PARA O BOTÃO - Cor 2 (Laranja Ferrugem) e Cor 1 (Dourado) */
+  background: linear-gradient(45deg, var(--brand-cor-2-laranja-ferrugem) 0%, var(--brand-cor-1-dourado) 100%) !important;
+  border: none !important;
+  color: var(--text-on-dark-primary) !important; /* Branco para o texto do botão */
+  font-weight: 600 !important;
+  font-size: 17px !important;
+  padding: 12px 30px !important;
+  height: auto !important;
+  border-radius: 10px !important;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* NOVA SOMBRA PARA O BOTÃO */
+  box-shadow: 0 4px 15px rgba(0,0,0, 0.3); /* Sombra mais escura, ou pode usar uma cor da marca bem suave */
+  /* Exemplo com cor da marca: box-shadow: 0 4px 15px rgba(var(--brand-cor-1-dourado-rgb, 227,190,98), 0.2); */
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-prompt-button.gradient-button .button-icon-animated {
+  margin-right: 8px;
+  font-size: 19px;
+  transition: transform 0.3s ease;
+  animation: buttonIconPulse 2s infinite ease-in-out;
+  color: var(--text-on-dark-primary); /* Garante que o ícone no botão seja branco */
+}
+
+@keyframes buttonIconPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.contact-prompt-button.gradient-button:hover,
+.contact-prompt-button.gradient-button:focus {
+  transform: translateY(-4px) scale(1.03);
+  /* SOMBRA DO BOTÃO NO HOVER */
+  box-shadow: 0 7px 22px rgba(0,0,0, 0.4);
+  /* Exemplo com cor da marca: box-shadow: 0 7px 22px rgba(var(--brand-cor-1-dourado-rgb, 227,190,98), 0.3); */
+}
+
+.contact-prompt-button.gradient-button:hover .button-icon-animated {
+  transform: scale(1.1) rotate(10deg);
+}
+
+.contact-prompt-button.gradient-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.15); /* Brilho um pouco menos intenso */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+}
+
+.contact-prompt-button.gradient-button:hover::before {
+  width: 250%;
+  height: 250%;
+  opacity: 1;
+  transition: width 0.5s ease-out, height 0.5s ease-out, opacity 0.6s ease-out;
+  animation: buttonShine 0.8s forwards;
+}
+@keyframes buttonShine {
+  to {
     opacity: 0;
-    transform: translateY(40px) scale(0.98); /* Começa um pouco menor e mais abaixo */
-    transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+    width: 300%;
+    height: 300%;
   }
-  
-  .contact-prompt-section-wrapper.visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  
-  .contact-prompt-container {
-    max-width: 650px; /* Um pouco mais estreito para um visual mais focado */
-    margin: 0 auto;
-    padding: 0 var(--header-padding-x);
-  }
-  
-  .contact-prompt-card.elevated {
-    background: var(--map-branco);
-    border-radius: 16px; /* Bordas mais suaves e modernas */
-    box-shadow: 0 12px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); /* Sombra mais elaborada */
-    padding: 40px 30px; /* Mais padding interno */
-    text-align: center;
-    border: none;
-    position: relative; /* Para o ícone de acento */
-    overflow: hidden; /* Para conter pseudo-elementos se usados */
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-  }
-  
-  .contact-prompt-card.elevated:hover {
-    transform: translateY(-8px) scale(1.01); /* Elevação mais sutil e escala */
-    box-shadow: 0 18px 45px rgba(50, 50, 93, 0.12), 0 8px 20px rgba(0, 0, 0, 0.08);
-  }
-  
-  /* Ícone de Acento no Card */
-  .card-icon-accent {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, var(--map-laranja), var(--map-dourado));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 25px auto; /* Centralizado e com espaço abaixo */
-    box-shadow: 0 6px 15px rgba(204, 102, 51, 0.3);
-  }
-  .card-icon-accent .anticon {
-    font-size: 32px;
-    color: var(--map-branco);
-  }
-  
-  
-  .contact-prompt-title {
-    font-size: 30px !important; /* Um pouco maior */
-    font-weight: 700 !important;
-    color: var(--map-preto) !important;
-    margin-bottom: 15px !important;
-    line-height: 1.3;
-  }
-  
-  .contact-prompt-text {
-    font-size: 17px !important; /* Um pouco maior */
-    color: #5a6a7b !important; /* Tom de cinza mais suave */
-    line-height: 1.7 !important;
-    margin-bottom: 35px !important;
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .contact-prompt-button.gradient-button {
-    background: linear-gradient(45deg, var(--map-laranja) 0%, var(--map-dourado) 100%) !important;
-    border: none !important;
-    color: var(--map-branco) !important;
-    font-weight: 600 !important; /* Ajustado */
-    font-size: 17px !important; /* Ajustado */
-    padding: 12px 30px !important; /* Ajustado */
-    height: auto !important;
-    border-radius: 10px !important; /* Mais arredondado */
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 15px rgba(204, 102, 51, 0.3);
-    position: relative; /* Para o efeito de brilho no hover */
-    overflow: hidden; /* Para o brilho */
-  }
-  
-  .contact-prompt-button.gradient-button .button-icon-animated {
-    margin-right: 8px;
-    font-size: 19px;
-    transition: transform 0.3s ease;
-    animation: buttonIconPulse 2s infinite ease-in-out; /* Animação de pulso */
-  }
-  
-  @keyframes buttonIconPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-  }
-  
-  .contact-prompt-button.gradient-button:hover,
-  .contact-prompt-button.gradient-button:focus {
-    transform: translateY(-4px) scale(1.03); /* Efeito de elevação */
-    box-shadow: 0 7px 22px rgba(224, 188, 99, 0.4); /* Sombra mais pronunciada */
-  }
-  
-  .contact-prompt-button.gradient-button:hover .button-icon-animated {
-    transform: scale(1.1) rotate(10deg); /* Animação no hover do ícone */
-  }
-  
-  /* Efeito de brilho no botão (opcional, mas caprichado) */
-  .contact-prompt-button.gradient-button::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
-  }
-  
-  .contact-prompt-button.gradient-button:hover::before {
-    width: 250%; /* Cobre todo o botão e mais */
-    height: 250%;
-    opacity: 1;
-    transition: width 0.5s ease-out, height 0.5s ease-out, opacity 0.6s ease-out; /* Animação de saída mais lenta */
-    animation: buttonShine 0.8s forwards; /* Para o brilho sumir depois */
-  }
-  @keyframes buttonShine { /* Para o brilho não ficar permanente no hover */
-    to {
-      opacity: 0;
-      width: 300%;
-      height: 300%;
-    }
-  }
-  
-  
-  /* Responsividade */
-  @media (max-width: 767px) {
-    .section-padding-enhanced { padding-top: 50px; padding-bottom: 60px; }
-    .contact-prompt-card.elevated { padding: 30px 20px; }
-    .contact-prompt-title { font-size: 26px !important; }
-    .contact-prompt-text { font-size: 16px !important; }
-    .contact-prompt-button.gradient-button { font-size: 16px !important; padding: 10px 25px !important; }
-    .card-icon-accent { width: 60px; height: 60px; margin-bottom: 20px; }
-    .card-icon-accent .anticon { font-size: 28px; }
-  }
-  
-  @media (max-width: 480px) {
-    .section-padding-enhanced { padding-top: 40px; padding-bottom: 50px; }
-    .contact-prompt-card.elevated { padding: 25px 15px; border-radius: 12px;}
-    .contact-prompt-title { font-size: 22px !important; margin-bottom: 12px !important;}
-    .contact-prompt-text { font-size: 15px !important; margin-bottom: 30px !important; }
-    .contact-prompt-button.gradient-button { font-size: 15px !important; }
-    .card-icon-accent { width: 50px; height: 50px; }
-    .card-icon-accent .anticon { font-size: 24px; }
-    .contact-prompt-button.gradient-button .button-icon-animated { font-size: 17px; }
-  }
+}
+
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .section-padding-enhanced { padding-top: 50px; padding-bottom: 60px; }
+  .contact-prompt-card.elevated { padding: 30px 20px; }
+  .contact-prompt-title { font-size: 26px !important; }
+  .contact-prompt-text { font-size: 16px !important; color: var(--text-on-dark-secondary) !important; }
+  .contact-prompt-button.gradient-button { font-size: 16px !important; padding: 10px 25px !important; }
+  .card-icon-accent { width: 60px; height: 60px; margin-bottom: 20px; }
+  .card-icon-accent .anticon { font-size: 28px; }
+}
+
+@media (max-width: 480px) {
+  .section-padding-enhanced { padding-top: 40px; padding-bottom: 50px; }
+  .contact-prompt-card.elevated { padding: 25px 15px; border-radius: 12px;}
+  .contact-prompt-title { font-size: 22px !important; margin-bottom: 12px !important;}
+  .contact-prompt-text { font-size: 15px !important; margin-bottom: 30px !important; color: var(--text-on-dark-secondary) !important;}
+  .contact-prompt-button.gradient-button { font-size: 15px !important; }
+  .card-icon-accent { width: 50px; height: 50px; }
+  .card-icon-accent .anticon { font-size: 24px; }
+  .contact-prompt-button.gradient-button .button-icon-animated { font-size: 17px; }
+}
