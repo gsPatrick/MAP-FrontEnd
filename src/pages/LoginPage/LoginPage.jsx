@@ -85,9 +85,26 @@ const LoginPage = () => {
       // Os erros da API já são tratados pelo interceptor do apiClient e mostram uma mensagem.
       // Aqui podemos logar ou tratar especificidades, se necessário.
       console.error('Erro no login:', error);
-      // A mensagem de erro já deve ter sido exibida pelo interceptor do apiClient.
-      // Se quiser uma mensagem específica aqui, pode adicionar, mas cuidado para não duplicar.
-      // message.error(error.response?.data?.message || 'Falha no login. Verifique suas credenciais.');
+
+      // Adiciona uma mensagem específica para erro de email/senha (ex: status 401 ou 400 com mensagem relevante)
+      // A label do campo é "E-mail ou Telefone", então a mensagem reflete isso.
+      if (error.response && 
+          (error.response.status === 401 || 
+           (error.response.status === 400 && error.response.data?.message && typeof error.response.data.message === 'string' && error.response.data.message.toLowerCase().includes('credenciais')) || // Exemplo: "Credenciais inválidas"
+           (error.response.status === 400 && error.response.data?.message && typeof error.response.data.message === 'string' && error.response.data.message.toLowerCase().includes('inválido')) // Exemplo: "Usuário ou senha inválido"
+          )
+         ) {
+        message.error('E-mail/telefone ou senha inválidos. Por favor, tente novamente.');
+      } else {
+        // Para outros erros, assume-se que o interceptor do apiClient (se configurado para tal)
+        // já exibiu uma mensagem adequada (ex: error.response.data.message).
+        // Se o interceptor não exibir mensagens ou uma mensagem genérica for desejada aqui como fallback,
+        // ela poderia ser adicionada, mas com cuidado para não duplicar mensagens.
+        // Exemplo de fallback (se o interceptor não cobrir):
+        // if (!error.response?.data?.message) {
+        //   message.error('Ocorreu uma falha ao tentar fazer login. Tente novamente mais tarde.');
+        // }
+      }
     } finally {
       setLoading(false);
     }
