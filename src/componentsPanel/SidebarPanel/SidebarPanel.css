@@ -1,0 +1,103 @@
+/* src/componentsPanel/SidebarPanel/SidebarPanel.css */
+.panel-sidebar {
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Sombra mais definida */
+    /* Se o HeaderPanel for sticky e este Layout Sider/Content estiver aninhado,
+       o paddingTop aqui não é necessário, pois o Sider começará abaixo do Header.
+       Se o Sider for parte do Layout principal com o HeaderPanel, então paddingTop é necessário.
+       Assumindo que o HeaderPanel está no Layout filho (junto com Content).
+    */
+  }
+  
+  .sidebar-logo-container {
+    height: 64px; /* Mesma altura do HeaderPanel para alinhamento visual */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px; /* Padding lateral */
+    margin-bottom: 8px; /* Espaço antes do menu */
+    /* background-color: rgba(255,255,255,0.05); */ /* Fundo sutil se desejar */
+    overflow: hidden; /* Para o texto não vazar quando colapsado */
+  }
+  
+  .sidebar-logo-icon {
+    font-size: 28px;
+    color: var(--map-dourado); /* Cor da logo */
+    transition: all 0.3s;
+  }
+  
+  .sidebar-logo-text {
+    color: var(--map-branco) !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    margin-left: 10px !important;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.3s ease-out, margin-left 0.3s ease-out;
+  }
+  
+  /* Quando a sidebar está colapsada */
+  .ant-layout-sider-collapsed .sidebar-logo-text {
+    opacity: 0;
+    margin-left: -200px; /* Empurra para fora da tela */
+    display: none; /* Garante que não ocupe espaço */
+  }
+  .ant-layout-sider-collapsed .sidebar-logo-icon {
+    font-size: 24px; /* Pode ajustar o tamanho do ícone quando colapsado */
+  }
+  
+  
+  .sidebar-menu.ant-menu-dark.ant-menu-inline {
+    border-right: none; /* Remove a borda padrão do menu inline */
+  }
+  
+  .sidebar-menu .ant-menu-item,
+  .sidebar-menu .ant-menu-submenu-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 4px !important; /* Espaçamento entre itens */
+    margin-bottom: 4px !important;
+    width: calc(100% - 16px); /* Largura com padding */
+    margin-left: 8px;
+    margin-right: 8px;
+    border-radius: 6px; /* Bordas arredondadas para os itens */
+  }
+  .sidebar-menu .ant-menu-item .anticon,
+  .sidebar-menu .ant-menu-submenu-title .anticon {
+    font-size: 17px; /* Tamanho dos ícones do menu */
+  }
+  
+  
+  /* Item Ativo */
+  .sidebar-menu .ant-menu-item-selected {
+    background-color: var(--map-laranja) !important; /* Cor de destaque para item ativo */
+    color: var(--map-branco) !important;
+  }
+  .sidebar-menu .ant-menu-item-selected .anticon {
+    color: var(--map-branco) !important;
+  }
+  .sidebar-menu .ant-menu-item-selected a { /* Cor do link no item ativo */
+      color: var(--map-branco) !important;
+  }
+  
+  
+  /* Item Hover */
+  .sidebar-menu .ant-menu-item:not(.ant-menu-item-selected):hover,
+  .sidebar-menu .ant-menu-submenu-title:not(.ant-menu-item-selected):hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Links dentro do menu */
+  .sidebar-menu .ant-menu-item a {
+    color: rgba(255, 255, 255, 0.75); /* Cor padrão para links */
+    transition: color 0.3s;
+  }
+  .sidebar-menu .ant-menu-item:hover a {
+    color: var(--map-branco); /* Cor do link no hover */
+  }
+  
+  
+  /* Trigger de colapso (se visível e customizado) */
+  .ant-layout-sider-trigger {
+    background-color: var(--map-laranja-escuro); /* Cor do trigger */
+    /* Posição e estilo customizados, se necessário */
+  }

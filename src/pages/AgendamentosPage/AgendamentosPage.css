@@ -1,0 +1,481 @@
+/* src/pages/AgendamentosPage/AgendamentosPage.css */
+
+/*
+:root {
+    --map-laranja: #FA8C16;
+    --map-laranja-escuro: #D46B08;
+    --map-laranja-claro: #FFE7BA;
+    --map-laranja-muito-claro: #FFF7E6;
+    --map-dourado: #FAAD14;
+    --map-dourado-escuro: #D48806;
+    --map-verde-claro: #8BC34A;
+    --map-verde-escuro: #389E0D;
+    --map-verde-muito-claro: #F6FFED;
+    --map-vermelho-claro: #F44336;
+    --map-vermelho-escuro: #CF1322;
+    --map-vermelho-muito-claro: #FFF1F0;
+    --map-azul-sistema-claro: #EFF6FF;
+    --map-azul-sistema: #3B82F6;
+    --map-azul-sistema-escuro: #2563EB;
+    --map-branco: #ffffff;
+    --map-cinza-claro: #f0f0f0;
+    --map-cinza-medio: #d9d9d9;
+    --map-cinza-texto: #6c757d;
+    --header-text-primary: #303133;
+    --header-text-secondary: #606266;
+    --header-icon-color: #595959;
+    --header-icon-hover-bg: #f0f0f0;
+    --link-hover-color: var(--map-dourado-escuro, #D48806);
+
+    --ant-primary-color: var(--map-laranja, #FA8C16);
+    --ant-primary-color-hover: var(--map-dourado, #FAAD14);
+    --ant-primary-color-active: var(--map-dourado-escuro, #D48806);
+    --ant-success-color: var(--map-verde-escuro, #389E0D); 
+    --ant-error-color: var(--map-vermelho-escuro, #CF1322); 
+    --ant-warning-color: var(--map-dourado, #FAAD14); 
+    --ant-info-color: var(--map-laranja, #FA8C16); 
+
+    --ant-tag-blue-color: var(--map-laranja, #FA8C16);
+    --ant-tag-blue-background-color: var(--map-laranja-muito-claro, #FFF7E6);
+    --ant-tag-blue-border-color: var(--map-laranja-claro, #FFE7BA);
+
+    --ant-tag-green-color: var(--map-verde-escuro, #389E0D);
+    --ant-tag-green-background-color: var(--map-verde-muito-claro, #F6FFED);
+    --ant-tag-green-border-color: var(--map-verde-claro, #B7EB8F);
+    
+    --ant-tag-volcano-color: var(--map-vermelho-escuro, #CF1322);
+    --ant-tag-volcano-background-color: var(--map-vermelho-muito-claro, #FFF1F0);
+    --ant-tag-volcano-border-color: var(--map-vermelho-claro, #FFCCC7);
+}
+*/
+
+.agendamentos-page-content {
+    padding: 24px 32px; /* Aumentado padding horizontal para 32px */
+    background-color: #f0f2f5; 
+    min-height: calc(100vh - 64px); 
+}
+
+.page-header-agendamentos {
+    margin-bottom: 24px;
+    padding-bottom: 20px; /* Aumentado padding inferior */
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+    /* O header da página em si já deve ter seu próprio padding horizontal do .agendamentos-page-content */
+}
+
+.page-title-agendamentos {
+    color: var(--header-text-primary, #333);
+    margin-bottom: 4px !important;
+    font-weight: 600 !important;
+    font-size: 24px; /* Leve redução para consistência */
+}
+
+.page-subtitle-agendamentos {
+    color: var(--header-text-secondary, #777);
+    font-size: 14px;
+}
+
+.btn-criar-agendamento.ant-btn-primary {
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
+    transition: all 0.3s ease;
+}
+.btn-criar-agendamento.ant-btn-primary:hover,
+.btn-criar-agendamento.ant-btn-primary:focus {
+    background-color: var(--map-dourado, #FAAD14) !important;
+    border-color: var(--map-dourado, #FAAD14) !important;
+    color: var(--map-preto, #303133) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 173, 20, 0.4);
+}
+
+.agendamentos-tabs {
+    margin-bottom: 24px; /* Adiciona espaço abaixo das abas */
+}
+.agendamentos-tabs .ant-tabs-tab {
+    padding: 12px 18px !important; /* Ajuste no padding da aba */
+    transition: color 0.3s ease;
+}
+.agendamentos-tabs .tab-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--header-text-secondary, #606266);
+}
+.agendamentos-tabs .tab-title .anticon {
+    margin-right: 8px;
+}
+.agendamentos-tabs .ant-tabs-tab:hover .tab-title,
+.agendamentos-tabs .ant-tabs-tab:hover .tab-title .anticon {
+    color: var(--map-laranja, #FA8C16) !important;
+}
+.agendamentos-tabs .ant-tabs-tab.ant-tabs-tab-active .tab-title,
+.agendamentos-tabs .ant-tabs-tab.ant-tabs-tab-active .tab-title .anticon {
+    color: var(--map-laranja, #FA8C16) !important;
+    font-weight: 600;
+}
+.agendamentos-tabs .ant-tabs-ink-bar {
+    background: var(--map-laranja, #FA8C16) !important;
+    height: 3px !important; /* Barra um pouco mais espessa */
+}
+
+.agendamentos-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra mais suave */
+    background-color: var(--map-branco, #ffffff);
+}
+
+.agendamentos-list .ant-list-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    border-radius: 6px;
+    margin-bottom: 10px; /* Espaço entre os cards/itens */
+    background-color: var(--map-branco, #ffffff);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.agendamentos-list .ant-list-item:last-child {
+    border-bottom: none; /* Remove borda do último item */
+    margin-bottom: 0;
+}
+.agendamentos-list .ant-list-item:hover {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+}
+
+.agendamento-item.concluido .agendamento-titulo {
+    text-decoration: line-through;
+    color: var(--map-cinza-texto, #aaa);
+}
+.agendamento-item.concluido .ant-tag {
+    opacity: 0.7;
+}
+
+.agendamento-item .ant-list-item-meta-avatar .anticon {
+    font-size: 20px;
+}
+.agendamento-item .avatar-tipo-geral {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+    color: var(--map-laranja, #FA8C16) !important;
+}
+.agendamento-item .avatar-tipo-financeiro {
+    background-color: var(--map-verde-muito-claro, #F6FFED) !important;
+    color: var(--map-verde-escuro, #389E0D) !important;
+}
+.agendamento-item.concluido .avatar-tipo-geral,
+.agendamento-item.concluido .avatar-tipo-financeiro {
+    background-color: var(--map-cinza-claro, #f0f0f0) !important;
+    color: var(--map-cinza-medio, #bfbfbf) !important;
+}
+
+
+.agendamento-titulo {
+    font-size: 16px;
+    transition: color 0.2s ease;
+    color: var(--header-text-primary, #303133);
+}
+
+.agendamento-item:hover .agendamento-titulo {
+    color: var(--map-dourado-escuro, #D48806);
+}
+
+.agendamento-notas {
+    font-size: 13px;
+    color: var(--header-text-secondary, #888);
+    margin-top: 4px !important;
+}
+.agendamento-notas .anticon {
+    margin-right: 4px;
+    color: var(--map-cinza-texto, #aaa);
+}
+
+.agendamento-item .ant-list-item-action > li {
+    padding: 0 6px !important;
+}
+.agendamento-item .action-btn-concluir .anticon,
+.agendamento-item .action-btn-editar .anticon,
+.agendamento-item .action-btn-excluir .anticon {
+    font-size: 17px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.agendamento-item .action-btn-editar {
+    color: var(--header-text-secondary, #606266);
+}
+.agendamento-item .action-btn-editar:hover .anticon,
+.agendamento-item .action-btn-editar:focus .anticon {
+    color: var(--map-dourado, #FAAD14) !important;
+    transform: scale(1.1);
+}
+
+.agendamento-item .action-btn-excluir {
+    color: var(--ant-error-color, #CF1322);
+}
+.agendamento-item .action-btn-excluir:hover .anticon,
+.agendamento-item .action-btn-excluir:focus .anticon {
+    color: var(--map-vermelho-escuro, #A8071A) !important;
+    transform: scale(1.1);
+}
+
+.agendamento-item .action-btn-concluir .anticon {
+    color: var(--header-text-secondary, #606266);
+}
+.agendamento-item .action-btn-concluir:hover .anticon,
+.agendamento-item .action-btn-concluir:focus .anticon {
+    color: var(--ant-success-color, #389E0D) !important;
+    transform: scale(1.1);
+}
+.agendamento-item.concluido .action-btn-concluir .anticon {
+    color: var(--ant-success-color, #389E0D) !important;
+}
+.agendamento-item.concluido .action-btn-concluir:hover .anticon {
+    color: var(--map-cinza-texto, #888) !important;
+}
+
+
+.agendamentos-list .ant-list-item .ant-tag {
+    border-radius: 4px;
+}
+.agendamentos-list .ant-list-item .ant-tag-blue {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6);
+    border-color: var(--map-laranja-claro, #FFE7BA);
+    color: var(--map-laranja-escuro, #D46B08);
+}
+.agendamentos-list .ant-list-item .ant-tag-volcano {
+    background-color: var(--map-vermelho-muito-claro, #FFF1F0);
+    border-color: var(--map-vermelho-claro, #FFCCC7);
+    color: var(--map-vermelho-escuro, #CF1322);
+}
+.agendamentos-list .ant-list-item .ant-tag-green {
+    background-color: var(--map-verde-muito-claro, #F6FFED);
+    border-color: var(--map-verde-claro, #B7EB8F);
+    color: var(--map-verde-escuro, #389E0D);
+}
+
+.agendamento-modal .ant-modal-header {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+    border-radius: 8px 8px 0 0;
+}
+.agendamento-modal .ant-modal-title {
+    font-weight: 600;
+    color: var(--header-text-primary, #303133);
+}
+.agendamento-modal .ant-modal-body {
+    padding: 24px 30px;
+}
+.agendamento-modal .ant-form-item-label > label {
+    font-weight: 500;
+    color: var(--header-text-secondary, #606266);
+}
+.agendamento-modal .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.agendamento-modal .ant-picker:not(.ant-picker-disabled):hover,
+.agendamento-modal .ant-input:not(.ant-input-disabled):hover,
+.agendamento-modal .ant-input-number:not(.ant-input-number-disabled):hover .ant-input-number-input-wrap {
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+.agendamento-modal .ant-select-focused:not(.ant-select-disabled) .ant-select-selector,
+.agendamento-modal .ant-picker-focused:not(.ant-picker-disabled),
+.agendamento-modal .ant-input:focus, .agendamento-modal .ant-input-focused,
+.agendamento-modal .ant-input-number-focused .ant-input-number-input-wrap {
+    border-color: var(--map-laranja, #FA8C16) !important;
+    box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+}
+
+.agendamento-modal .ant-btn-primary {
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+}
+.agendamento-modal .ant-btn-primary:hover,
+.agendamento-modal .ant-btn-primary:focus {
+    background-color: var(--map-dourado, #FAAD14) !important;
+    border-color: var(--map-dourado, #FAAD14) !important;
+    color: var(--map-preto, #303133) !important;
+}
+.agendamento-modal .ant-btn:not(.ant-btn-primary):hover,
+.agendamento-modal .ant-btn:not(.ant-btn-primary):focus {
+    color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+
+@media (max-width: 767px) {
+    .agendamentos-page-content {
+      padding: 16px; /* Reduz padding em telas menores */
+    }
+    .page-header-agendamentos {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .page-header-agendamentos .ant-col:last-child {
+      margin-top: 16px;
+      width: 100%;
+    }
+    .btn-criar-agendamento.ant-btn-primary {
+      width: 100%;
+    }
+    .agendamentos-list .ant-list-item {
+      padding: 12px 15px;
+    }
+    .agendamentos-list .ant-list-item-meta-title {
+      font-size: 15px;
+    }
+    .agendamento-modal .ant-modal-body {
+      padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title-agendamentos {
+        font-size: 20px; /* Ainda menor em telas muito pequenas */
+    }
+    .agendamentos-page-content {
+        padding: 12px; /* Menor padding ainda */
+    }
+}
+
+.agendamentos-list .ant-list-item {
+    animation: listItemFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@keyframes listItemFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* src/pages/AgendamentosPage/AgendamentosPage.css */
+
+/* ... (estilos existentes da AgendamentosPage.css mantidos) ... */
+
+/* Estilos para Clientes de Negócio Associados na Lista de Agendamentos */
+.associated-business-clients-list-item {
+    margin-top: 8px; 
+    display: flex; 
+    align-items: center;
+}
+
+.associated-business-clients-list-item .ant-avatar-group {
+    /* Estilos para o grupo de avatares se necessário */
+}
+
+.associated-client-avatar-in-list.ant-avatar {
+    cursor: pointer;
+    border: 1px solid var(--map-laranja-claro, #fae8d4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease; 
+}
+
+.associated-client-avatar-in-list.ant-avatar:hover {
+    transform: scale(1.15);
+    z-index: 1; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+}
+
+/* Modal de Detalhes do Cliente */
+.client-details-modal-agendamentos .ant-modal-header {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+    border-bottom: 1px solid var(--map-laranja-claro, #FFE7BA) !important;
+}
+.client-details-modal-agendamentos .ant-modal-title .anticon {
+    color: var(--map-laranja, #FA8C16);
+}
+.client-details-modal-agendamentos .client-details-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    padding: 16px 0; 
+}
+.client-details-modal-agendamentos .client-details-content .ant-typography {
+    font-size: 15px;
+    color: var(--header-text-secondary);
+    width: 100%; 
+    margin-bottom: 10px !important; 
+}
+.client-details-modal-agendamentos .client-details-content .ant-typography strong {
+    color: var(--header-text-primary);
+    margin-right: 6px;
+}
+.client-details-modal-agendamentos .client-details-content .ant-typography .anticon {
+    margin-right: 8px;
+    color: var(--map-laranja);
+}
+.client-details-modal-agendamentos .client-details-content a {
+    color: var(--map-laranja-escuro);
+    text-decoration: none;
+    font-weight: 500;
+}
+.client-details-modal-agendamentos .client-details-content a:hover {
+    color: var(--map-dourado-escuro);
+    text-decoration: underline;
+}
+.client-details-modal-agendamentos .client-details-notes { /* Para quebrar linha nas notas se forem longas */
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+
+/* Estilo para Select múltiplo de clientes no modal de agendamento */
+.agendamento-modal .ant-select-multiple .ant-select-selection-item {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+    border-color: var(--map-laranja-claro, #FFE7BA) !important;
+    color: var(--map-laranja-escuro, #D46B08) !important;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.agendamento-modal .ant-select-multiple .ant-select-selection-item-content {
+    display: flex;
+    align-items: center;
+}
+/* Ajuste para Avatar dentro da Tag do Select */
+.agendamento-modal .ant-select-multiple .ant-tag .ant-avatar {
+    margin-right: 5px; 
+}
+.agendamento-modal .ant-select-multiple .ant-select-selection-item .ant-select-selection-item-remove .anticon {
+    color: var(--map-laranja-escuro, #D46B08) !important;
+}
+.agendamento-modal .ant-select-multiple .ant-select-selection-item .ant-select-selection-item-remove .anticon:hover {
+    color: var(--map-vermelho-escuro, #CF1322) !important;
+}
+
+/* Estilo para as opções no dropdown do Select de clientes */
+.ant-select-dropdown .ant-select-item-option-content .ant-space .ant-avatar {
+    margin-right: 8px; 
+}
+.ant-select-dropdown .ant-select-item-option-content .ant-avatar .anticon-user { /* Se for o ícone de fallback */
+    color: var(--map-cinza-texto, #888) !important;
+}
+
+
+/* Estilos de foco e botões (reafirmados para garantir prioridade) */
+.agendamento-modal .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.agendamento-modal .ant-picker:not(.ant-picker-disabled):hover,
+.agendamento-modal .ant-input:not(.ant-input-disabled):hover,
+.agendamento-modal .ant-input-number:not(.ant-input-number-disabled):hover .ant-input-number-input-wrap {
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+.agendamento-modal .ant-select-focused:not(.ant-select-disabled) .ant-select-selector,
+.agendamento-modal .ant-picker-focused:not(.ant-picker-disabled),
+.agendamento-modal .ant-input:focus, .agendamento-modal .ant-input-focused,
+.agendamento-modal .ant-input-number-focused .ant-input-number-input-wrap {
+    border-color: var(--map-laranja, #FA8C16) !important;
+    box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+}
+.agendamento-modal .ant-btn-primary {
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+.agendamento-modal .ant-btn-primary:hover,
+.agendamento-modal .ant-btn-primary:focus {
+    background-color: var(--map-dourado, #FAAD14) !important;
+    border-color: var(--map-dourado, #FAAD14) !important;
+    color: var(--header-text-primary, #303133) !important; 
+}
+.agendamento-modal .ant-btn:not(.ant-btn-primary):hover,
+.agendamento-modal .ant-btn:not(.ant-btn-primary):focus {
+    color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+}

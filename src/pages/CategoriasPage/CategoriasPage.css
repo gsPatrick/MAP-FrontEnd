@@ -1,0 +1,152 @@
+/* src/pages/PainelUsuario/CategoriasPage/CategoriasPage.css */
+
+/* :root { */
+    /* Suas variáveis de cor --map-laranja, --map-dourado, etc. */
+    /* --map-laranja: #FA8C16; */
+    /* --map-dourado: #FAAD14; */
+    /* --map-dourado-escuro: #D48806; */
+    /* --map-vermelho-escuro: #CF1322; */
+    /* --map-branco: #ffffff; */
+    /* --map-cinza-claro: #f0f0f0; */
+    /* --map-cinza-texto: #8c8c8c; */
+    /* --header-text-primary: #262626; */
+    /* --header-text-secondary: #595959; */
+/* } */
+
+.categorias-page-main-layout .panel-content-area.categorias-content {
+    padding: 24px 32px;
+    background-color: #f8f9fc;
+    min-height: calc(100vh - 64px);
+}
+
+.page-header-categorias {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+
+.page-title-categorias {
+    color: var(--header-text-primary, #262626);
+    margin-bottom: 4px !important;
+    font-weight: 600 !important;
+    font-size: 24px;
+}
+
+.page-subtitle-categorias {
+    color: var(--header-text-secondary, #595959);
+    font-size: 14px;
+}
+.page-subtitle-categorias .ant-typography strong {
+    color: var(--map-laranja, #FA8C16);
+}
+
+.btn-nova-categoria.ant-btn-primary {
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
+    transition: all 0.3s ease;
+}
+.btn-nova-categoria.ant-btn-primary:hover,
+.btn-nova-categoria.ant-btn-primary:focus {
+    background-color: var(--map-dourado, #FAAD14) !important;
+    border-color: var(--map-dourado, #FAAD14) !important;
+    color: var(--header-text-primary, #262626) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 173, 20, 0.4);
+}
+
+/* Lista de Cards de Categoria */
+.categorias-card-list {
+    margin-top: 20px;
+}
+
+.categoria-item-card {
+    border-radius: 8px;
+    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03); /* Sombra mais sutil */
+    background-color: var(--map-branco, #ffffff);
+}
+.categoria-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08), 0 6px 6px rgba(0,0,0,0.05);
+}
+.categoria-item-card .ant-card-body {
+    padding: 16px !important; /* Padding interno do card */
+}
+.categoria-item-card .ant-card-actions {
+    background: #fafafa;
+    border-top: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.categoria-item-card .ant-card-actions > li > span:hover .anticon {
+    color: var(--map-laranja, #FA8C16) !important; /* Hover dos ícones de ação */
+}
+.categoria-item-card .ant-card-actions > li > span .anticon-delete:hover {
+    color: var(--map-vermelho-escuro, #CF1322) !important;
+}
+
+.categoria-card-avatar.ant-avatar {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6);
+    color: var(--map-laranja, #FA8C16);
+    font-size: 20px; /* Tamanho do ícone no avatar */
+}
+
+.categoria-card-nome {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--header-text-primary, #262626);
+    display: block; /* Para ellipsis funcionar bem */
+}
+
+
+/* Modal */
+.categoria-modal .ant-modal-content {
+    border-radius: 10px;
+}
+.categoria-modal .ant-modal-header {
+    border-radius: 10px 10px 0 0;
+    background-color: #f7f8fa;
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.categoria-modal .ant-modal-title {
+    font-weight: 600;
+    color: var(--header-text-primary, #262626);
+}
+.categoria-modal .modal-submit-btn.ant-btn-primary {
+    background: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+}
+.categoria-modal .modal-submit-btn.ant-btn-primary:hover,
+.categoria-modal .modal-submit-btn.ant-btn-primary:focus {
+    background: var(--map-dourado, #FAAD14) !important;
+    border-color: var(--map-dourado, #FAAD14) !important;
+    color: var(--header-text-primary, #262626) !important;
+}
+.categoria-modal .ant-btn:not(.ant-btn-primary):hover,
+.categoria-modal .ant-btn:not(.ant-btn-primary):focus {
+    color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+.categoria-modal .ant-input:focus, .categoria-modal .ant-input-focused {
+    border-color: var(--map-laranja, #FA8C16) !important;
+    box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+}
+
+@media (max-width: 767px) {
+    .categorias-page-main-layout .panel-content-area.categorias-content {
+      padding: 16px;
+    }
+    .page-header-categorias {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .page-header-categorias .ant-col:last-child {
+      margin-top: 16px;
+      width: 100%;
+    }
+    .btn-nova-categoria.ant-btn-primary {
+      width: 100%;
+    }
+}

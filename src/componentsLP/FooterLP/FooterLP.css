@@ -1,0 +1,251 @@
+/* src/componentsLP/FooterLP/FooterLP.css */
+
+.lp-footer-wrapper {
+  background-color: #f0f2f5; /* Cinza um pouco mais perceptível */
+  padding: 60px 0 30px 0;
+  border-top: 1px solid #dde1e6; /* Borda um pouco mais escura para combinar com o cinza */
+  color: #5a6a7b; /* Tom de cinza azulado para os textos padrão */
+}
+
+.lp-footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--header-padding-x);
+}
+
+.footer-main-content {
+  margin-bottom: 30px; /* Espaço antes dos créditos e divisor */
+}
+
+.footer-col {
+  /* Para garantir que as colunas tenham um bom espaçamento inferior em mobile antes de empilhar
+     o próximo conjunto de informações (créditos/copyright) */
+  margin-bottom: 20px;
+}
+@media (min-width: 768px) { /* md e acima */
+  .footer-col {
+    margin-bottom: 0; /* Remove a margem extra em desktop */
+  }
+}
+
+
+/* Coluna 1: Logo e Descrição */
+.footer-logo-area {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.footer-logo-icon {
+  font-size: 34px;
+  color: var(--map-laranja);
+  margin-right: 12px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efeito elástico */
+}
+.footer-logo-area:hover .footer-logo-icon {
+  transform: rotate(-10deg) scale(1.1);
+}
+
+.footer-brand-name {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #333f4d !important; /* Preto um pouco mais suave */
+  margin-bottom: 0 !important;
+}
+
+.footer-brand-description {
+  font-size: 14px !important;
+  line-height: 1.75 !important;
+  margin-bottom: 25px !important;
+  color: #5a6a7b;
+}
+
+.footer-social-icons .anticon {
+  font-size: 24px;
+  color: #7b8b9c; /* Cinza mais escuro para ícones sociais */
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.footer-social-icons a:hover .anticon {
+  color: var(--map-laranja);
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* Colunas de Links e Contato */
+.footer-col-title {
+  font-size: 16px !important; /* Um pouco menor */
+  font-weight: 600 !important;
+  color: #435160 !important; /* Um pouco mais escuro que o texto padrão */
+  margin-bottom: 20px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.footer-links-list,
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-list li,
+.footer-contact-list li {
+  margin-bottom: 12px;
+}
+
+.footer-links-list a,
+.footer-contact-list a {
+  font-size: 14px;
+  color: #5a6a7b;
+  text-decoration: none;
+  transition: color 0.3s ease, padding-left 0.3s ease;
+  position: relative; /* Para o pseudo-elemento de hover */
+}
+
+.footer-links-list a:hover,
+.footer-contact-list a:hover {
+  color: var(--map-laranja);
+  padding-left: 5px; /* Pequeno deslocamento no hover */
+  /* text-decoration: underline; */ /* Opcional, pode poluir */
+}
+.footer-links-list a:hover::before,
+.footer-contact-list a:hover::before {
+  content: "» ";
+  position: absolute;
+  left: -10px; /* Ajustar para alinhar com o padding-left */
+  color: var(--map-dourado);
+}
+
+
+.footer-contact-list .anticon {
+  margin-right: 10px;
+  color: var(--map-dourado); /* Ícones de contato com dourado */
+  font-size: 17px;
+  vertical-align: middle; /* Alinha melhor com o texto */
+}
+
+/* Créditos ao Desenvolvedor */
+.footer-dev-credits-row {
+  margin-top: 10px; /* Espaço acima dos créditos */
+  margin-bottom: 25px;
+}
+
+.footer-dev-credits {
+  font-size: 14px !important;
+  color: #7b8b9c;
+  text-align: center;
+  opacity: 0; /* Para animação */
+  transform: translateY(15px);
+  transition: opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s; /* Delay na transição */
+}
+
+.footer-dev-credits.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dev-heart-icon {
+  color: var(--map-laranja); /* Cor do coração */
+  margin: 0 4px;
+  animation: heartbeat 1.5s infinite ease-in-out;
+  display: inline-block; /* Para a animação de transform funcionar */
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.25); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.25); }
+  60% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+.dev-link {
+  color: var(--map-dourado) !important; /* Cor do link do dev */
+  font-weight: 600;
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 2px; /* Espaço para o sublinhado animado */
+}
+
+.dev-link::after { /* Sublinhado animado */
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1.5px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--map-dourado);
+  transition: width 0.3s ease-in-out;
+}
+
+.dev-link:hover::after {
+  width: 100%;
+}
+.dev-link:hover {
+  color: var(--map-laranja) !important; /* Mudança de cor no hover */
+}
+.dev-link:hover::after {
+  background-color: var(--map-laranja);
+}
+
+
+/* Divisor e Copyright */
+.footer-divider {
+  margin: 25px 0 !important; /* Ajuste de margem */
+  border-top-color: #c8ced5 !important; /* Cor do divisor um pouco mais visível */
+}
+
+.footer-copyright {
+  font-size: 13px !important;
+  color: #6c7a89;
+}
+
+
+/* Responsividade */
+@media (max-width: 767px) { /* sm */
+  .lp-footer-wrapper {
+    padding: 40px 0 25px 0;
+  }
+  .footer-main-content {
+    text-align: center; /* Centraliza todo o conteúdo das colunas */
+  }
+  .footer-logo-area,
+  .footer-social-icons {
+    justify-content: center;
+  }
+  .footer-links-list,
+  .footer-contact-list {
+    text-align: center; /* Centraliza itens da lista */
+  }
+  .footer-links-list a:hover::before,
+  .footer-contact-list a:hover::before {
+    display: none; /* Remove o "»" em mobile para não quebrar o layout centralizado */
+  }
+   .footer-links-list a:hover,
+   .footer-contact-list a:hover {
+     padding-left: 0;
+   }
+}
+
+@media (max-width: 575px) { /* xs */
+  .footer-brand-name {
+    font-size: 22px !important;
+  }
+  .footer-logo-icon {
+    font-size: 30px;
+  }
+  .footer-col-title {
+    font-size: 15px !important;
+    margin-bottom: 15px !important;
+  }
+   .footer-links-list a,
+   .footer-contact-list a,
+   .footer-brand-description {
+    font-size: 13px !important;
+  }
+  .footer-dev-credits {
+    font-size: 13px !important;
+  }
+}

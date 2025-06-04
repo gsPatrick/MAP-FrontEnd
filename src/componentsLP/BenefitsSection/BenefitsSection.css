@@ -1,0 +1,141 @@
+/* src/componentsLP/BenefitsSection/BenefitsSection.css */
+
+.benefits-section-wrapper {
+    background-color: #f8f9fa; /* Fundo levemente acinzentado, similar à Hero */
+    /* Para efeitos de background mais elaborados, pode-se usar pseudo-elementos ou SVGs */
+    position: relative;
+    overflow: hidden; /* Para conter elementos decorativos se houver */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  
+  .benefits-section-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .benefits-section-container {
+    max-width: 1100px; /* Um pouco mais largo para acomodar a grade */
+  }
+  
+  /* Header da Seção Centralizado (Pode ser um componente reutilizável) */
+  .section-header-centered {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  
+  .benefits-title .highlight-brand-title {
+    color: var(--map-laranja); /* Destaque no nome da marca no título */
+    /* Ou usar um gradiente:
+    background: linear-gradient(to right, var(--map-laranja), var(--map-dourado));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    */
+  }
+  
+  .benefits-subtitle {
+    max-width: 700px; /* Limita a largura do subtítulo */
+  }
+  
+  /* Estilo dos Cards de Benefício */
+  .benefit-card-item { /* Para aplicar animação de entrada em cascata */
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    /* transition é aplicada pela classe .visible */
+  }
+  .benefit-card-item.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    /* animation-delay é setado via JS */
+  }
+  
+  
+  .benefit-card {
+    background-color: var(--map-branco);
+    border-radius: 10px;
+    padding: 25px 20px;
+    text-align: center;
+    height: 100%; /* Para que todos os cards na mesma linha tenham a mesma altura se o conteúdo variar */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column; /* Para alinhar o conteúdo e garantir que o card ocupe a altura */
+  }
+  
+  .benefit-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+  }
+  
+  .benefit-icon-wrapper {
+    font-size: 42px; /* Tamanho do ícone */
+    color: var(--map-laranja); /* Cor principal para os ícones */
+    margin-bottom: 20px;
+    display: inline-block; /* Para centralizar o ícone */
+    /* Efeito de fundo para o ícone (opcional) */
+    background-color: rgba(204, 102, 51, 0.08); /* Laranja bem suave */
+    width: 80px;
+    height: 80px;
+    line-height: 80px; /* Centraliza o ícone verticalmente */
+    border-radius: 50%; /* Círculo */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .benefit-card:hover .benefit-icon-wrapper {
+    background-color: rgba(204, 102, 51, 0.15);
+    transform: scale(1.05) rotate(5deg);
+  }
+  
+  .benefit-card-title {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: var(--map-preto) !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .benefit-card-description {
+    font-size: 15px !important;
+    color: var(--map-cinza-texto) !important;
+    line-height: 1.65 !important;
+    flex-grow: 1; /* Faz com que a descrição ocupe o espaço restante, alinhando os botões (se houver) */
+  }
+  
+  /* Responsividade */
+  @media (max-width: 991px) { /* md */
+    .benefit-card-title {
+      font-size: 19px !important;
+    }
+  }
+  
+  @media (max-width: 767px) { /* sm - os cards já vão para 1 coluna por causa do Col sm={12} */
+    .benefits-section-container {
+      /* padding: 0 15px;  O section-container já tem padding, não precisa repetir */
+    }
+    .section-header-centered {
+      margin-bottom: 40px;
+    }
+    .benefit-card {
+      padding: 20px 15px;
+    }
+    .benefit-icon-wrapper {
+      font-size: 38px;
+      width: 70px;
+      height: 70px;
+      line-height: 70px;
+    }
+    .benefit-card-title {
+      font-size: 18px !important;
+    }
+    .benefit-card-description {
+      font-size: 14px !important;
+    }
+  }
+  @media (max-width: 575px) { /* Ajuste para xs se o Col sm={12} não for suficiente */
+     /* Se cada card ainda ocupar 50% da largura (devido ao sm=12),
+        e você quiser 100% em telas menores que sm,
+        não precisa de ajuste aqui, pois xs={24} já faz isso.
+        Se sm fosse maior, por exemplo sm={8}, aí um Col xs={24} md={12} sm={24} seria necessário
+        para garantir uma coluna única em sm. No nosso caso, xs={24} já cobre isso. */
+  }

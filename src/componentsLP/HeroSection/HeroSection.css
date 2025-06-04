@@ -1,0 +1,385 @@
+/* src/componentsLP/HeroSection/HeroSection.css */
+.hero-section-wrapper {
+    padding-top: calc(var(--header-height) + 50px); /* Espaço para o header fixo + margem */
+    padding-bottom: 70px;
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%); /* Fundo suavemente graduado */
+    overflow: hidden;
+  }
+  
+  .hero-section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--header-padding-x);
+  }
+  
+  /* Animações de entrada baseadas em Intersection Observer */
+  .hero-animate, .graphic-element-animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .hero-animate.visible, .graphic-element-animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .graphic-element-animate.visible { /* Stagger para elementos gráficos */
+    /* animation-delay é setado inline no JSX */
+  }
+  
+  
+  .hero-text-col {
+    text-align: left;
+    z-index: 10; /* Para garantir que o texto fique acima de blobs que possam vazar */
+  }
+  
+  .hero-headline {
+    font-size: 44px !important;
+    font-weight: 800 !important; /* Mais peso */
+    color: var(--map-preto) !important;
+    margin-bottom: 25px !important;
+    line-height: 1.25 !important;
+  }
+  
+  .hero-headline .highlight-orange {
+    color: var(--map-laranja);
+    /* Efeito de sublinhado estilizado */
+    /* padding-bottom: 5px;
+    border-bottom: 4px solid var(--map-dourado); */
+  }
+  
+  .hero-subheadline {
+    font-size: 19px !important;
+    color: #4a5568 !important; /* Tom de cinza mais escuro */
+    margin-bottom: 35px !important;
+    line-height: 1.75 !important;
+    max-width: 520px;
+  }
+  
+  .hero-subheadline .highlight-brand {
+    font-weight: 700;
+    color: var(--map-laranja-escuro);
+  }
+  
+  .hero-features-preview {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  
+  .feature-item {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: var(--map-cinza-texto);
+    font-weight: 600;
+  }
+  
+  .feature-icon {
+    margin-right: 10px;
+    font-size: 20px;
+    color: var(--map-laranja);
+  }
+  
+  .hero-cta-button {
+    background: linear-gradient(45deg, var(--map-laranja) 0%, var(--map-dourado) 100%) !important;
+    border: none !important;
+    color: var(--map-branco) !important;
+    font-weight: bold !important;
+    padding: 14px 35px !important;
+    height: auto !important;
+    font-size: 18px !important;
+    border-radius: 10px !important; /* Mais arredondado */
+    transition: all 0.35s ease;
+    box-shadow: 0 5px 18px rgba(204, 102, 51, 0.35);
+  }
+  
+  .hero-cta-button:hover,
+  .hero-cta-button:focus {
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 8px 25px rgba(224, 188, 99, 0.45);
+  }
+  
+  .hero-cta-subtext {
+    margin-top: 18px !important;
+    font-size: 14px !important;
+    color: #666 !important;
+  }
+  
+  /* Coluna de Gráficos Revisada */
+  .hero-graphics-col {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 450px; /* Mais altura para acomodar os elementos */
+  }
+  
+  .graphics-main-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px; /* Ajuste a largura máxima conforme necessário */
+    height: 450px; /* Altura fixa para posicionamento absoluto dos filhos */
+    display: flex; /* Para alinhar o mockup principal, se necessário */
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Mockup Principal do Celular */
+  .mockup-phone-main {
+    width: 280px; /* Largura do celular */
+    height: 560px; /* Altura do celular */
+    background-color: #1c1c1e; /* Cor escura para o corpo do celular */
+    border-radius: 40px; /* Bordas arredondadas do celular */
+    padding: 15px; /* "Bordas" internas do celular */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255,255,255,0.1) inset; /* Sombra e brilho na borda */
+    position: relative; /* Para z-index e posicionamento */
+    z-index: 5;
+    transform: rotate(-5deg); /* Leve inclinação */
+    transition: transform 0.5s ease-out;
+  }
+  .mockup-phone-main:hover {
+      transform: rotate(-2deg) scale(1.03);
+  }
+  
+  .mockup-phone-screen {
+    background-color: #f0f2f5; /* Cor da tela do celular (clara) */
+    width: 100%;
+    height: 100%;
+    border-radius: 25px; /* Bordas arredondadas da tela */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte típica de UI */
+  }
+  
+  .screen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #555;
+    padding: 5px 8px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .screen-header .anticon { margin: 0 5px; }
+  
+  .screen-content {
+    flex-grow: 1;
+    padding: 10px 8px;
+    overflow-y: auto; /* Caso o conteúdo do chat seja longo */
+  }
+  
+  .chat-message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 75%;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .chat-message.received {
+    background-color: #e9e9eb;
+    color: #2c2c2c;
+    border-bottom-left-radius: 5px;
+    align-self: flex-start;
+  }
+  .chat-message.sent {
+    background-color: var(--map-dourado);
+    color: var(--map-preto);
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+    align-self: flex-end;
+  }
+  .chat-message p {
+    margin-bottom: 0 !important;
+  }
+  
+  
+  .screen-footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 16px;
+    color: #777;
+  }
+  
+  
+  /* Elementos de UI Flutuantes */
+  .floating-ui-element {
+    position: absolute;
+    background-color: var(--map-branco);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    z-index: 6; /* Acima do mockup principal em alguns casos, ou ao lado */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  }
+  .floating-ui-element:hover {
+    transform: translateY(-8px) scale(1.05) !important; /* Mantem !important para sobrepor transform inicial */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  }
+  
+  .ui-card-1 {
+    width: 220px;
+    bottom: 40px; /* Posição relativa ao graphics-main-container */
+    left: -80px; /* Ajuste para ficar parcialmente fora ou sobreposto */
+    transform: rotate(8deg);
+  }
+  
+  .ui-card-2 {
+    width: 200px;
+    top: 50px;
+    right: -70px;
+    transform: rotate(-10deg);
+  }
+  
+  .ui-bubble-1 { /* Um elemento menor, como uma notificação */
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--map-branco);
+    background: linear-gradient(45deg, var(--map-laranja), var(--map-dourado));
+    top: 180px;
+    left: -50px;
+    transform: rotate(-15deg);
+    z-index: 7; /* Para ficar bem visível */
+  }
+  .ui-bubble-1 .anticon {
+    margin-right: 6px;
+  }
+  
+  /* Formas Decorativas de Fundo (Blobs) */
+  .decorative-blob {
+    position: absolute;
+    border-radius: 50%; /* Ou formas mais orgânicas com border-radius variado */
+    filter: blur(30px); /* Efeito de blur para suavizar */
+    pointer-events: none;
+    z-index: 1; /* Atrás de tudo */
+    animation: pulseAndDrift 15s ease-in-out infinite alternate;
+  }
+  
+  .blob-1 {
+    width: 350px;
+    height: 350px;
+    background-color: rgba(204, 102, 51, 0.15); /* Laranja bem suave */
+    top: -50px;
+    left: -100px;
+  }
+  
+  .blob-2 {
+    width: 300px;
+    height: 300px;
+    background-color: rgba(224, 188, 99, 0.12); /* Dourado bem suave */
+    bottom: -80px;
+    right: -80px;
+    animation-delay: -5s; /* Desfasa a animação */
+  }
+  
+  @keyframes pulseAndDrift {
+    0% {
+      transform: scale(0.9) translate(0, 0);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.1) translate(20px, -15px);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(0.9) translate(-10px, 10px);
+      opacity: 0.6;
+    }
+  }
+  
+  
+  /* Responsividade */
+  @media (max-width: 991px) { /* md breakpoint */
+    .hero-headline {
+      font-size: 38px !important;
+    }
+    .hero-subheadline {
+      font-size: 18px !important;
+    }
+    .graphics-main-container {
+      transform: scale(0.9); /* Reduz um pouco toda a área gráfica */
+      height: 400px;
+    }
+    .mockup-phone-main {
+        width: 260px;
+        height: 520px;
+    }
+    .ui-card-1 { left: -60px; bottom: 20px;}
+    .ui-card-2 { right: -50px; top: 30px;}
+    .ui-bubble-1 { left: -30px; top: 160px;}
+  }
+  
+  @media (max-width: 767px) { /* sm breakpoint */
+    .hero-row { text-align: center; }
+    .hero-text-col { text-align: center; order: 2; }
+    .hero-graphics-col { order: 1; margin-bottom: 50px; min-height: 400px; }
+    .hero-subheadline { max-width: 100%; }
+    .hero-features-preview { justify-content: center; }
+    
+    .hero-row{
+        display: flex;
+        flex-direction: column-reverse
+    }
+
+    .graphics-main-container {
+      transform: scale(0.8);
+      height: 380px;
+      margin-top: -30px; /* Ajusta um pouco para cima */
+    }
+     .mockup-phone-main {
+        width: 240px;
+        height: 480px;
+    }
+    .ui-card-1 { left: -40px; bottom: 10px; width: 180px;}
+    .ui-card-2 { right: -30px; top: 20px; width: 170px;}
+    .ui-bubble-1 { left: -20px; top: 150px; padding: 8px 15px; font-size: 12px;}
+    
+  }
+  
+  @media (max-width: 480px) {
+    .hero-headline { font-size: 32px !important; }
+    .hero-subheadline { font-size: 17px !important; }
+    .hero-cta-button { font-size: 16px !important; padding: 12px 30px !important; }
+    .feature-item { font-size: 14px; }
+    .feature-icon { font-size: 18px; }
+  
+    .graphics-main-container {
+      transform: scale(0.75); /* Ainda menor */
+      height: 350px;
+      margin-top: -40px;
+    }
+     .mockup-phone-main {
+        width: 220px;
+        height: 440px;
+        border-radius: 30px;
+        padding: 12px;
+    }
+    .mockup-phone-screen { border-radius: 18px; }
+  
+    /* Em telas muito pequenas, os elementos flutuantes podem precisar ser simplificados ou escondidos */
+    .floating-ui-element {
+      padding: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+    }
+    .ui-card-1 { left: -20px; bottom: 5px; width: 150px; transform: rotate(5deg); }
+    .ui-card-1 .anticon { font-size: 18px !important; }
+    .ui-card-1 h5 { font-size: 13px !important; }
+    .ui-card-1 p { font-size: 11px !important; }
+  
+    .ui-card-2 { right: -15px; top: 10px; width: 140px; transform: rotate(-6deg); }
+    .ui-card-2 .anticon { font-size: 18px !important; }
+    .ui-card-2 h5 { font-size: 13px !important; }
+    .ui-card-2 p { font-size: 11px !important; }
+    
+    .ui-bubble-1 { display: none; } /* Esconder o bubble menor para simplificar */
+    .decorative-blob { display: none; } /* Esconder blobs para performance e simplicidade */
+  }

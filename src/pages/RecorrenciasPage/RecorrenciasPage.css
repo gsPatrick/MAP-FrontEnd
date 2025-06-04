@@ -1,0 +1,108 @@
+/* src/pages/PainelUsuario/RecorrenciasPage/RecorrenciasPage.css */
+.recorrencias-page-main-layout .panel-content-area.recorrencias-content {
+    background-color: #f8f9fc;
+    padding: 20px;
+  }
+  
+  .page-title-recorrencias {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    color: var(--header-text-primary);
+    margin-bottom: 8px !important;
+  }
+  
+  .filters-card-recorrencias {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background-color: var(--map-branco);
+  }
+  .filters-card-recorrencias .ant-card-body {
+    padding: 20px !important;
+  }
+  .filters-card-recorrencias .ant-typography strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--header-text-secondary);
+  }
+  .filters-card-recorrencias .ant-select,
+  .filters-card-recorrencias .ant-picker {
+    border-radius: 6px;
+  }
+  .filters-card-recorrencias .btn-add-recorrencia {
+    background: linear-gradient(45deg, var(--map-laranja), var(--map-dourado));
+    border-color: transparent;
+    font-weight: 500;
+    min-height: 38px; /* Para alinhar com altura dos selects/datepickers */
+  }
+  
+  /* Tabela de Recorrências */
+  .recurrences-table-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  .recurrences-table-card .ant-table-thead > tr > th {
+    background-color: #fafbfc;
+    font-weight: 600;
+    color: var(--header-text-primary);
+    font-size: 13px;
+  }
+  .recurrences-table-card .ant-table-tbody > tr > td {
+    font-size: 13px;
+  }
+  .recurrences-table-card .ant-tag {
+    font-size: 11px;
+    padding: 2px 7px;
+    font-weight: 500;
+    border-radius: 4px;
+  }
+  .recurrences-table-card .anticon { /* Ícones na tabela */
+      color: var(--header-icon-color);
+  }
+  
+  /* Modal de Adicionar/Editar Recorrência */
+  .add-recurrence-modal .ant-modal-content {
+    border-radius: 10px;
+  }
+  .add-recurrence-modal .ant-modal-header {
+    border-radius: 10px 10px 0 0;
+    background-color: #f7f8fa;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  .add-recurrence-modal .ant-modal-title {
+    font-weight: 600;
+  }
+  .add-recurrence-modal .modal-submit-btn {
+    background: var(--map-laranja);
+    border-color: var(--map-laranja);
+    font-weight: 500;
+    height: 40px; /* Altura maior para o botão do modal */
+    font-size: 15px;
+  }
+  .add-recurrence-modal .modal-submit-btn:hover {
+    background: var(--map-dourado);
+    border-color: var(--map-dourado);
+  }
+  .add-recurrence-modal .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+      background-color: var(--map-laranja) !important;
+      border-color: var(--map-laranja) !important;
+      color: white !important;
+  }
+  .add-recurrence-modal .ant-radio-button-wrapper:hover {
+      color: var(--map-laranja) !important;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 767px) {
+    .recorrencias-page-main-layout .panel-content-area.recorrencias-content { padding: 15px; }
+    .page-title-recorrencias { font-size: 20px !important; }
+    .filters-card-recorrencias .ant-row > .ant-col:not(:last-child) {
+        margin-bottom: 10px;
+    }
+    .filters-card-recorrencias .ant-col:last-child { /* Botão Adicionar */
+        text-align: left !important; /* Alinhar à esquerda em mobile */
+        margin-top: 10px;
+    }
+     .filters-card-recorrencias .btn-add-recorrencia { width: 100%; }
+  }

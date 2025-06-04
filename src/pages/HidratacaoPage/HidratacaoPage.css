@@ -1,0 +1,190 @@
+/* src/pages/PainelUsuario/HidratacaoPage/HidratacaoPage.css */
+.hidratacao-page-main-layout .panel-content-area.hidratacao-content {
+    background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%); /* Gradiente azul claro */
+    padding: 25px;
+    position: relative; /* Para elementos de fundo */
+  }
+  /* Opcional: Elemento de fundo com onda */
+  .hidratacao-content::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px; /* Altura da onda */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.4' d='M0%2C160L48%2C170.7C96%2C181%2C192%2C203%2C288%2C208C384%2C213%2C480%2C192%2C576%2C165.3C672%2C139%2C768%2C107%2C864%2C112C960%2C117%2C1056%2C160%2C1152%2C176C1248%2C192%2C1344%2C181%2C1392%2C176L1440%2C170.7L1440%2C320L1392%2C320C1344%2C320%2C1248%2C320%2C1152%2C320C1056%2C320%2C960%2C320%2C864%2C320C768%2C320%2C672%2C320%2C576%2C320C480%2C320%2C384%2C320%2C288%2C320C192%2C320%2C96%2C320%2C48%2C320L0%2C320Z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: bottom;
+      background-size: cover;
+      opacity: 0.7;
+      z-index: 0;
+  }
+  .hidratacao-content > * { /* Garante que o conteúdo fique acima da onda */
+      position: relative;
+      z-index: 1;
+  }
+  
+  
+  .hidratacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .page-icon-hidratacao {
+    font-size: 28px;
+    color: var(--map-laranja);
+    padding: 8px;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 50%;
+  }
+  .page-title-hidratacao {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    color: var(--header-text-primary);
+    margin-bottom: 0 !important;
+    margin-left: 5px;
+  }
+  .page-subtitle-hidratacao {
+    font-size: 15px;
+    color: #00796B; /* Tom de azul/verde escuro */
+    margin-bottom: 30px;
+  }
+  .btn-config-hidratacao {
+    background: var(--map-laranja);
+    border-color: var(--map-laranja);
+    color: white;
+    font-weight: 500;
+    border-radius: 6px;
+  }
+  .btn-config-hidratacao:hover {
+    background: var(--map-dourado);
+    border-color: var(--map-dourado);
+  }
+  
+  
+  /* Card de Progresso */
+  .progress-card-hidratacao {
+    background-color: rgba(255, 255, 255, 0.85); /* Fundo semi-transparente */
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+  .progress-card-hidratacao .ant-typography {
+      color: var(--header-text-primary);
+  }
+  
+  /* Lista de Lembretes */
+  .reminders-list-card-hidratacao {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    height: 100%;
+  }
+  .reminders-list-card-hidratacao .ant-card-head-title {
+    font-weight: 600;
+    color: var(--header-text-primary);
+  }
+  .reminders-list-card-hidratacao .ant-list {
+      max-height: 350px; /* Altura máxima para a lista */
+      overflow-y: auto;
+      padding-right: 8px;
+  }
+  .reminder-item {
+    padding: 12px 8px !important;
+    border-radius: 8px;
+    margin-bottom: 8px !important;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-bottom: 1px solid #e8f5e9 !important; /* Borda suave entre itens */
+  }
+  .reminder-item:hover {
+      background-color: #E0F2F1; /* Verde água bem claro no hover */
+      transform: translateX(3px);
+  }
+  .reminder-item.drank {
+    background-color: #C8E6C9; /* Verde claro para itens concluídos */
+    opacity: 0.7;
+  }
+  .reminder-item.drank .reminder-amount {
+    text-decoration: line-through;
+    color: #555;
+  }
+  
+  .reminder-time-avatar.ant-avatar {
+    background-color: var(--map-dourado);
+    color: var(--map-preto);
+    font-weight: 600;
+    font-size: 13px;
+    width: 55px; /* Mais largo para caber HH:mm */
+    border-radius: 6px;
+  }
+  .reminder-item.drank .reminder-time-avatar {
+      background-color: #A5D6A7;
+  }
+  .reminder-amount {
+    font-size: 16px;
+    color: var(--header-text-primary);
+  }
+  .btn-toggle-drank.ant-btn {
+    border-color: #B0BEC5;
+    color: #546E7A;
+  }
+  .btn-toggle-drank.ant-btn-primary { /* Quando marcado como bebido */
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+  }
+  .btn-toggle-drank.ant-btn:hover:not(.ant-btn-primary) {
+    border-color: var(--map-laranja);
+    color: var(--map-laranja);
+  }
+  
+  
+  /* Modal de Configuração */
+  .config-hidratacao-modal .ant-modal-content { border-radius: 10px; }
+  .config-hidratacao-modal .ant-modal-header { border-radius: 10px 10px 0 0; background-color: #f7f8fa; border-bottom: 1px solid #e8e8e8; }
+  .config-hidratacao-modal .ant-modal-title { font-weight: 600; }
+  .config-hidratacao-modal .modal-submit-btn-hidratacao {
+    background: var(--map-laranja);
+    border-color: var(--map-laranja);
+    font-weight: 500;
+    height: 40px;
+    font-size: 15px;
+  }
+  .config-hidratacao-modal .modal-submit-btn-hidratacao:hover {
+    background: var(--map-dourado);
+    border-color: var(--map-dourado);
+  }
+  .reminder-form-item .anticon-delete {
+      font-size: 18px;
+      color: #EF5350; /* Vermelho para o ícone de lixeira */
+      cursor: pointer;
+      transition: color 0.2s ease;
+  }
+  .reminder-form-item .anticon-delete:hover {
+      color: #D32F2F;
+  }
+  
+  
+  /* Responsividade */
+  @media (max-width: 767px) {
+    .hidratacao-page-main-layout .panel-content-area.hidratacao-content { padding: 15px; }
+    .hidratacao-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .page-title-hidratacao { font-size: 20px !important; }
+    .btn-config-hidratacao { width: 100%; }
+    
+    .progress-card-hidratacao { margin-bottom: 20px; }
+    .reminders-list-card-hidratacao .ant-list { max-height: none; } /* Remove altura fixa em mobile */
+  }
+  @media (max-width: 480px) {
+      .reminder-item .ant-list-item-meta { flex-direction: column; }
+      .reminder-item .ant-list-item-meta-avatar { margin-bottom: 5px !important; }
+      .reminder-time-avatar.ant-avatar { width: 100%; text-align: center; }
+      .reminder-amount { width: 100%; text-align: center; margin-top: 5px; }
+      .reminder-item .ant-list-item-action { width: 100%; text-align: center; margin-top: 10px; }
+  }

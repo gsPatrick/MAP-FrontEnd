@@ -1,0 +1,316 @@
+/* src/componentsLP/Header/Header.css */
+:root {
+    --map-dourado: #E0BC63;
+    --map-laranja: #CC6633;
+    --map-laranja-escuro: #994C00;
+    --map-preto: #2c3e50;
+    --map-cinza-texto: #555;
+    --map-branco: #FFFFFF;
+    --header-background: var(--map-branco);
+    --header-height: 70px;
+    --header-padding-x: 20px;
+    --header-link-color: var(--map-cinza-texto);
+    --header-link-hover-color: var(--map-laranja); /* Cor do texto no hover */
+    --header-link-active-color: var(--map-laranja);
+    --header-menu-hover-bg: rgba(204, 102, 51, 0.1); /* Fundo laranja bem suave para o hover */
+  }
+  
+  .lp-header {
+    background-color: var(--header-background);
+    height: var(--header-height);
+    padding: 0 var(--header-padding-x);
+    border-bottom: 1px solid #e8e8e8;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(-100%);
+    animation: slideDownFadeIn 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  }
+  
+  @keyframes slideDownFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .lp-header.scrolled {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .header-row {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: nowrap !important;
+  }
+  
+  .logo-column {
+    min-width: 0;
+  }
+  
+  .logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  
+  .logo-icon-placeholder {
+    font-size: 28px;
+    color: var(--map-laranja);
+    margin-right: 8px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .logo-link:hover .logo-icon-placeholder {
+    transform: rotate(-12deg) scale(1.15);
+  }
+  
+  .logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--map-preto);
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+  
+  .logo-link:hover .logo-text {
+    color: var(--map-laranja);
+  }
+  
+  .menu-desktop-col {
+    display: flex;
+    justify-content: center;
+    flex-grow: 0;
+    flex-shrink: 1;
+  }
+  
+  .header-menu.ant-menu-horizontal {
+    border-bottom: none;
+    line-height: calc(var(--header-height) - 2px);
+    background-color: transparent;
+  }
+  
+  /* NOVA ANIMAÇÃO DE MENU "FLUTUAR" */
+  .header-menu .ant-menu-item {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--header-link-color) !important;
+    padding: 0 15px !important; /* Padding para dar espaço ao fundo flutuante */
+    margin: 0 5px !important;
+    position: relative; /* Essencial para o pseudo-elemento */
+    z-index: 1; /* Para o texto ficar sobre o ::before */
+    overflow: hidden; /* Para conter o ::before se ele for maior que o item */
+    border-radius: 6px; /* Cantos arredondados para o item, que o ::before herdará */
+    transition: color 0.3s ease;
+  }
+  
+  .header-menu .ant-menu-item::before { /* O fundo que "flutua" */
+    content: '';
+    position: absolute;
+    top: 50%; /* Começa no meio */
+    left: 50%; /* Começa no meio */
+    width: 0;   /* Começa sem largura */
+    height: 0;  /* Começa sem altura */
+    background-color: var(--header-menu-hover-bg);
+    border-radius: 6px; /* Mesmos cantos arredondados do item */
+    z-index: -1; /* Atrás do texto do menu */
+    opacity: 0;
+    transform: translate(-50%, -50%); /* Centraliza o ponto de origem da animação */
+    transition: width 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                opacity 0.35s ease;
+  }
+  
+  .header-menu .ant-menu-item:hover,
+  .header-menu .ant-menu-item-selected {
+    color: var(--header-link-hover-color) !important;
+  }
+  
+  .header-menu .ant-menu-item:hover::before,
+  .header-menu .ant-menu-item-selected::before {
+    width: calc(100% + 10px); /* Um pouco maior que o item para um efeito de "padding" visual */
+    height: calc(100% - 8px); /* Um pouco menor na altura para não tocar as bordas do header */
+    opacity: 1;
+  }
+  
+  /* Removido o ::after do sublinhado */
+  /* .header-menu .ant-menu-item::after { ... } */
+  
+  
+  .actions-column {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+  .actions-column .ant-space {
+    flex-wrap: nowrap;
+  }
+  
+  .header-action-button {
+    background-color: var(--map-laranja);
+    border-color: var(--map-laranja);
+    color: var(--map-branco) !important;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0 16px;
+    height: 38px;
+    line-height: 36px;
+    transition: all 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    white-space: nowrap;
+  }
+  
+  .header-action-button:hover,
+  .header-action-button:focus {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  }
+  
+  .menu-mobile-button {
+    display: none !important;
+    font-size: 22px;
+    color: var(--map-preto);
+    padding: 0 8px;
+    height: 38px;
+    line-height: 38px;
+    transition: color 0.2s ease; /* Adicionada transição de cor */
+  }
+  .menu-mobile-button:hover {
+    color: var(--map-laranja) !important;
+  }
+  
+  .menu-drawer .ant-drawer-header {
+    border-bottom: 1px solid #e8e8e8;
+    padding: 16px 20px;
+  }
+  .menu-drawer .ant-drawer-close {
+    color: var(--map-cinza-texto);
+    transition: color 0.2s ease; /* Adicionada transição de cor */
+  }
+  .menu-drawer .ant-drawer-close:hover {
+    color: var(--map-laranja);
+  }
+  
+  .menu-drawer .drawer-logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .menu-drawer .drawer-logo-icon {
+    font-size: 26px;
+    color: var(--map-laranja);
+    margin-right: 8px;
+  }
+  .menu-drawer .drawer-logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--map-preto);
+  }
+  
+  .menu-drawer .ant-drawer-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(100% - 55px - 1px); /* (55px é a altura padrão do header do Drawer do AntD) */
+  }
+  
+  .drawer-menu.ant-menu-vertical {
+    border-right: none;
+    flex-grow: 1;
+  }
+  
+  .drawer-menu .ant-menu-item {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--header-link-color);
+    margin-bottom: 10px !important;
+    border-radius: 4px;
+    padding: 10px 15px !important;
+    transition: background-color 0.2s ease, color 0.2s ease; /* Adicionada transição */
+  }
+  
+  .drawer-menu .ant-menu-item:hover {
+    background-color: #f4f4f5;
+    color: var(--map-laranja) !important;
+  }
+  
+  .drawer-menu .ant-menu-item-selected {
+    background-color: var(--map-laranja) !important;
+    color: var(--map-branco) !important;
+  }
+  
+  .drawer-action-button {
+    margin-top: 20px;
+    background-color: var(--map-laranja);
+    border-color: var(--map-laranja);
+    color: var(--map-branco) !important;
+    font-weight: 600;
+    border-radius: 6px;
+    height: 42px;
+    font-size: 15px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* Adicionada transição */
+  }
+  .drawer-action-button:hover,
+  .drawer-action-button:focus {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+  }
+  
+  @media (max-width: 873px) {
+    .menu-desktop-col {
+      display: none !important;
+    }
+    .menu-mobile-button {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 575px) {
+    .lp-header {
+      padding: 0 15px;
+      height: 60px;
+    }
+    .header-menu.ant-menu-horizontal {
+      line-height: calc(60px - 2px);
+    }
+    .logo-icon-placeholder {
+      font-size: 26px;
+    }
+    .logo-text {
+      font-size: 20px;
+    }
+    .menu-mobile-button {
+      font-size: 20px;
+      height: 36px;
+      line-height: 36px;
+    }
+  }
+  
+  @media (max-width: 399px) {
+    .lp-header {
+      padding: 0 10px;
+    }
+    .logo-text {
+      font-size: 18px;
+    }
+    .logo-icon-placeholder {
+      font-size: 24px;
+    }
+    .menu-mobile-button {
+      margin-left: auto;
+    }
+  }

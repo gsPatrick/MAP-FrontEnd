@@ -1,0 +1,341 @@
+/* src/pages/PainelUsuario/TransacoesPage/TransacoesPage.css */
+
+/* :root { */
+    /* Defina suas variáveis de cor aqui ou em um arquivo global se ainda não o fez */
+    /* --map-laranja: #FA8C16; */
+    /* --map-laranja-claro: #FFE7BA; /* Um laranja mais claro para fundos de hover suaves */
+    /* --map-laranja-muito-claro: #FFF7E6; */
+    /* --map-dourado: #FAAD14; */
+    /* --map-dourado-escuro: #D48806; */
+    /* --map-verde-claro: #8BC34A; */
+    /* --map-verde-escuro: #689F38; */
+    /* --map-verde-muito-claro: #F6FFED; */
+    /* --map-vermelho-claro: #F44336; */
+    /* --map-vermelho-escuro: #CF1322; */
+    /* --map-vermelho-muito-claro: #FFF1F0; */
+    /* --map-branco: #ffffff; */
+    /* --map-cinza-claro: #f0f0f0; */
+    /* --map-cinza-medio: #d9d9d9; */
+    /* --header-text-primary: #303133; */
+    /* --header-text-secondary: #606266; */
+    /* --link-hover-color: var(--map-dourado-escuro, #D48806); */
+/* } */
+
+/* Layout Geral da Página */
+.transacoes-page-main-layout .panel-content-area.transacoes-content {
+    background-color: #f8f9fc;
+    padding: 24px;
+    transition: background-color 0.3s ease;
+}
+
+.page-title-transactions {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: var(--header-text-primary, #333);
+    margin-bottom: 10px !important;
+}
+
+.filters-card-transactions .ant-typography strong,
+.transacoes-content .ant-typography[type="secondary"] {
+    color: var(--header-text-secondary, #555);
+}
+
+/* Card de Filtros e Ações */
+.filters-card-transactions {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    background-color: var(--map-branco, #fff);
+    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.filters-card-transactions .ant-card-body {
+    padding: 24px !important;
+}
+.filters-card-transactions .ant-typography strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--header-text-secondary, #555);
+}
+.filters-card-transactions .ant-select .ant-select-selector,
+.filters-card-transactions .ant-picker {
+    border-radius: 6px;
+    border-color: var(--map-cinza-medio, #d9d9d9);
+}
+.filters-card-transactions .ant-select-focused .ant-select-selector,
+.filters-card-transactions .ant-picker-focused,
+.filters-card-transactions .ant-select:hover .ant-select-selector, /* Hover para select */
+.filters-card-transactions .ant-picker:hover { /* Hover para datepicker */
+    border-color: var(--map-laranja, #FA8C16) !important;
+    box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+}
+
+/* Estilo para opções do Select no hover/focus (se o padrão azul estiver aparecendo) */
+.ant-select-dropdown .ant-select-item-option-active,
+.ant-select-dropdown .ant-select-item-option-selected {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+    color: var(--map-laranja, #FA8C16) !important;
+    font-weight: 500;
+}
+.ant-select-dropdown .ant-select-item-option-selected:hover { /* Para quando já está selecionado e passa o mouse */
+    background-color: var(--map-laranja-claro, #FFE7BA) !important;
+}
+
+
+/* Botões de Adicionar Receita/Despesa */
+.filters-card-transactions .btn-add-receita {
+    background: var(--map-verde-claro, #8BC34A);
+    border-color: transparent;
+    color: var(--map-branco, #fff);
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.filters-card-transactions .btn-add-receita:hover,
+.filters-card-transactions .btn-add-receita:focus {
+    background: var(--map-verde-escuro, #689F38) !important;
+    border-color: transparent !important; /* Mantido transparente ou cor do hover */
+    color: var(--map-branco, #fff) !important;
+}
+
+.filters-card-transactions .btn-add-despesa {
+    background: var(--map-vermelho-claro, #F44336);
+    border-color: transparent;
+    color: var(--map-branco, #fff);
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.filters-card-transactions .btn-add-despesa:hover,
+.filters-card-transactions .btn-add-despesa:focus {
+    background: var(--map-vermelho-escuro, #D32F2F) !important;
+    border-color: transparent !important;
+    color: var(--map-branco, #fff) !important;
+}
+
+/* Cards de Resumo Financeiro */
+.summary-stat-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    background-color: var(--map-branco, #fff);
+    padding: 16px;
+}
+.summary-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.summary-stat-card .ant-statistic-title {
+    font-size: 14px;
+    color: var(--header-text-secondary, #6c757d);
+    margin-bottom: 8px !important;
+    font-weight: 500;
+}
+.summary-stat-card .ant-statistic-content {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    line-height: 1.2;
+}
+.summary-stat-card.receita .ant-statistic-content { color: var(--map-verde-escuro, #3f8600); }
+.summary-stat-card.despesa .ant-statistic-content { color: var(--map-vermelho-escuro, #cf1322); }
+.summary-stat-card.saldo .ant-statistic-content { color: var(--map-dourado, #FAAD14); }
+
+.summary-stat-card.receita { border-left: 5px solid var(--map-verde-claro, #8BC34A); }
+.summary-stat-card.despesa { border-left: 5px solid var(--map-vermelho-claro, #F44336); }
+.summary-stat-card.saldo { border-left: 5px solid var(--map-dourado-escuro, #D48806); }
+
+
+/* Cards de Gráficos */
+.chart-card-transactions {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--map-branco, #fff);
+    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.chart-card-transactions .ant-card-head-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--header-text-primary, #333);
+}
+.chart-card-transactions .ant-card-body {
+    padding: 20px !important;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chart-card-transactions .ant-empty-description {
+    color: var(--header-text-secondary, #888);
+}
+
+/* Tabela de Transações */
+.transactions-table-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    background-color: var(--map-branco, #fff);
+    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.transactions-table-card .ant-table-thead > tr > th {
+    background-color: #fafcff;
+    font-weight: 600;
+    color: var(--header-text-primary, #333);
+    border-bottom: 2px solid var(--map-cinza-medio, #f0f0f0);
+}
+.transactions-table-card .ant-table-tbody > tr > td {
+    font-size: 13px;
+    color: var(--header-text-secondary, #555);
+    border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
+}
+.transactions-table-card .ant-table-tbody > tr:hover > td {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+}
+.transactions-table-card .ant-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+.transactions-table-card .ant-tag-green {
+    background-color: var(--map-verde-muito-claro, #F6FFED);
+    border-color: var(--map-verde-claro, #B7EB8F);
+    color: var(--map-verde-escuro, #389E0D);
+}
+.transactions-table-card .ant-tag-volcano {
+    background-color: var(--map-vermelho-muito-claro, #FFF1F0);
+    border-color: var(--map-vermelho-claro, #FFCCC7);
+    color: var(--map-vermelho-escuro, #CF1322);
+}
+.transactions-table-card .ant-table-cell-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Botões de Ação na Tabela (Editar/Excluir) */
+.transactions-table-card .ant-btn-text { /* Estilo base para botões de texto */
+    color: var(--map-laranja, #FA8C16); /* Cor laranja para ícones */
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+.transactions-table-card .ant-btn-text:hover,
+.transactions-table-card .ant-btn-text:focus {
+    color: var(--map-dourado-escuro, #D48806) !important; /* Dourado escuro no hover */
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important; /* Fundo laranja bem claro */
+}
+.transactions-table-card .ant-btn-text[danger] {
+    color: var(--map-vermelho-claro, #F44336); /* Cor vermelha para botão de perigo */
+}
+.transactions-table-card .ant-btn-text[danger]:hover,
+.transactions-table-card .ant-btn-text[danger]:focus {
+    color: var(--map-vermelho-escuro, #CF1322) !important;
+    background-color: var(--map-vermelho-muito-claro, #FFF1F0) !important;
+}
+
+
+/* Paginação da Tabela */
+.transactions-table-card .ant-pagination-item a {
+    color: var(--header-text-secondary, #555);
+}
+.transactions-table-card .ant-pagination-item-active {
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+}
+.transactions-table-card .ant-pagination-item-active a {
+    color: var(--map-branco, #fff) !important;
+}
+.transactions-table-card .ant-pagination-item:hover,
+.transactions-table-card .ant-pagination-item:focus {
+    border-color: var(--map-dourado, #FAAD14) !important;
+}
+.transactions-table-card .ant-pagination-item:hover a,
+.transactions-table-card .ant-pagination-item:focus a {
+    color: var(--map-dourado, #FAAD14) !important;
+}
+.transactions-table-card .ant-pagination-prev:hover .ant-pagination-item-link,
+.transactions-table-card .ant-pagination-next:hover .ant-pagination-item-link,
+.transactions-table-card .ant-pagination-jump-prev:hover .ant-pagination-item-link-icon,
+.transactions-table-card .ant-pagination-jump-next:hover .ant-pagination-item-link-icon {
+    color: var(--map-dourado, #FAAD14) !important;
+}
+
+
+/* Modal de Adicionar/Editar Transação */
+.add-transaction-modal .ant-modal-content {
+    border-radius: 12px;
+}
+.add-transaction-modal .ant-modal-header {
+    border-radius: 12px 12px 0 0;
+    background-color: #f7f8fa;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 16px 24px;
+}
+.add-transaction-modal .ant-modal-title {
+    font-weight: 600;
+    color: var(--header-text-primary, #333);
+}
+.add-transaction-modal .ant-form-item-label > label {
+    font-weight: 500;
+    color: var(--header-text-secondary, #555);
+}
+
+/* Botão de submit do Modal */
+.add-transaction-modal .modal-submit-btn.ant-btn-primary { /* Mais específico */
+    background: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #fff) !important;
+    font-weight: 500;
+    height: 40px;
+    font-size: 14px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.add-transaction-modal .modal-submit-btn.ant-btn-primary:hover,
+.add-transaction-modal .modal-submit-btn.ant-btn-primary:focus {
+    background: var(--map-dourado, #D48806) !important;
+    border-color: var(--map-dourado, #D48806) !important;
+    color: var(--map-branco, #fff) !important;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+    .transacoes-page-main-layout .panel-content-area.transacoes-content {
+        padding: 16px;
+    }
+    .page-title-transactions {
+        font-size: 22px !important;
+    }
+    .filters-card-transactions .ant-card-body {
+        padding: 16px !important;
+    }
+    .filters-card-transactions .ant-row > .ant-col {
+        margin-bottom: 16px;
+    }
+    .filters-card-transactions .ant-space-vertical {
+        width: 100% !important;
+    }
+    .filters-card-transactions .btn-add-receita,
+    .filters-card-transactions .btn-add-despesa {
+        width: 100%;
+    }
+    
+    .summary-stat-card {
+        margin-bottom: 16px;
+    }
+    .summary-stat-card .ant-statistic-content {
+        font-size: 22px !important;
+    }
+    .chart-card-transactions {
+        min-height: 300px;
+        margin-bottom: 16px;
+    }
+    .add-transaction-modal .ant-modal-wrap {
+        overflow-x: hidden;
+    }
+    .add-transaction-modal .ant-modal {
+        max-width: 95vw !important;
+        padding: 0 !important;
+    }
+}

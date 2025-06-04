@@ -1,0 +1,85 @@
+/* src/modals/ModalBusinessClientForm/ModalBusinessClientForm.css */
+.business-client-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  .business-client-modal .ant-modal-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+  }
+  .business-client-modal .ant-modal-title {
+    font-weight: 600;
+    color: var(--header-text-primary, #303133);
+  }
+  .business-client-modal .ant-modal-body {
+      padding: 24px 30px;
+  }
+  .business-client-modal .ant-form-item-label > label {
+      font-weight: 500;
+      color: var(--header-text-secondary, #606266);
+  }
+  
+  /* Estilos de foco/hover para inputs e selects - reusando do agendamentos page css */
+  .business-client-modal .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+  .business-client-modal .ant-picker:not(.ant-picker-disabled):hover,
+  .business-client-modal .ant-input:not(.ant-input-disabled):hover,
+  .business-client-modal .ant-input-number:not(.ant-input-number-disabled):hover .ant-input-number-input-wrap {
+      border-color: var(--map-laranja, #FA8C16) !important;
+  }
+  .business-client-modal .ant-select-focused:not(.ant-select-disabled) .ant-select-selector,
+  .business-client-modal .ant-picker-focused:not(.ant-picker-disabled),
+  .business-client-modal .ant-input:focus, .business-client-modal .ant-input-focused,
+  .business-client-modal .ant-input-number-focused .ant-input-number-input-wrap {
+      border-color: var(--map-laranja, #FA8C16) !important;
+      box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+  }
+  
+  /* Estilo dos botões */
+  .business-client-modal .ant-btn-primary {
+      background-color: var(--map-laranja, #FA8C16) !important;
+      border-color: var(--map-laranja, #FA8C16) !important;
+      color: var(--map-branco, #ffffff) !important;
+  }
+  .business-client-modal .ant-btn-primary:hover,
+  .business-client-modal .ant-btn-primary:focus {
+      background-color: var(--map-dourado, #FAAD14) !important;
+      border-color: var(--map-dourado, #FAAD14) !important;
+      color: var(--header-text-primary, #303133) !important;
+  }
+  .business-client-modal .ant-btn:not(.ant-btn-primary):hover,
+  .business-client-modal .ant-btn:not(.ant-btn-primary):focus {
+      color: var(--map-laranja, #FA8C16) !important;
+      border-color: var(--map-laranja, #FA8C16) !important;
+  }
+  
+  /* Estilos específicos para a lista na página, se necessário */
+  .business-clients-list .business-client-item.inactive {
+      opacity: 0.7;
+      /* color: var(--map-cinza-texto); */
+  }
+  .business-clients-list .business-client-item.inactive .ant-list-item-meta-title {
+      text-decoration: line-through;
+      color: var(--header-text-secondary);
+  }
+   .business-clients-list .business-client-item.inactive .ant-tag {
+       opacity: 0.7;
+   }
+  .business-clients-list .business-client-item .ant-list-item-meta-avatar .active-avatar {
+      background-color: var(--map-laranja-muito-claro, #FFF7E6);
+      color: var(--map-laranja, #FA8C16);
+  }
+  .business-clients-list .business-client-item .ant-list-item-meta-avatar .inactive-avatar {
+      background-color: var(--map-cinza-claro, #f0f0f0);
+      color: var(--map-cinza-medio, #bfbfbf);
+  }
+  .business-clients-list .client-contact-tag {
+      margin-right: 8px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      font-size: 12px;
+  }
+   .business-clients-list .client-status-tag {
+      margin-top: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+   }

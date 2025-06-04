@@ -1,0 +1,184 @@
+/* src/componentsLP/FeaturesSection/FeaturesSection.css */
+
+/* Adicionando '-refined' aos nomes das classes para evitar conflitos se o CSS antigo ainda estiver carregado */
+.features-section-wrapper-refined {
+    padding: 80px 0; /* Aumentar padding vertical */
+    background-color: #f8f9fa; /* Um cinza bem claro, quase branco */
+    /* background-color: var(--map-branco); */
+    overflow: hidden; /* Para conter animações */
+  }
+  
+  .features-section-container-refined {
+    max-width: 1100px; /* Levemente reduzido para mais respiro nas laterais */
+    margin: 0 auto;
+    padding: 0 var(--header-padding-x, 25px); /* Default se --header-padding-x não estiver definido */
+    text-align: center;
+  }
+  
+  .features-main-title-refined,
+  .features-main-subtitle-refined {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .features-main-title-refined.visible,
+  .features-main-subtitle-refined.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition-delay: inherit !important;
+  }
+  
+  
+  .features-main-title-refined {
+    font-size: 34px !important; /* Um pouco menor */
+    font-weight: 700 !important;
+    color: var(--map-preto) !important;
+    margin-bottom: 18px !important;
+  }
+  
+  .features-main-title-refined .highlight-brand { /* Usar a cor da marca mais forte aqui */
+    color: var(--map-laranja);
+    /* Ou var(--map-dourado); */
+  }
+  
+  .features-main-subtitle-refined {
+    font-size: 17px !important;
+    color: #5f6c7b !important; /* Cinza azulado suave */
+    margin-bottom: 60px !important; /* Mais espaço abaixo do subtítulo */
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+  
+  .feature-card-item-refined {
+    opacity: 0;
+    transform: translateY(30px); /* Começa um pouco mais de baixo */
+  }
+  
+  .feature-card-item-refined.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Animação mais rápida */
+    transition-delay: inherit !important;
+  }
+  
+  .feature-card-refined {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    border-radius: 10px !important; /* Bordas um pouco menos arredondadas */
+    /* box-shadow: 0 5px 15px rgba(0,0,0,0.03) !important; BEM sutil */
+    box-shadow: none !important; /* Sem sombra por padrão */
+    border: 1px solid #e9ecef !important; /* Borda clara */
+    background-color: var(--map-branco) !important;
+    padding: 25px !important; /* Padding direto no card */
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+  }
+  
+  .feature-card-refined .ant-card-body {
+    padding: 0 !important; /* Remover padding do body, já que está no card pai */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  
+  .feature-card-refined:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06) !important; /* Sombra mais pronunciada no hover */
+    border-color: transparent !important; /* Esconder borda no hover se tiver sombra */
+    /* border-color: var(--map-laranja) !important; Ou destacar a borda */
+  }
+  
+  .feature-card-icon-refined {
+    font-size: 30px !important; /* Ícone um pouco maior */
+    margin-bottom: 20px;
+    /* A cor é definida inline no JSX pela feature.highlightColor */
+    /* Ex: color: var(--map-laranja); */
+    align-self: flex-start; /* Alinha o ícone à esquerda */
+    padding: 8px; /* Um pequeno padding em volta do ícone */
+    background-color: #f8f9fa; /* Fundo MUITO sutil para o ícone */
+    border-radius: 8px;
+    display: inline-block; /* Para o padding funcionar bem */
+  }
+  
+  .feature-card-title-refined {
+    font-size: 18px !important; /* Título do card um pouco menor */
+    font-weight: 600 !important;
+    color: var(--map-preto) !important;
+    margin-bottom: 12px !important;
+    line-height: 1.45 !important;
+  }
+  
+  .feature-card-description-refined {
+    font-size: 14.5px !important; /* Descrição um pouco maior para leitura */
+    color: #495057 !important; /* Cinza mais escuro e legível */
+    line-height: 1.65 !important;
+    flex-grow: 1;
+    margin-bottom: 20px !important; /* Mais espaço antes das tags */
+  }
+  
+  .feature-card-tags-refined {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* Espaçamento entre as tags */
+  }
+  
+  .feature-tag-refined.ant-tag {
+    background-color: transparent !important;
+    border: 1px solid #ced4da !important; /* Borda da tag mais sutil */
+    color: #495057 !important; /* Texto da tag mais escuro */
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    padding: 3px 8px !important;
+    margin: 0 !important; /* Remover margem padrão da tag */
+    font-weight: 500;
+  }
+  /* Opcional: destacar a tag no hover */
+  .feature-tag-refined.ant-tag:hover {
+    border-color: var(--map-laranja) !important;
+    color: var(--map-laranja) !important;
+  }
+  
+  
+  /* Responsividade */
+  @media (max-width: 991px) { /* lg */
+    .features-main-title-refined {
+      font-size: 30px !important;
+    }
+    .features-main-subtitle-refined {
+      font-size: 16px !important;
+      margin-bottom: 50px !important;
+    }
+    .feature-card-refined {
+      padding: 20px !important;
+    }
+  }
+  
+  @media (max-width: 767px) { /* md */
+    .features-section-wrapper-refined {
+      padding: 60px 0;
+    }
+     .features-main-title-refined {
+      font-size: 26px !important;
+    }
+    .features-main-subtitle-refined {
+      font-size: 15px !important;
+      margin-bottom: 40px !important;
+    }
+  }
+  
+  @media (max-width: 575px) { /* sm */
+    .feature-card-title-refined {
+      font-size: 17px !important;
+    }
+    .feature-card-description-refined {
+      font-size: 14px !important;
+    }
+    .feature-card-icon-refined {
+      font-size: 26px !important;
+      margin-bottom: 15px;
+    }
+  }

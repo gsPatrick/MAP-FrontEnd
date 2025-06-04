@@ -1,0 +1,152 @@
+/* src/pages/LoginPage/LoginPage.css */
+
+.login-page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f9;
+}
+
+.login-page-content {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: calc(var(--header-height) + 40px);
+  padding-bottom: 50px;
+  padding-left: var(--header-padding-x);
+  padding-right: var(--header-padding-x);
+}
+
+.login-card-container {
+  width: 100%;
+  max-width: 400px; /* Pode ser um pouco mais estreito sem as opções extras */
+  background-color: var(--map-branco);
+  padding: 35px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.05);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.login-card-container.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.login-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--map-preto) !important;
+  margin-bottom: 10px !important;
+}
+
+.login-subtitle {
+  font-size: 15px !important;
+  color: var(--map-cinza-texto) !important;
+  margin-bottom: 30px !important;
+}
+
+.login-form .ant-form-item-label > label {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.login-form .ant-input-affix-wrapper {
+  border-radius: 6px;
+  border-color: #d9d9d9;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.login-form .ant-input-affix-wrapper:hover {
+  border-color: var(--map-laranja);
+}
+.login-form .ant-input-affix-wrapper-focused,
+.login-form .ant-input-affix-wrapper:focus-within {
+  border-color: var(--map-laranja) !important;
+  box-shadow: 0 0 0 2px rgba(204, 102, 51, 0.2) !important;
+}
+.login-form .site-form-item-icon {
+  color: #aaa;
+}
+
+/* Estilo para o link "Esqueceu sua senha?" quando está sozinho */
+.login-form-options-simplified {
+  text-align: right; /* Alinha o link à direita */
+  margin-bottom: 25px !important; /* Mais espaço antes do botão de entrar */
+}
+.login-form-options-simplified .ant-form-item {
+    margin-bottom: 0 !important;
+}
+
+
+.login-form-forgot {
+  color: var(--map-laranja);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+.login-form-forgot:hover {
+  color: var(--map-dourado);
+  text-decoration: underline;
+}
+
+.login-form-button {
+  background: linear-gradient(45deg, var(--map-laranja) 0%, var(--map-dourado) 100%) !important;
+  border: none !important;
+  color: var(--map-branco) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: 0 4px 12px rgba(204, 102, 51, 0.25) !important;
+  margin-top: 5px; /* Adiciona um pouco de espaço se o link "Esqueceu senha" estiver muito perto */
+}
+
+.login-form-button:hover,
+.login-form-button:focus {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(224, 188, 99, 0.35) !important;
+}
+
+/* Removido .login-divider e .social-login-button, pois os elementos foram retirados do JSX */
+
+.login-register-prompt {
+  margin-top: 30px !important; /* Mais espaço se não houver login social */
+  font-size: 14px !important;
+  color: var(--map-cinza-texto);
+}
+.login-register-prompt a {
+  color: var(--map-laranja);
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-register-prompt a:hover {
+  color: var(--map-dourado);
+  text-decoration: underline;
+}
+
+/* Responsividade para a página de login */
+@media (max-width: 480px) {
+  .login-page-content {
+    padding-top: calc(var(--header-height) + 20px);
+    padding-left: 15px;
+    padding-right: 15px;
+    align-items: flex-start;
+  }
+  .login-card-container {
+    padding: 25px 20px;
+    margin-top: 10px;
+    max-width: none; /* Permite que o card ocupe mais da largura em telas pequenas */
+  }
+  .login-title {
+    font-size: 24px !important;
+  }
+  .login-subtitle {
+    font-size: 14px !important;
+    margin-bottom: 25px !important;
+  }
+  .login-form-button {
+    font-size: 15px !important;
+  }
+}

@@ -1,0 +1,219 @@
+/* src/pages/ConfiguracoesPage/ConfiguracoesPage.css */
+
+.configuracoes-page-layout .page-content-wrapper.configuracoes-content {
+    padding: 24px;
+    background-color: #f8f9fa; /* Tom de cinza bem claro para o fundo */
+}
+
+.configuracoes-title.page-title-custom {
+    margin-bottom: 8px !important;
+    color: var(--map-preto) !important; /* Usando suas variáveis */
+}
+.configuracoes-title .title-icon-config {
+    color: var(--map-laranja) !important;
+    font-size: 28px;
+    margin-right: 12px;
+}
+.page-subtitle-config {
+    margin-bottom: 25px !important;
+    font-size: 14px;
+    color: #6c757d; /* Cinza padrão para subtítulo */
+}
+.page-subtitle-config strong {
+    color: var(--map-dourado);
+}
+
+.configuracoes-tabs .ant-tabs-nav {
+    margin-bottom: 24px !important;
+}
+.configuracoes-tabs .ant-tabs-tab {
+    border-radius: 8px 8px 0 0 !important;
+    background-color: #e9ecef !important; /* Cinza mais claro para abas inativas */
+    border: 1px solid #dee2e6 !important;
+    padding: 10px 20px !important;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+.configuracoes-tabs .ant-tabs-tab .anticon {
+    margin-right: 8px;
+    color: var(--map-laranja); /* Laranja para ícones de aba */
+    transition: color 0.3s;
+}
+.configuracoes-tabs .ant-tabs-tab:hover {
+    color: var(--map-laranja-escuro) !important;
+    border-color: var(--map-laranja-claro) !important;
+    background-color: #f1f3f5 !important;
+}
+.configuracoes-tabs .ant-tabs-tab:hover .anticon {
+    color: var(--map-laranja-escuro) !important;
+}
+
+.configuracoes-tabs .ant-tabs-tab-active {
+    background-color: var(--map-branco) !important;
+    border-bottom-color: var(--map-branco) !important; /* Para mesclar com o card */
+    border-left-color: var(--map-laranja) !important;
+    border-right-color: var(--map-laranja) !important;
+    border-top: 2px solid var(--map-laranja) !important; /* Borda superior mais grossa na ativa */
+    font-weight: 600;
+}
+.configuracoes-tabs .ant-tabs-tab-active .ant-tabs-tab-btn,
+.configuracoes-tabs .ant-tabs-tab-active .anticon {
+    color: var(--map-laranja-escuro) !important;
+}
+/* Remove a ink-bar padrão se a borda superior já indica a aba ativa */
+.configuracoes-tabs .ant-tabs-ink-bar {
+    display: none !important;
+}
+
+.config-card {
+    background-color: var(--map-branco);
+    border-radius: 0 8px 8px 8px; /* Arredonda cantos, exceto topo-esquerdo se a aba estiver conectada */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Sombra mais pronunciada */
+    /* border: 1px solid #dee2e6;  Removido para um look mais flat, ou pode ser #ddd */
+    border-top: none; /* Remove a borda superior do card se a aba já tem */
+}
+.config-card .ant-card-head {
+    border-bottom: 1px solid #eef2f7; /* Linha divisória mais suave */
+    padding: 0 24px;
+    min-height: 56px;
+}
+.config-card .ant-card-head-title {
+    font-weight: 600;
+    color: var(--map-preto);
+    font-size: 17px; /* Ligeiramente maior */
+}
+.config-card .ant-card-body {
+    padding: 24px;
+}
+.config-card .ant-form-item-label > label {
+    font-weight: 500;
+    color: #495057; /* Texto do label mais escuro */
+}
+
+/* Estilo para botões dentro dos cards e modais */
+.edit-personal-info-btn.ant-btn-link,
+.add-access-btn.ant-btn-primary,
+.save-google-colors-btn.ant-btn-primary,
+.google-connect-btn.ant-btn-primary,
+.google-disconnect-btn.ant-btn-primary.ant-btn-dangerous,
+.submit-btn-form.ant-btn-primary,
+.cancel-btn-form.ant-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+.edit-personal-info-btn.ant-btn-link { color: var(--map-laranja) !important; }
+.edit-personal-info-btn.ant-btn-link:hover { color: var(--map-dourado) !important; }
+
+.add-access-btn.ant-btn-primary,
+.save-google-colors-btn.ant-btn-primary, /* Aplicando estilo laranja */
+.submit-btn-form.ant-btn-primary {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+.add-access-btn.ant-btn-primary:hover,
+.save-google-colors-btn.ant-btn-primary:hover,
+.submit-btn-form.ant-btn-primary:hover {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
+
+/* Google Connect/Disconnect específico (já definido no JSX, mas reforçando) */
+.google-connect-btn.ant-btn-primary { background-color: #4285F4 !important; border-color: #4285F4 !important; }
+.google-connect-btn.ant-btn-primary:hover { background-color: #357ae8 !important; border-color: #357ae8 !important;}
+.google-disconnect-btn.ant-btn-primary.ant-btn-dangerous { background-color: #DB4437 !important; border-color: #DB4437 !important; } /* Cor vermelha do Google para perigo */
+.google-disconnect-btn.ant-btn-primary.ant-btn-dangerous:hover { background-color: #c23321 !important; border-color: #c23321 !important; }
+
+
+.shared-access-list .ant-list-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f7;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.shared-access-list .ant-list-item:hover { background-color: #fffcf5; } /* Laranja bem clarinho */
+.shared-user-avatar.ant-avatar { background-color: var(--map-dourado); color: var(--map-preto); }
+.shared-user-name { font-size: 15px; color: var(--map-preto); }
+.shared-access-list .list-action-btn .anticon { font-size: 16px; }
+.shared-access-list .list-action-btn.edit { color: var(--map-dourado); }
+.shared-access-list .list-action-btn.edit:hover { background-color: rgba(224, 188, 99, 0.1) !important; color: var(--map-laranja-escuro) !important; }
+.shared-access-list .list-action-btn.delete { color: #ff4d4f; }
+.shared-access-list .list-action-btn.delete:hover { background-color: rgba(255, 77, 79, 0.08) !important; color: #cf1322 !important; }
+.shared-access-list .profile-access-type-list .anticon { margin-right: 4px; color: var(--map-laranja); }
+
+/* Modal Styles (Reutilizando e simplificando) */
+.modal-style-map .ant-modal-header {
+  background-color: var(--map-laranja-escuro) !important;
+  border-bottom: 2px solid var(--map-dourado) !important;
+  padding: 16px 24px; border-radius: 8px 8px 0 0;
+}
+.modal-style-map .ant-modal-title { color: var(--map-branco) !important; font-weight: 600; }
+.modal-style-map .ant-modal-title .anticon { color: var(--map-dourado) !important; margin-right: 8px; }
+.modal-style-map .ant-modal-close-x { color: var(--map-texto-claro) !important; }
+.modal-style-map .ant-modal-close-x:hover { color: var(--map-dourado) !important; background-color: rgba(224, 188, 99, 0.1) !important; }
+.modal-style-map .ant-modal-body { padding: 24px; background-color: #fdfdfe; }
+.modal-style-map .ant-form-item-label > label { font-weight: 500; color: #495057; }
+.modal-style-map .form-divider { margin: 24px 0 20px 0; border-top-color: #eef2f7; }
+.modal-style-map .form-action-buttons { text-align: right; margin-bottom: 0; }
+.modal-style-map .cancel-btn-form.ant-btn:hover { border-color: var(--map-laranja) !important; color: var(--map-laranja) !important; }
+
+/* Estilos para Radio.Group simplificado no Modal de Acesso Compartilhado */
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper {
+    border-color: var(--map-cinza-medio) !important;
+    color: var(--header-text-secondary) !important;
+    background-color: var(--map-branco) !important;
+    transition: all 0.3s; margin-right: 8px; border-radius: 6px !important;
+    padding: 0 15px; /* Padding horizontal padrão do AntD */
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper:last-child { margin-right: 0; }
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper:hover {
+    color: var(--map-laranja) !important; border-color: var(--map-laranja) !important;
+    box-shadow: 0 0 0 1px var(--map-laranja-focus);
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    background-color: var(--map-laranja) !important; border-color: var(--map-laranja) !important;
+    color: var(--map-branco) !important; box-shadow: 0 2px 5px rgba(204,102,51,0.3);
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) .anticon {
+    color: var(--map-branco) !important;
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+    background-color: var(--map-dourado) !important; border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover .anticon {
+    color: var(--map-preto) !important;
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper.ant-radio-button-wrapper-danger.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    background-color: var(--ant-error-color) !important;
+    border-color: var(--ant-error-color) !important;
+    color: var(--map-branco) !important;
+}
+.access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper.ant-radio-button-wrapper-danger.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+    background-color: var(--map-vermelho-escuro) !important;
+    border-color: var(--map-vermelho-escuro) !important;
+}
+
+
+/* Foco para inputs no modal */
+.modal-style-map .ant-input-affix-wrapper:hover,
+.modal-style-map .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: var(--map-laranja) !important;
+}
+.modal-style-map .ant-input-affix-wrapper-focused,
+.modal-style-map .ant-input-affix-wrapper:focus-within,
+.modal-style-map .ant-select-focused:not(.ant-select-disabled) .ant-select-selector {
+  border-color: var(--map-dourado) !important;
+  box-shadow: 0 0 0 2px var(--map-laranja-focus) !important;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+    .configuracoes-page-layout .page-content-wrapper.configuracoes-content { padding: 16px; }
+    .configuracoes-title.page-title-custom { font-size: 22px !important; }
+    .configuracoes-tabs .ant-tabs-tab { padding: 8px 12px !important; }
+    .access-modal .ant-modal-body { padding: 16px; }
+    .access-modal .access-type-radio-group-simplified { display: flex; flex-wrap: wrap; gap: 8px; }
+    .access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper { flex-grow: 1; margin-right: 0 !important; min-width: 120px; }
+}

@@ -1,0 +1,314 @@
+/* src/pages/PainelUsuario/ProdutosEstoquePage/ProdutosEstoquePage.css */
+
+/* :root já foi definido em index.css ou outro global, mas podemos reafirmar/especializar se necessário.
+   Usaremos as variáveis: --map-dourado, --map-laranja, --map-laranja-escuro, --map-preto, --map-branco, --map-texto-claro
+*/
+:root {
+    --product-page-bg: #f4f6f8; /* Um cinza bem claro para o fundo da página de conteúdo */
+    --product-card-bg: var(--map-branco);
+    --product-text-primary: var(--map-preto);
+    --product-text-secondary: #595959;
+    --product-border-color: #e8e8e8;
+    --product-success-color: #52c41a; /* Verde AntD */
+    --product-warning-color: var(--map-laranja);
+    --product-error-color: #ff4d4f; /* Vermelho AntD */
+}
+
+.produtos-estoque-page-layout .site-layout .page-content-wrapper {
+  padding: 20px;
+  background-color: var(--product-page-bg);
+  min-height: calc(100vh - 64px);
+  animation: fadeInPageContent 0.5s ease-out;
+}
+@keyframes fadeInPageContent {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabeçalho da Página de Produtos */
+.product-page-header.page-header-custom {
+  background-color: var(--map-laranja-escuro); /* Fundo com cor da marca */
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.product-page-header .page-title-custom {
+  color: var(--map-branco) !important;
+}
+.product-page-header .title-icon-products.anticon {
+  color: var(--map-dourado) !important;
+  font-size: 28px;
+  margin-right: 12px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.add-new-button-custom.ant-btn-primary {
+  background-color: var(--map-dourado) !important;
+  border-color: var(--map-dourado) !important;
+  color: var(--map-preto) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.add-new-button-custom.ant-btn-primary:hover {
+  background-color: var(--map-branco) !important;
+  border-color: var(--map-branco) !important;
+  color: var(--map-laranja-escuro) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Card de Ações da Tabela (Busca, Filtros) */
+.table-actions-card {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: var(--product-card-bg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.search-input-products .search-input-icon {
+  color: var(--map-laranja);
+}
+.search-input-products.ant-input-affix-wrapper-focused,
+.search-input-products.ant-input-affix-wrapper:focus-within {
+  border-color: var(--map-laranja) !important;
+  box-shadow: 0 0 0 2px rgba(204, 102, 51, 0.2) !important;
+}
+.filter-button-products.ant-btn {
+  border-color: var(--map-laranja-escuro);
+  color: var(--map-laranja-escuro);
+  font-weight: 500;
+}
+.filter-button-products.ant-btn:hover {
+  border-color: var(--map-laranja);
+  color: var(--map-laranja);
+  background-color: rgba(204, 102, 51, 0.05);
+}
+.total-products-info {
+    color: var(--product-text-secondary);
+    font-size: 13px;
+}
+.total-products-info strong {
+    color: var(--map-laranja-escuro);
+    font-size: 15px;
+}
+
+/* Tabela Principal de Produtos */
+.products-main-table {
+  background-color: var(--product-card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  overflow: hidden; /* Para o border-radius aplicar no header da tabela */
+}
+.products-main-table .ant-table-thead > tr > th {
+  background-color: #f7f9fc !important;
+  color: var(--map-preto) !important;
+  font-weight: 600;
+  border-bottom: 1px solid var(--product-border-color) !important;
+}
+.product-name-table { color: var(--map-laranja-escuro) !important; font-size: 15px; }
+.price-sell { color: var(--product-success-color) !important; font-weight: 500; }
+
+.stock-tag { border-radius: 12px; font-weight: 500; padding: 3px 10px; }
+.stock-tag.success-stock { background-color: #e6f7f2; border-color: #b7eb8f; color: #092b00; }
+.stock-tag.warning-stock { background-color: rgba(204, 102, 51, 0.1); border-color: rgba(204, 102, 51, 0.4); color: var(--map-laranja-escuro); }
+.stock-tag.error-stock { background-color: #fff1f0; border-color: #ffa39e; color: var(--product-error-color); }
+.stock-tag.service-stock { background-color: #e6f4ff; border-color: #91caff; color: #0050b3; }
+
+/* Linhas com estoque baixo/zerado */
+.low-stock-row > td {
+  background-color: rgba(204, 102, 51, 0.03) !important; /* Laranja muito sutil */
+}
+.out-of-stock-row > td {
+    background-color: rgba(255, 77, 79, 0.03) !important; /* Vermelho muito sutil */
+}
+
+/* Botões de Ação na Tabela */
+.action-buttons-container .action-btn {
+  border: none;
+  box-shadow: none;
+  padding: 4px 8px; /* Menor para caber melhor */
+  font-size: 16px; /* Tamanho do ícone */
+}
+.action-buttons-container .action-btn.move-stock-btn { color: var(--map-laranja); }
+.action-buttons-container .action-btn.move-stock-btn:hover { background-color: rgba(204, 102, 51, 0.1); }
+.action-buttons-container .action-btn.edit-btn { color: var(--map-dourado); }
+.action-buttons-container .action-btn.edit-btn:hover { background-color: rgba(224, 188, 99, 0.1); }
+.action-buttons-container .action-btn.delete-btn { color: var(--product-error-color); }
+.action-buttons-container .action-btn.delete-btn:hover { background-color: rgba(255, 77, 79, 0.08); }
+
+/* Popconfirm de Exclusão */
+.delete-popconfirm .ant-popover-message-title { font-weight: normal !important; }
+.delete-popconfirm .delete-confirm-product-name { color: var(--map-laranja-escuro); }
+.delete-popconfirm .delete-confirm-ok-btn.ant-btn-primary.ant-btn-dangerous {
+    background-color: var(--product-error-color) !important;
+    border-color: var(--product-error-color) !important;
+    color: var(--map-branco) !important;
+}
+.delete-popconfirm .delete-confirm-cancel-btn.ant-btn:hover {
+    color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+
+/* Paginação */
+.products-pagination .ant-pagination-item-active {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+.products-pagination .ant-pagination-item-active a {
+    color: var(--map-branco) !important;
+}
+.products-pagination .ant-pagination-item:hover {
+    border-color: var(--map-dourado);
+}
+.products-pagination .ant-pagination-item:hover a {
+    color: var(--map-dourado);
+}
+
+
+/* Estilo Base para Modais MAP */
+.modal-style-map .ant-modal-header {
+  background-color: var(--map-laranja-escuro);
+  border-bottom: 2px solid var(--map-dourado);
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
+}
+.modal-style-map .ant-modal-title {
+  color: var(--map-branco) !important;
+  font-weight: 600;
+}
+.modal-style-map .ant-modal-title .anticon {
+    color: var(--map-dourado) !important;
+    margin-right: 8px;
+}
+.modal-style-map .ant-modal-close-x {
+  color: var(--map-texto-claro) !important;
+}
+.modal-style-map .ant-modal-close-x:hover {
+  color: var(--map-dourado) !important;
+}
+.modal-style-map .ant-modal-body {
+  padding: 24px;
+  background-color: #fdfdfe; /* Fundo levemente off-white para o corpo do modal */
+}
+.modal-style-map .ant-modal-content {
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+.modal-style-map .ant-form-item-label > label {
+  font-weight: 500;
+  color: var(--product-text-secondary);
+}
+.modal-style-map .form-divider {
+    margin: 24px 0 20px 0;
+    border-top-color: var(--product-border-color);
+}
+.modal-style-map .form-action-buttons {
+    text-align: right;
+    margin-bottom: 0;
+}
+.modal-style-map .form-action-buttons .ant-space-item {
+    margin-left: 10px;
+}
+.modal-style-map .cancel-btn-form.ant-btn:hover {
+    border-color: var(--map-laranja);
+    color: var(--map-laranja);
+}
+.modal-style-map .submit-btn-form.ant-btn-primary {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+    color: var(--map-branco) !important;
+    min-width: 160px;
+}
+.modal-style-map .submit-btn-form.ant-btn-primary:hover {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
+
+/* Específico para Modal de Produto */
+.product-form-modal .product-name-stock-modal {
+    color: var(--map-dourado);
+}
+
+/* Específico para Modal de Movimentação de Estoque */
+.stock-movement-modal .product-name-stock-modal {
+    color: var(--map-dourado);
+    font-style: italic;
+}
+.stock-movement-modal .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+    color: var(--map-branco) !important;
+    box-shadow: 0 2px 4px rgba(204,102,51,0.3);
+}
+.stock-movement-modal .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
+.stock-movement-modal .ant-radio-button-wrapper:hover {
+    color: var(--map-laranja);
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .product-page-header.page-header-custom {
+    flex-direction: column;
+    align-items: stretch; /* Botão ocupa largura total */
+    gap: 15px;
+  }
+  .table-actions-card .ant-row {
+    gap: 10px 0; /* Espaçamento vertical em mobile para filtros e busca */
+  }
+}
+
+@media (max-width: 575px) {
+  .modal-style-map .ant-modal-body {
+    padding: 16px;
+  }
+  .modal-style-map .ant-row {
+    flex-direction: column;
+  }
+  .modal-style-map .ant-col {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .modal-style-map .form-action-buttons .ant-btn {
+    width: 100%; /* Botões do modal empilhados */
+    margin-bottom: 10px;
+  }
+  .modal-style-map .form-action-buttons .ant-space-item:last-child .ant-btn {
+    margin-bottom: 0;
+  }
+}
+
+/* Acesso Restrito */
+.restricted-access-bg {
+    background-color: var(--product-page-bg);
+}
+.restricted-access-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    height: calc(100vh - 64px);
+}
+.restricted-access-content .ant-result {
+    background-color: var(--product-card-bg);
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+.restricted-access-content .ant-result-title {
+    color: var(--map-laranja-escuro);
+}
+.switch-profile-btn-restricted.ant-btn-primary {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+.switch-profile-btn-restricted.ant-btn-primary:hover {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}

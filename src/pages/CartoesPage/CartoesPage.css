@@ -1,0 +1,414 @@
+/* src/pages/PainelUsuario/CartoesPage/CartoesPage.css */
+
+/* :root { */
+    /* Defina suas variáveis de cor aqui ou em um arquivo global se ainda não o fez */
+    /* --map-laranja: #FA8C16; */
+    /* --map-laranja-escuro: #D46B08; /* Para hovers e destaques */
+    /* --map-laranja-claro: #FFE7BA; */
+    /* --map-laranja-muito-claro: #FFF7E6; */
+    /* --map-dourado: #FAAD14; */
+    /* --map-dourado-escuro: #D48806; */
+    /* --map-verde-claro: #8BC34A; */
+    /* --map-verde-escuro: #689F38; */
+    /* --map-verde-muito-claro: #F6FFED; */
+    /* --map-vermelho-claro: #F44336; */
+    /* --map-vermelho-escuro: #CF1322; */
+    /* --map-vermelho-muito-claro: #FFF1F0; */
+    /* --map-azul-sistema-claro: #EFF6FF; */
+    /* --map-azul-sistema: #3B82F6; */
+    /* --map-azul-sistema-escuro: #2563EB; */
+    /* --map-branco: #ffffff; */
+    /* --map-cinza-claro: #f0f0f0; */
+    /* --map-cinza-medio: #d9d9d9; */
+    /* --map-cinza-texto: #6c757d; */
+    /* --header-text-primary: #303133; */
+    /* --header-text-secondary: #606266; */
+    /* --header-icon-color: #595959; */
+    /* --header-icon-hover-bg: #f0f0f0; */
+    /* --link-hover-color: var(--map-dourado-escuro, #D48806); */
+/* } */
+
+.cartoes-page-main-layout .panel-content-area.cartoes-content {
+    background-color: #f9fafb;
+    padding: 20px;
+}
+
+/* Coluna da Lista de Cartões */
+.cards-list-col {
+    background-color: var(--map-branco, #ffffff);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    height: calc(100vh - 64px - 40px - 20px); /* Subtrair altura do Header e paddings */
+    display: flex;
+    flex-direction: column;
+}
+.cards-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
+}
+.cards-list-header .ant-typography {
+    color: var(--header-text-primary, #303133);
+}
+
+/* Botão Novo Cartão */
+.add-card-btn.ant-btn-primary { /* Adicionando .ant-btn-primary para maior especificidade */
+    background: linear-gradient(45deg, var(--map-laranja, #FA8C16), var(--map-dourado, #FAAD14)) !important;
+    border: none !important;
+    border-radius: 6px;
+    font-weight: 500;
+    color: var(--map-branco, #ffffff) !important;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; /* Adicionada transição para transform */
+}
+.add-card-btn.ant-btn-primary:hover,
+.add-card-btn.ant-btn-primary:focus {
+    background: linear-gradient(45deg, var(--map-dourado-escuro, #D48806), var(--map-laranja-escuro, #D46B08)) !important; /* Gradiente invertido ou escurecido */
+    border: none !important;
+    color: var(--map-branco, #ffffff) !important;
+    opacity: 0.95; /* Leve ajuste na opacidade para feedback */
+    box-shadow: 0 4px 10px rgba(204,102,51,0.3); /* Sombra mais pronunciada no hover */
+    transform: translateY(-1px); /* Leve elevação */
+}
+
+.cards-scrollable-list {
+    overflow-y: auto;
+    flex-grow: 1;
+    margin-right: -10px;
+    padding-right: 10px;
+}
+
+.cartao-item-card {
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    padding-left: 10px !important;
+    overflow: hidden;
+}
+.cartao-item-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--card-accent-color, var(--map-laranja));
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    transition: width 0.3s ease;
+}
+.cartao-item-card:hover::before,
+.cartao-item-card.selected::before {
+    width: 8px;
+}
+
+.cartao-item-card.selected {
+    border-color: var(--card-accent-color, var(--map-laranja));
+    box-shadow: 0 0 0 2px var(--card-accent-color, var(--map-laranja-claro, #FFE7BA)); /* Usar um laranja mais claro para o foco */
+    background-color: var(--map-laranja-muito-claro, #fff7e6);
+}
+.cartao-item-card .ant-card-body {
+    padding: 12px 15px !important;
+}
+.cartao-item-content {
+    display: flex;
+    align-items: center;
+}
+.cartao-bandeira-icon.ant-avatar {
+    background-color: transparent;
+    margin-right: 12px;
+    border: 1px solid var(--map-cinza-claro, #eee);
+}
+.cartao-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.cartao-nome {
+    font-size: 15px;
+    color: var(--header-text-primary, #303133);
+    line-height: 1.3;
+}
+.cartao-final {
+    font-size: 12px;
+    color: var(--header-text-secondary, #606266);
+}
+
+/* Botão de Ações (MoreOutlined) no Card da Lista */
+.cartao-actions-btn.ant-btn {
+    color: var(--header-icon-color, #595959);
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+.cartao-actions-btn.ant-btn:hover,
+.cartao-actions-btn.ant-btn:focus {
+    color: var(--map-laranja, #FA8C16) !important;
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+}
+/* Estilo para o Menu Dropdown de ações do cartão */
+.card-action-menu.ant-dropdown-menu .ant-dropdown-menu-item {
+    color: var(--header-text-secondary, #606266);
+}
+.card-action-menu.ant-dropdown-menu .ant-dropdown-menu-item:hover,
+.card-action-menu.ant-dropdown-menu .ant-dropdown-menu-item-active {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+    color: var(--map-laranja, #FA8C16) !important;
+}
+.card-action-menu.ant-dropdown-menu .ant-dropdown-menu-item-danger:hover,
+.card-action-menu.ant-dropdown-menu .ant-dropdown-menu-item-danger.ant-dropdown-menu-item-active {
+    background-color: var(--map-vermelho-muito-claro, #FFF1F0) !important;
+    color: var(--map-vermelho-escuro, #CF1322) !important;
+}
+
+
+.card-details-col .select-card-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    text-align: center;
+    background-color: #fdfdfd;
+    border: 2px dashed var(--map-cinza-medio, #e0e0e0);
+    border-radius: 10px;
+}
+.selected-card-details-wrapper {
+    animation: fadeInDetail 0.5s ease-out;
+}
+@keyframes fadeInDetail {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card-overview-panel {
+    margin-bottom: 24px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    background: linear-gradient(135deg, var(--selected-card-color, var(--map-laranja-escuro, #D46B08)) 0%, color-mix(in srgb, var(--selected-card-color, var(--map-laranja-escuro, #D46B08)) 80%, black) 100%);
+    color: var(--map-branco, #ffffff);
+}
+.card-overview-panel .ant-typography,
+.card-overview-panel .ant-statistic-title,
+.card-overview-panel .ant-statistic-content-prefix,
+.card-overview-panel .ant-statistic-content-suffix {
+    color: rgba(255,255,255,0.9) !important;
+}
+.card-overview-panel .ant-statistic-content-value {
+    color: var(--map-branco, #ffffff) !important;
+    font-size: 20px !important;
+}
+.card-overview-panel .limit-stats-row .ant-statistic-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7) !important;
+}
+
+.selected-card-avatar.ant-avatar {
+    width: 60px !important; height: 60px !important; line-height: 60px !important;
+    background-color: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+.selected-card-avatar.ant-avatar img { object-fit: contain; }
+.selected-card-name { color: var(--map-branco, #ffffff) !important; font-weight: 600 !important; margin-bottom: 2px !important; }
+
+.add-expense-main-btn.ant-btn-primary { /* Especificidade para botão primário */
+    background-color: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255,255,255,0.5) !important;
+    color: var(--map-branco, #ffffff) !important;
+    font-weight: 500;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.add-expense-main-btn.ant-btn-primary:hover,
+.add-expense-main-btn.ant-btn-primary:focus {
+    background-color: rgba(255,255,255,0.3) !important;
+    border-color: var(--map-branco, #ffffff) !important;
+}
+
+
+.limit-progress-bar { margin-top: 20px; }
+.limit-progress-bar .ant-progress-text { color: rgba(255,255,255,0.9); font-weight: 500; }
+.limit-progress-bar .ant-progress-inner { background-color: rgba(0,0,0,0.2); }
+
+
+.invoice-panel {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.invoice-panel .ant-card-head-title { font-weight: 600; color: var(--header-text-primary, #303133); }
+.invoice-panel .ant-card-extra .ant-typography { font-weight: 500; color: var(--header-text-secondary, #606266); }
+.invoice-panel .ant-select .ant-select-selection-item,
+.invoice-panel .ant-picker-input > input {
+     font-weight: 500; color: var(--header-text-primary, #303133);
+}
+/* Estilo para o popup do DatePicker */
+.custom-datepicker-popup .ant-picker-panel-container {
+    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+.custom-datepicker-popup .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+.custom-datepicker-popup .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
+    background: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #fff) !important;
+}
+.custom-datepicker-popup .ant-picker-cell-in-view:hover .ant-picker-cell-inner {
+    background: var(--map-laranja-muito-claro, #FFF7E6) !important;
+}
+.custom-datepicker-popup .ant-picker-header-super-prev-btn:hover,
+.custom-datepicker-popup .ant-picker-header-prev-btn:hover,
+.custom-datepicker-popup .ant-picker-header-super-next-btn:hover,
+.custom-datepicker-popup .ant-picker-header-next-btn:hover,
+.custom-datepicker-popup .ant-picker-month-btn:hover,
+.custom-datepicker-popup .ant-picker-year-btn:hover {
+    color: var(--map-laranja, #FA8C16) !important;
+}
+
+
+.invoice-expenses-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-bottom: 15px;
+}
+.invoice-expense-item .ant-list-item-meta-title { font-size: 14px; }
+.invoice-expense-item .ant-list-item-meta-description { font-size: 12px; color: var(--header-text-secondary, #777); }
+.invoice-expense-item .expense-value { font-size: 14px; }
+
+.invoice-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--map-cinza-claro, #f0f0f0);
+    margin-top: 10px;
+}
+.pay-invoice-btn.ant-btn-primary {
+    margin-top: 15px;
+    background-color: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+    font-weight: 500;
+}
+.pay-invoice-btn.ant-btn-primary:hover,
+.pay-invoice-btn.ant-btn-primary:focus {
+    background-color: var(--map-dourado-escuro, #D48806) !important;
+    border-color: var(--map-dourado-escuro, #D48806) !important;
+}
+
+.invoice-chart-col .ant-typography {
+    text-align: center;
+    color: var(--header-text-primary, #303133);
+}
+
+
+.add-card-modal .ant-modal-content,
+.add-expense-modal .ant-modal-content {
+    border-radius: 10px;
+}
+.add-card-modal .ant-modal-header,
+.add-expense-modal .ant-modal-header {
+    border-radius: 10px 10px 0 0;
+    background-color: #f7f8fa;
+    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+}
+.add-card-modal .ant-modal-title,
+.add-expense-modal .ant-modal-title {
+    font-weight: 600;
+    color: var(--header-text-primary, #303133);
+}
+.add-card-modal .modal-submit-btn.ant-btn-primary, /* Especificidade */
+.add-expense-modal .modal-submit-btn.ant-btn-primary {
+    background: var(--map-laranja, #FA8C16) !important;
+    border-color: var(--map-laranja, #FA8C16) !important;
+    color: var(--map-branco, #ffffff) !important;
+    font-weight: 500;
+}
+.add-card-modal .modal-submit-btn.ant-btn-primary:hover,
+.add-card-modal .modal-submit-btn.ant-btn-primary:focus,
+.add-expense-modal .modal-submit-btn.ant-btn-primary:hover,
+.add-expense-modal .modal-submit-btn.ant-btn-primary:focus {
+    background: var(--map-dourado-escuro, #D48806) !important;
+    border-color: var(--map-dourado-escuro, #D48806) !important;
+}
+
+
+@media (max-width: 1199px) {
+    .financial-summary-row .ant-col-xl-6 {
+        flex: 0 0 33.33333333%;
+        max-width: 33.33333333%;
+    }
+    .financial-summary-row .ant-col-lg-24.ant-col-xl-6 {
+         flex: 0 0 100%; max-width: 100%;
+    }
+     .financial-summary-row .summary-card .ant-statistic-content {
+        font-size: 22px !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .panel-content-area.dashboard-overview { padding: 16px; }
+    .dashboard-greeting { font-size: 24px !important; }
+    .dashboard-welcome-text { font-size: 14px; margin-bottom: 20px; }
+    .financial-summary-row .ant-col-lg-8 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+     .financial-summary-row .ant-col-lg-24 {
+         flex: 0 0 100%; max-width: 100%;
+    }
+    .list-card .ant-list-item-action {
+        /* Considerar empilhar ou reduzir em MD se necessário */
+    }
+}
+
+@media (max-width: 767px) {
+  .chart-card .ant-card-body, .list-card .ant-card-body {
+    padding: 12px !important;
+  }
+    .dashboard-header-title { margin-bottom: 20px; padding-left: 10px; border-left-width: 4px; }
+    .dashboard-greeting { font-size: 22px !important; }
+    .quick-actions-card .ant-btn { font-size: 12px; height: 34px; }
+    .list-card .ant-list-item-action {
+       /* Ajustes finos para mobile aqui se o flex padrão não for suficiente */
+    }
+}
+
+@media (max-width: 575px) {
+    .financial-summary-row .summary-card {
+        text-align: center;
+    }
+    .chart-card, .list-card {
+        margin-bottom: 16px;
+    }
+    .panel-content-area.dashboard-overview { padding: 12px; }
+    .dashboard-greeting { font-size: 20px !important; }
+    .dashboard-welcome-text { font-size: 13px; }
+
+    .list-card .ant-list-item {
+        flex-wrap: wrap;
+    }
+    .list-card .ant-list-item-meta {
+        flex-basis: 100%;
+        margin-bottom: 8px;
+    }
+    .list-card .ant-list-item-action {
+        flex-basis: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+    }
+    .upcoming-item-tag.ant-tag {
+        margin-right: 8px;
+        min-width: auto;
+        flex-grow: 1;
+    }
+    .list-item-action-btn.ant-btn-text {
+        min-width: auto;
+        flex-grow: 1;
+    }
+}

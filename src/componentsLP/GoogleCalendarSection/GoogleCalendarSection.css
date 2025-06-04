@@ -1,0 +1,311 @@
+/* src/componentsLP/GoogleCalendarSection/GoogleCalendarSection.css - GOOGLE ICON FOCUSED & POLISHED (Final Spacing Polish) */
+
+/* Variáveis locais para esta seção, se necessário */
+:root {
+  --gcal-google-blue: #4285F4;
+  --gcal-google-red: #DB4437;
+  --gcal-google-yellow: #F4B400;
+  --gcal-google-green: #0F9D58;
+}
+.section-padding-large { /* Classe utilitária para padding maior */
+    padding-top: 85px; /* Ajuste fino */
+    padding-bottom: 95px; /* Ajuste fino */
+}
+
+.gcal-focused-section-wrapper {
+  background: #f8f9fa;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  opacity: 0;
+  animation: fadeInSection 0.8s 0.2s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+@keyframes fadeInSection {
+  to { opacity: 1; }
+}
+
+
+.gcal-focused-container {
+  max-width: 850px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ícone Google Central e Animações */
+.gcal-main-icon-container {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 90px auto; /* Aumentada margem inferior */ /* <<< LINHA ATUAL */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.6) rotate(-15deg);
+}
+.gcal-main-icon-container.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  transition: opacity 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition-delay: inherit !important;
+}
+
+.gcal-central-google-icon {
+  font-size: 90px;
+  position: relative;
+  z-index: 5;
+  animation: googleIconBreathe 4s infinite ease-in-out 1s,
+             googleIconShine 6s infinite linear 1.5s;
+  filter: drop-shadow(0 6px 12px rgba(60, 64, 67, 0.2));
+  transition: transform 0.4s cubic-bezier(0.0, 0.0, 0.2, 1), filter 0.4s ease; /* Adicionada transição para filter */
+}
+
+@keyframes googleIconBreathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.95; }
+}
+@keyframes googleIconShine {
+  0% { filter: drop-shadow(0 6px 12px rgba(60, 64, 67, 0.2)) brightness(1); }
+  50% { filter: drop-shadow(0 8px 18px rgba(60, 64, 67, 0.25)) brightness(1.15); }
+  100% { filter: drop-shadow(0 6px 12px rgba(60, 64, 67, 0.2)) brightness(1); }
+}
+
+.gcal-main-icon-container:hover .gcal-central-google-icon {
+  transform: scale(1.18) rotate(5deg); /* Aumentado um pouco o scale no hover */
+  filter: drop-shadow(0 12px 28px rgba(60, 64, 67, 0.3)); /* Sombra mais pronunciada */
+  animation-play-state: paused;
+}
+
+/* Anéis de fundo */
+.gcal-main-icon-rings::before,
+.gcal-main-icon-rings::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border-style: solid;
+  opacity: 0;
+}
+.gcal-main-icon-container.visible .gcal-main-icon-rings::before {
+  width: 160%;
+  height: 160%;
+  border-width: 3px;
+  border-color: var(--gcal-google-blue);
+  animation: rippleRing 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s infinite alternate;
+}
+.gcal-main-icon-container.visible .gcal-main-icon-rings::after {
+  width: 120%;
+  height: 120%;
+  border-width: 2px;
+  border-color: var(--gcal-google-red);
+  animation: rippleRing 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s infinite alternate-reverse;
+}
+
+@keyframes rippleRing {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  50% { opacity: 0.12; } /* Ainda mais sutil */
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0; }
+}
+.gcal-main-icon-container:hover .gcal-main-icon-rings::before,
+.gcal-main-icon-container:hover .gcal-main-icon-rings::after {
+    animation-duration: 1.2s; /* Levemente mais lento no hover para não ser tão frenético */
+    opacity: 0.2;
+}
+
+
+/* Ícones Flutuantes */
+.gcal-floating-item {
+  position: absolute;
+  font-size: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  width: 40px; /* Levemente maior */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra ajustada */
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.5) translateZ(0);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-out; /* Adicionado cubic-bezier */
+}
+.gcal-main-icon-container.visible .gcal-floating-item {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+}
+
+.gcal-float-calendar {
+  color: var(--gcal-google-blue);
+  top: -8%; left: 12%; /* Ajuste de posição */
+  transition-delay: 0.7s;
+}
+.gcal-float-bell {
+  color: var(--gcal-google-yellow);
+  bottom: -8%; right: 8%; /* Ajuste de posição */
+  transition-delay: 0.85s;
+}
+.gcal-float-plus {
+  color: var(--gcal-google-red);
+  top: 30%; right: -20%; /* Ajuste de posição */
+  transition-delay: 1s;
+}
+
+.gcal-main-icon-container:hover .gcal-floating-item {
+  transform: scale(1.2) translateZ(0) rotate(8deg); /* Rotação um pouco menor */
+}
+/* Ajustes individuais no hover para movimento mais interessante */
+.gcal-main-icon-container:hover .gcal-float-calendar { transform: scale(1.2) translate(-6px, -6px) rotate(8deg); }
+.gcal-main-icon-container:hover .gcal-float-bell   { transform: scale(1.2) translate(6px, 6px) rotate(-6deg); }
+.gcal-main-icon-container:hover .gcal-float-plus   { transform: scale(1.2) translate(6px, -6px) rotate(12deg); }
+
+
+/* Título e Subtítulo */
+.gcal-focused-main-title {
+  font-size: 42px !important; /* Levemente maior */
+  font-weight: 700 !important;
+  color: #202124 !important;
+  margin-bottom: 20px !important; /* Aumentada margem inferior */
+  line-height: 1.25 !important; /* Aumentado line-height para melhor leitura */
+  opacity: 0; transform: translateY(20px);
+}
+.gcal-focused-main-title.visible {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition-delay: inherit !important;
+}
+.gcal-highlight-google-animated {
+  background: linear-gradient(90deg, var(--gcal-google-blue), var(--gcal-google-red), var(--gcal-google-yellow), var(--gcal-google-green), var(--gcal-google-blue));
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  animation: textGradientFlow 5s linear infinite;
+  padding: 0 1px; /* Para evitar corte em algumas fontes/tamanhos */
+}
+@keyframes textGradientFlow {
+  0% { background-position: 0% center; }
+  100% { background-position: -150% center; }
+}
+
+
+.gcal-focused-main-subtitle {
+  font-size: 18.5px !important; /* Levemente maior */
+  color: #5f6368 !important;
+  line-height: 1.8 !important; /* Aumentado line-height */
+  margin-bottom: 65px !important; /* Mais espaço antes das features */
+  max-width: 600px; /* Levemente maior */
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0; transform: translateY(20px);
+}
+.gcal-focused-main-subtitle.visible {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 0.6s ease-out 0.1s, transform 0.6s ease-out 0.1s;
+  transition-delay: inherit !important;
+}
+
+/* Grid de Features */
+.gcal-features-grid {
+  justify-content: center;
+  gap: 10px 0; /* Adiciona um pequeno gap vertical entre as linhas do grid */
+}
+
+.gcal-focused-feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px; /* Ajustado padding */
+  border-radius: 10px; /* Bordas um pouco menos arredondadas */
+  transition: background-color 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Adicionado cubic-bezier */
+  opacity: 0; transform: translateY(25px) scale(0.9);
+}
+.gcal-focused-feature-item.visible {
+  opacity: 1; transform: translateY(0) scale(1);
+  transition: opacity 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-delay: inherit !important;
+}
+.gcal-focused-feature-item:hover {
+  background-color: #ffffff; /* Fundo branco sólido no hover para mais destaque */
+  transform: translateY(-6px) scale(1.04); /* Ajustado efeito de hover */
+  box-shadow: 0 6px 20px -5px rgba(60, 64, 67, 0.15); /* Sombra no hover */
+}
+
+
+.gcal-feature-icon-wrapper-focused {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px; /* Mais espaço abaixo do ícone */
+  background-color: color-mix(in srgb, var(--feature-color) 10%, #f8f9fa); /* Fundo ainda mais sutil */
+  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--feature-color) 25%, #00000022); /* Sombra mais suave */
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.gcal-focused-feature-item:hover .gcal-feature-icon-wrapper-focused {
+  background-color: var(--feature-color);
+  box-shadow: 0 6px 15px -3px color-mix(in srgb, var(--feature-color) 40%, #00000030);
+  transform: scale(1.12) rotate(5deg); /* Rotação no hover */
+}
+.gcal-feature-icon-inner {
+  font-size: 24px;
+  color: var(--feature-color);
+  transition: color 0.3s ease;
+}
+.gcal-focused-feature-item:hover .gcal-feature-icon-inner {
+  color: #fff;
+}
+
+
+.gcal-feature-title-focused {
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  color: #3c4043 !important;
+  margin-bottom: 0 !important;
+  line-height: 1.4; /* Aumentado line-height */
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .section-padding-large { padding-top: 70px; padding-bottom: 80px; } /* Ajustado */
+  .gcal-main-icon-container { width: 120px; height: 120px; margin-bottom: 35px; }
+  .gcal-central-google-icon { font-size: 70px; }
+  .gcal-floating-item { width: 34px; height: 34px; font-size: 17px; }
+  .gcal-focused-main-title { font-size: 36px !important; } /* Ajustado */
+  .gcal-focused-main-subtitle { font-size: 17.5px !important; margin-bottom: 55px; } /* Ajustado */
+  .gcal-feature-icon-wrapper-focused { width: 56px; height: 56px; margin-bottom: 14px; }
+  .gcal-feature-icon-inner { font-size: 22px; }
+  .gcal-feature-title-focused { font-size: 14px !important; } /* Ajustado */
+}
+
+@media (max-width: 575px) {
+  .gcal-main-icon-container { width: 100px; height: 100px; margin-bottom: 30px; }
+  .gcal-central-google-icon { font-size: 60px; }
+  .gcal-focused-main-title { font-size: 30px !important; } /* Ajustado */
+  .gcal-focused-main-subtitle { font-size: 16.5px !important; margin-bottom: 50px; } /* Ajustado */
+  .gcal-features-grid .ant-col {
+    flex-basis: 33.3333% !important;
+    max-width: 33.3333% !important;
+  }
+   .gcal-feature-icon-wrapper-focused { width: 52px; height: 52px; }
+  .gcal-feature-icon-inner { font-size: 20px; }
+  .gcal-feature-title-focused { font-size: 13.5px !important; }
+}
+@media (max-width: 420px) {
+    .gcal-focused-main-title { font-size: 26px !important; } /* Ajustado */
+    .gcal-focused-main-subtitle { font-size: 15.5px !important; } /* Ajustado */
+    .gcal-features-grid .ant-col {
+      flex-basis: 50% !important;
+      max-width: 50% !important;
+    }
+    .gcal-feature-icon-wrapper-focused { width: 50px; height: 50px; }
+    .gcal-feature-icon-inner { font-size: 20px; }
+    .gcal-feature-title-focused { font-size: 13px !important; }
+    .gcal-floating-item { display: none; } /* Esconder ícones flutuantes em telas muito pequenas para não poluir */
+}

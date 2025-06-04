@@ -1,0 +1,241 @@
+/* src/componentsLP/PricingSection/PricingSection.css */
+
+.pricing-section-wrapper {
+    padding: 70px 0 80px;
+    background-color: #f8f9fa; /* Cinza claro para diferenciar das seções brancas */
+    overflow: hidden;
+  }
+  
+  .pricing-section-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 var(--header-padding-x, 25px);
+    text-align: center;
+  }
+  
+  /* Animação de entrada geral */
+  .pricing-section-animate {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  .pricing-section-animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition-delay: inherit !important;
+  }
+  
+  .pricing-main-title {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: var(--map-preto) !important;
+    margin-bottom: 15px !important;
+  }
+  .pricing-main-title .highlight-brand {
+    color: var(--map-laranja);
+  }
+  
+  .pricing-main-subtitle {
+    font-size: 17px !important;
+    color: #5f6c7b !important;
+    margin-bottom: 40px !important;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+  
+  .billing-cycle-toggle {
+    margin-bottom: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
+  .billing-cycle-toggle .ant-switch {
+    background-color: var(--map-dourado); /* Cor quando desligado */
+  }
+  .billing-cycle-toggle .ant-switch-checked {
+    background-color: var(--map-laranja) !important; /* Cor quando ligado (Anual) */
+  }
+  .billing-cycle-toggle .ant-typography {
+    font-size: 15px;
+    font-weight: 500;
+    color: #868e96; /* Cinza para texto inativo */
+    transition: color 0.3s ease;
+  }
+  .billing-cycle-toggle .ant-typography.active {
+    color: var(--map-preto); /* Preto para texto ativo */
+    font-weight: 600;
+  }
+  
+  
+  .pricing-cards-row {
+    /* align-items: stretch; já está no JSX */
+  }
+  
+  .pricing-card-wrapper {
+    display: flex; /* Para o card ocupar 100% da altura do Col */
+  }
+  
+  .pricing-card {
+    width: 100%;
+    background-color: var(--map-branco) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05) !important;
+    padding: 30px 25px !important; /* Padding interno do card */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; /* Para a tag de destaque */
+  }
+  .pricing-card .ant-card-body {
+    padding: 0 !important; /* Remover padding padrão do body */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Faz o corpo crescer */
+  }
+  
+  .pricing-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.08) !important;
+  }
+  
+  .pricing-card.featured {
+    border: 2px solid var(--map-laranja) !important;
+    box-shadow: 0 10px 40px rgba(204, 102, 51, 0.15) !important; /* Sombra com cor da marca */
+    transform: scale(1.03); /* Levemente maior */
+  }
+  .pricing-card.featured:hover {
+    transform: translateY(-8px) scale(1.05); /* Um pouco mais de efeito no hover do destacado */
+  }
+  
+  .featured-tag {
+    position: absolute !important;
+    top: -1px; /* Ajustar para alinhar com a borda */
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%); /* Centraliza e move para cima da borda */
+    font-size: 12px !important;
+    padding: 4px 12px !important;
+    border-radius: 15px !important;
+    font-weight: bold;
+    /* A cor é definida no JSX, ex: color="volcano" ou "gold" */
+  }
+  .featured-tag .anticon {
+    margin-right: 5px;
+  }
+  
+  
+  .plan-name {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    color: var(--map-preto) !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .plan-description {
+    font-size: 14px !important;
+    color: #5f6c7b !important;
+    margin-bottom: 25px !important;
+    min-height: 60px; /* Para alinhar os preços, ajuste conforme necessário */
+  }
+  
+  .plan-price-container {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: baseline; /* Alinha preço e período */
+    justify-content: center;
+    gap: 5px;
+  }
+  .original-price {
+    font-size: 16px !important;
+    color: #adb5bd !important; /* Cinza claro para preço original */
+    font-weight: 500;
+  }
+  .plan-price {
+    font-size: 38px !important;
+    font-weight: 700 !important;
+    color: var(--map-laranja) !important; /* Cor de destaque para o preço */
+  }
+  .pricing-card.featured .plan-price {
+    color: var(--map-laranja) !important;
+  }
+  .plan-period {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #495057 !important;
+  }
+  
+  .plan-features-list {
+    text-align: left;
+    margin-bottom: 30px;
+    flex-grow: 1; /* Ocupa o espaço restante antes do botão */
+  }
+  .plan-features-list .ant-list-item {
+    padding: 8px 0 !important;
+    border-bottom: 1px dashed #e9ecef !important;
+    font-size: 14.5px;
+    color: #343a40;
+  }
+  .plan-features-list .ant-list-item:last-child {
+    border-bottom: none !important;
+  }
+  .plan-features-list .feature-icon {
+    color: var(--map-dourado); /* Cor para o ícone de check */
+    margin-right: 10px;
+    font-size: 16px;
+  }
+  
+  .plan-cta-button {
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    /* Estilos específicos para featured são aplicados inline no JSX */
+  }
+  .plan-cta-button.ant-btn-default:hover {
+    color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+  }
+  
+  .pricing-footer-note {
+      margin-top: 50px !important;
+      font-size: 14px !important;
+      color: #5f6c7b !important;
+  }
+  .pricing-footer-note a {
+      color: var(--map-laranja);
+      font-weight: 500;
+      text-decoration: none;
+  }
+  .pricing-footer-note a:hover {
+      text-decoration: underline;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 991px) { /* md */
+    .pricing-card.featured {
+      transform: scale(1); /* Remove o scale em telas menores se estiver causando problemas de layout */
+    }
+    .pricing-card-wrapper {
+        margin-bottom: 0; /* Gutter da row já lida com isso */
+    }
+    .pricing-cards-row .ant-col { /* Garante que os cards tenham espaço */
+        margin-bottom: 24px;
+    }
+    .pricing-cards-row .ant-col:last-child {
+        margin-bottom: 0;
+    }
+  }
+  
+  @media (max-width: 767px) { /* sm */
+    .pricing-main-title { font-size: 28px !important; }
+    .pricing-main-subtitle { font-size: 16px !important; margin-bottom: 30px !important;}
+    .billing-cycle-toggle { margin-bottom: 40px; }
+    .plan-description { min-height: auto; } /* Remove altura mínima para telas menores */
+  }
+  
+  @media (max-width: 575px) { /* xs */
+    .pricing-card { padding: 25px 20px !important; }
+    .plan-name { font-size: 20px !important; }
+    .plan-price { font-size: 32px !important; }
+    .plan-features-list .ant-list-item { font-size: 14px; }
+  }

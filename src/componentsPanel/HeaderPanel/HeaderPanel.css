@@ -1,0 +1,322 @@
+/* src/componentsPanel/HeaderPanel/HeaderPanel.css */
+:root {
+    --header-panel-bg: #FFFFFF;
+    --header-panel-border: #EAECEF;
+    --header-panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra ainda mais suave */
+    --header-text-primary: #2D3748; /* Um cinza mais escuro e profissional */
+    --header-text-secondary: #718096;
+    --header-icon-color: #4A5568;
+    --header-icon-hover-bg: #EDF2F7;
+    --map-laranja-focus: rgba(204, 102, 51, 0.1);
+    --header-item-spacing: 12px; /* Espaçamento padrão entre itens da direita */
+  }
+  
+  .header-panel.modern.refined { /* Nova classe para especificidade */
+    background-color: var(--header-panel-bg);
+    padding: 0 20px; /* Reduzido um pouco */
+    height: 64px; /* Voltando para altura padrão para mais consistência com AntD */
+    line-height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--header-panel-border);
+    box-shadow: var(--header-panel-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1010;
+    color: var(--header-text-primary);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .header-bottom-accent-line {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2.5px; /* Um pouco mais espessa */
+    background: linear-gradient(90deg, var(--map-dourado), var(--map-laranja), var(--map-laranja-escuro), var(--map-dourado));
+    background-size: 300% 100%;
+    animation: gradientShimmer 8s linear infinite;
+    opacity: 0.9;
+  }
+  @keyframes gradientShimmer {
+    0% { background-position: 300% 0; }
+    100% { background-position: -300% 0; }
+  }
+  
+  
+  /* Seção da Esquerda: Marca + Nome do Perfil Ativo */
+  .header-panel-left-section {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; /* Não encolher demais */
+    /* overflow: hidden;  Para conter texto longo do perfil se necessário */
+  }
+  
+  .header-panel-brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .brand-icon {
+    font-size: 24px; /* Ligeiramente menor */
+    color: var(--map-laranja);
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+  }
+  .header-panel-brand:hover .brand-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  .brand-name {
+    font-size: 18px; /* Ligeiramente menor */
+    font-weight: 600;
+    color: var(--header-text-primary);
+    white-space: nowrap;
+  }
+  
+  .brand-profile-divider.ant-divider-vertical {
+    height: 20px; /* Altura do divisor */
+    margin: 0 12px; /* Espaçamento */
+    border-left-color: #CFD8DC; /* Cor suave para o divisor */
+  }
+  
+  .current-profile-name-header {
+    display: flex;
+    align-items: center;
+    color: var(--header-text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Limitar largura do nome do perfil aqui */
+  }
+  .current-profile-name-header .anticon {
+    margin-right: 6px;
+    font-size: 16px;
+    color: var(--header-icon-color);
+  }
+  
+  
+  /* Seção da Direita: Seletor de Perfil + Ações */
+  .header-panel-right-section {
+    display: flex;
+    align-items: center;
+    gap: var(--header-item-spacing); /* Espaçamento entre os itens principais da direita */
+  }
+  
+  /* Classe para espaçamento uniforme dos itens principais no header direito */
+  .header-item {
+    /* margin-left: var(--header-item-spacing);  Substituído por gap no pai */
+  }
+  
+  
+  /* Seletor de Perfil Estilizado */
+  .profile-selector-modern.ant-select {
+    min-width: auto; /* Deixar mais flexível */
+    /* max-width continua útil para não ficar enorme */
+    max-width: 220px;
+    height: 38px; /* Altura para alinhar com outros botões */
+  }
+  .profile-selector-modern .ant-select-selector {
+    background-color: #F7F9FC !important;
+    border: 1px solid #E1E7ED !important;
+    border-radius: 6px !important; /* Um pouco menos arredondado */
+    height: 38px !important;
+    padding: 0 10px 0 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .profile-selector-modern:hover .ant-select-selector,
+  .profile-selector-modern.ant-select-focused .ant-select-selector {
+    border-color: var(--map-dourado) !important; /* Dourado para foco/hover */
+    box-shadow: 0 0 0 2px rgba(224, 188, 99, 0.2) !important;
+  }
+  .profile-selector-modern .ant-select-selection-item {
+    color: var(--header-text-primary) !important;
+    font-weight: 500;
+    font-size: 13px; /* Menor para caber mais texto */
+  }
+  .profile-selector-modern .ant-select-selection-item .profile-option-selected-label .anticon {
+    color: var(--map-laranja);
+    font-size: 15px;
+  }
+  .profile-selector-modern .ant-select-arrow .anticon {
+    color: var(--header-icon-color) !important;
+    font-size: 11px;
+  }
+  
+  .profile-selector-dropdown-modern.ant-select-dropdown {
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 4px 0;
+  }
+  .profile-selector-dropdown-modern .ant-select-item-option {
+    border-radius: 4px;
+    margin: 0 4px;
+    padding: 7px 10px !important;
+    font-size: 13px;
+  }
+  .profile-selector-dropdown-modern .profile-option-item-dropdown .anticon {
+    color: var(--map-laranja);
+    font-size: 15px;
+    margin-right: 8px;
+  }
+  .profile-selector-dropdown-modern .profile-option-item-dropdown span {
+    font-weight: 500;
+  }
+  .profile-selector-dropdown-modern .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+  .profile-selector-dropdown-modern .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: var(--header-icon-hover-bg) !important;
+    color: var(--map-laranja) !important;
+  }
+  
+  
+  /* Botões de Ação */
+  .header-panel-action-btn.ant-btn-text {
+    color: var(--header-icon-color) !important;
+    font-size: 19px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px; /* Quadrado arredondado em vez de círculo */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .header-panel-action-btn.ant-btn-text:hover,
+  .header-panel-action-btn.ant-btn-text:focus {
+    background-color: var(--header-icon-hover-bg) !important;
+    color: var(--map-laranja) !important;
+  }
+  
+  .header-panel-badge .ant-badge-count {
+    background-color: var(--map-laranja);
+    color: var(--map-branco);
+    box-shadow: 0 0 0 1.5px var(--map-branco);
+    font-weight: 600;
+    font-size: 9px;
+    padding: 0 4.5px;
+    min-width: 17px; height: 17px; line-height: 17px;
+  }
+  
+  .user-avatar-link {
+    display: flex;
+    align-items: center;
+    padding: 0; /* O Avatar já tem seu tamanho */
+    border-radius: 50%; /* Para hover no avatar ser circular */
+    transition: box-shadow 0.2s ease;
+  }
+  .user-avatar-link:hover {
+    /* background-color: var(--header-icon-hover-bg); */
+    box-shadow: 0 0 0 3px var(--map-laranja-focus); /* Anel de foco no hover */
+  }
+  
+  .user-avatar-modern.ant-avatar {
+    background-color: var(--map-dourado);
+    cursor: pointer;
+    width: 38px !important; /* Alinha com altura dos botões */
+    height: 38px !important;
+    line-height: 38px !important;
+    transition: transform 0.2s ease;
+  }
+  .user-avatar-modern.ant-avatar .anticon {
+      font-size: 18px !important;
+  }
+  .user-avatar-link:hover .user-avatar-modern {
+    transform: scale(1.08);
+  }
+  
+  /* Dropdown do Usuário */
+  .user-menu-dropdown-overlay .ant-dropdown-menu { /* Classe aplicada ao Dropdown para especificidade */
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    padding: 6px;
+    min-width: 180px;
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-submenu-title {
+    border-radius: 6px;
+    margin: 2px 0;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item .anticon,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-submenu-title .anticon {
+    color: var(--header-icon-color);
+    margin-right: 10px;
+    font-size: 15px;
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item:hover,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item-active,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-submenu-title:hover {
+    background-color: var(--header-icon-hover-bg);
+    color: var(--map-laranja);
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item:hover .anticon,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item-active .anticon,
+  .user-menu-dropdown-overlay .ant-dropdown-menu-submenu-title:hover .anticon {
+    color: var(--map-laranja);
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item-danger:hover {
+      color: #ff4d4f !important; /* Cor do AntD para danger */
+      background-color: rgba(255, 77, 79, 0.08) !important;
+  }
+  .user-menu-dropdown-overlay .ant-dropdown-menu-item-danger:hover .anticon {
+      color: #ff4d4f !important;
+  }
+  
+  
+  /* Responsividade */
+  @media (max-width: 1024px) { /* Logo antes de tablets */
+      .current-profile-name-header {
+          max-width: 120px; /* Reduzir nome do perfil */
+      }
+      .profile-selector-modern {
+          max-width: 180px; /* Reduzir seletor */
+      }
+  }
+  
+  @media (max-width: 767px) { /* Tablets e Mobile */
+    .header-panel.modern.refined {
+      padding: 0 12px; /* Menos padding */
+    }
+    .header-panel-left-section .brand-name {
+      display: none; /* Esconder "No Controle" */
+    }
+    .current-profile-name-header {
+      /* Poderia ser escondido e o perfil gerenciado apenas pelo menu do usuário */
+      /* display: none; */
+      max-width: 150px; /* Permite um pouco mais se a marca sumir */
+      font-size: 13px;
+    }
+    .brand-profile-divider {
+      margin: 0 8px;
+    }
+    .profile-selector-modern {
+      display: none; /* Esconder seletor principal, usar o do menu do usuário */
+    }
+    .header-panel-right-section {
+        gap: 8px; /* Menor espaçamento entre ícones */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .header-panel.modern.refined {
+      height: 56px; /* Header menor */
+      line-height: 56px;
+    }
+    .brand-icon { font-size: 22px; }
+    .current-profile-name-header {
+        display: none; /* Esconder nome do perfil ao lado da logo */
+    }
+    .brand-profile-divider { display: none; }
+  
+    .header-panel-action-btn.ant-btn-text {
+      font-size: 18px; width: 34px; height: 34px;
+    }
+    .user-avatar-modern.ant-avatar {
+        width: 34px !important; height: 34px !important; line-height: 34px !important;
+    }
+     .user-avatar-modern.ant-avatar .anticon { font-size: 17px !important; }
+    .header-panel-badge .ant-badge-count { transform: translate(40%, -35%); }
+  }

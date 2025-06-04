@@ -1,0 +1,26 @@
+/* src/index.css */
+/* Reset básico e definições de fontes/cores globais */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Cor de fundo padrão do Ant Design, pode ser ajustada */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Variáveis de cor baseadas na identidade visual */
+:root {
+  --map-dourado: #E0BC63;
+  --map-laranja: #CC6633;
+  --map-laranja-escuro: #994C00; /* Usado como fundo principal em algumas referências */
+  --map-preto: #000000;
+  --map-branco: #FFFFFF;
+  --map-texto-claro: #f1f1f1;
+}
