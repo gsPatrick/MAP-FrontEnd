@@ -157,7 +157,7 @@
   background-color: #1E1E1E; /* Cor de um celular escuro */
   border-radius: 36px; /* Bordas arredondadas de celular */
   padding: 12px;
-  box-shadow: 0 20px 50px -10px rgba(0,0,0,0.25), 
+  box-shadow: 0 20px 50px -10px rgba(0,0,0,0.25),
               inset 0 2px 3px rgba(255,255,255,0.08),
               inset 0 -2px 3px rgba(0,0,0,0.2);
   position: relative;
@@ -288,7 +288,7 @@
 /* Responsividade */
 @media (max-width: 991px) { /* lg */
   .wpp-integration-container .ant-row {
-    flex-direction: column-reverse; /* Coluna do celular primeiro em mobile */
+    flex-direction: column; /* Coluna do WhatsApp (esquerda) primeiro em mobile */
   }
   .wpp-right-column { margin-bottom: 40px; }
   .wpp-mobile-mockup { width: 280px; height: 570px; }
