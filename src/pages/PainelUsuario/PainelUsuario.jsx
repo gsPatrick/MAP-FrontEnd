@@ -4,10 +4,10 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   PlusCircleOutlined,
-  CalendarOutlined, // Usado para compromissos na lista
+  CalendarOutlined,
   PieChartOutlined,
   RetweetOutlined,
-  DollarCircleOutlined, // Usado para transações financeiras na lista
+  DollarCircleOutlined,
 } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/charts';
 import dayjs from 'dayjs';
@@ -18,8 +18,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
-import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
-import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
+// REMOVIDAS importações de HeaderPanel e SidebarPanel
 import ModalNovaReceita from '../../modals/ModalNovaReceita/ModalNovaReceita';
 import ModalNovaDespesa from '../../modals/ModalNovaDespesa/ModalNovaDespesa';
 import ModalNovoCompromisso from '../../modals/ModalNovoCompromisso/ModalNovoCompromisso';
@@ -48,7 +47,7 @@ dayjs.updateLocale('pt-br', {
   }
 });
 
-const { Content, Footer } = Layout;
+const { Content } = Layout; // Content ainda é útil
 const { Title, Paragraph, Text } = Typography;
 
 const PainelUsuario = () => {
@@ -58,14 +57,14 @@ const PainelUsuario = () => {
     isAuthenticated
   } = useProfile();
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // REMOVIDO estado do sidebarCollapsed
   const [dashboardLoading, setDashboardLoading] = useState(true);
 
   const [financialSummary, setFinancialSummary] = useState({ currentBalance: 0, incomeThisMonth: 0, expensesThisMonth: 0 });
   const [expenseCategories, setExpenseCategories] = useState([]);
-  const [incomeCategories, setIncomeCategories] = useState([]); // <<< NOVO ESTADO PARA GRÁFICO DE RECEITAS
+  const [incomeCategories, setIncomeCategories] = useState([]);
   const [monthlyTrend, setMonthlyTrend] = useState([]);
-  const [upcomingItems, setUpcomingItems] = useState([]); // <<< Alterado de upcomingBills para upcomingItems
+  const [upcomingItems, setUpcomingItems] = useState([]);
 
   const [isReceitaModalVisible, setIsReceitaModalVisible] = useState(false);
   const [isDespesaModalVisible, setIsDespesaModalVisible] = useState(false);
@@ -110,7 +109,7 @@ const PainelUsuario = () => {
         params: {
           dateStart: dayjs().startOf('month').format('YYYY-MM-DD'),
           dateEnd: dayjs().endOf('month').format('YYYY-MM-DD'),
-          limit: 1000, // Pegar um número grande para agrupar
+          limit: 1000,
         }
       });
       if (transactionsForChartsRes.data && transactionsForChartsRes.data.status === 'success') {
@@ -155,7 +154,6 @@ const PainelUsuario = () => {
       // 4. Próximos Itens (Transações Pendentes e Compromissos Agendados)
       let combinedUpcoming = [];
 
-      // Buscar Transações Pendentes
       const upcomingTransactionsRes = await apiClient.get(`/financial-accounts/${profileId}/transactions`, {
         params: {
           isPayableOrReceivable: true,
@@ -163,46 +161,44 @@ const PainelUsuario = () => {
           dueDate_gte: dayjs().format('YYYY-MM-DD'), 
           sortBy: 'dueDate',
           sortOrder: 'ASC',
-          limit: 5 // Limite para transações
+          limit: 5
         }
       });
       if (upcomingTransactionsRes.data && upcomingTransactionsRes.data.status === 'success') {
         const financialUpcoming = upcomingTransactionsRes.data.transactions.map(t => ({
-            id: `trans_${t.id}`, // Adiciona prefixo para chave única
+            id: `trans_${t.id}`,
             title: t.description,
-            dueDate: t.dueDate, // Usar dueDate para transações
+            dueDate: t.dueDate,
             amount: parseFloat(t.value),
-            itemType: 'transaction', // Tipo para diferenciar na renderização
+            itemType: 'transaction',
             transactionType: t.type === 'Entrada' ? 'receber' : 'pagar'
         }));
         combinedUpcoming.push(...financialUpcoming);
       }
 
-      // Buscar Compromissos Agendados
       const upcomingAppointmentsRes = await apiClient.get(`/financial-accounts/${profileId}/appointments`, {
           params: {
-              status: 'Scheduled', // Ou 'Scheduled,Confirmed' dependendo da lógica do backend
-              eventDateTime_gte: dayjs().toISOString(), // A partir de agora
+              status: 'Scheduled',
+              eventDateTime_gte: dayjs().toISOString(),
               sortBy: 'eventDateTime',
               sortOrder: 'ASC',
-              limit: 5 // Limite para compromissos
+              limit: 5
           }
       });
       if (upcomingAppointmentsRes.data && upcomingAppointmentsRes.data.status === 'success') {
-          const appointmentUpcoming = upcomingAppointmentsRes.data.appointments.map(app => ({
-              id: `appt_${app.id}`, // Adiciona prefixo
+          const appointmentUpcoming = upcomingAppointmentsRes.data.data.map(app => ({ // Ajustado para response.data.data
+              id: `appt_${app.id}`,
               title: app.title,
-              dueDate: app.eventDateTime, // Usar eventDateTime para compromissos
+              dueDate: app.eventDateTime,
               amount: app.associatedValue ? parseFloat(app.associatedValue) : null,
-              itemType: 'appointment', // Tipo para diferenciar
+              itemType: 'appointment',
               transactionType: app.associatedTransactionType || (app.associatedValue ? 'lembrete_valor' : 'lembrete')
           }));
           combinedUpcoming.push(...appointmentUpcoming);
       }
       
-      // Ordenar combinados e pegar os N mais próximos
       combinedUpcoming.sort((a,b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
-      setUpcomingItems(combinedUpcoming.slice(0, 5)); // Pega os 5 mais próximos no total
+      setUpcomingItems(combinedUpcoming.slice(0, 5));
 
     } catch (error) {
       console.error("Erro ao buscar dados do dashboard:", error);
@@ -218,7 +214,7 @@ const PainelUsuario = () => {
   };
   
   useEffect(() => {
-    document.body.classList.add('painel-active');
+    // REMOVIDO: document.body.classList.add('painel-active');
     if (!loadingProfiles && isAuthenticated && currentProfile) {
         fetchDataForDashboard(currentProfile.id);
     } else if (!loadingProfiles && !isAuthenticated) {
@@ -229,7 +225,6 @@ const PainelUsuario = () => {
   }, [currentProfile, loadingProfiles, isAuthenticated]);
 
   const handleAddGeneric = (type, values) => {
-    // ... (lógica de handleAddGeneric permanece a mesma da resposta anterior)
     if (!currentProfile) {
         message.error("Nenhum perfil selecionado para adicionar a transação.");
         return;
@@ -242,7 +237,7 @@ const PainelUsuario = () => {
         delete dataToSend.data;
     }
     if (values.prazo) {
-        dataToSend.eventDateTime = values.prazo;
+        dataToSend.eventDateTime = values.prazo.toISOString(); // Ajustado para ISOString
         delete dataToSend.prazo;
     }
     if (type === 'recorrencia') {
@@ -326,7 +321,8 @@ const PainelUsuario = () => {
         });
   };
 
-  // Configuração do Gráfico de Pizza para DESPESAS
+  const formatCurrency = (value) => `R$ ${parseFloat(value || 0).toFixed(2).replace('.', ',')}`;
+
   const expensePieConfig = useMemo(() => ({
     appendPadding: 10,
     data: expenseCategories.length > 0 ? expenseCategories : [{type: "Sem despesas", value: 1, isPlaceholder: true}],
@@ -339,7 +335,7 @@ const PainelUsuario = () => {
       offset: '15%',
       content: ({ type, value, percent }) => {
           const percentage = (percent * 100).toFixed(1);
-          if (parseFloat(percentage) > 3) { // Só mostra label para fatias maiores
+          if (parseFloat(percentage) > 3) {
             return `${type}\n${percentage}%`;
           }
           return '';
@@ -347,7 +343,7 @@ const PainelUsuario = () => {
       style: { fontSize: 9, fill: 'rgba(0, 0, 0, 0.75)'},
     } : false,
     interactions: [{ type: 'element-selected' }, { type: 'element-active' }, {type: 'tooltip'}],
-    legend: false, // Remover legenda para dar mais espaço, tooltip mostrará
+    legend: false,
     tooltip: {
         formatter: (datum) => {
           if(datum.isPlaceholder) return null;
@@ -370,7 +366,6 @@ const PainelUsuario = () => {
     color: ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#EF476F', '#F78C6B', '#7A869A', '#5F6C7F'],
   }), [expenseCategories]);
 
-  // Configuração do Gráfico de Pizza para RECEITAS
   const incomePieConfig = useMemo(() => ({
     appendPadding: 10,
     data: incomeCategories.length > 0 ? incomeCategories : [{type: "Sem receitas", value: 1, isPlaceholder: true}],
@@ -437,89 +432,55 @@ const PainelUsuario = () => {
     animation: { appear: { animation: 'path-in', duration: 600 } },
   }), [monthlyTrend]);
 
-  const FooterPanelPlaceholder = () => (
-    <Footer style={{ textAlign: 'center', background: '#f0f2f5', padding: '15px 50px', fontSize: '13px', color: 'var(--header-text-secondary)' }}>
-      MAP no Controle ©{new Date().getFullYear()} - Seu Assistente Pessoal Inteligente.
-    </Footer>
-  );
+  // REMOVIDO FooterPanelPlaceholder
 
   if (loadingProfiles || (dashboardLoading && isAuthenticated)) {
     return (
-        <Layout style={{ minHeight: '100vh' }} className="painel-usuario-main-layout">
-            <SidebarPanel
-                collapsed={sidebarCollapsed}
-                onCollapse={setSidebarCollapsed}
-                selectedProfileType={currentProfile?.type}
-            />
-            <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s ease' }}>
-                <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-                <Content className="panel-content-area dashboard-loading">
-                    <div className="skeleton-loader-card">
-                        <PieChartOutlined className="loader-icon" />
-                        <Title level={4} style={{color: 'var(--map-cinza-texto)', marginTop: '15px'}}>
-                            {loadingProfiles ? "Carregando seu perfil..." : "Carregando sua Visão Geral..."}
-                        </Title>
-                        <Paragraph style={{color: 'var(--map-cinza-texto)'}}>Aguarde um momento, estamos preparando tudo para você.</Paragraph>
-                        <Progress percent={loadingProfiles ? 30 : 70} status="active" strokeColor={{ from: 'var(--map-dourado)', to: 'var(--map-laranja)' }} trailColor="#f0f0f0"/>
-                    </div>
-                </Content>
-                 <FooterPanelPlaceholder />
-            </Layout>
-        </Layout>
+        <div className="dashboard-loading" style={{ minHeight: 'calc(100vh - 64px)' }}>
+            <div className="skeleton-loader-card">
+                <PieChartOutlined className="loader-icon" />
+                <Title level={4} style={{color: 'var(--map-cinza-texto)', marginTop: '15px'}}>
+                    {loadingProfiles ? "Carregando seu perfil..." : "Carregando sua Visão Geral..."}
+                </Title>
+                <Paragraph style={{color: 'var(--map-cinza-texto)'}}>Aguarde um momento, estamos preparando tudo para você.</Paragraph>
+                <Progress percent={loadingProfiles ? 30 : 70} status="active" strokeColor={{ from: 'var(--map-dourado)', to: 'var(--map-laranja)' }} trailColor="#f0f0f0"/>
+            </div>
+        </div>
     )
   }
 
   if (!isAuthenticated && !loadingProfiles) {
       return (
-        <Layout style={{ minHeight: '100vh' }}>
-            <Content style={{padding: 50, textAlign: 'center'}}>
-                <Title level={3}>Acesso Negado</Title>
-                <Paragraph>Você precisa estar logado para acessar o painel.</Paragraph>
-                <Button type="primary" onClick={() => window.location.href = '/login'}>Ir para Login</Button>
-            </Content>
-        </Layout>
+        <Content style={{padding: 50, textAlign: 'center'}}>
+            <Title level={3}>Acesso Negado</Title>
+            <Paragraph>Você precisa estar logado para acessar o painel.</Paragraph>
+            <Button type="primary" onClick={() => window.location.href = '/login'}>Ir para Login</Button>
+        </Content>
       );
   }
   
   if (!currentProfile && isAuthenticated && !loadingProfiles){
        return (
-        <Layout style={{ minHeight: '100vh' }} className="painel-usuario-main-layout">
-            <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null}/>
-            <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s ease' }}>
-                <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-                <Content className="panel-content-area dashboard-loading">
-                     <div className="skeleton-loader-card" style={{padding: '40px'}}>
-                        <PieChartOutlined className="loader-icon" style={{animation: 'none', transform: 'none', opacity: 0.6}}/>
-                        <Title level={4} style={{color: 'var(--map-cinza-texto)', marginTop: '20px'}}>Nenhum Perfil Selecionado</Title>
-                        <Paragraph style={{color: 'var(--map-cinza-texto)'}}>
-                            Parece que você não tem nenhum perfil financeiro (PF/PJ) selecionado ou cadastrado.
-                        </Paragraph>
-                        <Paragraph style={{color: 'var(--map-cinza-texto)'}}>
-                             Vá para "Meu Perfil" para criar ou selecionar um perfil financeiro para começar.
-                        </Paragraph>
-                         <Button type="primary" onClick={() => window.location.href = '/painel/meu-perfil'} style={{marginTop: '15px'}}>
-                            Ir para Meu Perfil
-                        </Button>
-                    </div>
-                </Content>
-                 <FooterPanelPlaceholder />
-            </Layout>
-        </Layout>
+        <Content className="panel-content-area dashboard-loading">
+             <div className="skeleton-loader-card" style={{padding: '40px'}}>
+                <PieChartOutlined className="loader-icon" style={{animation: 'none', transform: 'none', opacity: 0.6}}/>
+                <Title level={4} style={{color: 'var(--map-cinza-texto)', marginTop: '20px'}}>Nenhum Perfil Selecionado</Title>
+                <Paragraph style={{color: 'var(--map-cinza-texto)'}}>
+                    Parece que você não tem nenhum perfil financeiro (PF/PJ) selecionado ou cadastrado.
+                </Paragraph>
+                <Paragraph style={{color: 'var(--map-cinza-texto)'}}>
+                     Vá para "Meu Perfil" para criar ou selecionar um perfil financeiro para começar.
+                </Paragraph>
+                 <Button type="primary" onClick={() => window.location.href = '/painel/meu-perfil'} style={{marginTop: '15px'}}>
+                    Ir para Meu Perfil
+                </Button>
+            </div>
+        </Content>
     )
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }} className="painel-usuario-main-layout">
-      <SidebarPanel
-        collapsed={sidebarCollapsed}
-        onCollapse={setSidebarCollapsed}
-        selectedProfileType={currentProfile?.type}
-      />
-      <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s ease' }}>
-        <HeaderPanel
-          userName={userNameForHeader}
-          appName={sidebarCollapsed ? "" : "MAP"}
-        />
+    <>
         <Content className="panel-content-area dashboard-overview">
           <div className="dashboard-header-title">
             <Title level={2} className="dashboard-greeting">
@@ -595,7 +556,7 @@ const PainelUsuario = () => {
                 }
               </Card>
             </Col>
-            <Col xs={24} lg={12} className="animated-card" style={{animationDelay: '0.5s'}}> {/* Mantido mesmo delay para aparecerem juntos */}
+            <Col xs={24} lg={12} className="animated-card" style={{animationDelay: '0.5s'}}>
               <Card title="Distribuição de Despesas por Categoria" bordered={false} className="chart-card" loading={dashboardLoading}>
                  {(!dashboardLoading && expenseCategories.length > 0 && !expenseCategories[0]?.isPlaceholder) ? 
                     <Pie {...expensePieConfig} style={{ height: '320px' }} /> :
@@ -606,7 +567,7 @@ const PainelUsuario = () => {
           </Row>
           
           <Row gutter={[24,24]} style={{marginTop: '30px'}}>
-            <Col xs={24} lg={24} className="animated-card" style={{animationDelay: '0.4s'}}> {/* Ajustado o span para ocupar a linha toda */}
+            <Col xs={24} lg={24} className="animated-card" style={{animationDelay: '0.4s'}}>
               <Card title="Evolução Mensal (Receitas vs. Despesas)" bordered={false} className="chart-card">
                 {(!dashboardLoading && monthlyTrend.length > 0) ? 
                     <Line {...lineConfig} style={{ height: '320px' }} /> :
@@ -616,30 +577,29 @@ const PainelUsuario = () => {
             </Col>
           </Row>
 
-
           <Row gutter={[24, 24]} style={{ marginTop: '30px' }}>
             <Col span={24} className="animated-card" style={{animationDelay: '0.6s'}}>
               <Card title="Próximos Vencimentos e Lembretes" bordered={false} className="list-card" loading={dashboardLoading}>
                 {(!dashboardLoading && upcomingItems.length > 0) ? (
                   <List
                     itemLayout="horizontal"
-                    dataSource={upcomingItems} // Usa o estado combinado
+                    dataSource={upcomingItems}
                     renderItem={item => (
                       <List.Item
                         actions={[
                             <Button type="text" size="small" key={`action-${item.id}`} className="list-item-action-btn">
-                                Detalhes {/* Ou alguma ação específica baseada em item.itemType */}
+                                Detalhes
                             </Button>
                         ]}
                       >
                         <List.Item.Meta
                           avatar={
                             <Avatar
-                                className={`upcoming-item-avatar ${item.transactionType || item.itemType}`} // Usa transactionType se for transação
+                                className={`upcoming-item-avatar ${item.transactionType || item.itemType}`}
                                 icon={
                                     item.itemType === 'transaction' 
                                         ? (item.transactionType === 'pagar' ? <ArrowDownOutlined /> : <ArrowUpOutlined />) 
-                                        : (item.amount ? <DollarCircleOutlined /> : <CalendarOutlined />) // Ícone para compromisso
+                                        : (item.amount ? <DollarCircleOutlined /> : <CalendarOutlined />)
                                 }
                             />
                           }
@@ -673,38 +633,36 @@ const PainelUsuario = () => {
             </Col>
           </Row>
         </Content>
-        <FooterPanelPlaceholder />
-      </Layout>
 
-      <ModalNovaReceita
-        visible={isReceitaModalVisible}
-        onCancel={() => { setIsReceitaModalVisible(false); setEditingTransaction(null); }}
-        onOk={(values) => handleAddGeneric('receita', values)}
-        currentProfile={currentProfile}
-        editingTransaction={editingTransaction}
-      />
-      <ModalNovaDespesa
-        visible={isDespesaModalVisible}
-        onCancel={() => { setIsDespesaModalVisible(false); setEditingTransaction(null); }}
-        onOk={(values) => handleAddGeneric('despesa', values)}
-        currentProfile={currentProfile}
-        editingTransaction={editingTransaction}
-      />
-      <ModalNovoCompromisso
-        visible={isCompromissoModalVisible}
-        onCancel={() => { setIsCompromissoModalVisible(false); setEditingAppointment(null); }}
-        onOk={(values) => handleAddGeneric('compromisso', values)}
-        currentProfile={currentProfile}
-        editingAppointment={editingAppointment}
-      />
-      <ModalNovaRecorrencia
-        visible={isRecorrenciaModalVisible}
-        onCancel={() => {setIsRecorrenciaModalVisible(false); setEditingRecorrencia(null);}}
-        onOk={(values) => handleAddGeneric('recorrencia', values)}
-        currentProfile={currentProfile}
-        editingRecorrencia={editingRecorrencia}
-      />
-    </Layout>
+        <ModalNovaReceita
+            visible={isReceitaModalVisible}
+            onCancel={() => { setIsReceitaModalVisible(false); setEditingTransaction(null); }}
+            onOk={(values) => handleAddGeneric('receita', values)}
+            currentProfile={currentProfile}
+            editingTransaction={editingTransaction}
+        />
+        <ModalNovaDespesa
+            visible={isDespesaModalVisible}
+            onCancel={() => { setIsDespesaModalVisible(false); setEditingTransaction(null); }}
+            onOk={(values) => handleAddGeneric('despesa', values)}
+            currentProfile={currentProfile}
+            editingTransaction={editingTransaction}
+        />
+        <ModalNovoCompromisso
+            visible={isCompromissoModalVisible}
+            onCancel={() => { setIsCompromissoModalVisible(false); setEditingAppointment(null); }}
+            onOk={(values) => handleAddGeneric('compromisso', values)}
+            currentProfile={currentProfile}
+            editingAppointment={editingAppointment}
+        />
+        <ModalNovaRecorrencia
+            visible={isRecorrenciaModalVisible}
+            onCancel={() => {setIsRecorrenciaModalVisible(false); setEditingRecorrencia(null);}}
+            onOk={(values) => handleAddGeneric('recorrencia', values)}
+            currentProfile={currentProfile}
+            editingRecorrencia={editingRecorrencia}
+        />
+    </>
   );
 };
 

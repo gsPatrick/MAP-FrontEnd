@@ -1,5 +1,5 @@
 /* src/pages/PainelUsuario/RecorrenciasPage/RecorrenciasPage.css */
-.recorrencias-page-main-layout .panel-content-area.recorrencias-content {
+.panel-content-area.recorrencias-content {
     background-color: #f8f9fc;
     padding: 20px;
   }
@@ -95,7 +95,7 @@
   
   /* Responsividade */
   @media (max-width: 767px) {
-    .recorrencias-page-main-layout .panel-content-area.recorrencias-content { padding: 15px; }
+    .panel-content-area.recorrencias-content { padding: 15px; }
     .page-title-recorrencias { font-size: 20px !important; }
     .filters-card-recorrencias .ant-row > .ant-col:not(:last-child) {
         margin-bottom: 10px;

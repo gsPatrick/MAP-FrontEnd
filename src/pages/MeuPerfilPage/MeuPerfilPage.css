@@ -1,73 +1,71 @@
-/* src/pages/PainelUsuario/MeuPerfilPage/MeuPerfilPage.css */
+/* src/pages/MeuPerfilPage/MeuPerfilPage.css */
 
 /* Reutilizar variáveis de cores --map-dourado, --map-laranja, etc. */
 
-.meu-perfil-page-layout .site-layout .perfil-content-wrapper {
+/* Seletor simplificado para o contêiner principal da página */
+.perfil-content-wrapper {
     padding: 24px;
     background-color: var(--product-page-bg); /* Reutilizando cor de fundo de Produtos */
-    min-height: calc(100vh - 64px);
-  }
+    min-height: calc(100vh - 64px); /* Altura do HeaderPanel */
+}
   
-  .perfil-page-title.page-title-custom {
-    /* Estilo similar ao product-page-header, mas podemos personalizar */
+.perfil-page-title.page-title-custom {
     margin-bottom: 28px !important;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--product-border-color); /* --map-cinza-claro ou similar */
     color: var(--map-preto) !important;
-  }
-  .perfil-page-title .title-icon-perfil.anticon {
+}
+.perfil-page-title .title-icon-perfil.anticon {
     color: var(--map-laranja) !important; /* Ícone da página */
     font-size: 28px;
     margin-right: 12px;
-  }
+}
   
-  .perfil-card {
+.perfil-card {
     background-color: var(--map-branco);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.07);
     transition: all 0.3s ease;
-  }
-  .perfil-card:hover {
+}
+.perfil-card:hover {
     box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    /* transform: translateY(-2px); */ /* Opcional */
-  }
-  .perfil-card .ant-card-head {
+}
+.perfil-card .ant-card-head {
     border-bottom: 1px solid var(--product-border-color);
     padding: 0 20px;
     min-height: 50px;
-  }
-  .perfil-card .ant-card-head-title {
+}
+.perfil-card .ant-card-head-title {
     font-weight: 600;
     color: var(--map-preto);
     font-size: 17px;
-  }
-  .perfil-card .ant-card-head .card-title-icon {
+}
+.perfil-card .ant-card-head .card-title-icon {
     color: var(--map-laranja);
     font-size: 18px;
     margin-right: 8px;
-  }
-  .perfil-card .ant-card-body {
+}
+.perfil-card .ant-card-body {
     padding: 20px;
-  }
+}
   
-  /* Animação de entrada para os cards */
-  .animated-card {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: cardFadeInUp 0.5s ease-out forwards;
-  }
-  @keyframes cardFadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-  }
+/* Animação de entrada para os cards */
+.animated-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardFadeInUp 0.5s ease-out forwards;
+}
+@keyframes cardFadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
   
-  
-  /* Card de Informações Pessoais */
-  .user-info-header {
+/* Card de Informações Pessoais */
+.user-info-header {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
-  }
-  .user-avatar-perfil.ant-avatar {
+}
+.user-avatar-perfil.ant-avatar {
     width: 80px;
     height: 80px;
     line-height: 80px;
@@ -77,89 +75,88 @@
     color: var(--map-preto);
     border: 3px solid var(--map-branco);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  }
-  .user-details .user-name-perfil {
+}
+.user-details .user-name-perfil {
     margin-bottom: 2px !important;
     color: var(--map-preto);
     font-weight: 600;
-  }
-  .user-details .user-email-perfil {
+}
+.user-details .user-email-perfil {
     color: var(--product-text-secondary);
     font-size: 14px;
-  }
-  .edit-personal-info-btn.ant-btn-link {
-      color: var(--map-laranja);
-      padding: 0;
-  }
+}
+.edit-personal-info-btn.ant-btn-link {
+    color: var(--map-laranja);
+    padding: 0;
+}
   
-  /* Card de Perfis de Conta */
-  .profile-list-item {
-      padding: 12px 16px !important;
-      border-radius: 6px;
-      margin-bottom: 8px !important;
-      border: 1px solid transparent !important; /* Para a transição da borda */
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-  }
-  .profile-list-item:hover {
-      background-color: #f7f9fc;
-  }
-  .profile-list-item.active-profile-item {
-      background-color: rgba(204, 102, 51, 0.05); /* Laranja bem claro */
-      border-color: var(--map-laranja) !important;
-  }
-  .profile-list-item .profile-item-icon {
-      font-size: 22px;
-      color: var(--map-laranja);
-  }
-  .profile-list-item .profile-item-name {
-      color: var(--map-preto);
-  }
-  .profile-list-item .profile-item-type {
-      color: var(--product-text-secondary);
-      font-size: 13px;
-  }
-  .active-tag-profile.ant-tag-green {
-      background-color: var(--map-laranja);
-      border-color: var(--map-laranja);
-      color: var(--map-branco);
-      font-weight: 500;
-  }
+/* Card de Perfis de Conta */
+.profile-list-item {
+    padding: 12px 16px !important;
+    border-radius: 6px;
+    margin-bottom: 8px !important;
+    border: 1px solid transparent !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.profile-list-item:hover {
+    background-color: #f7f9fc;
+}
+.profile-list-item.active-profile-item {
+    background-color: rgba(204, 102, 51, 0.05);
+    border-color: var(--map-laranja) !important;
+}
+.profile-list-item .profile-item-icon {
+    font-size: 22px;
+    color: var(--map-laranja);
+}
+.profile-list-item .profile-item-name {
+    color: var(--map-preto);
+}
+.profile-list-item .profile-item-type {
+    color: var(--product-text-secondary);
+    font-size: 13px;
+}
+.active-tag-profile.ant-tag-green {
+    background-color: var(--map-laranja);
+    border-color: var(--map-laranja);
+    color: var(--map-branco);
+    font-weight: 500;
+}
   
-  .create-pj-profile-section .ant-result {
-      padding: 24px 16px !important;
-      background-color: #fafbff;
-      border-radius: 8px;
-      border: 1px dashed var(--product-border-color);
-  }
-  .create-pj-profile-section .ant-result-title {
-      font-size: 18px !important;
-      color: var(--map-preto);
-  }
-  .create-pj-profile-section .ant-result-subtitle {
-      font-size: 14px !important;
-      color: var(--product-text-secondary);
-  }
-  .create-pj-btn.ant-btn-primary {
+.create-pj-profile-section .ant-result {
+    padding: 24px 16px !important;
+    background-color: #fafbff;
+    border-radius: 8px;
+    border: 1px dashed var(--product-border-color);
+}
+.create-pj-profile-section .ant-result-title {
+    font-size: 18px !important;
+    color: var(--map-preto);
+}
+.create-pj-profile-section .ant-result-subtitle {
+    font-size: 14px !important;
+    color: var(--product-text-secondary);
+}
+.create-pj-btn.ant-btn-primary {
     background-color: var(--map-laranja) !important;
     border-color: var(--map-laranja) !important;
-  }
-  .create-pj-btn.ant-btn-primary:hover {
+}
+.create-pj-btn.ant-btn-primary:hover {
     background-color: var(--map-dourado) !important;
     border-color: var(--map-dourado) !important;
     color: var(--map-preto) !important;
-  }
+}
   
-  
-  /* Card de Código de Referência */
-  .referral-desc {
-      color: var(--product-text-secondary);
-      margin-bottom: 16px !important;
-      line-height: 1.6;
-  }
-  .referral-desc .referral-highlight {
-      color: var(--map-laranja);
-  }
-  .referral-code-area {
+/* Card de Código de Referência */
+.referral-desc {
+    color: var(--product-text-secondary);
+    margin-bottom: 16px !important;
+    line-height: 1.6;
+}
+.referral-desc .referral-highlight {
+    color: var(--map-laranja);
+}
+.referral-code-area {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -167,109 +164,104 @@
     padding: 12px 16px;
     border-radius: 8px;
     border: 1px dashed var(--map-dourado);
-  }
-  .referral-code-text {
+}
+.referral-code-text {
     font-size: 18px;
     letter-spacing: 1px;
     color: var(--map-laranja-escuro);
-  }
-  .copy-code-btn.ant-btn {
+}
+.copy-code-btn.ant-btn {
     color: var(--map-laranja);
     border-color: var(--map-laranja);
-  }
-  .copy-code-btn.ant-btn:hover {
+}
+.copy-code-btn.ant-btn:hover {
     color: var(--map-dourado);
     border-color: var(--map-dourado);
     background-color: rgba(224, 188, 99, 0.05);
-  }
+}
   
-  /* Card de Benefícios */
-  .benefits-card .ant-card-body {
-      text-align: center;
-  }
-  .referral-statistic .statistic-title .ant-typography { /* Alvo no Text dentro do title */
-      color: var(--product-text-secondary);
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 4px;
-  }
-  .referral-statistic .ant-statistic-content {
-      margin-bottom: 20px;
-  }
-  .withdraw-benefits-btn.ant-btn {
-      font-weight: 500;
-      border-color: var(--map-laranja);
-      color: var(--map-laranja);
-      margin-bottom: 12px;
-  }
-  .withdraw-benefits-btn.ant-btn:hover:not([disabled]) {
-      background-color: var(--map-laranja);
-      color: var(--map-branco);
-  }
-  .benefits-footer-text {
-      font-size: 12px;
-      color: #8c8c8c; /* Cinza mais claro */
-      margin-top: 8px !important;
-  }
+/* Card de Benefícios */
+.benefits-card .ant-card-body {
+    text-align: center;
+}
+.referral-statistic .statistic-title .ant-typography {
+    color: var(--product-text-secondary);
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.referral-statistic .ant-statistic-content {
+    margin-bottom: 20px;
+}
+.withdraw-benefits-btn.ant-btn {
+    font-weight: 500;
+    border-color: var(--map-laranja);
+    color: var(--map-laranja);
+    margin-bottom: 12px;
+}
+.withdraw-benefits-btn.ant-btn:hover:not([disabled]) {
+    background-color: var(--map-laranja);
+    color: var(--map-branco);
+}
+.benefits-footer-text {
+    font-size: 12px;
+    color: #8c8c8c;
+    margin-top: 8px !important;
+}
   
-  /* Card de Plano */
-  .plan-card .current-plan-info {
-      margin-bottom: 20px;
-      text-align: center;
-  }
-  .plan-card .current-plan-name {
-      color: var(--map-dourado);
-      font-weight: 600;
-      margin-bottom: 6px !important;
-  }
-  .plan-card .current-plan-detail {
-      color: var(--product-text-secondary);
-      font-size: 14px;
-  }
-  .manage-plan-btn.ant-btn-primary {
-      background-color: var(--map-laranja) !important;
-      border-color: var(--map-laranja) !important;
-      font-weight: 500;
-  }
-  .manage-plan-btn.ant-btn-primary:hover {
-      background-color: var(--map-dourado) !important;
-      border-color: var(--map-dourado) !important;
-      color: var(--map-preto) !important;
-  }
+/* Card de Plano */
+.plan-card .current-plan-info {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.plan-card .current-plan-name {
+    color: var(--map-dourado);
+    font-weight: 600;
+    margin-bottom: 6px !important;
+}
+.plan-card .current-plan-detail {
+    color: var(--product-text-secondary);
+    font-size: 14px;
+}
+.manage-plan-btn.ant-btn-primary {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+    font-weight: 500;
+}
+.manage-plan-btn.ant-btn-primary:hover {
+    background-color: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
   
-  /* Modal de Criação de Perfil (reutiliza .modal-style-map) */
-  .profile-creation-modal .ant-select .anticon {
-      color: var(--map-laranja); /* Ícones no select */
-  }
+/* Modal de Criação de Perfil (reutiliza .modal-style-map) */
+.profile-creation-modal .ant-select .anticon {
+    color: var(--map-laranja);
+}
   
+/* Responsividade */
+@media (max-width: 991px) {
+    .perfil-content-wrapper .ant-col-lg-16,
+    .perfil-content-wrapper .ant-col-lg-8 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
   
-  /* Responsividade */
-  @media (max-width: 991px) { /* lg breakpoint, onde as colunas podem empilhar */
-      .perfil-content-wrapper .ant-col-lg-16,
-      .perfil-content-wrapper .ant-col-lg-8 {
-          width: 100% !important;
-          max-width: 100% !important;
-      }
-  }
-  
-  @media (max-width: 575px) {
-      .perfil-card .ant-card-body {
-          padding: 16px;
-      }
-      .user-info-header {
-          flex-direction: column;
-          text-align: center;
-      }
-      .user-avatar-perfil.ant-avatar {
-          margin-right: 0;
-          margin-bottom: 15px;
-      }
-      .referral-code-area {
-          flex-direction: column;
-          gap: 10px;
-      }
-  }
-  
-  /* Herda .modal-style-map para os botões e header do modal.
-     Definições específicas de botões já estão em .modal-style-map no CSS anterior.
-  */
+@media (max-width: 575px) {
+    .perfil-card .ant-card-body {
+        padding: 16px;
+    }
+    .user-info-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .user-avatar-perfil.ant-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    .referral-code-area {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

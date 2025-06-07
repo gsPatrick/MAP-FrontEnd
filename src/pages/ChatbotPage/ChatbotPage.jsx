@@ -1,3 +1,4 @@
+// src/pages/ChatbotPage/ChatbotPage.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Layout, Input, Button, Avatar, List, Typography, Space, Spin, Modal, message } from 'antd';
 import {
@@ -10,11 +11,10 @@ import remarkGfm from 'remark-gfm';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
-import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
-import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
+// REMOVIDO: HeaderPanel e SidebarPanel
 import './ChatbotPage.css';
 
-const { Content } = Layout;
+const { Content } = Layout; // Content ainda é necessário
 const { Paragraph, Text, Title } = Typography;
 
 const CHAT_STORAGE_PREFIX = 'mapSiteChat_';
@@ -28,15 +28,15 @@ const ChatbotPage = () => {
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // REMOVIDO: const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [actionSuggestions, setActionSuggestions] = useState([]);
   const [resourceCurrentlyEditing, setResourceCurrentlyEditing] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const userNameForHeader = currentProfile?.ownerClient?.name?.split(" ")[0] || currentProfile?.name?.split(" ")[0] || "Usuário Chat";
-  
+  // REMOVIDO: const userNameForHeader = ...
+
   const userSessionId = useMemo(() => {
     if (currentProfile?.ownerClient?.id) {
         return `client_${currentProfile.ownerClient.id}`;
@@ -60,7 +60,7 @@ const ChatbotPage = () => {
         })),
         inputValue: currentInputValue,
         actionSuggestions: currentActionSuggestions,
-        resourceCurrentlyEditing: currentEditingResource, // Salva o contexto de edição
+        resourceCurrentlyEditing: currentEditingResource,
         lastActivity: Date.now()
       };
       localStorage.setItem(storageKey, JSON.stringify(stateToSave));
@@ -82,7 +82,7 @@ const ChatbotPage = () => {
           setMessages(restoredMessages);
           setInputValue(savedState.inputValue || '');
           setActionSuggestions(savedState.actionSuggestions || []);
-          setResourceCurrentlyEditing(savedState.resourceCurrentlyEditing || null); // Restaura contexto de edição
+          setResourceCurrentlyEditing(savedState.resourceCurrentlyEditing || null);
           console.log("Estado do chat restaurado do localStorage para:", storageKey);
         } else {
           setMessages([
@@ -156,11 +156,9 @@ const ChatbotPage = () => {
         userSessionId: userSessionId,
         payloadFromFrontend: {
             ...payloadForBackend,
-            // Envia o resourceCurrentlyEditing se estiver setado e NÃO for uma iniciação de edição
-            // (porque na iniciação, o payloadForBackend.editingResourceContextFromFrontend já tem essa info)
             resourceBeingEdited: (resourceCurrentlyEditing && !payloadForBackend.isEditActionInitiation)
               ? { id: resourceCurrentlyEditing.id, type: resourceCurrentlyEditing.type, description: resourceCurrentlyEditing.description } 
-              : (payloadForBackend.editingResourceContextFromFrontend || null) // Se for iniciação, usa o que veio
+              : (payloadForBackend.editingResourceContextFromFrontend || null)
         }
       };
       
@@ -181,18 +179,12 @@ const ChatbotPage = () => {
           setActionSuggestions(serviceResponse.suggestions);
         }
 
-        // Se a IA confirmou que uma edição foi feita OU se a IA não pediu clarificação e não detectou um UPDATE,
-        // significa que o fluxo de edição pode ter sido concluído ou abandonado.
         if (serviceResponse.actionWasAnEdit) {
             console.log("Frontend: Edição confirmada pelo backend, limpando resourceCurrentlyEditing.");
             setResourceCurrentlyEditing(null);
         } else if (resourceCurrentlyEditing && 
                    (!serviceResponse.clarifications_needed || serviceResponse.clarifications_needed.length === 0) &&
                    (!serviceResponse.detected_actions || !serviceResponse.detected_actions.some(a => (a.action || a.action_type)?.startsWith("UPDATE_")))) {
-            // Verifica se a resposta da IA ainda é sobre a edição. Se não for, limpa.
-            // Esta lógica pode ser complexa, pois a IA pode responder algo genérico.
-            // O ideal é a IA explicitamente indicar que o fluxo de edição terminou ou mudou.
-            // Por ora, se não for um UPDATE e não pedir clarificação, assumimos que saiu do fluxo de edição.
             const isStillEditingRelated = serviceResponse.replyText?.toLowerCase().includes(resourceCurrentlyEditing.description.toLowerCase());
             if (!isStillEditingRelated) {
                 console.log("Frontend: Conversa mudou de rumo ou IA não entendeu edição, limpando resourceCurrentlyEditing.");
@@ -241,15 +233,12 @@ const ChatbotPage = () => {
     const editInitiationMessage = `Quero editar o item: "${resource.description}" (ID: ${resource.id})`;
     sendChatMessageToApi(editInitiationMessage, { 
         isEditActionInitiation: true, 
-        editingResourceContextFromFrontend: { // Envia o contexto para o backend iniciar o state.editingResource
+        editingResourceContextFromFrontend: {
             type: resource.type, 
             id: resource.id, 
             description: resource.description 
         } 
     });
-    // A IA deve responder pedindo os detalhes da edição.
-    // O usuário então digitará as alterações, e o resourceCurrentlyEditing (do frontend)
-    // será enviado no payload para o backend saber qual item está sendo alterado.
   };
 
   const handleDeleteResource = (resource) => {
@@ -325,195 +314,164 @@ const ChatbotPage = () => {
 
   if (loadingProfiles && !userSessionId) {
     return (
-      <Layout style={{ minHeight: '100vh' }} className="chatbot-page-layout">
-        <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-        <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-          <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP Chat"}/>
-          <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
-            <LoadingOutlined style={{fontSize: 48, color: 'var(--map-dourado)'}} spin/>
-            <Text style={{marginLeft: 15, fontSize: 16, color: 'var(--chatbot-text-secondary)'}}>Carregando dados do chat...</Text>
-          </Content>
-        </Layout>
-      </Layout>
+      <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
+        <LoadingOutlined style={{fontSize: 48, color: 'var(--map-dourado)'}} spin/>
+        <Text style={{marginLeft: 15, fontSize: 16, color: 'var(--chatbot-text-secondary)'}}>Carregando dados do chat...</Text>
+      </Content>
     );
   }
   if (!isAuthenticated && !loadingProfiles){
       return (
-          <Layout style={{ minHeight: '100vh' }} className="chatbot-page-layout">
-                <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null} />
-                <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                <HeaderPanel userName={"Visitante"} appName={sidebarCollapsed ? "" : "MAP Chat"}/>
-                    <Content className="chatbot-content-area">
-                        <div className="chat-container" style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
-                            <RobotOutlined style={{fontSize: 60, color: 'var(--chatbot-text-secondary)', marginBottom: 20}}/>
-                            <Title level={3} style={{color: 'var(--chatbot-text-secondary)'}}>Acesso Negado</Title>
-                            <Paragraph style={{color: 'var(--chatbot-text-secondary)'}}>Você precisa estar logado para usar o assistente.</Paragraph>
-                            <Button type="primary" onClick={() => window.location.href='/login'} className="login-button-chat">Ir para Login</Button>
-                        </div>
-                    </Content>
-                </Layout>
-          </Layout>
+        <Content className="chatbot-content-area">
+            <div className="chat-container" style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
+                <RobotOutlined style={{fontSize: 60, color: 'var(--chatbot-text-secondary)', marginBottom: 20}}/>
+                <Title level={3} style={{color: 'var(--chatbot-text-secondary)'}}>Acesso Negado</Title>
+                <Paragraph style={{color: 'var(--chatbot-text-secondary)'}}>Você precisa estar logado para usar o assistente.</Paragraph>
+                <Button type="primary" onClick={() => window.location.href='/login'} className="login-button-chat">Ir para Login</Button>
+            </div>
+        </Content>
       )
   }
    if (!currentProfile && isAuthenticated && !loadingProfiles){
       return (
-          <Layout style={{ minHeight: '100vh' }} className="chatbot-page-layout">
-                <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null} />
-                <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP Chat"}/>
-                     <Content className="chatbot-content-area">
-                        <div className="chat-container" style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
-                             <RobotOutlined style={{fontSize: 60, color: 'var(--chatbot-text-secondary)', marginBottom: 20}}/>
-                            <Title level={3} style={{color: 'var(--chatbot-text-secondary)'}}>Nenhum Perfil Selecionado</Title>
-                            <Paragraph style={{color: 'var(--chatbot-text-secondary)'}}>
-                                Por favor, selecione um perfil (PF/PJ) no topo da página para interagir com o assistente.
-                            </Paragraph>
-                             <Button type="primary" onClick={() => window.location.href='/painel/meu-perfil'} className="profile-button-chat">Configurar Perfis</Button>
-                        </div>
-                    </Content>
-                </Layout>
-          </Layout>
+        <Content className="chatbot-content-area">
+            <div className="chat-container" style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
+                  <RobotOutlined style={{fontSize: 60, color: 'var(--chatbot-text-secondary)', marginBottom: 20}}/>
+                <Title level={3} style={{color: 'var(--chatbot-text-secondary)'}}>Nenhum Perfil Selecionado</Title>
+                <Paragraph style={{color: 'var(--chatbot-text-secondary)'}}>
+                    Por favor, selecione um perfil (PF/PJ) no topo da página para interagir com o assistente.
+                </Paragraph>
+                  <Button type="primary" onClick={() => window.location.href='/painel/meu-perfil'} className="profile-button-chat">Configurar Perfis</Button>
+            </div>
+        </Content>
       )
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }} className="chatbot-page-layout">
-      <SidebarPanel
-        collapsed={sidebarCollapsed}
-        onCollapse={setSidebarCollapsed}
-        selectedProfileType={currentProfile?.type}
-      />
-      <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s ease' }}>
-        <HeaderPanel
-          userName={userNameForHeader}
-          appName={sidebarCollapsed ? "" : "MAP Chat"}
-        />
-        <Content className="chatbot-content-area">
-          <div className="chat-container">
-            {(storageKey && messages.length <= 1 && !isAiTyping && predefinedActions.length > 0 && !messages.find(m => m.resourceContext)) && (
-              <div className="chat-initial-screen">
-                <div className="initial-icon-wrapper">
-                  <RobotOutlined className="initial-icon" />
-                </div>
-                <Title level={2} className="initial-title animated-text">
-                  Pronto para ajudar com <Text style={{color: 'var(--map-dourado)'}}>{currentProfile?.name}</Text>!
-                </Title>
-                <Paragraph className="initial-subtitle animated-text" style={{ animationDelay: '0.2s' }}>
-                  Sou seu assistente financeiro. Pergunte-me qualquer coisa ou escolha uma sugestão abaixo.
-                </Paragraph>
-                <Space wrap size={[12, 16]} justify="center" className="initial-actions-container">
-                  {predefinedActions.map((action, index) => (
-                    <Button
-                      key={action.id}
-                      className="initial-action-button animated-button"
-                      style={{ animationDelay: `${0.4 + index * 0.1}s` }}
-                      icon={action.icon || <ExperimentOutlined />}
-                      onClick={() => handleSuggestionClick(action)}
-                    >
-                      {action.label}
-                    </Button>
-                  ))}
-                </Space>
-              </div>
-            )}
-
-            <div className="messages-list">
-              {messages.map((msg) => (
-                <React.Fragment key={msg.id}>
-                  <div
-                    className={`message-item ${msg.sender === 'user' ? 'user-message' : 'ai-message'} message-appear`}
-                  >
-                    <Avatar
-                      className="message-avatar"
-                      icon={msg.sender === 'user' ? <UserOutlined /> : <RobotOutlined />}
-                    />
-                    <div className="message-content">
-                      <div className="message-bubble">
-                        {msg.sender === 'ai' ? (
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown> 
-                        ) : (
-                          <Paragraph className="message-text" style={{marginBottom: 0}}>{msg.text}</Paragraph>
-                        )}
-                      </div>
-                      <Text className="message-timestamp">
-                        {msg.timestamp instanceof Date ? msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </Text>
-                    </div>
-                  </div>
-                  {msg.sender === 'ai' && msg.resourceContext && (
-                    <div className="resource-actions-chat">
-                        <Button 
-                            icon={<EditOutlined />} 
-                            onClick={() => handleEditResource(msg.resourceContext)}
-                            className="resource-action-btn edit"
-                        >
-                            Editar "{msg.resourceContext.description.substring(0,15)}{msg.resourceContext.description.length > 15 ? '...' : ''}"
-                        </Button>
-                        <Button 
-                            icon={<DeleteOutlined />} 
-                            onClick={() => handleDeleteResource(msg.resourceContext)}
-                            className="resource-action-btn delete"
-                            danger
-                        >
-                            Excluir
-                        </Button>
-                    </div>
-                  )}
-                </React.Fragment>
+    <Content className="chatbot-content-area">
+      <div className="chat-container">
+        {(storageKey && messages.length <= 1 && !isAiTyping && predefinedActions.length > 0 && !messages.find(m => m.resourceContext)) && (
+          <div className="chat-initial-screen">
+            <div className="initial-icon-wrapper">
+              <RobotOutlined className="initial-icon" />
+            </div>
+            <Title level={2} className="initial-title animated-text">
+              Pronto para ajudar com <Text style={{color: 'var(--map-dourado)'}}>{currentProfile?.name}</Text>!
+            </Title>
+            <Paragraph className="initial-subtitle animated-text" style={{ animationDelay: '0.2s' }}>
+              Sou seu assistente financeiro. Pergunte-me qualquer coisa ou escolha uma sugestão abaixo.
+            </Paragraph>
+            <Space wrap size={[12, 16]} justify="center" className="initial-actions-container">
+              {predefinedActions.map((action, index) => (
+                <Button
+                  key={action.id}
+                  className="initial-action-button animated-button"
+                  style={{ animationDelay: `${0.4 + index * 0.1}s` }}
+                  icon={action.icon || <ExperimentOutlined />}
+                  onClick={() => handleSuggestionClick(action)}
+                >
+                  {action.label}
+                </Button>
               ))}
-              {isAiTyping && (
-                <div className="message-item ai-message typing-indicator message-appear">
-                  <Avatar className="message-avatar" icon={<RobotOutlined />} />
-                  <div className="message-content">
-                    <div className="message-bubble">
-                      <Spin indicator={<LoadingOutlined style={{ fontSize: 16, color: 'var(--chatbot-text-primary)' }} spin />} />
-                      <Text style={{ marginLeft: 8, color: 'var(--chatbot-text-primary)', opacity: 0.8 }}>Digitando...</Text>
-                    </div>
+            </Space>
+          </div>
+        )}
+
+        <div className="messages-list">
+          {messages.map((msg) => (
+            <React.Fragment key={msg.id}>
+              <div
+                className={`message-item ${msg.sender === 'user' ? 'user-message' : 'ai-message'} message-appear`}
+              >
+                <Avatar
+                  className="message-avatar"
+                  icon={msg.sender === 'user' ? <UserOutlined /> : <RobotOutlined />}
+                />
+                <div className="message-content">
+                  <div className="message-bubble">
+                    {msg.sender === 'ai' ? (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown> 
+                    ) : (
+                      <Paragraph className="message-text" style={{marginBottom: 0}}>{msg.text}</Paragraph>
+                    )}
                   </div>
+                  <Text className="message-timestamp">
+                    {msg.timestamp instanceof Date ? msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </div>
+              </div>
+              {msg.sender === 'ai' && msg.resourceContext && (
+                <div className="resource-actions-chat">
+                    <Button 
+                        icon={<EditOutlined />} 
+                        onClick={() => handleEditResource(msg.resourceContext)}
+                        className="resource-action-btn edit"
+                    >
+                        Editar "{msg.resourceContext.description.substring(0,15)}{msg.resourceContext.description.length > 15 ? '...' : ''}"
+                    </Button>
+                    <Button 
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleDeleteResource(msg.resourceContext)}
+                        className="resource-action-btn delete"
+                        danger
+                    >
+                        Excluir
+                    </Button>
                 </div>
               )}
-              <div ref={messagesEndRef} />
-            </div>
-            
-            {actionSuggestions.length > 0 && !isAiTyping && (
-                <div className="suggestions-area">
-                    <Text strong style={{color: 'var(--chatbot-text-secondary)', marginBottom: 8, display: 'block'}}>Sugestões:</Text>
-                    <Space wrap size={[8,12]}>
-                        {actionSuggestions.map(sugg => (
-                            <Button key={sugg.id} onClick={() => handleSuggestionClick(sugg)} className="suggestion-button">
-                                {sugg.label}
-                            </Button>
-                        ))}
-                    </Space>
+            </React.Fragment>
+          ))}
+          {isAiTyping && (
+            <div className="message-item ai-message typing-indicator message-appear">
+              <Avatar className="message-avatar" icon={<RobotOutlined />} />
+              <div className="message-content">
+                <div className="message-bubble">
+                  <Spin indicator={<LoadingOutlined style={{ fontSize: 16, color: 'var(--chatbot-text-primary)' }} spin />} />
+                  <Text style={{ marginLeft: 8, color: 'var(--chatbot-text-primary)', opacity: 0.8 }}>Digitando...</Text>
                 </div>
-            )}
-
-            <div className="chat-input-area">
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onPressEnter={handleUserMessageSend}
-                placeholder={currentProfile && storageKey ? `Converse com seu assistente (${currentProfile.name})...` : "Carregando assistente..."}
-                className="chat-input"
-                size="large"
-                disabled={isAiTyping || !currentProfile || loadingProfiles || !isAuthenticated || !storageKey}
-                suffix={
-                  <Button
-                    type="primary"
-                    icon={<SendOutlined />}
-                    onClick={handleUserMessageSend}
-                    className="send-button"
-                    disabled={!inputValue.trim() || isAiTyping || !currentProfile || loadingProfiles || !isAuthenticated || !storageKey}
-                    loading={isAiTyping}
-                  />
-                }
-              />
+              </div>
             </div>
-          </div>
-        </Content>
-      </Layout>
-    </Layout>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        
+        {actionSuggestions.length > 0 && !isAiTyping && (
+            <div className="suggestions-area">
+                <Text strong style={{color: 'var(--chatbot-text-secondary)', marginBottom: 8, display: 'block'}}>Sugestões:</Text>
+                <Space wrap size={[8,12]}>
+                    {actionSuggestions.map(sugg => (
+                        <Button key={sugg.id} onClick={() => handleSuggestionClick(sugg)} className="suggestion-button">
+                            {sugg.label}
+                        </Button>
+                    ))}
+                </Space>
+            </div>
+        )}
+
+        <div className="chat-input-area">
+          <Input
+            ref={inputRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onPressEnter={handleUserMessageSend}
+            placeholder={currentProfile && storageKey ? `Converse com seu assistente (${currentProfile.name})...` : "Carregando assistente..."}
+            className="chat-input"
+            size="large"
+            disabled={isAiTyping || !currentProfile || loadingProfiles || !isAuthenticated || !storageKey}
+            suffix={
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                onClick={handleUserMessageSend}
+                className="send-button"
+                disabled={!inputValue.trim() || isAiTyping || !currentProfile || loadingProfiles || !isAuthenticated || !storageKey}
+                loading={isAiTyping}
+              />
+            }
+          />
+        </div>
+      </div>
+    </Content>
   );
 };
 

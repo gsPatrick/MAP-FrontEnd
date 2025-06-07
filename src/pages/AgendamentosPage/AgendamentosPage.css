@@ -49,10 +49,11 @@
 }
 */
 
-.agendamentos-page-content {
-    padding: 24px 32px; /* Aumentado padding horizontal para 32px */
+/* MODIFICAÇÃO: O Content agora é o container principal da página, então ele recebe o padding e o fundo. */
+.agendamentos-page-content.ant-layout-content {
+    padding: 24px 32px;
     background-color: #f0f2f5; 
-    min-height: calc(100vh - 64px); 
+    /* REMOVIDO: min-height: calc(100vh - 64px); pois o Layout pai já cuida da altura */
 }
 
 .page-header-agendamentos {
@@ -301,7 +302,7 @@
 }
 
 @media (max-width: 767px) {
-    .agendamentos-page-content {
+    .agendamentos-page-content.ant-layout-content {
       padding: 16px; /* Reduz padding em telas menores */
     }
     .page-header-agendamentos {
@@ -330,7 +331,7 @@
     .page-title-agendamentos {
         font-size: 20px; /* Ainda menor em telas muito pequenas */
     }
-    .agendamentos-page-content {
+    .agendamentos-page-content.ant-layout-content {
         padding: 12px; /* Menor padding ainda */
     }
 }

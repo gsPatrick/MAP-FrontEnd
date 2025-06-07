@@ -1,22 +1,11 @@
 /* src/pages/PainelUsuario/CategoriasPage/CategoriasPage.css */
 
-/* :root { */
-    /* Suas variáveis de cor --map-laranja, --map-dourado, etc. */
-    /* --map-laranja: #FA8C16; */
-    /* --map-dourado: #FAAD14; */
-    /* --map-dourado-escuro: #D48806; */
-    /* --map-vermelho-escuro: #CF1322; */
-    /* --map-branco: #ffffff; */
-    /* --map-cinza-claro: #f0f0f0; */
-    /* --map-cinza-texto: #8c8c8c; */
-    /* --header-text-primary: #262626; */
-    /* --header-text-secondary: #595959; */
-/* } */
-
-.categorias-page-main-layout .panel-content-area.categorias-content {
+/* A classe .categorias-page-main-layout foi removida do seletor abaixo,
+   pois o <Layout> que a continha não existe mais neste arquivo. */
+.panel-content-area.categorias-content {
     padding: 24px 32px;
     background-color: #f8f9fc;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 64px); /* Mantém a altura mínima correta */
 }
 
 .page-header-categorias {
@@ -65,7 +54,7 @@
     border-radius: 8px;
     border: 1px solid var(--map-cinza-claro, #e8e8e8);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03); /* Sombra mais sutil */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03);
     background-color: var(--map-branco, #ffffff);
 }
 .categoria-item-card:hover {
@@ -73,14 +62,14 @@
     box-shadow: 0 10px 20px rgba(0,0,0,0.08), 0 6px 6px rgba(0,0,0,0.05);
 }
 .categoria-item-card .ant-card-body {
-    padding: 16px !important; /* Padding interno do card */
+    padding: 16px !important;
 }
 .categoria-item-card .ant-card-actions {
     background: #fafafa;
     border-top: 1px solid var(--map-cinza-claro, #e8e8e8);
 }
 .categoria-item-card .ant-card-actions > li > span:hover .anticon {
-    color: var(--map-laranja, #FA8C16) !important; /* Hover dos ícones de ação */
+    color: var(--map-laranja, #FA8C16) !important;
 }
 .categoria-item-card .ant-card-actions > li > span .anticon-delete:hover {
     color: var(--map-vermelho-escuro, #CF1322) !important;
@@ -89,14 +78,14 @@
 .categoria-card-avatar.ant-avatar {
     background-color: var(--map-laranja-muito-claro, #FFF7E6);
     color: var(--map-laranja, #FA8C16);
-    font-size: 20px; /* Tamanho do ícone no avatar */
+    font-size: 20px;
 }
 
 .categoria-card-nome {
     font-size: 15px;
     font-weight: 500;
     color: var(--header-text-primary, #262626);
-    display: block; /* Para ellipsis funcionar bem */
+    display: block;
 }
 
 
@@ -135,7 +124,8 @@
 }
 
 @media (max-width: 767px) {
-    .categorias-page-main-layout .panel-content-area.categorias-content {
+    /* A classe .categorias-page-main-layout foi removida do seletor abaixo */
+    .panel-content-area.categorias-content {
       padding: 16px;
     }
     .page-header-categorias {

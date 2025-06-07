@@ -1,54 +1,17 @@
 /* src/pages/PainelUsuario/PainelUsuario.css */
 
-/* :root {
-    --map-laranja: #FA8C16;
-    --map-laranja-escuro: #D46B08;
-    --map-laranja-claro: #FFE7BA;
-    --map-laranja-muito-claro: #FFF7E6;
-    --map-dourado: #FAAD14;
-    --map-dourado-escuro: #D48806;
-    --map-verde-claro: #8BC34A;
-    --map-verde-escuro: #689F38;
-    --map-verde-muito-claro: #F6FFED;
-    --map-vermelho-claro: #F44336;
-    --map-vermelho-escuro: #CF1322;
-    --map-vermelho-muito-claro: #FFF1F0;
-    --map-azul-sistema-claro: #E6F7FF;
-    --map-azul-sistema: #1677ff; 
-    --map-azul-sistema-escuro: #0958d9;
-    --map-branco: #ffffff;
-    --map-preto: #262626; 
-    --map-cinza-claro: #f0f0f0;
-    --map-cinza-medio: #d9d9d9;
-    --map-cinza-texto: #8c8c8c; 
-    --header-text-primary: #303133;
-    --header-text-secondary: #606266;
-    --header-icon-color: #595959;
-    --header-icon-hover-bg: #f0f0f0;
-    --link-hover-color: var(--map-dourado-escuro, #D48806);
-} */
-
 body.painel-active {
   background-color: #f0f4f8;
 }
 
-.painel-usuario-main-layout .ant-layout-sider-trigger {
-  background-color: var(--map-laranja, #FA8C16) !important;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
-}
-.panel-sidebar { 
-  box-shadow: 3px 0 15px rgba(0, 0, 0, 0.07);
-}
-
-.site-layout {
-  background-color: transparent;
-}
+/* REMOVIDAS as regras para .painel-usuario-main-layout, .panel-sidebar e .site-layout */
 
 .panel-content-area.dashboard-overview {
   background-color: transparent !important;
   padding: 24px 32px;
   border-radius: 0;
-  min-height: calc(100vh - 64px - 53px); 
+  /* A altura mínima agora é controlada pelo layout pai, esta regra pode ser removida ou ajustada */
+  min-height: calc(100vh - 64px); 
 }
 
 .animated-card {
@@ -308,7 +271,7 @@ body.painel-active {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 64px - 53px);
+  min-height: calc(100vh - 64px); /* Ajustado para não subtrair o footer que foi removido */
 }
 .skeleton-loader-card {
   width: 100%;
@@ -354,23 +317,22 @@ body.painel-active {
   color: var(--header-text-primary, #303133);
 }
 
-/* Ajuste para diminuir margens internas do formulário nos modais */
 .modal-nova-transacao .ant-form-item,
 .modal-novo-compromisso .ant-form-item,
 .modal-nova-recorrencia .ant-form-item {
-  margin-bottom: 16px; /* Reduzido de 24px (padrão AntD) para 16px */
+  margin-bottom: 16px;
 }
 .modal-nova-transacao .ant-form-item-label > label,
 .modal-novo-compromisso .ant-form-item-label > label,
 .modal-nova-recorrencia .ant-form-item-label > label {
   font-weight: 500;
   color: var(--header-text-secondary, #606266);
-  padding-bottom: 4px; /* Reduzido de 8px */
+  padding-bottom: 4px;
 }
 .modal-nova-transacao .ant-modal-body,
 .modal-novo-compromisso .ant-modal-body,
 .modal-nova-recorrencia .ant-modal-body {
-  padding: 20px 24px; /* Padding do corpo do modal */
+  padding: 20px 24px;
 }
 
 
@@ -494,7 +456,7 @@ body.painel-active {
 .chart-card .ant-card-body, .list-card .ant-card-body {
   padding: 12px !important;
 }
-  .panel-content-area.dashboard-overview { padding: 20px 16px; } /* Padding lateral menor em mobile */
+  .panel-content-area.dashboard-overview { padding: 20px 16px; }
   .dashboard-header-title { margin-bottom: 20px; padding-left: 10px; border-left-width: 4px; }
   .dashboard-greeting { font-size: 22px !important; }
   .quick-actions-card .ant-btn { font-size: 12px; height: 34px; }
@@ -507,7 +469,7 @@ body.painel-active {
   .chart-card, .list-card {
       margin-bottom: 16px;
   }
-  .panel-content-area.dashboard-overview { padding: 16px 12px; } /* Padding ainda menor */
+  .panel-content-area.dashboard-overview { padding: 16px 12px; }
   .dashboard-greeting { font-size: 20px !important; }
   .dashboard-welcome-text { font-size: 13px; }
 

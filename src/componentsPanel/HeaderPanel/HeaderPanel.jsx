@@ -1,33 +1,27 @@
-import React, { useState } from 'react'; // Mantém useState para estados locais (embora notificationsCount seja removido, pode haver outros usos futuros)
+// src/componentsPanel/HeaderPanel/HeaderPanel.jsx
+import React from 'react';
 import { Layout, Avatar, Typography, Select, Space, Dropdown, Menu, Tooltip, Button, Divider } from 'antd';
 import {
-  UserOutlined,
-  // BellOutlined, // Removido - não mais usado para notificações
-  SettingOutlined,
-  LogoutOutlined,
-  DownOutlined,
-  CreditCardOutlined,
-  ShopOutlined,
-  MessageOutlined,
-  GlobalOutlined,
-  LineChartOutlined,
-  SwapOutlined
+  UserOutlined, SettingOutlined, LogoutOutlined, DownOutlined,
+  CreditCardOutlined, ShopOutlined, MessageOutlined, GlobalOutlined,
+  LineChartOutlined, SwapOutlined, MenuOutlined // <<< IMPORTAR MenuOutlined
 } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
-import { useProfile } from '../../contexts/ProfileContext'; // <<< IMPORTAR useProfile
+import { useProfile } from '../../contexts/ProfileContext';
 import './HeaderPanel.css';
 
 const { Header } = Layout;
 const { Text } = Typography;
 const { Option } = Select;
 
+// ACEITAR AS NOVAS PROPS: isMobile e onMenuClick
 const HeaderPanel = ({
   userName = "Usuário Exemplo",
-  appName = "No Controle"
+  appName = "No Controle",
+  isMobile,
+  onMenuClick
 }) => {
   const navigate = useNavigate();
-  // const [notificationsCount, setNotificationsCount] = useState(3); // Removido estado de notificações
-
   const {
     userProfiles,
     selectedProfileId,
@@ -39,22 +33,18 @@ const HeaderPanel = ({
   const currentProfileDetails = currentProfile || profilesToUse[0];
 
   const handleLogout = () => {
-    console.log('Logout');
+    localStorage.removeItem('authToken'); // <<< IMPORTANTE: LIMPAR TOKEN NO LOGOUT
     localStorage.removeItem('selectedProfileId');
     setSelectedProfileId(null);
     navigate('/login');
   };
-
-  // const handleProfileChangeInDropdown = (e) => { // Esta função não estava sendo usada e pode ser removida se não houver intenção futura
-  //   setSelectedProfileId(e.key);
-  // };
 
   const handleProfileChangeInSelect = (value) => {
     setSelectedProfileId(value);
   };
 
   const userMenu = (
-    <Menu className="header-panel-user-dropdown-menu">
+    <Menu className="user-menu-dropdown-overlay">
       <Menu.Item key="profile" icon={<UserOutlined />}>
         <Link to="/painel/meu-perfil">Meu Perfil</Link>
       </Menu.Item>
@@ -87,11 +77,22 @@ const HeaderPanel = ({
   return (
     <Header className="header-panel modern refined">
       <div className="header-panel-left-section">
+        {/* Renderiza o botão de menu em modo mobile */}
+        {isMobile && (
+          <Button
+            className="menu-toggle-btn"
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMenuClick}
+            style={{ marginRight: '10px' }}
+          />
+        )}
         <div className="header-panel-brand">
           <LineChartOutlined className="brand-icon" />
-          <Text className="brand-name">{appName}</Text>
+          {/* Esconde o texto da marca em mobile para dar espaço */}
+          {!isMobile && <Text className="brand-name">{appName}</Text>}
         </div>
-        {currentProfileDetails && currentProfileDetails.id !== 'loading_pf' && (
+        {!isMobile && currentProfileDetails && currentProfileDetails.id !== 'loading_pf' && (
           <>
             <Divider type="vertical" className="brand-profile-divider" />
             <div className="current-profile-name-header">
@@ -105,7 +106,7 @@ const HeaderPanel = ({
       </div>
 
       <div className="header-panel-right-section">
-        {profilesToUse.length > 1 && profilesToUse[0].id !== 'loading_pf' && (
+        {!isMobile && profilesToUse.length > 1 && profilesToUse[0].id !== 'loading_pf' && (
             <Select
                 value={selectedProfileId}
                 className="profile-selector-modern header-item"
@@ -139,12 +140,9 @@ const HeaderPanel = ({
                 shape="circle"
                 icon={<MessageOutlined />}
                 className="header-panel-action-btn header-item"
-                onClick={() => navigate('/painel/chat')} // <<< MODIFICADO AQUI
+                onClick={() => navigate('/painel/chat')}
             />
           </Tooltip>
-
-          {/* Seção de notificações removida daqui */}
-
           <Dropdown overlay={userMenu} trigger={['click']} placement="bottomRight" overlayClassName="user-menu-dropdown-overlay">
             <a onClick={(e) => e.preventDefault()} className="user-avatar-link header-item">
               <Avatar size={36} icon={<UserOutlined />} className="user-avatar-modern" />

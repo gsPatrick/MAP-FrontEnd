@@ -2,20 +2,18 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Button, List, Card, Space, Tooltip,
-  Popconfirm, message, Tag, Row, Col, Empty, ConfigProvider, Avatar, Spin // Removido Switch, pois já é usado no modal
+  Popconfirm, message, Tag, Row, Col, Empty, ConfigProvider, Avatar, Spin, Result // Adicionado Result
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, InfoCircleOutlined,
   UserOutlined, PhoneOutlined, MailOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  UserAddOutlined, LoadingOutlined, TeamOutlined // TeamOutlined para ícone da página
+  UserAddOutlined, LoadingOutlined, TeamOutlined, StopOutlined // Adicionado StopOutlined
 } from '@ant-design/icons';
 import ptBR from 'antd/lib/locale/pt_BR';
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
-import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
-import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
 import ModalBusinessClientForm from '../../modals/ModalBusinessClientForm/ModalBusinessClientForm';
 
 import './BusinessClientsPage.css';
@@ -30,8 +28,8 @@ const BusinessClientsPage = () => {
     isAuthenticated
   } = useProfile();
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const userNameForHeader = currentProfile?.ownerClientName || currentProfile?.name || "Usuário Clientes";
+  // REMOVIDO: const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // REMOVIDO: const userNameForHeader = ...
 
   const [businessClients, setBusinessClients] = useState([]);
   const [loadingClients, setLoadingClients] = useState(true);
@@ -50,16 +48,10 @@ const BusinessClientsPage = () => {
     }
     setLoadingClients(true);
     try {
-      // A rota no backend espera :financialAccountId e é /financial-accounts/:financialAccountId/business-clients
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients`, {
         params: { sortBy: 'name', sortOrder: 'ASC', limit: 200 }
       });
-      // Ajuste conforme a estrutura da sua resposta da API
-      // Assumindo que a lista de clientes está em response.data.data (se seu controller retorna { status, data, totalItems })
-      // ou response.data.businessClients (se o controller retorna { ..., businessClients, totalItems })
       if (response.data && response.data.status === 'success') {
-        // Se o controller retorna { data: [clientes], totalItems: X }
-        // ou se retorna { businessClients: [clientes], totalItems: X }
         const clientsArray = response.data.data || response.data.businessClients || [];
         setBusinessClients(clientsArray.map(client => ({ ...client, id: client.id.toString() })));
       } else {
@@ -69,7 +61,6 @@ const BusinessClientsPage = () => {
     } catch (error) {
       console.error("Erro ao carregar clientes de negócio:", error);
       setBusinessClients([]);
-      // O interceptor do apiClient deve mostrar mensagens de erro de rede/servidor
     } finally {
       setLoadingClients(false);
     }
@@ -107,8 +98,6 @@ const BusinessClientsPage = () => {
     setSavingClient(true);
     
     const payload = { ...values };
-    // O backend já trata string vazia para photoUrl como null através do hook do modelo
-    // Não precisamos fazer a conversão aqui no frontend explicitamente.
 
     try {
       if (editingClient) {
@@ -122,13 +111,12 @@ const BusinessClientsPage = () => {
       handleModalCancel();
     } catch (error) {
       console.error("Erro ao salvar cliente de negócio:", error);
-      // A mensagem de erro já deve ser exibida pelo interceptor global do apiClient
     } finally {
       setSavingClient(false);
     }
   };
 
-  const handleDelete = async (clientToDelete) => { // Renomeado para clientToDelete para clareza
+  const handleDelete = async (clientToDelete) => {
     if (!currentProfile || !isBusinessProfile) return;
     setDeletingClient(true);
     try {
@@ -137,7 +125,6 @@ const BusinessClientsPage = () => {
       fetchBusinessClients();
     } catch (error) {
       console.error("Erro ao excluir cliente de negócio:", error);
-      // Interceptor deve tratar
     } finally {
       setDeletingClient(false);
     }
@@ -166,7 +153,7 @@ const BusinessClientsPage = () => {
           cancelText="Não"
           placement="topRight"
           disabled={savingClient || deletingClient || loadingClients}
-          okButtonProps={{ danger: true, className: 'popconfirm-delete-btn' }} // Adicionando classe para estilização se necessário
+          okButtonProps={{ danger: true, className: 'popconfirm-delete-btn' }}
           cancelButtonProps={{ className: 'popconfirm-cancel-btn-custom' }}
         >
           <Tooltip title="Excluir Cliente">
@@ -184,19 +171,13 @@ const BusinessClientsPage = () => {
     >
       <List.Item.Meta
          avatar={
-            // AQUI ESTÁ O PONTO CHAVE PARA EXIBIR A IMAGEM:
-            // O Avatar do Ant Design tentará carregar a `src`.
-            // Se `src` for null, undefined, ou uma string vazia, ele mostrará o `icon`.
-            // Se `item.photoUrl` for uma URL válida, a imagem será carregada.
-            // Se for uma URL inválida ou a imagem não puder ser carregada, o AntD Avatar pode mostrar um ícone de erro ou o fallback.
             <Avatar 
                 size={48} 
-                src={item.photoUrl || undefined} // Passa undefined se photoUrl for null/vazio para forçar o ícone
-                icon={<UserOutlined />} // Ícone de fallback
-                className={`${item.isActive ? 'active-avatar' : 'inactive-avatar'} client-list-avatar`} // Classe adicional
-                alt={item.name} // Texto alternativo para acessibilidade
+                src={item.photoUrl || undefined}
+                icon={<UserOutlined />}
+                className={`${item.isActive ? 'active-avatar' : 'inactive-avatar'} client-list-avatar`}
+                alt={item.name}
             >
-              {/* Fallback para iniciais se não houver photoUrl E houver nome */}
               {!item.photoUrl && item.name ? item.name.charAt(0).toUpperCase() : null}
             </Avatar>
          }
@@ -221,145 +202,113 @@ const BusinessClientsPage = () => {
     </List.Item>
   );
 
-    // --- Lógica de Renderização Condicional ---
+    // --- Lógica de Renderização Condicional Simplificada ---
     if (loadingProfiles || (loadingClients && isAuthenticated && currentProfile && isBusinessProfile)) {
         return (
-           <Layout style={{ minHeight: '100vh' }}>
-                <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-                <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                    <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-                    <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
-                        <Spin indicator={<TeamOutlined style={{ fontSize: 48, color: 'var(--map-laranja)' }} spin />} tip="Carregando Clientes..." size="large"/>
-                    </Content>
-                </Layout>
-            </Layout>
+            <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
+                <Spin indicator={<TeamOutlined style={{ fontSize: 48, color: 'var(--map-laranja)' }} spin />} tip="Carregando Clientes..." size="large"/>
+            </Content>
         );
     }
 
     if (!isAuthenticated && !loadingProfiles) {
         return (
-            <Layout style={{ minHeight: '100vh' }}>
-                 <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null} />
-                 <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                    <HeaderPanel userName="Visitante" appName={sidebarCollapsed ? "" : "MAP"}/>
-                    <Content style={{ padding: 50, textAlign: 'center' }}>
-                        <Result
-                            status="403"
-                            title="Acesso Negado"
-                            subTitle="Você precisa estar logado para acessar esta página."
-                            extra={<Button type="primary" onClick={() => window.location.href = '/login'}>Fazer Login</Button>}
-                        />
-                    </Content>
-                </Layout>
-            </Layout>
+            <Content style={{ padding: 50, textAlign: 'center' }}>
+                <Result
+                    status="403"
+                    title="Acesso Negado"
+                    subTitle="Você precisa estar logado para acessar esta página."
+                    extra={<Button type="primary" onClick={() => window.location.href = '/login'}>Fazer Login</Button>}
+                />
+            </Content>
         );
     }
 
     if (currentProfile && !isBusinessProfile && !loadingProfiles) {
         return (
-             <Layout style={{ minHeight: '100vh' }}>
-                <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-                <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                    <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-                    <Content className="restricted-access-content" style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
-                        <Result
-                            status="warning"
-                            icon={<StopOutlined style={{color: 'var(--map-laranja)'}}/>}
-                            title="Funcionalidade Restrita"
-                            subTitle="Clientes de Negócio estão disponíveis apenas para perfis PJ ou MEI."
-                        />
-                    </Content>
-                </Layout>
-            </Layout>
+            <Content className="restricted-access-content" style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
+                <Result
+                    status="warning"
+                    icon={<StopOutlined style={{color: 'var(--map-laranja)'}}/>}
+                    title="Funcionalidade Restrita"
+                    subTitle="Clientes de Negócio estão disponíveis apenas para perfis PJ ou MEI."
+                />
+            </Content>
         );
     }
     
     if (!currentProfile && isAuthenticated && !loadingProfiles) {
         return (
-             <Layout style={{ minHeight: '100vh' }}>
-                <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null} />
-                <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-                    <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-                    <Content style={{ padding: 50, textAlign: 'center' }}>
-                         <Result
-                            status="info"
-                            icon={<UserOutlined style={{color: 'var(--map-laranja)'}}/>}
-                            title="Nenhum Perfil Financeiro Selecionado"
-                            subTitle="Por favor, selecione um perfil PJ ou MEI no topo da página para gerenciar clientes de negócio."
-                            extra={<Button type="primary" onClick={() => document.querySelector('.profile-selector-modern')?.click()}>Selecionar Perfil</Button>}
-                        />
-                    </Content>
-                </Layout>
-            </Layout>
+            <Content style={{ padding: 50, textAlign: 'center' }}>
+                 <Result
+                    status="info"
+                    icon={<UserOutlined style={{color: 'var(--map-laranja)'}}/>}
+                    title="Nenhum Perfil Financeiro Selecionado"
+                    subTitle="Por favor, selecione um perfil PJ ou MEI no topo da página para gerenciar clientes de negócio."
+                    extra={<Button type="primary" onClick={() => document.querySelector('.profile-selector-modern')?.click()}>Selecionar Perfil</Button>}
+                />
+            </Content>
         );
     }
 
     // --- Renderização Principal ---
     return (
       <ConfigProvider locale={ptBR}>
-        <Layout style={{ minHeight: '100vh' }}>
-          <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-          <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s' }}>
-            <HeaderPanel userName={userNameForHeader} appName={sidebarCollapsed ? "" : "MAP"}/>
-            <Content className="business-clients-page-content">
-              <Row justify="space-between" align="middle" className="page-header-clients">
-                <Col>
-                  <Title level={2} className="page-title-clients">Meus Clientes de Negócio</Title>
-                  <Paragraph className="page-subtitle-clients">
-                    Gerencie seus clientes do perfil: <Text strong>{currentProfile?.name || 'N/D'}</Text>.
-                  </Paragraph>
-                </Col>
-                <Col>
-                  <Button
-                    type="primary"
-                    icon={<UserAddOutlined />}
-                    size="large"
-                    onClick={() => showModal()}
-                    className="btn-create-client"
-                    disabled={loadingClients || savingClient || deletingClient} 
-                  >
-                    Novo Cliente
-                  </Button>
-                </Col>
-              </Row>
+        <Content className="business-clients-page-content">
+          <Row justify="space-between" align="middle" className="page-header-clients">
+            <Col>
+              <Title level={2} className="page-title-clients">Meus Clientes de Negócio</Title>
+              <Paragraph className="page-subtitle-clients">
+                Gerencie seus clientes do perfil: <Text strong>{currentProfile?.name || 'N/D'}</Text>.
+              </Paragraph>
+            </Col>
+            <Col>
+              <Button
+                type="primary"
+                icon={<UserAddOutlined />}
+                size="large"
+                onClick={() => showModal()}
+                className="btn-create-client"
+                disabled={loadingClients || savingClient || deletingClient} 
+              >
+                Novo Cliente
+              </Button>
+            </Col>
+          </Row>
 
-              <Card bordered={false} className="clients-card">
-                {/* O loading principal da tela já indica o carregamento. Não precisa de Spin na List aqui. */}
-                {businessClients.length > 0 ? (
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={businessClients}
-                    renderItem={renderClientItem}
-                    className="business-clients-list"
-                  />
-                ) : (
-                   <Empty
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                            loadingClients 
-                                ? "Carregando clientes..." 
-                                : (currentProfile ? `Nenhum cliente cadastrado para ${currentProfile.name}.` : "Selecione um perfil PJ/MEI.")
-                        }
-                    >
-                        {(!loadingClients && currentProfile && isBusinessProfile) && ( // Só mostra o botão se não estiver carregando E tiver perfil PJ/MEI
-                            <Button type="primary" onClick={() => showModal()} className="btn-create-client">
-                                Adicionar Primeiro Cliente
-                            </Button>
-                        )}
-                    </Empty>
-                )}
-              </Card>
-
-            </Content>
-          </Layout>
-           <ModalBusinessClientForm
-              open={isModalVisible}
-              onCancel={handleModalCancel}
-              onFinish={handleModalFinish}
-              initialValues={editingClient}
-              loading={savingClient}
-            />
-        </Layout>
+          <Card bordered={false} className="clients-card">
+            {businessClients.length > 0 ? (
+              <List
+                itemLayout="horizontal"
+                dataSource={businessClients}
+                renderItem={renderClientItem}
+                className="business-clients-list"
+              />
+            ) : (
+               <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={
+                        loadingClients 
+                            ? "Carregando clientes..." 
+                            : (currentProfile ? `Nenhum cliente cadastrado para ${currentProfile.name}.` : "Selecione um perfil PJ/MEI.")
+                    }
+                >
+                    {(!loadingClients && currentProfile && isBusinessProfile) && (
+                        <Button type="primary" onClick={() => showModal()} className="btn-create-client">
+                            Adicionar Primeiro Cliente
+                        </Button>
+                    )}
+                </Empty>
+            )}
+          </Card>
+        </Content>
+        <ModalBusinessClientForm
+          open={isModalVisible}
+          onCancel={handleModalCancel}
+          onFinish={handleModalFinish}
+          initialValues={editingClient}
+          loading={savingClient}
+        />
       </ConfigProvider>
     );
 };

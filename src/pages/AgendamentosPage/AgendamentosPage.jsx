@@ -18,8 +18,9 @@ import ptBR from 'antd/lib/locale/pt_BR';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
-import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
-import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
+// REMOVIDO: HeaderPanel e SidebarPanel
+// import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
+// import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
 
 import './AgendamentosPage.css'; 
 
@@ -36,7 +37,8 @@ const AgendamentosPage = () => {
     isAuthenticated
   } = useProfile();
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // REMOVIDO: Estado do sidebar
+  // const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const userNameForHeader = currentProfile?.ownerClientName || currentProfile?.name || "Usuário Agendamentos";
 
   const [agendamentos, setAgendamentos] = useState([]);
@@ -383,161 +385,148 @@ const AgendamentosPage = () => {
   // --- Renderização Principal e de Loading/Erro ---
   if (loadingProfiles || (loadingAgendamentos && isAuthenticated && currentProfile)) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-        <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}>
-          <HeaderPanel userName={userNameForHeader} />
-          <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
-               <Spin indicator={<CalendarFilled style={{fontSize: 48, color: 'var(--map-laranja)'}} spin/>}/>
-          </Content>
-        </Layout>
-      </Layout>
+        <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
+             <Spin indicator={<CalendarFilled style={{fontSize: 48, color: 'var(--map-laranja)'}} spin/>}/>
+        </Content>
     );
   }
 
   if (!isAuthenticated && !loadingProfiles) {
-    return ( <Layout style={{ minHeight: '100vh' }}><Content style={{ padding: 50, textAlign: 'center' }}><Title level={3}>Acesso Negado</Title><Paragraph>Você precisa estar logado para acessar esta página.</Paragraph></Content></Layout> );
+    return ( <Content style={{ padding: 50, textAlign: 'center' }}><Title level={3}>Acesso Negado</Title><Paragraph>Você precisa estar logado para acessar esta página.</Paragraph></Content> );
   }
 
   if (!currentProfile && isAuthenticated && !loadingProfiles) {
-    return ( <Layout style={{ minHeight: '100vh' }}><SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={null} /><Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220 }}><HeaderPanel userName={userNameForHeader} /><Content style={{ padding: 50, textAlign: 'center' }}><Title level={3}>Nenhum Perfil Selecionado</Title><Paragraph>Por favor, selecione um perfil financeiro para gerenciar agendamentos.</Paragraph></Content></Layout></Layout> );
+    return ( <Content style={{ padding: 50, textAlign: 'center' }}><Title level={3}>Nenhum Perfil Selecionado</Title><Paragraph>Por favor, selecione um perfil financeiro para gerenciar agendamentos.</Paragraph></Content> );
   }
 
   return (
     <ConfigProvider locale={ptBR}>
-      <Layout style={{ minHeight: '100vh' }}>
-        <SidebarPanel collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} selectedProfileType={currentProfile?.type} />
-        <Layout className="site-layout" style={{ marginLeft: sidebarCollapsed ? 80 : 220, transition: 'margin-left 0.2s' }}>
-          <HeaderPanel userName={userNameForHeader} />
-          <Content className="agendamentos-page-content">
-            <Row justify="space-between" align="middle" className="page-header-agendamentos">
-              <Col>
-                <Title level={2} className="page-title-agendamentos">Meus Agendamentos</Title>
-                <Paragraph className="page-subtitle-agendamentos">
-                  Organize seus compromissos para o perfil <Text strong>{currentProfile?.name}</Text>.
-                </Paragraph>
-              </Col>
-              <Col>
-                <Button type="primary" icon={<PlusOutlined />} size="large" onClick={() => showModal()} className="btn-criar-agendamento" loading={loadingAgendamentos} >
-                  Novo Agendamento
-                </Button>
-              </Col>
-            </Row>
+      <Content className="agendamentos-page-content">
+        <Row justify="space-between" align="middle" className="page-header-agendamentos">
+          <Col>
+            <Title level={2} className="page-title-agendamentos">Meus Agendamentos</Title>
+            <Paragraph className="page-subtitle-agendamentos">
+              Organize seus compromissos para o perfil <Text strong>{currentProfile?.name}</Text>.
+            </Paragraph>
+          </Col>
+          <Col>
+            <Button type="primary" icon={<PlusOutlined />} size="large" onClick={() => showModal()} className="btn-criar-agendamento" loading={loadingAgendamentos} >
+              Novo Agendamento
+            </Button>
+          </Col>
+        </Row>
 
-            <Card bordered={false} className="agendamentos-card">
-              {sortedAgendamentos.length > 0 ? (
-                <List itemLayout="horizontal" dataSource={sortedAgendamentos} renderItem={renderAgendamentoItem} className="agendamentos-list" loading={loadingAgendamentos} />
-              ) : (
-                 <Empty description={loadingAgendamentos ? "Carregando agendamentos..." : `Nenhum agendamento encontrado para ${currentProfile?.name}.`} image={loadingAgendamentos ? <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: 'var(--map-laranja)' }} spin />} /> : Empty.PRESENTED_IMAGE_SIMPLE} />
-              )}
-            </Card>
-          </Content>
-        </Layout>
+        <Card bordered={false} className="agendamentos-card">
+          {sortedAgendamentos.length > 0 ? (
+            <List itemLayout="horizontal" dataSource={sortedAgendamentos} renderItem={renderAgendamentoItem} className="agendamentos-list" loading={loadingAgendamentos} />
+          ) : (
+             <Empty description={loadingAgendamentos ? "Carregando agendamentos..." : `Nenhum agendamento encontrado para ${currentProfile?.name}.`} image={loadingAgendamentos ? <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: 'var(--map-laranja)' }} spin />} /> : Empty.PRESENTED_IMAGE_SIMPLE} />
+          )}
+        </Card>
+      </Content>
 
-        {/* Modal de Criação/Edição de Agendamento */}
-        <Modal
-          title={editingAgendamento ? "Editar Agendamento" : "Criar Novo Agendamento/Lembrete"}
-          open={isModalVisible} onCancel={handleCancel} footer={null}
-          className="agendamento-modal" destroyOnClose width={600}
-          confirmLoading={loadingAgendamentos}
-        >
-          <Form form={form} layout="vertical" onFinish={onFinishModal} disabled={loadingAgendamentos}>
-            <Form.Item name="titulo" label="Título do Agendamento/Lembrete" rules={[{ required: true, message: 'Por favor, insira um título!' }]}>
-              <Input placeholder="Ex: Reunião com equipe, Pagar conta X" />
-            </Form.Item>
-            <Form.Item label="Definir Prazo Como:">
-                <Radio.Group onChange={(e) => setPrazoTipoModal(e.target.value)} value={prazoTipoModal}>
-                    <Radio.Button value="data">Data e Hora Específica</Radio.Button>
-                    <Radio.Button value="relativo">Relativo a Agora</Radio.Button>
-                </Radio.Group>
-            </Form.Item>
-            {prazoTipoModal === 'data' && (
-                <Form.Item name="prazoPicker" label="Prazo" rules={prazoTipoModal === 'data' ? [{ required: true, message: 'Por favor, selecione o prazo!' }] : []}>
-                    <DatePicker showTime={{ format: 'HH:mm' }} format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} placeholder="Selecione data e hora" />
-                </Form.Item>
-            )}
-            {prazoTipoModal === 'relativo' && (
-                 <Form.Item label="Prazo Relativo" rules={prazoTipoModal === 'relativo' ? [{ required: true, message: 'Por favor, defina um prazo relativo!' }] : []}>
-                    {renderPrazoRelativoFormModal()}
-                 </Form.Item>
-            )}
+      {/* Modal de Criação/Edição de Agendamento */}
+      <Modal
+        title={editingAgendamento ? "Editar Agendamento" : "Criar Novo Agendamento/Lembrete"}
+        open={isModalVisible} onCancel={handleCancel} footer={null}
+        className="agendamento-modal" destroyOnClose width={600}
+        confirmLoading={loadingAgendamentos}
+      >
+        <Form form={form} layout="vertical" onFinish={onFinishModal} disabled={loadingAgendamentos}>
+          <Form.Item name="titulo" label="Título do Agendamento/Lembrete" rules={[{ required: true, message: 'Por favor, insira um título!' }]}>
+            <Input placeholder="Ex: Reunião com equipe, Pagar conta X" />
+          </Form.Item>
+          <Form.Item label="Definir Prazo Como:">
+              <Radio.Group onChange={(e) => setPrazoTipoModal(e.target.value)} value={prazoTipoModal}>
+                  <Radio.Button value="data">Data e Hora Específica</Radio.Button>
+                  <Radio.Button value="relativo">Relativo a Agora</Radio.Button>
+              </Radio.Group>
+          </Form.Item>
+          {prazoTipoModal === 'data' && (
+              <Form.Item name="prazoPicker" label="Prazo" rules={prazoTipoModal === 'data' ? [{ required: true, message: 'Por favor, selecione o prazo!' }] : []}>
+                  <DatePicker showTime={{ format: 'HH:mm' }} format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} placeholder="Selecione data e hora" />
+              </Form.Item>
+          )}
+          {prazoTipoModal === 'relativo' && (
+               <Form.Item label="Prazo Relativo" rules={prazoTipoModal === 'relativo' ? [{ required: true, message: 'Por favor, defina um prazo relativo!' }] : []}>
+                  {renderPrazoRelativoFormModal()}
+               </Form.Item>
+          )}
 
-            {isBusinessProfile && (
-                <Form.Item
-                    name="businessClientIds"
-                    label={ <Space> Clientes de Negócio Associados (Opcional) {loadingBusinessClients && <Spin size="small" />} </Space> }
-                >
-                    <Select
-                        mode="multiple" placeholder="Selecione clientes de negócio..." style={{ width: '100%' }}
-                        loading={loadingBusinessClients} disabled={loadingBusinessClients} allowClear
-                        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase()) }
-                        optionRender={(option) => ( 
-                            <Space>
-                                <Avatar src={option.data.photoUrl} icon={!option.data.photoUrl && <UserOutlined />} size="small" />
-                                {option.data.label}
-                            </Space>
-                        )}
-                        tagRender={({ label, value, closable, onClose }) => {
-                            const clientOption = businessClientsList.find(c => c.value === value);
-                            return (
-                                <Tag closable={closable} onClose={onClose} style={{ marginRight: 3, display: 'flex', alignItems: 'center', padding: '2px 6px' }}>
-                                     <Avatar src={clientOption?.photoUrl} icon={!clientOption?.photoUrl && <UserOutlined />} size="small" style={{ marginRight: 5 }} />
-                                    {label}
-                                </Tag>
-                            );
-                        }}
-                    >
-                    {businessClientsList.map(client => ( 
-                        <Option key={client.value} value={client.value} label={client.label} data={client}>
-                            {client.label} 
-                        </Option>
-                    ))}
-                    </Select>
-                </Form.Item>
-            )}
+          {isBusinessProfile && (
+              <Form.Item
+                  name="businessClientIds"
+                  label={ <Space> Clientes de Negócio Associados (Opcional) {loadingBusinessClients && <Spin size="small" />} </Space> }
+              >
+                  <Select
+                      mode="multiple" placeholder="Selecione clientes de negócio..." style={{ width: '100%' }}
+                      loading={loadingBusinessClients} disabled={loadingBusinessClients} allowClear
+                      filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase()) }
+                      optionRender={(option) => ( 
+                          <Space>
+                              <Avatar src={option.data.photoUrl} icon={!option.data.photoUrl && <UserOutlined />} size="small" />
+                              {option.data.label}
+                          </Space>
+                      )}
+                      tagRender={({ label, value, closable, onClose }) => {
+                          const clientOption = businessClientsList.find(c => c.value === value);
+                          return (
+                              <Tag closable={closable} onClose={onClose} style={{ marginRight: 3, display: 'flex', alignItems: 'center', padding: '2px 6px' }}>
+                                   <Avatar src={clientOption?.photoUrl} icon={!clientOption?.photoUrl && <UserOutlined />} size="small" style={{ marginRight: 5 }} />
+                                  {label}
+                              </Tag>
+                          );
+                      }}
+                  >
+                  {businessClientsList.map(client => ( 
+                      <Option key={client.value} value={client.value} label={client.label} data={client}>
+                          {client.label} 
+                      </Option>
+                  ))}
+                  </Select>
+              </Form.Item>
+          )}
 
-            <Form.Item name="descricaoAgendamento" label="Descrição do Agendamento" rules={[{ required: true, message: 'Por favor, insira a descrição do agendamento!' }]}>
-              <Input.TextArea rows={3} placeholder="Detalhes sobre o agendamento..." />
-            </Form.Item>
-            <Form.Item style={{ textAlign: 'right', marginTop: '24px' }}>
-              <Button onClick={handleCancel} style={{ marginRight: 8 }} className="cancel-btn-form">Cancelar</Button>
-              <Button type="primary" htmlType="submit" loading={loadingAgendamentos} className="submit-btn-form">
-                {editingAgendamento ? "Salvar Alterações" : "Criar Agendamento"}
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
+          <Form.Item name="descricaoAgendamento" label="Descrição do Agendamento" rules={[{ required: true, message: 'Por favor, insira a descrição do agendamento!' }]}>
+            <Input.TextArea rows={3} placeholder="Detalhes sobre o agendamento..." />
+          </Form.Item>
+          <Form.Item style={{ textAlign: 'right', marginTop: '24px' }}>
+            <Button onClick={handleCancel} style={{ marginRight: 8 }} className="cancel-btn-form">Cancelar</Button>
+            <Button type="primary" htmlType="submit" loading={loadingAgendamentos} className="submit-btn-form">
+              {editingAgendamento ? "Salvar Alterações" : "Criar Agendamento"}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
 
-        <Modal
-            title={
-                <Space>
-                    <ProfileOutlined /> Detalhes do Cliente: <Text strong>{selectedClientForDetails?.name}</Text>
-                </Space>
-            }
-            open={isClientDetailsModalVisible}
-            onCancel={handleClientDetailsModalCancel}
-            footer={[ <Button key="close" onClick={handleClientDetailsModalCancel}>Fechar</Button> ]}
-            className="client-details-modal-agendamentos" 
-        >
-            {selectedClientForDetails ? (
-                <div className="client-details-content">
-                    <Avatar 
-                        size={80} // Aumentado para melhor visualização
-                        src={selectedClientForDetails.photoUrl} 
-                        icon={!selectedClientForDetails.photoUrl && <UserOutlined />} 
-                        style={{ marginBottom: 20, border:'2px solid var(--map-laranja-claro)' }} 
-                    />
-                    <Paragraph><Text strong><UserOutlined /> Nome:</Text> {selectedClientForDetails.name}</Paragraph>
-                    {selectedClientForDetails.email && <Paragraph><Text strong><MailOutlined /> Email:</Text> <a href={`mailto:${selectedClientForDetails.email}`}>{selectedClientForDetails.email}</a></Paragraph>}
-                    {selectedClientForDetails.phone && <Paragraph><Text strong><PhoneOutlined /> Telefone:</Text> <a href={`tel:${selectedClientForDetails.phone}`}>{selectedClientForDetails.phone}</a></Paragraph>}
-                    {selectedClientForDetails.notes && <Paragraph className="client-details-notes"><Text strong><InfoCircleOutlined /> Notas:</Text> {selectedClientForDetails.notes}</Paragraph>}
-                </div>
-            ) : (
-                <Paragraph>Nenhum cliente selecionado.</Paragraph>
-            )}
-        </Modal>
-
-      </Layout>
+      <Modal
+          title={
+              <Space>
+                  <ProfileOutlined /> Detalhes do Cliente: <Text strong>{selectedClientForDetails?.name}</Text>
+              </Space>
+          }
+          open={isClientDetailsModalVisible}
+          onCancel={handleClientDetailsModalCancel}
+          footer={[ <Button key="close" onClick={handleClientDetailsModalCancel}>Fechar</Button> ]}
+          className="client-details-modal-agendamentos" 
+      >
+          {selectedClientForDetails ? (
+              <div className="client-details-content">
+                  <Avatar 
+                      size={80} // Aumentado para melhor visualização
+                      src={selectedClientForDetails.photoUrl} 
+                      icon={!selectedClientForDetails.photoUrl && <UserOutlined />} 
+                      style={{ marginBottom: 20, border:'2px solid var(--map-laranja-claro)' }} 
+                  />
+                  <Paragraph><Text strong><UserOutlined /> Nome:</Text> {selectedClientForDetails.name}</Paragraph>
+                  {selectedClientForDetails.email && <Paragraph><Text strong><MailOutlined /> Email:</Text> <a href={`mailto:${selectedClientForDetails.email}`}>{selectedClientForDetails.email}</a></Paragraph>}
+                  {selectedClientForDetails.phone && <Paragraph><Text strong><PhoneOutlined /> Telefone:</Text> <a href={`tel:${selectedClientForDetails.phone}`}>{selectedClientForDetails.phone}</a></Paragraph>}
+                  {selectedClientForDetails.notes && <Paragraph className="client-details-notes"><Text strong><InfoCircleOutlined /> Notas:</Text> {selectedClientForDetails.notes}</Paragraph>}
+              </div>
+          ) : (
+              <Paragraph>Nenhum cliente selecionado.</Paragraph>
+          )}
+      </Modal>
     </ConfigProvider>
   );
 };
