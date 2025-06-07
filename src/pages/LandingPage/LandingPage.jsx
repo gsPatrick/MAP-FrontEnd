@@ -57,7 +57,6 @@ const LandingPage = () => {
         </div>
 
         <WhyChooseMapSection />
-        <BrandValuesSection />
 
 
           <div id="sobre">
