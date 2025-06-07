@@ -200,7 +200,6 @@ const CategoriasPage = () => {
                 <Card.Meta
                   avatar={<Avatar icon={<TagsOutlined />} className={`categoria-card-avatar type-${(cat.type || 'todos').toLowerCase()}`} />}
                   title={<Text className="categoria-card-nome" ellipsis={{tooltip: cat.name}}>{cat.name}</Text>}
-                  description={cat.type ? <Tag color={cat.type === 'Entrada' ? 'green' : cat.type === 'Saída' ? 'volcano' : 'geekblue'}>{cat.type}</Tag> : <Tag>N/D</Tag>}
                 />
               </Card>
             </Col>

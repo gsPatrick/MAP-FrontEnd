@@ -1,9 +1,8 @@
-// src/pages/HidratacaoPage/HidratacaoPage.jsx (MODIFICADO)
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Typography, Button, Row, Col, Card, List, Progress,
+  Layout, Typography, Button, Row, Col, Card, List, Progress,
   Empty, Tooltip, Modal, Form, TimePicker, InputNumber, Switch,
-  Alert, Space, Avatar, Result, Select, Tag, Divider, Layout // Layout ainda é necessário para o Content
+  Alert, Space, Avatar, Result, Select, Tag, Divider
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, ExperimentOutlined,
@@ -284,248 +283,258 @@ const HidratacaoPage = () => {
   if (!loadingProfiles && currentProfileType !== 'PF' && isAuthenticated) {
     const pfProfile = userProfiles.find(p => p.type === 'PF');
     return (
-      <Content className="restricted-access-content">
-        <Result
-          icon={<StopOutlined style={{color: 'var(--map-laranja)'}}/>}
-          status="warning"
-          title="Funcionalidade Apenas para Perfil Pessoal"
-          subTitle={`A página de Lembretes de Hidratação é destinada ao uso pessoal. O perfil "${currentProfile?.name || 'Atual'}" (${currentProfileType}) não é compatível.`}
-          extra={
-            pfProfile ? (
-              <Button type="primary" className="switch-profile-btn-restricted" onClick={() => setSelectedProfileId(pfProfile.id)}>
-                Mudar para Perfil Pessoal ({pfProfile.name})
-              </Button>
-            ) : (
-              <Text>Nenhum perfil pessoal encontrado para alternar.</Text>
-            )
-          }
-        />
-      </Content>
+      <Layout style={{ minHeight: '100vh' }} className="hidratacao-page-main-layout restricted-access-bg">
+        <Content className="restricted-access-content">
+          <Result
+            icon={<StopOutlined style={{color: 'var(--map-laranja)'}}/>}
+            status="warning"
+            title="Funcionalidade Apenas para Perfil Pessoal"
+            subTitle={`A página de Lembretes de Hidratação é destinada ao uso pessoal. O perfil "${currentProfile?.name || 'Atual'}" (${currentProfileType}) não é compatível.`}
+            extra={
+              pfProfile ? (
+                <Button type="primary" className="switch-profile-btn-restricted" onClick={() => setSelectedProfileId(pfProfile.id)}>
+                  Mudar para Perfil Pessoal ({pfProfile.name})
+                </Button>
+              ) : (
+                <Text>Nenhum perfil pessoal encontrado para alternar.</Text>
+              )
+            }
+          />
+        </Content>
+      </Layout>
     );
   }
   
   if (loadingProfiles || (configLoading && isAuthenticated)) {
      return (
+      <Layout style={{ minHeight: '100vh' }} className="hidratacao-page-main-layout">
         <Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}>
             <ExperimentOutlined style={{fontSize: 48, color: 'var(--map-laranja)'}} spin/>
         </Content>
+      </Layout>
     );
   }
   if (!isAuthenticated && !loadingProfiles) {
       return (
-        <Content style={{padding: 50, textAlign: 'center'}}>
-            <Title level={3}>Acesso Negado</Title>
-            <Paragraph>Você precisa estar logado para acessar esta página.</Paragraph>
-        </Content>
+        <Layout style={{ minHeight: '100vh' }} className="hidratacao-page-main-layout">
+            <Content style={{padding: 50, textAlign: 'center'}}>
+                <Title level={3}>Acesso Negado</Title>
+                <Paragraph>Você precisa estar logado para acessar esta página.</Paragraph>
+            </Content>
+        </Layout>
       );
   }
   if (!currentProfile && isAuthenticated && !loadingProfiles) {
       return (
-        <Content style={{padding:50, textAlign:'center'}}>
-            <Title level={3}>Nenhum Perfil Selecionado</Title>
-            <Paragraph>Por favor, selecione um perfil para continuar.</Paragraph>
-        </Content>
+        <Layout style={{ minHeight: '100vh' }} className="hidratacao-page-main-layout">
+            <Content style={{padding:50, textAlign:'center'}}>
+                <Title level={3}>Nenhum Perfil Selecionado</Title>
+                <Paragraph>Por favor, selecione um perfil para continuar.</Paragraph>
+            </Content>
+        </Layout>
       );
   }
 
   return (
-    <Content className="panel-content-area hidratacao-content">
-      <div className="hidratacao-header">
-        <Space align="center">
-          <ExperimentOutlined className="page-icon-hidratacao" />
-          <Title level={2} className="page-title-hidratacao">Meus Lembretes de Água</Title>
-        </Space>
-        <Button type="primary" icon={<SettingOutlined />} onClick={openSettingsModal} className="btn-config-hidratacao">
-          Configurar Lembretes
-        </Button>
-      </div>
-      <Paragraph type="secondary" className="page-subtitle-hidratacao">
-        Mantenha-se hidratado! Acompanhe seus lembretes e registre seu consumo de água diário.
-        (Perfil: <Text strong>{currentProfile?.name}</Text>)
-      </Paragraph>
+    <Layout style={{ minHeight: '100vh' }} className="hidratacao-page-main-layout">
+      <Content className="panel-content-area hidratacao-content">
+        <div className="hidratacao-header">
+          <Space align="center">
+            <ExperimentOutlined className="page-icon-hidratacao" />
+            <Title level={2} className="page-title-hidratacao">Meus Lembretes de Água</Title>
+          </Space>
+          <Button type="primary" icon={<SettingOutlined />} onClick={openSettingsModal} className="btn-config-hidratacao">
+            Configurar Lembretes
+          </Button>
+        </div>
+        <Paragraph type="secondary" className="page-subtitle-hidratacao">
+          Mantenha-se hidratado! Acompanhe seus lembretes e registre seu consumo de água diário.
+          (Perfil: <Text strong>{currentProfile?.name}</Text>)
+        </Paragraph>
 
-      <Row gutter={[24, 24]} align="middle" style={{ marginBottom: '30px' }}>
-        <Col xs={24} md={10} lg={8}>
-          <Card bordered={false} className="progress-card-hidratacao">
-            <Title level={4} style={{textAlign: 'center', marginBottom: '20px'}}>Progresso Diário</Title>
-            <Progress
-              type="dashboard"
-              percent={progressPercent}
-              width={180}
-              strokeColor={{ '0%': 'var(--map-dourado)', '100%': 'var(--map-laranja)' }}
-              trailColor="rgba(0,0,0,0.06)"
-              format={() => <span style={{color: 'var(--map-laranja)', fontWeight: '600'}}>{`${totalDrankToday}ml`}</span>}
-            />
-            <Paragraph style={{textAlign: 'center', marginTop: '15px', fontSize: '14px'}}>
-              Meta: <Text strong>{dailyGoal}ml</Text>
-            </Paragraph>
-            {progressPercent >= 100 && (
-                <Alert message="Parabéns! Meta de hidratação atingida!" type="success" showIcon style={{marginTop: '15px'}}/>
-            )}
-          </Card>
-        </Col>
-        <Col xs={24} md={14} lg={16}>
-          <Card title="Lembretes de Hoje (Metas de Consumo)" bordered={false} className="reminders-list-card-hidratacao">
-            {waterIntakeList.length > 0 ? (
-              <List
-                itemLayout="horizontal"
-                dataSource={waterIntakeList}
-                renderItem={(item) => (
-                  <List.Item
-                    className={`reminder-item ${item.drank ? 'drank' : ''}`}
-                    actions={[
-                      <Tooltip title={item.drank ? "Marcar como não bebido" : "Marcar como bebido"}>
-                        <Button 
-                          shape="circle" 
-                          icon={item.drank ? <CheckOutlined /> : <ExperimentOutlined />} 
-                          onClick={() => handleToggleDrank(item.id)}
-                          type={item.drank ? "primary" : "default"}
-                          className="btn-toggle-drank"
-                        />
-                      </Tooltip>
-                    ]}
-                  >
-                    <List.Item.Meta
-                      avatar={<Avatar className="reminder-time-avatar">{item.time}</Avatar>}
-                      title={<Text strong className="reminder-amount">{item.amount} ml</Text>}
-                      description={item.drank ? <Tag color="green" icon={<CheckCircleOutlined/>}>Consumido!</Tag> : <Tag color="blue">Pendente</Tag>}
-                    />
-                  </List.Item>
-                )}
+        <Row gutter={[24, 24]} align="middle" style={{ marginBottom: '30px' }}>
+          <Col xs={24} md={10} lg={8}>
+            <Card bordered={false} className="progress-card-hidratacao">
+              <Title level={4} style={{textAlign: 'center', marginBottom: '20px'}}>Progresso Diário</Title>
+              <Progress
+                type="dashboard"
+                percent={progressPercent}
+                width={180}
+                strokeColor={{ '0%': 'var(--map-dourado)', '100%': 'var(--map-laranja)' }}
+                trailColor="rgba(0,0,0,0.06)"
+                format={() => <span style={{color: 'var(--map-laranja)', fontWeight: '600'}}>{`${totalDrankToday}ml`}</span>}
               />
-            ) : (
-              <Empty description={!enableReminder || reminderFrequencyType === 'disabled' ? "Lembretes de água desativados." : "Nenhum horário de consumo. Verifique as configurações."} />
-            )}
-          </Card>
-        </Col>
-      </Row>
+              <Paragraph style={{textAlign: 'center', marginTop: '15px', fontSize: '14px'}}>
+                Meta: <Text strong>{dailyGoal}ml</Text>
+              </Paragraph>
+              {progressPercent >= 100 && (
+                  <Alert message="Parabéns! Meta de hidratação atingida!" type="success" showIcon style={{marginTop: '15px'}}/>
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} md={14} lg={16}>
+            <Card title="Lembretes de Hoje (Metas de Consumo)" bordered={false} className="reminders-list-card-hidratacao">
+              {waterIntakeList.length > 0 ? (
+                <List
+                  itemLayout="horizontal"
+                  dataSource={waterIntakeList}
+                  renderItem={(item) => (
+                    <List.Item
+                      className={`reminder-item ${item.drank ? 'drank' : ''}`}
+                      actions={[
+                        <Tooltip title={item.drank ? "Marcar como não bebido" : "Marcar como bebido"}>
+                          <Button 
+                            shape="circle" 
+                            icon={item.drank ? <CheckOutlined /> : <ExperimentOutlined />} 
+                            onClick={() => handleToggleDrank(item.id)}
+                            type={item.drank ? "primary" : "default"}
+                            className="btn-toggle-drank"
+                          />
+                        </Tooltip>
+                      ]}
+                    >
+                      <List.Item.Meta
+                        avatar={<Avatar className="reminder-time-avatar">{item.time}</Avatar>}
+                        title={<Text strong className="reminder-amount">{item.amount} ml</Text>}
+                        description={item.drank ? <Tag color="green" icon={<CheckCircleOutlined/>}>Consumido!</Tag> : <Tag color="blue">Pendente</Tag>}
+                      />
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <Empty description={!enableReminder || reminderFrequencyType === 'disabled' ? "Lembretes de água desativados." : "Nenhum horário de consumo. Verifique as configurações."} />
+              )}
+            </Card>
+          </Col>
+        </Row>
 
-      <Modal
-        title="Configurar Lembretes de Hidratação"
-        open={isSettingsModalVisible}
-        onCancel={() => setIsSettingsModalVisible(false)}
-        footer={null}
-        destroyOnClose
-        width={600}
-        className="config-hidratacao-modal modal-style-map"
-      >
-        <Form 
-            form={settingsForm} 
-            layout="vertical" 
-            onFinish={handleSaveReminderSettings}
-            key={isSettingsModalVisible ? 'form-visible-hydration' : 'form-hidden-hydration'} 
+        <Modal
+          title="Configurar Lembretes de Hidratação"
+          open={isSettingsModalVisible}
+          onCancel={() => setIsSettingsModalVisible(false)}
+          footer={null}
+          destroyOnClose
+          width={600}
+          className="config-hidratacao-modal modal-style-map"
         >
-          <Form.Item name="dailyGoal" label="Meta Diária de Água (ml)" rules={[{required: true, message: "Meta é obrigatória"}]}>
-            <InputNumber min={0} step={100} style={{ width: '100%' }} placeholder="Ex: 2000" />
-          </Form.Item>
-          
-          <Form.Item name="enableReminder" label="Ativar Lembretes de Água no WhatsApp" valuePropName="checked">
-            <Switch onChange={(checked) => settingsForm.setFieldsValue({ enableReminder: checked })}/>
-          </Form.Item>
+          <Form 
+              form={settingsForm} 
+              layout="vertical" 
+              onFinish={handleSaveReminderSettings}
+              key={isSettingsModalVisible ? 'form-visible-hydration' : 'form-hidden-hydration'} 
+          >
+            <Form.Item name="dailyGoal" label="Meta Diária de Água (ml)" rules={[{required: true, message: "Meta é obrigatória"}]}>
+              <InputNumber min={0} step={100} style={{ width: '100%' }} placeholder="Ex: 2000" />
+            </Form.Item>
+            
+            <Form.Item name="enableReminder" label="Ativar Lembretes de Água no WhatsApp" valuePropName="checked">
+              <Switch onChange={(checked) => settingsForm.setFieldsValue({ enableReminder: checked })}/>
+            </Form.Item>
 
-        <Form.Item
-            noStyle
-            shouldUpdate={(prevValues, currentValues) => 
-                prevValues.enableReminder !== currentValues.enableReminder || 
-                prevValues.reminderFrequencyType !== currentValues.reminderFrequencyType ||
-                prevValues.reminderCustomIntervalUnit !== currentValues.reminderCustomIntervalUnit
-            }
-        >
-            {({ getFieldValue }) => getFieldValue('enableReminder') && (
-                <>
-                    <Form.Item name="reminderFrequencyType" label="Frequência dos Lembretes" rules={[{required: getFieldValue('enableReminder'), message: "Frequência é obrigatória"}]}>
-                        <Select 
-                            placeholder="Selecione a frequência" 
-                            onChange={(value) => {
-                                settingsForm.setFieldsValue({reminderFrequencyType: value});
-                                if (value !== 'custom') {
-                                    settingsForm.setFieldsValue({ reminderCustomIntervalValue: undefined, reminderCustomIntervalUnit: 'minutes' });
-                                    setCustomIntervalUnitModal('minutes');
-                                }
-                            }}
-                        >
-                            <Option value="disabled">Desabilitado (sem lembretes)</Option>
-                            <Option value="2h">A cada 2 horas</Option>
-                            <Option value="3h">A cada 3 horas</Option>
-                            <Option value="custom">Intervalo Personalizado</Option>
-                        </Select>
-                    </Form.Item>
+          <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) => 
+                  prevValues.enableReminder !== currentValues.enableReminder || 
+                  prevValues.reminderFrequencyType !== currentValues.reminderFrequencyType ||
+                  prevValues.reminderCustomIntervalUnit !== currentValues.reminderCustomIntervalUnit
+              }
+          >
+              {({ getFieldValue }) => getFieldValue('enableReminder') && (
+                  <>
+                      <Form.Item name="reminderFrequencyType" label="Frequência dos Lembretes" rules={[{required: getFieldValue('enableReminder'), message: "Frequência é obrigatória"}]}>
+                          <Select 
+                              placeholder="Selecione a frequência" 
+                              onChange={(value) => {
+                                  settingsForm.setFieldsValue({reminderFrequencyType: value});
+                                  if (value !== 'custom') {
+                                      settingsForm.setFieldsValue({ reminderCustomIntervalValue: undefined, reminderCustomIntervalUnit: 'minutes' });
+                                      setCustomIntervalUnitModal('minutes');
+                                  }
+                              }}
+                          >
+                              <Option value="disabled">Desabilitado (sem lembretes)</Option>
+                              <Option value="2h">A cada 2 horas</Option>
+                              <Option value="3h">A cada 3 horas</Option>
+                              <Option value="custom">Intervalo Personalizado</Option>
+                          </Select>
+                      </Form.Item>
 
-                    {getFieldValue('reminderFrequencyType') === 'custom' && (
-                        <Form.Item label="Intervalo Personalizado">
-                            <Space.Compact style={{width: '100%'}}>
-                                <Form.Item 
-                                    name="reminderCustomIntervalValue" 
-                                    noStyle
-                                    rules={[{
-                                        required: getFieldValue('reminderFrequencyType') === 'custom', 
-                                        message: "Valor!"
-                                    },{
-                                        validator: (_, value) => {
-                                            const unit = settingsForm.getFieldValue('reminderCustomIntervalUnit') || customIntervalUnitModal;
-                                            let valInMinutes = value;
-                                            if (unit === 'hours') {
-                                                valInMinutes = value * 60;
-                                            }
-                                            if (getFieldValue('reminderFrequencyType') === 'custom' && valInMinutes < MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM) {
-                                                return Promise.reject(new Error(`Mínimo ${MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM} minutos!`));
-                                            }
-                                            return Promise.resolve();
-                                        }
-                                    }]}
-                                >
-                                    <InputNumber 
-                                        min={ (settingsForm.getFieldValue('reminderCustomIntervalUnit') || customIntervalUnitModal) === 'minutes' ? MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM : 1 } 
-                                        style={{ width: '60%' }} 
-                                        placeholder="Valor"
-                                    />
-                                </Form.Item>
-                                <Form.Item 
-                                    name="reminderCustomIntervalUnit" 
-                                    noStyle
-                                    rules={[{required: getFieldValue('reminderFrequencyType') === 'custom', message: "Unid.!"}]}
-                                >
-                                    <Select 
-                                        style={{ width: '40%' }} 
-                                        onChange={(value) => {
-                                            settingsForm.setFieldsValue({ reminderCustomIntervalUnit: value });
-                                            settingsForm.validateFields(['reminderCustomIntervalValue']);
-                                        }}
-                                    >
-                                        <Option value="minutes">Minutos</Option>
-                                        <Option value="hours">Horas</Option>
-                                    </Select>
-                                </Form.Item>
-                            </Space.Compact>
-                        </Form.Item>
-                    )}
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item name="reminderStartTime" label="Horário de Início" rules={[{required: getFieldValue('enableReminder'), message: "Início é obrigatório"}]}>
-                                <TimePicker format="HH:mm" style={{width: '100%'}} placeholder="Ex: 09:00" minuteStep={15}/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="reminderEndTime" label="Horário de Fim" rules={[{required: getFieldValue('enableReminder'), message: "Fim é obrigatório"}]}>
-                                <TimePicker format="HH:mm" style={{width: '100%'}} placeholder="Ex: 18:00" minuteStep={15}/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </>
-            )}
-        </Form.Item>
-          <Divider />
-          <Form.Item style={{marginTop: '20px', textAlign: 'right'}}>
-            <Button onClick={() => setIsSettingsModalVisible(false)} style={{marginRight: 8}} className="cancel-btn-form">
-                Cancelar
-            </Button>
-            <Button type="primary" htmlType="submit" loading={configLoading} className="submit-btn-form">
-              Salvar Configurações
-            </Button>
+                      {getFieldValue('reminderFrequencyType') === 'custom' && (
+                          <Form.Item label="Intervalo Personalizado">
+                              <Space.Compact style={{width: '100%'}}>
+                                  <Form.Item 
+                                      name="reminderCustomIntervalValue" 
+                                      noStyle
+                                      rules={[{
+                                          required: getFieldValue('reminderFrequencyType') === 'custom', 
+                                          message: "Valor!"
+                                      },{
+                                          validator: (_, value) => {
+                                              const unit = settingsForm.getFieldValue('reminderCustomIntervalUnit') || customIntervalUnitModal;
+                                              let valInMinutes = value;
+                                              if (unit === 'hours') {
+                                                  valInMinutes = value * 60;
+                                              }
+                                              if (getFieldValue('reminderFrequencyType') === 'custom' && valInMinutes < MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM) {
+                                                  return Promise.reject(new Error(`Mínimo ${MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM} minutos!`));
+                                              }
+                                              return Promise.resolve();
+                                          }
+                                      }]}
+                                  >
+                                      <InputNumber 
+                                          min={ (settingsForm.getFieldValue('reminderCustomIntervalUnit') || customIntervalUnitModal) === 'minutes' ? MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM : 1 } 
+                                          style={{ width: '60%' }} 
+                                          placeholder="Valor"
+                                      />
+                                  </Form.Item>
+                                  <Form.Item 
+                                      name="reminderCustomIntervalUnit" 
+                                      noStyle
+                                      rules={[{required: getFieldValue('reminderFrequencyType') === 'custom', message: "Unid.!"}]}
+                                  >
+                                      <Select 
+                                          style={{ width: '40%' }} 
+                                          onChange={(value) => {
+                                              settingsForm.setFieldsValue({ reminderCustomIntervalUnit: value });
+                                              settingsForm.validateFields(['reminderCustomIntervalValue']);
+                                          }}
+                                      >
+                                          <Option value="minutes">Minutos</Option>
+                                          <Option value="hours">Horas</Option>
+                                      </Select>
+                                  </Form.Item>
+                              </Space.Compact>
+                          </Form.Item>
+                      )}
+                      <Row gutter={16}>
+                          <Col span={12}>
+                              <Form.Item name="reminderStartTime" label="Horário de Início" rules={[{required: getFieldValue('enableReminder'), message: "Início é obrigatório"}]}>
+                                  <TimePicker format="HH:mm" style={{width: '100%'}} placeholder="Ex: 09:00" minuteStep={15}/>
+                              </Form.Item>
+                          </Col>
+                          <Col span={12}>
+                              <Form.Item name="reminderEndTime" label="Horário de Fim" rules={[{required: getFieldValue('enableReminder'), message: "Fim é obrigatório"}]}>
+                                  <TimePicker format="HH:mm" style={{width: '100%'}} placeholder="Ex: 18:00" minuteStep={15}/>
+                              </Form.Item>
+                          </Col>
+                      </Row>
+                  </>
+              )}
           </Form.Item>
-        </Form>
-      </Modal>
-    </Content>
+            <Divider />
+            <Form.Item style={{marginTop: '20px', textAlign: 'right'}}>
+              <Button onClick={() => setIsSettingsModalVisible(false)} style={{marginRight: 8}} className="cancel-btn-form">
+                  Cancelar
+              </Button>
+              <Button type="primary" htmlType="submit" loading={configLoading} className="submit-btn-form">
+                Salvar Configurações
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Content>
+    </Layout>
   );
 };
 

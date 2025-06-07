@@ -50,21 +50,28 @@ const TransacoesPage = () => {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [transactionTypeForModal, setTransactionTypeForModal] = useState('despesa');
 
-  // Buscar categorias do sistema uma vez
+  // Buscar categorias do sistema quando o perfil estiver disponível
   useEffect(() => {
-    if (isAuthenticated) {
-      apiClient.get('/system/financial-categories?isActive=true')
+    // A condição agora depende da existência do currentProfile
+    if (isAuthenticated && currentProfile) {
+      // Monta a URL correta usando o ID do perfil/conta financeira atual
+      const endpoint = `/financial-accounts/${currentProfile.id}/categories`;
+
+      apiClient.get(endpoint, { params: { hierarchical: false } }) // Usa o endpoint correto e busca a lista simples
         .then(response => {
           if (response.data && response.data.status === 'success') {
             setAllSystemCategories(response.data.data || []);
           }
         })
         .catch(error => {
-          console.error("Erro ao buscar categorias do sistema:", error);
-          message.error("Não foi possível carregar as categorias para filtro.");
+          // A mensagem de erro agora é mais específica
+          console.error(`Erro ao buscar categorias para a conta ${currentProfile.id}:`, error);
+          message.error("Não foi possível carregar as categorias para o perfil atual.");
         });
     }
-  }, [isAuthenticated]);
+    // Adiciona currentProfile ao array de dependências para que este hook rode novamente
+    // quando o usuário trocar de perfil.
+  }, [isAuthenticated, currentProfile]);
 
   // Buscar transações quando filtros ou perfil mudarem
   useEffect(() => {
