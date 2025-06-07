@@ -1,0 +1,252 @@
+/* src/componentsLP/AppointmentsSection/AppointmentsSection.css */
+
+/* :root - Cores assumidas como globais (dourado, laranja, preto, etc.) */
+/* --map-dourado, --map-laranja, --cor-preto-absoluto, --texto-cinza-claro, etc. */
+/* Cores específicas para esta seção */
+:root {
+  --appointments-card-bg: #0d1117; /* Mesmo preto azulado dos cards da AboutCreatorSection */
+  --appointments-card-border: #21262d; /* Borda cinza escura */
+  --appointments-mockup-header: #1f232b;
+  --appointments-mockup-confirmed: #0F9D58; /* Google Green */
+  --appointments-mockup-pending: #F4B400; /* Google Yellow */
+  --appointments-mockup-personal: #4285F4; /* Google Blue */
+  --appointments-mockup-cancelled: #6c757d; /* Cinza para cancelado */
+}
+
+.appointments-section-wrapper {
+  background-color: var(--cor-preto-absoluto);
+  color: var(--texto-cinza-claro);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(227, 190, 98, 0.2); /* Borda Dourada sutil no topo */
+}
+
+.appointments-container {
+  max-width: 1150px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Animações e Gráficos de Fundo */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.215, 0.61, 0.355, 1), transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.background-accent-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: subtleMorphAndDrift 20s infinite alternate ease-in-out;
+}
+.blob-a1 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(227, 190, 98, 0.06) 0%, transparent 70%);
+  top: 10%; left: -150px;
+  animation-delay: 0s;
+}
+.blob-a2 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(178, 74, 10, 0.08) 0%, transparent 70%);
+  bottom: 5%; right: -120px;
+  animation-delay: -5s;
+}
+@keyframes subtleMorphAndDrift {
+  0% { transform: scale(1) translate(0, 0); border-radius: 40% 60% 70% 30% / 30% 50% 50% 70%; }
+  100% { transform: scale(1.1) translate(20px, -15px); border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%; }
+}
+
+/* Coluna Esquerda: Ícone Principal */
+.appointments-main-row {
+  margin-bottom: 80px;
+}
+.appointments-text-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 992px) { /* lg */
+  .appointments-text-col { align-items: flex-start; text-align: left; }
+}
+
+.appointments-icon-container {
+  width: 250px;
+  height: 250px;
+  margin-bottom: 35px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.appointments-central-icon {
+  font-size: 150px;
+  color: var(--map-dourado);
+  z-index: 2;
+  filter: drop-shadow(0 8px 20px rgba(227, 190, 98, 0.25));
+  animation: iconBreatheAndShine 6s infinite ease-in-out;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes iconBreatheAndShine {
+  0%, 100% { transform: scale(1); text-shadow: 0 0 10px transparent; }
+  50% { transform: scale(1.04); text-shadow: 0 0 20px rgba(227, 190, 98, 0.4); }
+}
+.appointments-icon-container:hover .appointments-central-icon {
+  transform: scale(1.1) rotate(-4deg);
+  filter: drop-shadow(0 12px 30px rgba(227, 190, 98, 0.4));
+  animation-play-state: paused;
+}
+
+.appointments-icon-rings::before,
+.appointments-icon-rings::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  border-radius: 50%; border: 2px solid transparent; opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+.appointments-icon-container.visible .appointments-icon-rings::before {
+  width: 130%; height: 130%; border-color: rgba(227, 190, 98, 0.3);
+  animation: ringExpand 3s infinite ease-out 0.5s;
+}
+.appointments-icon-container.visible .appointments-icon-rings::after {
+  width: 160%; height: 160%; border-color: rgba(227, 190, 98, 0.15);
+  animation: ringExpand 3s infinite ease-out 1.2s;
+}
+@keyframes ringExpand {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+}
+
+.appointments-main-title {
+  font-size: clamp(28px, 4vw, 38px) !important;
+  font-weight: 700 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 12px !important;
+  line-height: 1.3 !important;
+}
+.appointments-main-title .highlight-brand {
+  color: var(--map-laranja);
+}
+.appointments-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--texto-cinza-medio) !important;
+  max-width: 480px;
+}
+@media (max-width: 991px) { /* md */
+  .appointments-main-subtitle { margin-left: auto; margin-right: auto; }
+}
+
+/* Coluna Direita: Mockup Visual */
+.appointments-visual-col {
+  display: flex; justify-content: center; align-items: center;
+}
+.appointments-mockup-card {
+  background-color: var(--appointments-card-bg);
+  border: 1px solid var(--appointments-card-border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: 0 15px 40px -10px rgba(0,0,0,0.3);
+  transform: perspective(1500px) rotateY(10deg) scale(0.95);
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.6s ease;
+}
+.appointments-visual-col.visible .appointments-mockup-card {
+  transform: perspective(1500px) rotateY(0deg) scale(1);
+}
+.appointments-section-wrapper:hover .appointments-mockup-card {
+  transform: perspective(1500px) rotateY(-2deg) scale(1.02) translateY(-5px);
+  box-shadow: 0 20px 50px -10px rgba(0,0,0,0.4);
+}
+
+.mockup-card-header {
+  font-size: 16px; font-weight: 600;
+  color: var(--texto-cinza-claro);
+  background-color: var(--appointments-mockup-header);
+  padding: 12px 15px; border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.mockup-events-list { display: flex; flex-direction: column; gap: 12px; }
+.mockup-event-item {
+  background-color: var(--appointments-mockup-header);
+  padding: 12px 15px; border-radius: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+  border-left: 4px solid var(--texto-cinza-medio);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.mockup-event-item:hover {
+  transform: translateX(5px);
+  background-color: #2a2e37;
+}
+
+.mockup-event-item.confirmed { border-left-color: var(--appointments-mockup-confirmed); }
+.mockup-event-item.pending { border-left-color: var(--appointments-mockup-pending); }
+.mockup-event-item.personal { border-left-color: var(--appointments-mockup-personal); }
+.mockup-event-item.cancelled { border-left-color: var(--appointments-mockup-cancelled); text-decoration: line-through; opacity: 0.7; }
+
+.mockup-event-time { font-size: 13px; color: var(--texto-cinza-medio); font-weight: 500; }
+.mockup-event-time .anticon { margin-right: 6px; }
+.mockup-event-title { font-size: 15px; color: var(--cor-branco); font-weight: 600; }
+.mockup-event-client { font-size: 13px; color: var(--texto-cinza-medio); }
+.mockup-event-client .anticon { margin-right: 6px; }
+
+/* Grid de Cards de Funcionalidades */
+.appointments-features-grid {
+  margin-top: 50px;
+}
+.appointments-feature-card {
+  background-color: var(--appointments-card-bg);
+  border: 1px solid var(--appointments-card-border);
+  border-radius: 12px; padding: 25px 30px;
+  height: 100%; display: flex; flex-direction: column; text-align: left;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  position: relative; overflow: hidden;
+}
+.appointments-feature-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(227, 190, 98, 0.5);
+  box-shadow: 0 10px 30px -5px rgba(227, 190, 98, 0.1);
+}
+.appointments-feature-card::before {
+  content: ""; position: absolute; top: 0; left: -100%; width: 80%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(227, 190, 98, 0.08), transparent);
+  transition: left 0.6s ease-in-out; transform: skewX(-25deg); opacity: 0;
+}
+.appointments-feature-card:hover::before {
+  left: 120%; opacity: 1;
+}
+
+/* Estilos internos dos cards de feature (reutilizados da AboutCreatorSection) */
+.appointments-feature-card .card-icon-wrapper {
+  font-size: 28px; color: var(--map-laranja); margin-bottom: 18px; width: 50px; height: 50px;
+  background-color: rgba(255, 127, 0, 0.1); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.appointments-feature-card .card-title {
+  font-size: 20px !important; font-weight: 600 !important; color: var(--cor-branco) !important;
+  margin-bottom: 12px !important;
+}
+.appointments-feature-card .card-text {
+  font-size: 14.5px !important; color: var(--texto-cinza-medio) !important;
+  line-height: 1.7 !important; font-weight: 300 !important;
+  flex-grow: 1;
+}
+
+/* Responsividade */
+@media (max-width: 991px) {
+  .appointments-main-row {
+    flex-direction: column;
+    gap: 30px;
+  }
+  .appointments-mockup-card {
+    transform: perspective(1500px) rotateY(0deg) scale(0.95);
+  }
+}

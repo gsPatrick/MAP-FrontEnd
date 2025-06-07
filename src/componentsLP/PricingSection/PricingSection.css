@@ -1,258 +1,265 @@
-/* src/componentsLP/PricingSection/PricingSection.css */
+/* src/componentsLP/PricingSection/PricingSection.css - VERSÃO LUXO */
 
-/* Cores da paleta fornecida (para referência dentro do CSS) */
-/* Cor 1 (Dourado): #e3be62 */
-/* Cor 2 (Laranja Ferrugem): #b24a0a */
-/* Cor 3 (Terracota Escuro): #903b07 */
-/* Cor 4 (Preto Absoluto): #000000 */
+:root {
+  --pricing-luxe-bg: #fdfcf9; /* Branco com um toque de creme */
+  --pricing-gold: #c5a450;
+  --pricing-gold-dark: #8c7333;
+  --pricing-orange: #ff8c00; /* Laranja mais vibrante */
+  --pricing-text-dark: #3a3222;
+  --pricing-text-light: #6e624a;
+}
 
-.pricing-section-wrapper {
-  padding: 70px 0 80px;
-  background-color: var(--map-branco); /* Fundo da seção agora é branco */
+.pricing-luxe-section-wrapper {
+  padding: 80px 0 90px;
+  background-color: var(--pricing-luxe-bg);
+  position: relative;
   overflow: hidden;
 }
 
-.pricing-section-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 var(--header-padding-x, 25px);
-  text-align: center;
+/* Elementos Gráficos de Fundo */
+.pricing-luxe-bg-elements {
+  position: absolute; inset: 0;
+  z-index: 0; pointer-events: none;
+}
+.bg-luxe-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(197, 164, 80, 0.1) 0%, transparent 70%);
+  filter: blur(50px);
+}
+.bg-luxe-shape.shape-1 {
+  width: 50vw; height: 50vw; top: -20%; left: -20%;
+}
+.bg-luxe-shape.shape-2 {
+  width: 40vw; height: 40vw; bottom: -15%; right: -15%;
+}
+.bg-luxe-flare {
+    position: absolute; top: 10%; right: 10%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255, 140, 0, 0.08) 0%, transparent 70%);
+    animation: flarePulse 8s infinite ease-in-out;
+}
+@keyframes flarePulse {
+    50% { transform: scale(1.2); opacity: 0.7; }
 }
 
-.pricing-section-animate {
+
+.pricing-luxe-container {
+  max-width: 1000px;
+  margin: 0 auto; padding: 0 20px;
+  text-align: center; position: relative; z-index: 1;
+}
+
+/* Animações de Entrada */
+.pricing-luxe-section-wrapper .animate-on-scroll {
   opacity: 0;
-  transform: translateY(25px);
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.pricing-section-animate.visible {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  transition-delay: inherit !important;
+.pricing-luxe-section-wrapper .animate-on-scroll.visible {
+  opacity: 1; transform: translateY(0);
 }
 
-.pricing-main-title {
-  font-size: 32px !important;
+.pricing-luxe-main-title {
+  font-size: clamp(32px, 4vw, 40px) !important;
   font-weight: 700 !important;
-  color: var(--map-preto) !important; /* Título da seção em preto sobre fundo branco */
+  color: var(--pricing-text-dark) !important;
   margin-bottom: 15px !important;
 }
-.pricing-main-title .highlight-brand {
-  color: var(--map-laranja); /* Mantém destaque da marca */
+.highlight-luxe-text {
+  color: var(--pricing-gold);
+}
+.pricing-luxe-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--pricing-text-light) !important;
+  max-width: 650px; margin: 0 auto 40px auto;
+  line-height: 1.7;
 }
 
-.pricing-main-subtitle {
-  font-size: 17px !important;
-  color: #5f6c7b !important; /* Subtítulo em cinza sobre fundo branco */
-  margin-bottom: 40px !important;
-  max-width: 650px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
+/* Toggle de Cobrança */
+.billing-toggle-wrapper {
+  display: flex; justify-content: center; align-items: center;
+  gap: 15px; margin-bottom: 50px;
+}
+.billing-toggle-wrapper .billing-option {
+  font-size: 16px; font-weight: 500;
+  color: var(--pricing-text-light);
+  transition: color 0.3s ease;
+}
+.billing-toggle-wrapper .billing-option.active {
+  color: var(--pricing-gold-dark);
+  font-weight: 600;
+}
+.billing-toggle-wrapper .ant-switch {
+  background-color: var(--pricing-gold-dark);
+}
+.billing-toggle-wrapper .ant-switch-checked {
+  background-color: var(--pricing-gold);
+}
+.discount-tag {
+  background-color: var(--pricing-orange) !important;
+  color: white !important;
+  border: none !important;
+  font-size: 11px !important;
+  margin-left: 8px !important;
 }
 
-.pricing-card-wrapper {
-  display: flex;
+/* Cards de Plano */
+.pricing-luxe-card-wrapper {
+    perspective: 1500px;
 }
-
-.pricing-card {
-  width: 100%;
-  background-color: #903b07 !important; /* Fundo dos cards em Terracota Escuro */
-  border-radius: 12px !important;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.05) !important;
-  padding: 30px 25px !important;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.pricing-luxe-card {
+  width: 100%; height: 100%;
+  background: linear-gradient(150deg, #ffffff 0%, #f9f6f0 100%);
+  border: 1px solid #e9e2d0;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px -15px rgba(140, 115, 51, 0.1);
   position: relative;
+  transform-style: preserve-3d;
+  transform: rotateY(-20deg) rotateX(10deg);
+  transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.6s ease;
 }
-.pricing-card .ant-card-body {
-  padding: 0 !important;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.pricing-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 35px rgba(144, 59, 7, 0.25) !important; /* Sombra com tom terracota */
+.pricing-luxe-card-wrapper.visible .pricing-luxe-card {
+  transform: rotateY(0deg) rotateX(0deg);
 }
 
-/* Estilização para o card destacado */
-.pricing-card.featured {
-  border: 2px solid #e3be62 !important; /* Borda Dourada */
-  box-shadow: 0 10px 40px rgba(227, 190, 98, 0.2) !important; /* Sombra com tom dourado */
-  transform: scale(1.03);
-}
-.pricing-card.featured:hover {
-  transform: translateY(-8px) scale(1.05);
+.pricing-luxe-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 45px -15px rgba(140, 115, 51, 0.2);
 }
 
-.featured-tag {
-  position: absolute !important;
-  top: -2px; /* Ajustar para alinhar com a borda dourada */
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  font-size: 12px !important;
-  padding: 5px 14px !important;
-  border-radius: 15px !important;
-  font-weight: bold;
-  background-color: #e3be62 !important; /* Fundo Dourado */
-  color: #903b07 !important; /* Texto Terracota Escuro */
-  border: 1px solid #903b07; /* Borda sutil terracota na tag */
+.pricing-luxe-card.featured {
+  background: linear-gradient(150deg, #fffcf2 0%, #f5ead1 100%);
+  border-color: var(--pricing-gold);
+  transform: rotateY(-20deg) rotateX(10deg) scale(1.05); /* Começa um pouco maior */
 }
-.featured-tag .anticon {
-  margin-right: 5px;
-  color: #903b07 !important; /* Ícone da estrela também terracota */
+.pricing-luxe-card-wrapper.visible .pricing-luxe-card.featured {
+  transform: rotateY(0deg) rotateX(0deg) scale(1.05);
+}
+.pricing-luxe-card.featured:hover {
+  transform: translateY(-10px) scale(1.07);
 }
 
-.plan-icon-header {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
+
+/* Efeito de brilho no card */
+.card-luxe-background-shine {
+  position: absolute; inset: -1px;
+  border-radius: 18px;
+  background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3), transparent 40%);
+  z-index: 1;
+  opacity: 0; transition: opacity 0.5s;
 }
-.plan-title-icon {
-  font-size: 38px;
-  color: #e3be62; /* Ícones dos planos em Dourado */
-  padding: 10px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1); /* Fundo sutil para o ícone */
+.pricing-luxe-card:hover .card-luxe-background-shine {
+  opacity: 1;
 }
 
-.plan-name {
-  font-size: 22px !important;
-  font-weight: 600 !important;
-  color: #e3be62 !important; /* Título do plano em Dourado */
-  margin-bottom: 10px !important;
+.card-luxe-content {
+  padding: 30px;
+  display: flex; flex-direction: column;
+  height: 100%; position: relative; z-index: 2;
 }
 
-.plan-description {
-  font-size: 14px !important;
-  color: #f0f0f0 !important; /* Descrição em branco ou cinza claro */
-  margin-bottom: 25px !important;
-  min-height: 60px;
+.featured-luxe-banner {
+  position: absolute; top: 20px; right: -1px;
+  background: var(--pricing-gold);
+  color: var(--pricing-text-dark);
+  padding: 6px 15px 6px 20px;
+  font-size: 12px; font-weight: 600;
+  border-radius: 15px 0 0 15px;
+  box-shadow: -3px 3px 10px rgba(140, 115, 51, 0.2);
+}
+.featured-luxe-banner .anticon { margin-right: 6px; }
+
+.plan-luxe-icon-header {
+  margin-bottom: 20px;
+}
+.plan-luxe-title-icon {
+  font-size: 32px; color: var(--pricing-gold-dark);
+}
+.featured .plan-luxe-title-icon {
+    color: var(--pricing-gold);
 }
 
-.plan-price-container {
+
+.plan-luxe-name {
+  font-size: 24px !important; font-weight: 600 !important;
+  color: var(--pricing-text-dark) !important; margin-bottom: 8px !important;
+}
+
+.plan-luxe-description {
+  font-size: 15px !important; color: var(--pricing-text-light) !important;
+  line-height: 1.6; margin-bottom: 25px !important;
+  min-height: 65px;
+}
+
+.plan-luxe-price-container {
   margin-bottom: 25px;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 5px;
+}
+.price-tag { display: flex; align-items: baseline; justify-content: center; }
+.price-currency {
+  font-size: 20px; font-weight: 500;
+  color: var(--pricing-text-light); margin-right: 4px;
+}
+.price-value {
+  font-size: 48px; font-weight: 700;
+  color: var(--pricing-text-dark); line-height: 1;
+}
+.price-meta { display: flex; flex-direction: column; align-items: flex-start; margin-left: 4px; }
+.price-suffix, .price-period {
+  font-size: 14px; font-weight: 500;
+  color: var(--pricing-text-light); line-height: 1.2;
+}
+.original-price-strike {
+  font-size: 13px; color: #aaa; text-decoration: line-through;
+  margin-top: 5px; display: block;
+  height: 20px; /* Garante espaço mesmo quando não visível */
 }
 
-.plan-price {
-  font-size: 38px !important;
-  font-weight: 700 !important;
-  color: #e3be62 !important; /* Preço em Dourado */
-}
-.plan-price-suffix {
-  font-size: 0.7em; /* Sufixo menor */
-  color: #e3be62 !important; /* Sufixo do preço também em dourado */
-}
-.plan-period {
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  color: #f0f0f0 !important; /* Período em branco ou cinza claro */
-}
-
-.plan-features-list {
-  text-align: left;
-  margin-bottom: 30px;
+/* Lista de Features */
+.plan-luxe-features-list {
+  text-align: left; margin-bottom: 30px;
   flex-grow: 1;
 }
-.plan-features-list .ant-list-item {
-  padding: 8px 0 !important;
-  border-bottom: 1px dashed rgba(227, 190, 98, 0.3) !important; /* Linha divisória Dourada suave */
-  font-size: 14.5px;
-  color: #ffffff !important; /* Texto das features em Branco */
+.plan-luxe-features-list .ant-list-item {
+  padding: 10px 0 !important;
+  border-bottom: 1px solid #f0eade !important;
 }
-.plan-features-list .ant-list-item:last-child {
+.plan-luxe-features-list .ant-list-item:last-child {
   border-bottom: none !important;
 }
-.plan-features-list .feature-icon {
-  color: #e3be62 !important; /* Ícone de check em Dourado */
-  margin-right: 10px;
-  font-size: 16px;
+.feature-luxe-icon {
+  color: var(--pricing-gold) !important; margin-right: 12px; font-size: 16px;
 }
-/* Estilo para o primeiro item da lista do plano business */
-.plan-features-list .feature-item-highlighted {
-  color: #e3be62 !important; /* Dourado para o texto destacado */
-  font-weight: 600; /* Negrito */
+.plan-luxe-features-list .ant-list-item .ant-typography {
+  font-size: 15px; color: var(--pricing-text-light);
 }
 
 
-/* Botões CTA */
-.plan-cta-button {
-  font-weight: bold !important;
-  border-radius: 8px !important;
+/* Botão CTA */
+.plan-luxe-cta-button {
+  background: var(--pricing-text-dark) !important;
+  border-color: var(--pricing-text-dark) !important;
+  color: var(--pricing-gold) !important;
+  font-weight: 600 !important; border-radius: 8px !important;
   transition: all 0.3s ease;
 }
-
-.plan-cta-button.normal-button {
-  background-color: #e3be62 !important;
-  border: 2px solid #e3be62 !important; /* Borda Dourada */
-  color: #903b07 !important; /* Texto Terracota no hover */
-}
-.plan-cta-button.normal-button:hover,
-.plan-cta-button.normal-button:focus {
-  background-color: #e3be62 !important;
-  border-color: #e3be62 !important;
-  color: #903b07 !important; /* Texto Terracota no hover */
-}
-
-.plan-cta-button.featured-button {
-  background-color: #e3be62 !important; /* Fundo Dourado */
-  border-color: #e3be62 !important; /* Borda Dourada */
-  color: #903b07 !important; /* Texto Terracota Escuro */
-}
-.plan-cta-button.featured-button:hover,
-.plan-cta-button.featured-button:focus {
-  background-color: #d4ae5f !important; /* Dourado um pouco mais escuro no hover */
-  border-color: #d4ae5f !important;
-  color: #903b07 !important;
+.plan-luxe-cta-button:hover,
+.plan-luxe-cta-button:focus {
+  background: var(--pricing-gold-dark) !important;
+  border-color: var(--pricing-gold-dark) !important;
+  color: var(--cor-branco) !important;
   transform: scale(1.03);
 }
-
-
-.pricing-footer-note {
-  margin-top: 50px !important;
-  font-size: 14px !important;
-  color: #5f6c7b !important; /* Nota de rodapé em cinza sobre fundo branco */
+.featured .plan-luxe-cta-button {
+  background: linear-gradient(45deg, var(--pricing-orange), var(--pricing-gold)) !important;
+  border: none !important;
+  color: var(--cor-branco) !important;
+  box-shadow: 0 5px 15px rgba(197, 164, 80, 0.4);
 }
-.pricing-footer-note a {
-  color: var(--map-laranja); /* Links na nota em laranja padrão */
-  font-weight: 500;
-  text-decoration: none;
-}
-.pricing-footer-note a:hover {
-  text-decoration: underline;
+.featured .plan-luxe-cta-button:hover,
+.featured .plan-luxe-cta-button:focus {
+    box-shadow: 0 8px 20px rgba(197, 164, 80, 0.5);
 }
 
-/* Responsividade */
-@media (max-width: 991px) { /* md */
-  .pricing-card.featured {
-    transform: scale(1);
-  }
-  .pricing-card-wrapper {
-    margin-bottom: 0;
-  }
-  .pricing-cards-row .ant-col {
-    margin-bottom: 24px;
-  }
-  .pricing-cards-row .ant-col:last-child {
-    margin-bottom: 0;
-  }
-}
-
-@media (max-width: 767px) { /* sm */
-  .pricing-main-title { font-size: 28px !important; }
-  .pricing-main-subtitle { font-size: 16px !important; margin-bottom: 30px !important;}
-  .plan-description { min-height: auto; }
-}
-
-@media (max-width: 575px) { /* xs */
-  .pricing-card { padding: 25px 20px !important; }
-  .plan-name { font-size: 20px !important; }
-  .plan-price { font-size: 32px !important; }
-  .plan-features-list .ant-list-item { font-size: 14px; }
-}
+.plan-luxe-cta-button .anticon { margin-left: 5px; transition: transform 0.3s ease; }
+.plan-luxe-cta-button:hover .anticon { transform: translateX(4px); }

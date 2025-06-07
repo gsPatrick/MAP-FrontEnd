@@ -1,0 +1,236 @@
+/* src/componentsLP/DashboardSection/DashboardSection.css - VERSÃO DE TRANSIÇÃO FLUIDA */
+
+:root {
+  --flow-bg: #0d1117; /* Preto levemente azulado para combinar com outros temas escuros */
+  --flow-gold: #e3be62;
+  --flow-gold-rgb: 227, 190, 98;
+  --flow-orange: #ff7f00;
+  --flow-card-bg: rgba(13, 17, 23, 0.7);
+  --flow-card-border: rgba(227, 190, 98, 0.2);
+  --flow-card-hover-border: rgba(227, 190, 98, 0.6);
+}
+
+.dashboard-flow-section-wrapper {
+  background-color: var(--flow-bg);
+  color: var(--texto-cinza-claro);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding-top: 120px; /* Mais espaço no topo para a transição */
+  padding-bottom: 120px; /* Mais espaço abaixo para a transição */
+}
+
+/* Transições de Topo e Fundo */
+.flow-transition-top, .flow-transition-bottom {
+  position: absolute;
+  left: 0; right: 0;
+  height: 150px;
+  background: linear-gradient(to bottom, var(--cor-preto-absoluto), transparent); /* De preto (seção WhatsApp) para transparente */
+  z-index: 5;
+  pointer-events: none;
+}
+.flow-transition-top { top: 0; }
+.flow-transition-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--cor-preto-absoluto), transparent); /* Para a próxima seção escura */
+  /* Se a próxima seção for clara, mude para: background: linear-gradient(to top, #f8f9fa, transparent); */
+}
+
+
+/* Fundo Estrelado e Nebulosa */
+.dashboard-flow-background {
+  position: absolute; inset: 0; z-index: 0;
+}
+.flow-bg-stars {
+  width: 100%; height: 100%;
+  background-image: radial-gradient(white 0.5px, transparent 0.5px);
+  background-size: 30px 30px;
+  opacity: 0.1;
+  animation: panStarsFlow 200s linear infinite;
+}
+@keyframes panStarsFlow {
+  from { background-position: 0 0; }
+  to { background-position: -1000px 1000px; }
+}
+.flow-bg-nebula {
+  position: absolute; top: 50%; left: 50%;
+  width: 100vw; height: 100vh;
+  max-width: 1400px; max-height: 1400px;
+  background: radial-gradient(ellipse at center, rgba(var(--flow-gold-rgb), 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  filter: blur(60px);
+}
+
+.dashboard-flow-container {
+  max-width: 1100px; position: relative; z-index: 1;
+}
+
+/* Animações */
+.dashboard-flow-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.dashboard-flow-section-wrapper .animate-on-scroll.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+/* Header */
+.dashboard-flow-header-row { margin-bottom: 60px; }
+.dashboard-flow-header-icon-wrapper {
+  width: 70px; height: 70px;
+  border: 1px solid var(--flow-card-border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 25px auto;
+}
+.dashboard-flow-header-icon { font-size: 32px; color: var(--flow-gold); }
+.dashboard-flow-main-title {
+  font-size: clamp(32px, 4.5vw, 40px) !important;
+  font-weight: 700 !important; color: var(--cor-branco) !important;
+  margin-bottom: 15px !important;
+}
+.highlight-flow-text {
+  background: linear-gradient(90deg, var(--flow-orange), var(--flow-gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; text-fill-color: transparent;
+  padding: 0 2px;
+}
+.dashboard-flow-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important; color: var(--texto-cinza-medio) !important;
+  max-width: 700px; margin: 0 auto; line-height: 1.7;
+}
+
+/* Painel Central e Conexão */
+.flow-panel-container {
+  position: relative; width: 100%; height: 420px;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1800px; margin-bottom: 80px;
+  transition: transform 0.1s linear;
+  transform: rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg));
+  transform-style: preserve-3d;
+}
+
+/* Linhas de Energia */
+.energy-flow-lines {
+  position: absolute; bottom: 100%; left: 50%;
+  width: 200px; height: 150px;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+.energy-flow-lines .line {
+  position: absolute; bottom: 0; left: 50%;
+  width: 2px; height: 100%;
+  background: linear-gradient(to top, var(--flow-gold), transparent 80%);
+  transform-origin: bottom;
+  opacity: 0;
+}
+.animate-on-scroll.visible .energy-flow-lines .line {
+  animation: flowUp 2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+.energy-flow-lines .line:nth-child(1) { transform: translateX(-50px) rotate(-15deg); animation-delay: 0.5s; }
+.energy-flow-lines .line:nth-child(2) { transform: translateX(-10px) rotate(-5deg); animation-delay: 0.7s; }
+.energy-flow-lines .line:nth-child(3) { transform: translateX(10px) rotate(5deg); animation-delay: 0.6s; }
+.energy-flow-lines .line:nth-child(4) { transform: translateX(50px) rotate(15deg); animation-delay: 0.8s; }
+@keyframes flowUp {
+  0% { height: 0; opacity: 1; }
+  80% { height: 100%; }
+  100% { height: 100%; opacity: 0; }
+}
+
+
+.flow-panel-frame {
+  width: 90%; height: 100%; max-width: 850px;
+  background-color: var(--flow-card-bg);
+  border: 1px solid var(--flow-card-border);
+  border-radius: 16px; padding: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4), inset 0 0 40px rgba(13, 17, 23, 0.5);
+  position: relative; transform-style: preserve-3d;
+  backdrop-filter: blur(10px);
+  transform: rotateX(10deg);
+  opacity: 0;
+  transition: opacity 0.8s ease 0.8s, transform 0.8s ease 0.8s, border-color 0.4s ease;
+}
+.animate-on-scroll.visible .flow-panel-frame {
+  opacity: 1; transform: rotateX(0deg);
+}
+.flow-panel-container:hover .flow-panel-frame {
+  border-color: var(--flow-card-hover-border);
+}
+.panel-flow-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(var(--flow-gold-rgb), 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--flow-gold-rgb), 0.08) 1px, transparent 1px);
+  background-size: 50px 50px; z-index: 0;
+}
+
+/* Widgets - Reutilizando estilos anteriores, mas com novas classes para evitar conflitos */
+.flow-widget {
+  position: absolute; background-color: rgba(0,0,0,0.3);
+  border: 1px solid var(--flow-card-border); border-radius: 8px;
+  padding: 10px 15px; z-index: 1; color: var(--cor-branco);
+  transition: all 0.4s ease; transform: translateZ(25px);
+  opacity: 0;
+}
+.animate-on-scroll.visible .flow-widget {
+    animation: flowWidgetAppear 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+@keyframes flowWidgetAppear { to { opacity: 1; transform: translateZ(25px); }}
+
+.flow-widget-header {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500; color: var(--texto-cinza-medio);
+  margin-bottom: 8px; white-space: nowrap;
+}
+.flow-widget-header .anticon { color: var(--flow-orange); }
+
+.flow-widget.widget-chart { top: 20px; left: 20px; width: 50%; height: 60%; animation-delay: 1s; }
+.flow-widget.widget-kpi-top { top: 20px; right: 20px; width: 25%; height: 80px; animation-delay: 1.2s; }
+.flow-widget.widget-kpi-bottom { bottom: 20px; right: 20px; width: 25%; height: 80px; animation-delay: 1.4s; }
+.flow-widget.widget-pie { bottom: 20px; left: 20px; width: 30%; height: 110px; animation-delay: 1.3s; }
+
+.chart-bars-flow { display: flex; align-items: flex-end; justify-content: space-around; height: calc(100% - 25px); }
+.chart-bars-flow .bar { width: 12%; background: linear-gradient(to top, var(--flow-orange), var(--flow-gold)); border-radius: 2px 2px 0 0; }
+.kpi-value-flow { font-size: 22px; font-weight: 600; color: var(--cor-branco); }
+.pie-chart-flow { width: 60px; height: 60px; border-radius: 50%; background: conic-gradient(var(--flow-orange) 0% 40%, var(--flow-gold) 40% 75%, #a4812a 75% 100%); margin: 0 auto; }
+
+
+/* Grid de Benefícios */
+.dashboard-flow-features-row {
+    margin-top: 60px;
+    position: relative; z-index: 5;
+}
+.dashboard-flow-feature-card {
+  background: var(--flow-card-bg);
+  border: 1px solid var(--flow-card-border);
+  border-radius: 12px; padding: 30px; height: 100%; text-align: left;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+.dashboard-flow-feature-card:hover {
+  transform: translateY(-8px);
+  background-color: rgba(29, 23, 11, 0.7);
+  border-color: var(--flow-card-hover-border);
+}
+.feature-flow-icon-wrapper {
+  width: 50px; height: 50px; background-color: var(--flow-gold);
+  color: var(--flow-bg); border-radius: 10px; font-size: 22px;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+}
+.feature-flow-title {
+  font-size: 19px !important; font-weight: 600 !important;
+  color: var(--cor-branco) !important; margin-bottom: 10px !important;
+}
+.feature-flow-text {
+  font-size: 15px !important; color: var(--texto-cinza-medio) !important; line-height: 1.7;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .flow-panel-frame { display: none; }
+  .energy-flow-lines { display: none; }
+  .flow-panel-container { height: 0; margin-bottom: 50px; }
+  .dashboard-flow-features-row { margin-top: 0; }
+}

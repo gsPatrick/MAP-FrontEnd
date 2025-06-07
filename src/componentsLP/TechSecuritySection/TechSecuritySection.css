@@ -1,0 +1,193 @@
+/* src/componentsLP/TechSecuritySection/TechSecuritySection.css - VERSÃO "BLUEPRINT" */
+
+.blueprint-section-wrapper {
+  background-color: #fdfdfd; /* Branco levemente "quebrado" */
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* Fundo com grade e textura de ruído */
+.blueprint-background-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 75px 75px;
+  z-index: 0;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+}
+.blueprint-section-wrapper::after { /* Textura de ruído sutil */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXVAAAAacXAaAAAAd3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3cAGwAZAAAAFXRSTlMAAAAAANTX19vj4+fr7+/z8/Pz9/v7/P39/GEGfLEAAAAYdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAABHklEQVRIia3Q_QEAIAzAwIyE2IcmAwO3/1VzprO5L8H7/Ua/h78Gd2x8f_8P5l7Ig9cO2s4C8NruoDevB9s5wAa94h7d2lp4c3wW3d2LPB2XJL8Vj50wasqRpfSjpGj1g2Uds13uW5IuP23vO0SoGDkFqD6C2yXsuUHwF2K0sOkeR6I_8QR3dKgsY2Yrq2MK3CPG8w2zE9x1Hru25wKxESBv2yKKd5y9yqNDB151pXy7AghrKXySdcJ6Vb15oAysmL2s0g2pEptis9wjDFCIupTESB9YpFpBq2pL0d9c4T9vRBberyGhsSIm7x2jNQ3KBtjdDEMg24V3Bmxo2JkAwvS5jB500gM0hJ5g0YgU1M5sF0K3sELoHVIxYqyQG3hVbUKqgYBF2VpLSsFOo1iVpFILCr5Dq2oZII4jcKFE1KAIK7REUzXG4OQuFpIifkLqDCg3sWS2EaUS4+V2cGfAPM1QBi4e5zzwI4wYg2I5hO5x9eQx1w0g32LgNK4sc21LgNTSg2yH/wWz/2IK0wQMAAAAASUVORK5CYII=');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+.blueprint-section-container {
+  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+}
+
+.blueprint-header { margin-bottom: 70px; }
+.blueprint-section-title { color: var(--map-preto) !important; }
+.highlight-blueprint-orange { color: var(--map-laranja); }
+.highlight-blueprint-gold { color: var(--map-dourado); }
+.blueprint-section-subtitle {
+  color: var(--map-cinza-texto) !important;
+  max-width: 750px;
+}
+
+/* Animações */
+.blueprint-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.blueprint-section-wrapper .animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Coluna de Visualização (Elemento Central) */
+.blueprint-visual-col {
+  display: flex; justify-content: center; align-items: center;
+  min-height: 450px;
+}
+.blueprint-central-core {
+  width: 300px; height: 300px;
+  position: relative;
+  display: flex; justify-content: center; align-items: center;
+}
+.core-pulse {
+  position: absolute;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background-color: rgba(204, 102, 51, 0.1);
+  animation: corePulseAnim 3s infinite ease-in-out;
+}
+@keyframes corePulseAnim {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+.core-icon-main {
+  width: 120px; height: 120px;
+  background-color: var(--map-laranja);
+  color: var(--map-branco);
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 32px; font-weight: 700;
+  box-shadow: 0 10px 25px rgba(204, 102, 51, 0.3);
+  z-index: 5;
+}
+
+.orbiting-icon {
+  position: absolute;
+  width: 60px; height: 60px;
+  background-color: var(--map-branco);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border: 1px solid #eee;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 26px;
+  animation: orbit 15s linear infinite;
+  z-index: 4;
+}
+.orbiting-icon:hover {
+  animation-play-state: paused;
+}
+.orbiting-icon .anticon {
+    transition: transform 0.3s ease;
+}
+.orbiting-icon:hover .anticon {
+    transform: scale(1.2);
+}
+
+.icon-ai { color: var(--map-laranja); animation-delay: 0s; top: 0; left: 50%; transform-origin: 0px 150px; }
+.icon-security { color: var(--map-dourado); animation-delay: -3.75s; top: 50%; left: 0; transform-origin: 150px 0px; }
+.icon-wpp { color: #25D366; animation-delay: -7.5s; top: 100%; left: 50%; transform-origin: 0px -150px; }
+.icon-gcal { color: #4285F4; animation-delay: -11.25s; top: 50%; left: 100%; transform-origin: -150px 0px; }
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+}
+
+/* Coluna dos Pilares de Conteúdo */
+.blueprint-pillars-col {
+  display: flex; flex-direction: column; gap: 30px;
+}
+.blueprint-pillar-item {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 25px;
+  backdrop-filter: blur(5px);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.blueprint-pillar-item:hover {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+  border-color: #ddd;
+}
+
+.pillar-header {
+  display: flex; align-items: center; gap: 15px;
+  margin-bottom: 15px;
+}
+.pillar-icon-wrapper {
+  flex-shrink: 0; width: 50px; height: 50px;
+  background-color: var(--pillar-color);
+  color: var(--map-branco);
+  border-radius: 12px;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 24px;
+}
+.pillar-title {
+  color: var(--map-preto) !important;
+  margin-bottom: 0 !important;
+  font-size: 20px !important;
+}
+
+.pillar-description {
+  color: var(--map-cinza-texto) !important;
+  margin-bottom: 20px !important;
+  padding-left: 65px; /* Alinha com o texto do título */
+}
+
+.pillar-subpoints-list {
+  list-style: none; padding-left: 65px;
+  display: flex; flex-direction: column; gap: 12px;
+  margin: 0;
+}
+.pillar-subpoints-list li {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; color: #333;
+}
+.pillar-subpoints-list li .anticon {
+  font-size: 16px;
+}
+
+/* Responsividade */
+@media (max-width: 991px) { /* lg */
+  .blueprint-visual-col { order: 1; }
+  .blueprint-pillars-col { order: 2; margin-top: 50px; }
+  .orbiting-icon { width: 50px; height: 50px; font-size: 22px; }
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+  }
+}
+@media (max-width: 575px) { /* sm */
+  .blueprint-central-core { transform: scale(0.8); }
+  .pillar-description, .pillar-subpoints-list { padding-left: 0; }
+}

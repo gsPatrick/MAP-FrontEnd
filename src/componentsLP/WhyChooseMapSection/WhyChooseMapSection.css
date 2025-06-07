@@ -1,0 +1,170 @@
+/* src/componentsLP/BenefitsSection/BenefitsSection.css - VERSÃO "PILARES" */
+
+.pillars-section-wrapper {
+  background-color: #fcfcfc; /* Branco com um tom quase imperceptível de cinza */
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid #f0f0f0;
+}
+/* Textura de ruído sutil */
+.pillars-section-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXVAAAAacXAaAAAAd3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3cAGwAZAAAAFXRSTlMAAAAAANTX19vj4+fr7+/z8/Pz9/v7/P39/GEGfLEAAAAYdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAABHklEQVRIia3Q_QEAIAzAwIyE2IcmAwO3/1VzprO5L8H7/Ua/h78Gd2x8f_8P5l7Ig9cO2s4C8NruoDevB9s5wAa94h7d2lp4c3wW3d2LPB2XJL8Vj50wasqRpfSjpGj1g2Uds13uW5IuP23vO0SoGDkFqD6C2yXsuUHwF2K0sOkeR6I_8QR3dKgsY2Yrq2MK3CPG8w2zE9x1Hru25wKxESBv2yKKd5y9yqNDB151pXy7AghrKXySdcJ6Vb15oAysmL2s0g2pEptis9wjDFCIupTESB9YpFpBq2pL0d9c4T9vRBberyGhsSIm7x2jNQ3KBtjdDEMg24V3Bmxo2JkAwvS5jB500gM0hJ5g0YgU1M5sF0K3sELoHVIxYqyQG3hVbUKqgYBF2VpLSsFOo1iVpFILCr5Dq2oZII4jcKFE1KAIK7REUzXG4OQuFpIifkLqDCg3sWS2EaUS4+V2cGfAPM1QBi4e5zzwI4wYg2I5hO5x9eQx1w0g32LgNK4sc21LgNTSg2yH/wWz/2IK0wQMAAAAASUVORK5CYII=');
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+
+.pillars-section-container {
+  max-width: 1100px;
+}
+
+.pillars-header {
+  margin-bottom: 70px;
+}
+.pillars-section-title {
+  color: var(--map-preto) !important;
+}
+.highlight-pillars-gradient {
+  background: linear-gradient(90deg, var(--map-dourado), var(--map-laranja));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  padding: 0 2px;
+}
+
+.pillars-section-subtitle {
+  color: var(--map-cinza-texto) !important;
+  max-width: 650px;
+}
+
+/* Animações */
+.pillars-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 0.7s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.pillars-section-wrapper .animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Formas Abstratas de Fundo */
+.pillars-background-shape {
+  position: absolute;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+  pointer-events: none;
+}
+.pillars-section-wrapper.visible .pillars-background-shape {
+  opacity: 1;
+}
+.shape-1 {
+  width: 400px; height: 400px;
+  background-color: rgba(227, 190, 98, 0.07); /* Dourado */
+  top: 10%; left: -150px;
+  animation: subtleMorphAnim 20s infinite alternate;
+}
+.shape-2 {
+  width: 350px; height: 350px;
+  background-color: rgba(204, 102, 51, 0.07); /* Laranja */
+  bottom: 5%; right: -120px;
+  animation: subtleMorphAnim 25s infinite alternate-reverse;
+}
+@keyframes subtleMorphAnim {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(45deg) scale(1.1); border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; }
+}
+
+
+/* Cards dos Pilares (Benefícios) */
+.pillar-card-col {
+  display: flex;
+}
+.pillar-card {
+  width: 100%;
+  background-color: var(--map-branco);
+  border: 1px solid #eaeaea;
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Efeito de borda colorida no topo */
+.pillar-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 5px;
+  width: 100%;
+  background-color: var(--pillar-color);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.2s;
+}
+.animate-on-scroll.visible .pillar-card::before {
+  transform: scaleX(1);
+}
+
+.pillar-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+}
+
+.pillar-card-icon-wrapper {
+  margin: 0 auto 30px auto;
+  width: 70px; height: 70px;
+  background-color: #f8f9fa;
+  border: 1px solid #f0f0f0;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 30px;
+  color: var(--pillar-color);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+.pillar-card:hover .pillar-card-icon-wrapper {
+  background-color: var(--pillar-color);
+  color: var(--map-branco);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 8px 20px -5px color-mix(in srgb, var(--pillar-color) 40%, black);
+}
+
+.pillar-card-title {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: var(--map-preto) !important;
+  margin-bottom: 15px !important;
+}
+
+.pillar-card-description {
+  font-size: 15px !important;
+  color: var(--map-cinza-texto) !important;
+  line-height: 1.75 !important;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .pillar-card-col {
+    margin-bottom: 24px;
+  }
+   .pillar-card-col:last-child {
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 575px) {
+    .pillars-section-title { font-size: 28px !important; }
+    .pillars-section-subtitle { font-size: 16px !important; }
+    .pillar-card { padding: 30px 25px; }
+    .pillar-card-title { font-size: 20px !important; }
+}

@@ -1,0 +1,211 @@
+/* src/componentsLP/WaterReminderSection/WaterReminderSection.css - VERSÃO ULTRA */
+
+:root {
+  --water-cyan-v2: #00E5FF; /* Ciano mais elétrico */
+  --water-cyan-v2-rgb: 0, 229, 255;
+  --water-deep-blue-v2: #020a1a; /* Fundo quase preto, mas azulado */
+  --water-mid-blue-v2: #0a192f; /* Tom para gradientes e elementos */
+  --water-glass-bg: rgba(10, 25, 47, 0.75); /* Fundo do card/mockup */
+  --water-glass-border: rgba(0, 229, 255, 0.2);
+  --water-text-light-v2: #ccd6f6;
+  --water-text-mid-v2: #8892b0;
+}
+
+.water-v2-section-wrapper {
+  background-color: var(--water-deep-blue-v2);
+  background-image: linear-gradient(180deg, var(--water-mid-blue-v2) 0%, var(--water-deep-blue-v2) 100%);
+  color: var(--water-text-light-v2);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border-top: 1px solid var(--water-glass-border);
+}
+
+/* Efeitos de Fundo */
+.water-v2-bg-blur-layer {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 80vw; height: 80vw;
+  max-width: 900px; max-height: 900px;
+  background: radial-gradient(circle, rgba(var(--water-cyan-v2-rgb), 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  filter: blur(120px);
+  z-index: 0;
+}
+.water-v2-bg-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(var(--water-glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--water-glass-border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.2;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  z-index: 0;
+}
+
+.water-v2-container {
+  max-width: 1100px;
+  position: relative;
+  z-index: 2;
+}
+
+.water-v2-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.water-v2-section-wrapper .animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Header (Título e Subtítulo) */
+.water-v2-header-row { margin-bottom: 70px; }
+.water-v2-main-title {
+  font-size: clamp(32px, 5vw, 44px) !important;
+  font-weight: 700 !important; color: var(--cor-branco) !important;
+  margin-bottom: 15px !important;
+}
+.highlight-v2-cyan {
+  color: var(--water-cyan-v2);
+  text-shadow: 0 0 25px rgba(var(--water-cyan-v2-rgb), 0.5);
+}
+.water-v2-main-subtitle {
+  font-size: clamp(16px, 2.5vw, 18px) !important;
+  color: var(--water-text-light-v2) !important;
+  max-width: 700px; margin: 0 auto; line-height: 1.7;
+}
+
+/* Mockup do Celular */
+.water-v2-mockup-col {
+  display: flex; justify-content: center; align-items: center;
+}
+.water-v2-mockup-wrapper {
+  position: relative;
+}
+.water-v2-mockup {
+  width: 280px; height: 570px;
+  background: linear-gradient(145deg, #1e2c40, #0a182e);
+  border-radius: 40px; padding: 12px;
+  box-shadow: 0 25px 60px -15px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.05);
+  transition: transform 0.5s ease;
+}
+.water-v2-mockup-wrapper:hover .water-v2-mockup {
+  transform: scale(1.03);
+}
+
+.water-v2-mockup-notch {
+  width: 120px; height: 20px; background-color: #000;
+  border-radius: 0 0 12px 12px; margin: 0 auto;
+}
+.water-v2-screen {
+  background-color: var(--water-mid-blue-v2);
+  width: 100%; height: calc(100% - 20px);
+  margin-top: 8px; border-radius: 28px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+
+.water-v2-screen-header, .water-v2-screen-footer {
+  padding: 12px 15px; background-color: var(--water-glass-bg);
+  backdrop-filter: blur(5px); z-index: 10; font-weight: 500;
+}
+.water-v2-screen-header { border-bottom: 1px solid var(--water-glass-border); }
+.water-v2-screen-footer { border-top: 1px solid var(--water-glass-border); margin-top: auto; }
+.water-v2-screen-header .anticon { margin-right: 8px; color: var(--water-cyan-v2); }
+
+/* Animação da Água */
+.water-v2-progress-container {
+  flex-grow: 1; position: relative;
+  display: flex; justify-content: center; align-items: center;
+}
+.water-v2-progress-text {
+  position: relative; z-index: 5; text-align: center;
+  display: flex; flex-direction: column;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+.progress-value {
+  font-size: 40px; font-weight: 700; color: var(--cor-branco);
+}
+.progress-goal {
+  font-size: 16px; color: var(--water-text-light-v2); opacity: 0.8;
+}
+
+.water-v2-liquid {
+  position: absolute; bottom: 0; left: 0;
+  width: 100%;
+  background-color: rgba(var(--water-cyan-v2-rgb), 0.5);
+  transition: height 2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+.water-v2-wave {
+  position: absolute;
+  top: -20px; left: -50%;
+  width: 200%; height: 20px;
+  background-repeat: repeat-x;
+  animation: waveAnim 5s linear infinite;
+}
+.water-v2-wave.wave-1 {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C30 20, 90 0, 120 10" stroke="%2300E5FF" fill="transparent" stroke-width="2"/></svg>');
+  animation-duration: 7s;
+}
+.water-v2-wave.wave-2 {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C40 0, 80 20, 120 10" stroke="rgba(0, 229, 255, 0.5)" fill="transparent" stroke-width="2"/></svg>');
+  animation-direction: reverse;
+}
+@keyframes waveAnim {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+
+/* Pontos de Funcionalidade */
+.water-v2-features-col {
+  display: flex; align-items: center;
+}
+.water-v2-features-list {
+  display: flex; flex-direction: column;
+  gap: 25px;
+  text-align: left;
+  padding-left: 40px;
+}
+@media (max-width: 991px) { /* lg */
+  .water-v2-features-list { padding-left: 0; margin-top: 50px; text-align: center; }
+  .water-v2-feature-item { flex-direction: column; align-items: center; }
+  .feature-v2-text-content { text-align: center; }
+}
+
+.water-v2-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.feature-v2-icon-wrapper {
+  flex-shrink: 0;
+  width: 50px; height: 50px;
+  background: var(--water-glass-bg);
+  border: 1px solid var(--water-glass-border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--water-cyan-v2);
+  transition: all 0.3s ease;
+}
+.water-v2-feature-item:hover .feature-v2-icon-wrapper {
+  background-color: var(--water-cyan-v2);
+  color: var(--water-deep-blue-v2);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 0 20px rgba(var(--water-cyan-v2-rgb), 0.4);
+}
+
+.feature-v2-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 8px !important;
+}
+.feature-v2-description {
+  font-size: 15px !important;
+  color: var(--water-text-mid-v2) !important;
+  line-height: 1.6;
+  margin-bottom: 0 !important;
+}

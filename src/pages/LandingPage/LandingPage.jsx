@@ -13,6 +13,20 @@ import TargetAudienceSection from '../../componentsLP/TargetAudienceSection/Targ
 import GoogleCalendarSection from '../../componentsLP/GoogleCalendarSection/GoogleCalendarSection';
 import WhatsAppIntegrationSection from '../../componentsLP/WhatsAppIntegrationSection/WhatsAppIntegrationSection';
 import AboutCreatorSection from '../../componentsLP/AboutCreatorSection/AboutCreatorSection';
+import AppointmentsSection from '../../componentsLP/AppointmentsSection/AppointmentsSection';
+import ProductsStockSection from '../../componentsLP/ProductsStockSection/ProductsStockSection';
+import MotivationalMessageSection from '../../componentsLP/MotivationalMessageSection/MotivationalMessageSection';
+import WaterReminderSection from '../../componentsLP/WaterReminderSection/WaterReminderSection';
+
+import TechSecuritySection from '../../componentsLP/TechSecuritySection/TechSecuritySection';
+import WhyChooseMapSection from '../../componentsLP/WhyChooseMapSection/WhyChooseMapSection'; // <<< NOVO IMPORT
+import BrandValuesSection from '../../componentsLP/BrandValuesSection/BrandValuesSection';
+import DashboardSection from '../../componentsLP/DashboardSection/DashboardSection';
+import AccountTypesSection from '../../componentsLP/AccountTypesSection/AccountTypesSection'; // <<< NOVO IMPORT
+
+
+
+
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import './LandingPage.css';
 
@@ -25,31 +39,47 @@ const LandingPage = () => {
       <Content className="landing-page-main-content">
         {/* O HeroSection geralmente é o topo, não precisa de ID para navegação do menu, a menos que haja um link "Home" */}
         <HeroSection /> 
-        
         <GoogleCalendarSection/>
+        <AppointmentsSection />
         
         {/* Adicionando IDs para navegação do menu */}
         <div id="funcionalidades">
           <FeaturesSection />
         </div>
-        
+                          <TechSecuritySection />
+
         <HowItWorksSection />
+                <ProductsStockSection /> 
+
+        
+        <div id="beneficios">
+          <BenefitsSection />
+        </div>
+
+        <WhyChooseMapSection />
+        <BrandValuesSection />
 
 
           <div id="sobre">
               <AboutCreatorSection />
           </div>
-        
-        <div id="beneficios">
-          <BenefitsSection />
-        </div>
+
+
         
         <TargetAudienceSection />
+                <AccountTypesSection /> {/* <<< ADICIONE A NOVA SEÇÃO AQUI >>> */}
+
         <WhatsAppIntegrationSection />
-        
+                <DashboardSection />
+
+
         <div id="planos">
           <PricingSection />
         </div>
+                <MotivationalMessageSection />
+
+        <WaterReminderSection />
+
 
         {/* 
           Para o item de menu "Depoimentos" funcionar, 
