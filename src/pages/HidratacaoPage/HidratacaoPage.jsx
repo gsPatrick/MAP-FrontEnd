@@ -50,31 +50,22 @@ const HidratacaoPage = () => {
   const [reminderEndTime, setReminderEndTime] = useState('18:00');   
   
   const [configLoading, setConfigLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
 
   const [waterIntakeList, setWaterIntakeList] = useState([]);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [settingsForm] = Form.useForm();
   const [customIntervalUnitModal, setCustomIntervalUnitModal] = useState('minutes'); 
 
-  const LS_KEY_PREFIX = 'mapHidratacao_';
-  
-  const getLocalStorageKey = useCallback(() => {
-    return `${LS_KEY_PREFIX}${currentProfile?.id || 'geral'}_${dayjs().format('YYYY-MM-DD')}`;
-  }, [currentProfile]);
-
   const fetchHydrationPreferences = useCallback(async () => {
-    if (!isAuthenticated || !currentProfile) {
+    if (!isAuthenticated) {
         setConfigLoading(false);
-        setDailyGoal(2000);
-        setEnableReminder(false);
-        setReminderFrequencyType('disabled');
-        setReminderCustomInterval(120);
-        setReminderStartTime('09:00');
-        setReminderEndTime('18:00');
         return;
     }
     setConfigLoading(true);
     try {
+      // Esta rota agora pode ser simplificada ou removida se as configs
+      // forem salvas por cliente, mas mantemos por enquanto.
       const response = await apiClient.get('/system/preferences');
       if (response.data && response.data.status === 'success') {
         const prefs = response.data.data;
@@ -92,6 +83,31 @@ const HidratacaoPage = () => {
     } finally {
       setConfigLoading(false);
     }
+  }, [isAuthenticated]);
+
+  const fetchDailyLogs = useCallback(async () => {
+    if (!isAuthenticated || !currentProfile) {
+        setWaterIntakeList([]);
+        return;
+    }
+    setListLoading(true);
+    try {
+        const response = await apiClient.get('/hydration/logs/today');
+        if (response.data && Array.isArray(response.data)) {
+            const logsFromServer = response.data.map(log => ({
+                id: log.id,
+                time: log.scheduledTime.substring(0, 5),
+                amount: log.amount,
+                drank: log.status === 'completed'
+            }));
+            setWaterIntakeList(logsFromServer);
+        }
+    } catch (error) {
+        console.error("Erro ao buscar logs de hidratação:", error);
+        message.error("Não foi possível carregar o seu progresso de hidratação de hoje.");
+    } finally {
+        setListLoading(false);
+    }
   }, [isAuthenticated, currentProfile]);
 
   useEffect(() => {
@@ -99,118 +115,36 @@ const HidratacaoPage = () => {
         fetchHydrationPreferences();
     }
   }, [loadingProfiles, fetchHydrationPreferences]);
-
-  const generateIntakeList = useCallback(() => {
-    if (configLoading || !enableReminder || !reminderFrequencyType || reminderFrequencyType === 'disabled' || !reminderStartTime || !reminderEndTime) {
-      setWaterIntakeList([]);
-      return;
-    }
-
-    const list = [];
-    let intervalMinutes;
-
-    if (reminderFrequencyType === 'custom') {
-      intervalMinutes = reminderCustomInterval > 0 ? parseInt(reminderCustomInterval, 10) : 120;
-      if (isNaN(intervalMinutes) || intervalMinutes < MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM) { 
-          logger.warn(`[HidratacaoPage] Intervalo customizado (em minutos) ${intervalMinutes} é menor que o mínimo do sistema (${MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM}min). Ajustando para ${MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM}min para geração da lista.`);
-          intervalMinutes = MIN_CUSTOM_INTERVAL_IN_MINUTES_SYSTEM;
-      }
-    } else if (reminderFrequencyType === '2h' || reminderFrequencyType === '3h') {
-      intervalMinutes = parseInt(reminderFrequencyType.replace('h', ''), 10) * 60;
-    } else {
-      logger.warn(`[HidratacaoPage] Tipo de frequência inválido: ${reminderFrequencyType}.`);
-      setWaterIntakeList([]);
-      return;
-    }
-
-    const start = dayjs(reminderStartTime, 'HH:mm');
-    const end = dayjs(reminderEndTime, 'HH:mm');
-    
-    if (!start.isValid() || !end.isValid() || end.isBefore(start)) {
-        logger.warn(`[HidratacaoPage] Horários de início/fim inválidos. Start: ${reminderStartTime}, End: ${reminderEndTime}`);
-        setWaterIntakeList([]);
-        return;
-    }
-
-    const durationTotalMinutes = end.diff(start, 'minute');
-    let amountPerPortion = 250;
-    let numberOfIntervals = 0;
-
-    if (durationTotalMinutes >= 0 && intervalMinutes > 0) {
-        numberOfIntervals = Math.floor(durationTotalMinutes / intervalMinutes) + 1;
-    } else if (durationTotalMinutes >= 0 && intervalMinutes === 0) {
-        numberOfIntervals = 1;
-    }
-    
-    if (dailyGoal > 0 && numberOfIntervals > 0) {
-        amountPerPortion = Math.max(100, Math.round(dailyGoal / numberOfIntervals / 50) * 50);
-    } else if (dailyGoal > 0 && numberOfIntervals === 0 && durationTotalMinutes >= 0){
-        amountPerPortion = dailyGoal;
-        numberOfIntervals = 1; 
-    }
-
-    if (numberOfIntervals > 0) {
-        let currentTime = start;
-        let idCounter = 0;
-        for (let i = 0; i < numberOfIntervals; i++) {
-            if (currentTime.isAfter(end)) break; 
-            if (list.length >= 25) break;
-            list.push({
-                id: `intake-${idCounter++}-${currentTime.format('HHmm')}`,
-                time: currentTime.format('HH:mm'),
-                amount: amountPerPortion,
-                drank: false,
-            });
-            currentTime = currentTime.add(intervalMinutes, 'minute');
-             if (intervalMinutes === 0 && i === 0) break;
-        }
-    }
-    
-    const storageKey = getLocalStorageKey();
-    let savedState = {};
-    try {
-        const item = localStorage.getItem(storageKey);
-        if (item) {
-            savedState = JSON.parse(item);
-        }
-    } catch(e) {
-        console.error("Erro ao ler localStorage para hidratação:", e);
-    }
-    
-    const hydratedList = list.map(item => ({
-        ...item,
-        drank: savedState[item.id] || false,
-    }));
-    setWaterIntakeList(hydratedList);
-  }, [dailyGoal, enableReminder, reminderFrequencyType, reminderCustomInterval, reminderStartTime, reminderEndTime, configLoading, getLocalStorageKey]);
-
+  
   useEffect(() => {
-    if(!configLoading && isAuthenticated && currentProfile){
-        generateIntakeList();
-    } else if (!isAuthenticated && !configLoading) {
-        setWaterIntakeList([]);
-    }
-  }, [generateIntakeList, configLoading, isAuthenticated, currentProfile]);
+      if (!configLoading && isAuthenticated && currentProfile) {
+          fetchDailyLogs();
+      }
+  }, [configLoading, isAuthenticated, currentProfile, fetchDailyLogs]);
+
 
   const totalDrankToday = useMemo(() => {
-    return waterIntakeList.reduce((sum, r) => r.drank ? sum + r.amount : sum, 0);
+    return waterIntakeList.reduce((sum, r) => r.drank ? sum + (r.amount || 0) : sum, 0);
   }, [waterIntakeList]);
 
   const progressPercent = useMemo(() => {
     return dailyGoal > 0 ? Math.min(Math.round((totalDrankToday / dailyGoal) * 100), 100) : 0;
   }, [totalDrankToday, dailyGoal]);
 
-  const handleToggleDrank = (reminderId) => {
+  const handleToggleDrank = async (logId, currentDrankStatus) => {
+    const originalList = [...waterIntakeList];
     const newList = waterIntakeList.map(r =>
-      r.id === reminderId ? { ...r, drank: !r.drank } : r
+      r.id === logId ? { ...r, drank: !r.drank } : r
     );
     setWaterIntakeList(newList);
-    const storageKey = getLocalStorageKey();
-    const currentState = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    const itemChanged = newList.find(r => r.id === reminderId);
-    if(itemChanged) {
-        currentState[reminderId] = itemChanged.drank;
-        localStorage.setItem(storageKey, JSON.stringify(currentState));
+
+    try {
+      const newStatus = !currentDrankStatus ? 'completed' : 'pending';
+      await apiClient.patch(`/hydration/log/${logId}`, { status: newStatus });
+    } catch (error) {
+      console.error("Erro ao atualizar status de hidratação:", error);
+      message.error("Não foi possível salvar a alteração. Desfazendo.");
+      setWaterIntakeList(originalList);
     }
   };
   
@@ -241,9 +175,12 @@ const HidratacaoPage = () => {
 
     setConfigLoading(true);
     try {
-        await apiClient.put('/system/preferences', dataToSave);
-        message.success("Configurações de hidratação salvas!");
+        // <<< MUDANÇA PRINCIPAL AQUI >>>
+        // Trocamos a rota de '/system/preferences' para a nossa nova rota de hidratação
+        await apiClient.put('/hydration/settings', dataToSave);
+        message.success("Configurações salvas! Suas metas de hoje foram atualizadas.");
         
+        // Atualiza o estado local para refletir as mudanças imediatamente na UI
         setDailyGoal(dataToSave.dailyGoalMl);
         setEnableReminder(dataToSave.enableWaterReminder);
         setReminderFrequencyType(dataToSave.waterReminderFrequencyType);
@@ -252,8 +189,14 @@ const HidratacaoPage = () => {
         setReminderEndTime(dataToSave.waterReminderEndTime.substring(0,5));
         
         setIsSettingsModalVisible(false);
+        
+        // <<< AÇÃO CRÍTICA >>>
+        // Força a recarga dos logs para mostrar a nova lista que acabamos de criar no backend
+        fetchDailyLogs();
+
     } catch (error) {
       console.error("Erro ao salvar configurações de hidratação:", error);
+      message.error("Falha ao salvar as configurações.");
     } finally {
       setConfigLoading(false); 
     }
@@ -373,7 +316,7 @@ const HidratacaoPage = () => {
             </Card>
           </Col>
           <Col xs={24} md={14} lg={16}>
-            <Card title="Lembretes de Hoje (Metas de Consumo)" bordered={false} className="reminders-list-card-hidratacao">
+            <Card title="Lembretes de Hoje (Metas de Consumo)" bordered={false} className="reminders-list-card-hidratacao" loading={listLoading}>
               {waterIntakeList.length > 0 ? (
                 <List
                   itemLayout="horizontal"
@@ -386,7 +329,7 @@ const HidratacaoPage = () => {
                           <Button 
                             shape="circle" 
                             icon={item.drank ? <CheckOutlined /> : <ExperimentOutlined />} 
-                            onClick={() => handleToggleDrank(item.id)}
+                            onClick={() => handleToggleDrank(item.id, item.drank)}
                             type={item.drank ? "primary" : "default"}
                             className="btn-toggle-drank"
                           />
@@ -402,7 +345,7 @@ const HidratacaoPage = () => {
                   )}
                 />
               ) : (
-                <Empty description={!enableReminder || reminderFrequencyType === 'disabled' ? "Lembretes de água desativados." : "Nenhum horário de consumo. Verifique as configurações."} />
+                <Empty description={!enableReminder ? "Lembretes de água desativados. Ative nas configurações." : "Nenhuma meta de consumo para hoje. A lista será gerada amanhã com base nas suas configurações."} />
               )}
             </Card>
           </Col>
