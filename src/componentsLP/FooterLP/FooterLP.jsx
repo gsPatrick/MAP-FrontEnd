@@ -137,7 +137,7 @@ const FooterLP = () => {
               </li>
               <li>
                 <WhatsAppOutlined />
-                <a href="https://wa.me/SEUNUMEROWHATSAPP" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/5521995557002" target="_blank" rel="noopener noreferrer">
                   WhatsApp Suporte
                 </a>
               </li>
@@ -146,16 +146,6 @@ const FooterLP = () => {
         </Row>
 
         {/* Créditos ao Desenvolvedor */}
-        <Row justify="center" className="footer-dev-credits-row">
-          <Col>
-            <Paragraph className="footer-dev-credits">
-              Desenvolvido com <HeartFilled className="dev-heart-icon" /> por{' '}
-              <a href="https://codebypatrick.dev" target="_blank" rel="noopener noreferrer" className="dev-link">
-                Patrick.Developer
-              </a>
-            </Paragraph>
-          </Col>
-        </Row>
 
         <Divider className="footer-divider" />
 
