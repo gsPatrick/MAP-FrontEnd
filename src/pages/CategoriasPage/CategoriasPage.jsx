@@ -89,19 +89,16 @@ const CategoriasPage = () => {
       message.error("Perfil não selecionado. Não é possível salvar a categoria.");
       return;
     }
+    // ALTERAÇÃO 1: Removido o campo 'type' do payload. O backend não o utiliza mais.
     const payload = {
       name: values.name,
-      type: 'Saída',
-      parentId: null,
+      parentId: null, // Mantido, pois o UI atual cria apenas categorias raiz.
     };
-
-    if (editingCategoria) {
-        // Lógica de edição mantida
-    }
 
     try {
       if (editingCategoria) {
-        await apiClient.put(`/financial-accounts/${currentProfile.id}/categories/${editingCategoria.id}`, payload);
+        // Para edição, o payload também não precisa mais do 'type'.
+        await apiClient.put(`/financial-accounts/${currentProfile.id}/categories/${editingCategoria.id}`, { name: values.name });
         message.success(`Categoria "${payload.name}" atualizada com sucesso!`);
       } else {
         await apiClient.post(`/financial-accounts/${currentProfile.id}/categories`, payload);
@@ -110,6 +107,8 @@ const CategoriasPage = () => {
       fetchCategorias();
       handleCancelModal();
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Erro ao salvar categoria.";
+      message.error(errorMessage);
       console.error("Erro ao salvar categoria:", error);
     }
   };
@@ -125,6 +124,8 @@ const CategoriasPage = () => {
       message.warn(`Categoria "${categoria.name}" foi excluída.`);
       fetchCategorias();
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Erro ao excluir categoria.";
+      message.error(errorMessage);
       console.error("Erro ao excluir categoria:", error);
     }
   };
@@ -198,7 +199,8 @@ const CategoriasPage = () => {
                 ]}
               >
                 <Card.Meta
-                  avatar={<Avatar icon={<TagsOutlined />} className={`categoria-card-avatar type-${(cat.type || 'todos').toLowerCase()}`} />}
+                  // ALTERAÇÃO 2: Removida a classe dinâmica baseada em 'type'.
+                  avatar={<Avatar icon={<TagsOutlined />} className="categoria-card-avatar" />}
                   title={<Text className="categoria-card-nome" ellipsis={{tooltip: cat.name}}>{cat.name}</Text>}
                 />
               </Card>

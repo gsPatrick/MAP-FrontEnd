@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Button, Row, Col, Card, Avatar, Select, DatePicker,
@@ -7,7 +6,7 @@ import {
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, CreditCardOutlined,
-  InfoCircleOutlined, MoreOutlined, // PercentageOutlined, CalendarOutlined,
+  InfoCircleOutlined, MoreOutlined,
   ShoppingCartOutlined, PieChartOutlined, WalletOutlined 
 } from '@ant-design/icons';
 import { Pie } from '@ant-design/charts';
@@ -17,24 +16,16 @@ import 'dayjs/locale/pt-br';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
-// HeaderPanel e SidebarPanel não são mais importados aqui
-// import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
-// import SidebarPanel from '../../componentsPanel/SidebarPanel/SidebarPanel';
-
 import './CartoesPage.css';
 
 dayjs.locale('pt-br');
 
-const { Content } = Layout; // Content ainda é usado
+const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
-const mockCategoriasDespesaCartao = [
-  { id: 'ali_c', nome: 'Alimentação (Cartão)' }, { id: 'com_c', nome: 'Compras Online' },
-  { id: 'ser_c', nome: 'Serviços Assinatura' }, { id: 'via_c', nome: 'Viagens (Cartão)' },
-  { id: 'laz_c', nome: 'Lazer (Cartão)' }, { id: 'out_c', nome: 'Outras Despesas (Cartão)' },
-];
-
+// REMOVIDO: Não usaremos mais dados fixos.
+// const mockCategoriasDespesaCartao = [ ... ];
 
 const CartoesPage = () => {
   const {
@@ -43,16 +34,16 @@ const CartoesPage = () => {
     isAuthenticated
   } = useProfile();
 
-  // O estado sidebarCollapsed foi removido
-  // const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  // A variável userNameForHeader foi removida pois o Header não está mais aqui
-
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCardDetails, setSelectedCardDetails] = useState(null);
   const [selectedMonthYearForInvoice, setSelectedMonthYearForInvoice] = useState(dayjs());
   const [availableInvoicePeriods, setAvailableInvoicePeriods] = useState([]);
   const [invoiceExpenses, setInvoiceExpenses] = useState([]);
+  
+  // --- ALTERAÇÃO 1: Estados para categorias reais e seu carregamento ---
+  const [categorias, setCategorias] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   
   const [loadingCards, setLoadingCards] = useState(true);
   const [loadingInvoice, setLoadingInvoice] = useState(false);
@@ -69,12 +60,35 @@ const CartoesPage = () => {
   const [payInvoiceForm] = Form.useForm();
   const [payingInvoiceCard, setPayingInvoiceCard] = useState(null);
 
-  const [categoriasDespesaModal, setCategoriasDespesaModal] = useState(mockCategoriasDespesaCartao);
+  // --- ALTERAÇÃO 2: Função para buscar as categorias da API ---
+  const fetchCategories = useCallback(async () => {
+    if (!currentProfile?.id) {
+      setCategorias([]);
+      return;
+    }
+    setLoadingCategories(true);
+    try {
+      // Usamos o endpoint que busca as categorias para a conta financeira (perfil) atual
+      const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/categories`);
+      if (response.data && response.data.status === 'success') {
+        // A API já retorna a lista simples com `parentCategory` incluso se houver
+        setCategorias(response.data.data || []);
+      } else {
+        setCategorias([]);
+        message.error("Falha ao carregar categorias.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+      setCategorias([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  }, [currentProfile]);
 
 
   const fetchCreditCards = useCallback(async () => {
     if (!currentProfile?.id) {
-        setCards([]); // Limpa cartões se não houver perfil
+        setCards([]);
         setLoadingCards(false);
         return;
     }
@@ -99,15 +113,18 @@ const CartoesPage = () => {
     }
   }, [currentProfile]);
 
+  // --- ALTERAÇÃO 3: Chamar a busca de categorias junto com a de cartões ---
   useEffect(() => {
     if (!loadingProfiles && isAuthenticated && currentProfile) {
       fetchCreditCards();
+      fetchCategories(); // Busca as categorias quando o perfil estiver pronto
     } else if (!loadingProfiles && !isAuthenticated) {
       setLoadingCards(false);
       setCards([]);
-      setSelectedCard(null); // Garante que nenhum cartão fique selecionado ao deslogar
+      setSelectedCard(null);
+      setCategorias([]); // Limpa as categorias ao deslogar
     }
-  }, [currentProfile, loadingProfiles, isAuthenticated, fetchCreditCards]);
+  }, [currentProfile, loadingProfiles, isAuthenticated, fetchCreditCards, fetchCategories]); // Adiciona fetchCategories à dependência
 
   const fetchInvoiceDetails = useCallback(async (cardId, periodType = 'aberta', month, year) => {
     if (!currentProfile?.id || !cardId) return;
@@ -126,12 +143,12 @@ const CartoesPage = () => {
       }
     } catch (error) {
       console.error("Erro ao buscar detalhes da fatura:", error);
-      setSelectedCardDetails(prev => ({...(prev || selectedCard), totalAmount: 0})); // Zera total se erro
+      setSelectedCardDetails(prev => ({...(prev || selectedCard), totalAmount: 0}));
       setInvoiceExpenses([]);
     } finally {
       setLoadingInvoice(false);
     }
-  }, [currentProfile, selectedCard]); // Adicionado selectedCard como dependência
+  }, [currentProfile, selectedCard]);
 
   const fetchAvailablePeriods = useCallback(async (cardId) => {
     if (!currentProfile?.id || !cardId) return;
@@ -161,7 +178,7 @@ const CartoesPage = () => {
         }
     } catch (error) {
         console.error("Erro ao buscar limite disponível:", error);
-         setSelectedCardDetails(prev => ({ // Fallback se der erro
+         setSelectedCardDetails(prev => ({
             ...(prev || selectedCard),
             totalLimit: selectedCard?.limit || 0,
             availableLimit: selectedCard?.availableLimit || 0,
@@ -249,6 +266,7 @@ const CartoesPage = () => {
       fetchCreditCards(); 
     } catch (error) {
       console.error("Erro ao salvar cartão:", error);
+      message.error(error.response?.data?.message || "Erro ao salvar cartão.");
     }
   };
 
@@ -276,8 +294,8 @@ const CartoesPage = () => {
         ? `/financial-accounts/${currentProfile.id}/transactions/parcelled`
         : `/financial-accounts/${currentProfile.id}/transactions`;
     
-    if (values.isParceladaCheck) { // Para o endpoint parcelled, o campo 'value' é o valor da parcela, não o total da compra
-        expensePayload.value = undefined; // O backend irá calcular a parcela
+    if (values.isParceladaCheck) {
+        expensePayload.value = undefined;
     }
 
     try {
@@ -298,6 +316,7 @@ const CartoesPage = () => {
         fetchAvailableLimit(selectedCard.id);
     } catch (error) {
         console.error("Erro ao adicionar despesa no cartão:", error);
+        message.error(error.response?.data?.message || "Erro ao adicionar despesa.");
     }
   };
   
@@ -313,6 +332,7 @@ const CartoesPage = () => {
       fetchCreditCards(); 
     } catch (error) {
       console.error(`Erro ao excluir cartão ${cardName}:`, error);
+      message.error(error.response?.data?.message || "Erro ao excluir cartão.");
     }
   }
 
@@ -322,7 +342,6 @@ const CartoesPage = () => {
         paymentAmount: parseFloat(values.paymentAmount),
         paymentDate: dayjs(values.paymentDate).format('YYYY-MM-DD'),
         originatingAccountDescription: values.originatingAccountDescription,
-        // Se quiser passar categoria: financialCategoryId: values.financialCategoryId (precisa adicionar no form)
     };
     try {
         await apiClient.post(`/financial-accounts/${currentProfile.id}/credit-cards/${payingInvoiceCard.id}/pay-invoice`, payload);
@@ -342,6 +361,7 @@ const CartoesPage = () => {
         fetchAvailableLimit(payingInvoiceCard.id);
     } catch (error) {
         console.error("Erro ao pagar fatura:", error);
+        message.error(error.response?.data?.message || "Erro ao registrar pagamento.");
     }
   };
 
@@ -460,7 +480,7 @@ const CartoesPage = () => {
                     <Col flex="none">
                          <Button type="primary" icon={<ShoppingCartOutlined />} className="add-expense-main-btn" onClick={() => { 
                             addExpenseToCardForm.resetFields(); 
-                            addExpenseToCardForm.setFieldsValue({data: dayjs(), numeroParcelas: 1, categoria: categoriasDespesaModal[0]?.nome });
+                            addExpenseToCardForm.setFieldsValue({data: dayjs(), numeroParcelas: 1});
                             setIsParceladaExpense(false);
                             setIsAddExpenseToCardModalVisible(true);
                           }}>
@@ -490,7 +510,7 @@ const CartoesPage = () => {
                         <Select
                             value={`${selectedMonthYearForInvoice.year()}-${String(selectedMonthYearForInvoice.month() + 1).padStart(2, '0')}`}
                             onChange={handleInvoicePeriodChange}
-                            style={{width: '200px'}} // Aumentado um pouco
+                            style={{width: '200px'}}
                             popupClassName="custom-datepicker-popup"
                         >
                             {availableInvoicePeriods.map(p => (
@@ -637,7 +657,6 @@ const CartoesPage = () => {
         </Form>
       </Modal>
 
-        {/* Modal Adicionar Despesa ao Cartão (INTERNO) */}
         <Modal
             title={`Nova Despesa no Cartão: ${selectedCard?.name || ''}`}
             open={isAddExpenseToCardModalVisible}
@@ -655,7 +674,7 @@ const CartoesPage = () => {
                 form={addExpenseToCardForm} 
                 layout="vertical" 
                 onFinish={handleAddExpenseToSelectedCard}
-                initialValues={{ data: dayjs(), numeroParcelas: 1, categoria: categoriasDespesaModal[0]?.nome }}
+                initialValues={{ data: dayjs(), numeroParcelas: 1 }}
             >
                 <Form.Item
                     name="description"
@@ -684,17 +703,28 @@ const CartoesPage = () => {
                         </Form.Item>
                     </Col>
                 </Row>
+                {/* --- ALTERAÇÃO 4: Select de categorias agora usa dados reais --- */}
                 <Form.Item
                     name="categoria"
                     label="Categoria"
                     rules={[{ required: true, message: 'Categoria é obrigatória!' }]}
                 >
-                    <Select placeholder="Selecione uma categoria" showSearch optionFilterProp="children">
-                        {categoriasDespesaModal.map(cat => (
-                            <Option key={cat.id} value={cat.nome}>{cat.nome}</Option>
+                    <Select 
+                        placeholder={loadingCategories ? "Carregando..." : "Selecione uma categoria"}
+                        showSearch
+                        optionFilterProp="children"
+                        loading={loadingCategories}
+                        disabled={loadingCategories || categorias.length === 0}
+                        notFoundContent={!loadingCategories && categorias.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma categoria encontrada."/> : null}
+                    >
+                        {categorias.map(cat => (
+                            <Option key={cat.id} value={cat.name}>
+                                {cat.parentCategory ? `${cat.parentCategory.name} > ${cat.name}` : cat.name}
+                            </Option>
                         ))}
                     </Select>
                 </Form.Item>
+
                 <Form.Item name="isParceladaCheck" valuePropName="checked" style={{ marginBottom: isParceladaExpense ? '8px' : '24px' }}>
                     <Checkbox checked={isParceladaExpense} onChange={(e) => {
                         setIsParceladaExpense(e.target.checked);
