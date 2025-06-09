@@ -77,7 +77,7 @@ const PainelUsuario = () => {
 
   const userNameForHeader = currentProfile?.ownerClientName || currentProfile?.name || "Usuário MAP";
 
-  const fetchDataForDashboard = async (profileId) => {
+ const fetchDataForDashboard = async (profileId) => {
     if (!profileId) {
         setDashboardLoading(false);
         return;
@@ -95,21 +95,29 @@ const PainelUsuario = () => {
             upcomingTransactionsRes,
             upcomingAppointmentsRes
         ] = await Promise.all([
-            // 1. Resumo Financeiro do Mês
-            apiClient.get(`/financial-accounts/${profileId}/transactions/summary`, { params: { period: 'este_mes' } }),
+            // 1. Resumo Financeiro do Mês - Rota CORRETA
+            apiClient.get(`/financial-accounts/${profileId}/summary`, { params: { period: 'este_mes' } }),
             
             // 2. Resumo de Categorias de Despesa do Mês
             apiClient.get(`/financial-accounts/${profileId}/expense-category-summary`, { params: { dateStart: monthStart, dateEnd: monthEnd } }),
             
-            // 3. Resumo de Categorias de Receita do Mês (Assumindo um endpoint similar)
-            // Se não existir, a lógica anterior de 'reduce' para receitas pode ser mantida
+            // 3. Resumo de Categorias de Receita do Mês
             apiClient.get(`/financial-accounts/${profileId}/income-category-summary`, { params: { dateStart: monthStart, dateEnd: monthEnd } }).catch(() => ({ data: { data: [] }})),
             
             // 4. Tendência Mensal
             apiClient.get(`/financial-accounts/${profileId}/monthly-trend`),
 
-            // 5. Próximas Contas a Pagar/Receber
-            apiClient.get(`/financial-accounts/${profileId}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, due_after: dayjs().subtract(1,'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
+            // 5. Próximas Contas a Pagar/Receber - Parâmetro CORRETO
+            apiClient.get(`/financial-accounts/${profileId}/transactions`, { 
+                params: { 
+                    isPayableOrReceivable: true, 
+                    isPaidOrReceived: false, 
+                    dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), // CORREÇÃO: de 'due_after' para 'dueAfter'
+                    sortBy: 'dueDate', 
+                    sortOrder: 'ASC', 
+                    limit: 5 
+                } 
+            }),
 
             // 6. Próximos Compromissos
             apiClient.get(`/financial-accounts/${profileId}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
@@ -133,13 +141,16 @@ const PainelUsuario = () => {
         if (incomeCategoriesRes.data.status === 'success' && incomeCategoriesRes.data.data.length > 0) {
             setIncomeCategories(incomeCategoriesRes.data.data);
         } else {
-             const allTransactionsMonth = (await apiClient.get(`/financial-accounts/${profileId}/transactions`, { params: { dateStart: monthStart, dateEnd: monthEnd, limit: 1000 } })).data.transactions || [];
-             const groupedIncomes = allTransactionsMonth.filter(t => t.type === 'Entrada').reduce((acc, curr) => {
-                const categoryName = curr.category?.name || 'Outras Receitas';
-                acc[categoryName] = (acc[categoryName] || 0) + parseFloat(curr.value);
-                return acc;
-            }, {});
-            setIncomeCategories(Object.entries(groupedIncomes).map(([type, value]) => ({ type, value })));
+             const allTransactionsMonthRes = await apiClient.get(`/financial-accounts/${profileId}/transactions`, { params: { dateStart: monthStart, dateEnd: monthEnd, limit: 1000 } });
+             if (allTransactionsMonthRes.data.status === 'success') {
+                 const allTransactionsMonth = allTransactionsMonthRes.data.transactions || [];
+                 const groupedIncomes = allTransactionsMonth.filter(t => t.type === 'Entrada').reduce((acc, curr) => {
+                    const categoryName = curr.category?.name || 'Outras Receitas';
+                    acc[categoryName] = (acc[categoryName] || 0) + parseFloat(curr.value);
+                    return acc;
+                }, {});
+                setIncomeCategories(Object.entries(groupedIncomes).map(([type, value]) => ({ type, value })));
+             }
         }
 
         // Processa a tendência mensal
