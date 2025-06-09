@@ -80,138 +80,91 @@ const PainelUsuario = () => {
   const fetchDataForDashboard = async (profileId) => {
     if (!profileId) {
         setDashboardLoading(false);
-        setFinancialSummary({ currentBalance: 0, incomeThisMonth: 0, expensesThisMonth: 0 });
-        setExpenseCategories([]);
-        setIncomeCategories([]);
-        setMonthlyTrend([]);
-        setUpcomingItems([]);
         return;
     }
     setDashboardLoading(true);
     try {
-      // 1. Resumo Financeiro
-      const summaryRes = await apiClient.get(`/financial-accounts/${profileId}/transactions/summary`, {
-          params: {
-              dateStart: dayjs().startOf('month').format('YYYY-MM-DD'),
-              dateEnd: dayjs().endOf('month').format('YYYY-MM-DD'),
-          }
-      });
-      if (summaryRes.data && summaryRes.data.status === 'success') {
-        setFinancialSummary({
-            currentBalance: summaryRes.data.data.saldoEfetivado,
-            incomeThisMonth: summaryRes.data.data.totalEntradas,
-            expensesThisMonth: summaryRes.data.data.totalSaidas,
-        });
-      }
+        const monthStart = dayjs().startOf('month').format('YYYY-MM-DD');
+        const monthEnd = dayjs().endOf('month').format('YYYY-MM-DD');
 
-      // 2. Transações para gráficos de categoria (Receitas e Despesas)
-      const transactionsForChartsRes = await apiClient.get(`/financial-accounts/${profileId}/transactions`, {
-        params: {
-          dateStart: dayjs().startOf('month').format('YYYY-MM-DD'),
-          dateEnd: dayjs().endOf('month').format('YYYY-MM-DD'),
-          limit: 1000,
+        const [
+            summaryRes,
+            expenseCategoriesRes,
+            incomeCategoriesRes,
+            trendRes,
+            upcomingTransactionsRes,
+            upcomingAppointmentsRes
+        ] = await Promise.all([
+            // 1. Resumo Financeiro do Mês
+            apiClient.get(`/financial-accounts/${profileId}/transactions/summary`, { params: { period: 'este_mes' } }),
+            
+            // 2. Resumo de Categorias de Despesa do Mês
+            apiClient.get(`/financial-accounts/${profileId}/expense-category-summary`, { params: { dateStart: monthStart, dateEnd: monthEnd } }),
+            
+            // 3. Resumo de Categorias de Receita do Mês (Assumindo um endpoint similar)
+            // Se não existir, a lógica anterior de 'reduce' para receitas pode ser mantida
+            apiClient.get(`/financial-accounts/${profileId}/income-category-summary`, { params: { dateStart: monthStart, dateEnd: monthEnd } }).catch(() => ({ data: { data: [] }})),
+            
+            // 4. Tendência Mensal
+            apiClient.get(`/financial-accounts/${profileId}/monthly-trend`),
+
+            // 5. Próximas Contas a Pagar/Receber
+            apiClient.get(`/financial-accounts/${profileId}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, due_after: dayjs().subtract(1,'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
+
+            // 6. Próximos Compromissos
+            apiClient.get(`/financial-accounts/${profileId}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
+        ]);
+
+        // Processa o resumo financeiro
+        if (summaryRes.data.status === 'success') {
+            setFinancialSummary({
+                currentBalance: summaryRes.data.data.accountTotalBalance,
+                incomeThisMonth: summaryRes.data.data.totalIncome,
+                expensesThisMonth: summaryRes.data.data.totalExpenses,
+            });
         }
-      });
-      if (transactionsForChartsRes.data && transactionsForChartsRes.data.status === 'success') {
-        const allTransactionsMonth = transactionsForChartsRes.data.transactions || [];
         
-        const groupedExpenses = allTransactionsMonth
-            .filter(t => t.type === 'Saída')
-            .reduce((acc, curr) => {
-                const categoryName = curr.category?.name || 'Outras Despesas';
-                acc[categoryName] = (acc[categoryName] || 0) + parseFloat(curr.value);
-                return acc;
-            }, {});
-        setExpenseCategories(Object.entries(groupedExpenses).map(([type, value]) => ({ type, value })));
+        // Processa as categorias de despesa
+        if (expenseCategoriesRes.data.status === 'success') {
+            setExpenseCategories(expenseCategoriesRes.data.data || []);
+        }
         
-        const groupedIncomes = allTransactionsMonth
-            .filter(t => t.type === 'Entrada')
-            .reduce((acc, curr) => {
+        // Processa as categorias de receita (se o endpoint existir)
+        if (incomeCategoriesRes.data.status === 'success' && incomeCategoriesRes.data.data.length > 0) {
+            setIncomeCategories(incomeCategoriesRes.data.data);
+        } else {
+             const allTransactionsMonth = (await apiClient.get(`/financial-accounts/${profileId}/transactions`, { params: { dateStart: monthStart, dateEnd: monthEnd, limit: 1000 } })).data.transactions || [];
+             const groupedIncomes = allTransactionsMonth.filter(t => t.type === 'Entrada').reduce((acc, curr) => {
                 const categoryName = curr.category?.name || 'Outras Receitas';
                 acc[categoryName] = (acc[categoryName] || 0) + parseFloat(curr.value);
                 return acc;
             }, {});
-        setIncomeCategories(Object.entries(groupedIncomes).map(([type, value]) => ({ type, value })));
-      }
-      
-      // 3. Tendência Mensal
-      const trendData = [];
-      for (let i = 5; i >= 0; i--) {
-        const monthTarget = dayjs().subtract(i, 'month');
-        const monthSummaryRes = await apiClient.get(`/financial-accounts/${profileId}/transactions/summary`, {
-            params: {
-                dateStart: monthTarget.startOf('month').format('YYYY-MM-DD'),
-                dateEnd: monthTarget.endOf('month').format('YYYY-MM-DD'),
-            }
-        });
-        if (monthSummaryRes.data && monthSummaryRes.data.status === 'success') {
-            trendData.push({ month: monthTarget.format('MMM'), type: 'Receitas', value: parseFloat(monthSummaryRes.data.data.totalEntradas) });
-            trendData.push({ month: monthTarget.format('MMM'), type: 'Despesas', value: parseFloat(monthSummaryRes.data.data.totalSaidas) });
+            setIncomeCategories(Object.entries(groupedIncomes).map(([type, value]) => ({ type, value })));
         }
-      }
-      setMonthlyTrend(trendData);
 
-      // 4. Próximos Itens (Transações Pendentes e Compromissos Agendados)
-      let combinedUpcoming = [];
-
-      const upcomingTransactionsRes = await apiClient.get(`/financial-accounts/${profileId}/transactions`, {
-        params: {
-          isPayableOrReceivable: true,
-          isPaidOrReceived: false,
-          dueDate_gte: dayjs().format('YYYY-MM-DD'), 
-          sortBy: 'dueDate',
-          sortOrder: 'ASC',
-          limit: 5
+        // Processa a tendência mensal
+        if (trendRes.data.status === 'success') {
+            setMonthlyTrend(trendRes.data.data || []);
         }
-      });
-      if (upcomingTransactionsRes.data && upcomingTransactionsRes.data.status === 'success') {
-        const financialUpcoming = upcomingTransactionsRes.data.transactions.map(t => ({
-            id: `trans_${t.id}`,
-            title: t.description,
-            dueDate: t.dueDate,
-            amount: parseFloat(t.value),
-            itemType: 'transaction',
-            transactionType: t.type === 'Entrada' ? 'receber' : 'pagar'
-        }));
-        combinedUpcoming.push(...financialUpcoming);
-      }
 
-      const upcomingAppointmentsRes = await apiClient.get(`/financial-accounts/${profileId}/appointments`, {
-          params: {
-              status: 'Scheduled',
-              eventDateTime_gte: dayjs().toISOString(),
-              sortBy: 'eventDateTime',
-              sortOrder: 'ASC',
-              limit: 5
-          }
-      });
-      if (upcomingAppointmentsRes.data && upcomingAppointmentsRes.data.status === 'success') {
-          const appointmentUpcoming = upcomingAppointmentsRes.data.data.map(app => ({ // Ajustado para response.data.data
-              id: `appt_${app.id}`,
-              title: app.title,
-              dueDate: app.eventDateTime,
-              amount: app.associatedValue ? parseFloat(app.associatedValue) : null,
-              itemType: 'appointment',
-              transactionType: app.associatedTransactionType || (app.associatedValue ? 'lembrete_valor' : 'lembrete')
-          }));
-          combinedUpcoming.push(...appointmentUpcoming);
-      }
-      
-      combinedUpcoming.sort((a,b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
-      setUpcomingItems(combinedUpcoming.slice(0, 5));
+        // Processa os próximos itens
+        let combinedUpcoming = [];
+        if (upcomingTransactionsRes.data.status === 'success') {
+            combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' })));
+        }
+        if (upcomingAppointmentsRes.data.status === 'success') {
+            combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: app.associatedTransactionType || (app.associatedValue ? 'lembrete_valor' : 'lembrete') })));
+        }
+        combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
+        setUpcomingItems(combinedUpcoming.slice(0, 5));
 
     } catch (error) {
-      console.error("Erro ao buscar dados do dashboard:", error);
-      message.error("Não foi possível carregar os dados do painel.");
-       setFinancialSummary({ currentBalance: 0, incomeThisMonth: 0, expensesThisMonth: 0 });
-       setExpenseCategories([]);
-       setIncomeCategories([]);
-       setMonthlyTrend([]);
-       setUpcomingItems([]);
+        console.error("Erro ao buscar dados do dashboard:", error);
+        message.error("Não foi possível carregar os dados do painel.");
     } finally {
-      setDashboardLoading(false);
+        setDashboardLoading(false);
     }
-  };
+};
   
   useEffect(() => {
     // REMOVIDO: document.body.classList.add('painel-active');
