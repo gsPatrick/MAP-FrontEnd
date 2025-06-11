@@ -1,6 +1,8 @@
 // src/componentsLP/Header/Header.jsx
+
 import React, { useState, useEffect } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Renomeado para evitar conflito com Link de AntD se houver
+// <<< MUDANÇA 1: Importar useLocation
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button, Row, Col, Drawer, Space } from 'antd';
 import { MenuOutlined, LineChartOutlined, LoginOutlined } from '@ant-design/icons';
 import './Header.css';
@@ -9,6 +11,7 @@ const { Header: AntHeader } = Layout;
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // <<< MUDANÇA 2: Obter a localização atual
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeKey, setActiveKey] = useState('');
@@ -39,12 +42,10 @@ const Header = () => {
     window.addEventListener('resize', handleResize);
     handleResize(); 
 
-    // Define a activeKey inicial baseado no hash da URL, se houver
     const currentHash = window.location.hash.replace('#', '');
     if (currentHash) {
       setActiveKey(currentHash);
     }
-
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -52,38 +53,42 @@ const Header = () => {
     };
   }, []);
 
+  // <<< MUDANÇA 3: A lógica de navegação foi completamente atualizada
   const handleMenuClick = (key) => {
     setActiveKey(key);
     if (drawerVisible) {
       closeDrawer();
     }
 
-    if (key) {
-      const section = document.getElementById(key);
-      if (section) {
-        // Atualiza o hash da URL para refletir a seção ativa
-        // window.location.hash = key; // Comentado para evitar pulo brusco antes da rolagem suave
-        
-        // Calcula a posição da seção levando em conta a altura do header fixo
-        const headerOffset = document.querySelector('.lp-header')?.offsetHeight || 70; // Altura do header
-        const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - headerOffset - 10; // -10 para um pequeno espaço extra
+    // Verifica se estamos na página inicial (Landing Page)
+    if (location.pathname === '/') {
+      // Se estivermos na LP, usamos a rolagem suave existente
+      if (key) {
+        const section = document.getElementById(key);
+        if (section) {
+          const headerOffset = document.querySelector('.lp-header')?.offsetHeight || 70;
+          const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - headerOffset - 10;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      } else {
-        console.warn(`Seção com id "${key}" não encontrada.`);
-        // Se a seção não for encontrada, mas for uma rota (ex: /faq), navega
-        if (key.startsWith('/')) {
-            navigate(key);
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        } else {
+          console.warn(`Seção com id "${key}" não encontrada.`);
         }
+      } else {
+        // Clique no logo para ir ao topo da LP
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } else {
-      // Clique no logo, rolar para o topo
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // window.location.hash = ''; // Limpa o hash ao ir para o topo
+      // Se estivermos em outra página (ex: /planos), navegamos para a LP com a âncora
+      if (key) {
+        navigate(`/#${key}`);
+      } else {
+        // Clique no logo para voltar à página inicial
+        navigate('/');
+      }
     }
   };
 
@@ -92,18 +97,17 @@ const Header = () => {
     { key: 'beneficios', label: 'Benefícios', onClick: () => handleMenuClick('beneficios') },
     { key: 'planos', label: 'Planos', onClick: () => handleMenuClick('planos') },
     { key: 'sobre', label: 'Sobre', onClick: () => handleMenuClick('sobre') },
-    // Adicione mais itens conforme necessário, por exemplo, para FAQ:
-    // { key: 'faq', label: 'FAQ', onClick: () => handleMenuClick('faq') }, 
   ];
 
   return (
     <AntHeader className={`lp-header ${isScrolled ? 'scrolled' : ''}`}>
       <Row justify="space-between" align="middle" className="header-row" wrap={false}>
         <Col flex="1" className="logo-column">
-          <RouterLink to="/" onClick={() => handleMenuClick('')} className="logo-link">
+          {/* O clique no logo agora também usa a nova lógica handleMenuClick */}
+          <a onClick={() => handleMenuClick('')} className="logo-link" style={{ cursor: 'pointer' }}>
             <LineChartOutlined className="logo-icon-placeholder" />
             <span className="logo-text">No Controle</span>
-          </RouterLink>
+          </a>
         </Col>
 
         <Col xs={0} sm={0} md={14} lg={12} xl={10} className="menu-desktop-col">
@@ -139,10 +143,10 @@ const Header = () => {
 
       <Drawer
         title={
-          <RouterLink to="/" onClick={() => { handleMenuClick(''); closeDrawer();}} className="drawer-logo-link">
+          <a onClick={() => { handleMenuClick(''); closeDrawer();}} className="drawer-logo-link" style={{ cursor: 'pointer' }}>
             <LineChartOutlined className="logo-icon-placeholder drawer-logo-icon" />
             <span className="logo-text drawer-logo-text">No Controle</span>
-          </RouterLink>
+          </a>
         }
         placement="right"
         onClose={closeDrawer}

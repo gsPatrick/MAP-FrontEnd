@@ -5,6 +5,7 @@ import { Routes, Route, Outlet } from 'react-router-dom';
 import { Spin } from 'antd';
 // Importe o novo layout do painel
 import PainelLayout from './PainelLayout/PainelLayout'; // Ajuste o caminho se necessário
+import PlanosPage from './pages/Planos/Planos';
 
 // Lazy loading para as páginas principais
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -34,6 +35,8 @@ function App() {
     <Routes>
       {/* Rotas públicas ou com layout diferente */}
       <Route element={<AppLayoutSuspense />}>
+              <Route path="/planos" element={<PlanosPage />} /> 
+
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Route>

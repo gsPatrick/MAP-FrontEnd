@@ -1,0 +1,10 @@
+.planos-page-layout {
+  background-color: #fdfcf9; /* Cor de fundo da seção de preços para consistência */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.planos-page-main-content {
+  flex-grow: 1;
+}
