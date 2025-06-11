@@ -104,7 +104,7 @@ const FaqSection = () => {
         </Collapse>
         <Paragraph className="faq-contact-prompt">
           Não encontrou sua dúvida?{' '}
-          <a href="mailto:suporte@mapnocontrole.com.br" className="faq-contact-link">
+          <a href="https://wa.me/5521995557002" className="faq-contact-link">
             Entre em contato conosco!
           </a>
         </Paragraph>

@@ -1,4 +1,4 @@
-/* src/componentsLP/PricingSection/PricingSection.css - VERSÃO LUXO */
+/* src/componentsLP/PricingSection/PricingSection.css - VERSÃO LUXO (Ajustada) */
 
 :root {
   --pricing-luxe-bg: #fdfcf9; /* Branco com um toque de creme */
@@ -7,6 +7,7 @@
   --pricing-orange: #ff8c00; /* Laranja mais vibrante */
   --pricing-text-dark: #3a3222;
   --pricing-text-light: #6e624a;
+  --cor-branco: #ffffff;
 }
 
 .pricing-luxe-section-wrapper {
@@ -79,7 +80,8 @@
 /* Toggle de Cobrança */
 .billing-toggle-wrapper {
   display: flex; justify-content: center; align-items: center;
-  gap: 15px; margin-bottom: 50px;
+  gap: 15px;
+  margin-bottom: 25px; 
 }
 .billing-toggle-wrapper .billing-option {
   font-size: 16px; font-weight: 500;
@@ -103,6 +105,24 @@
   font-size: 11px !important;
   margin-left: 8px !important;
 }
+
+/* Aviso de Termos e Ajustes de Espaçamento */
+.asaas-terms-notice {
+  font-size: 13px;
+  color: var(--pricing-text-light);
+  margin-top: 0;
+  margin-bottom: 50px !important; /* AJUSTE FINAL: Aumentado para criar mais espaço antes dos cards */
+}
+.asaas-terms-notice a {
+  color: var(--pricing-gold-dark);
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+.asaas-terms-notice a:hover {
+  color: var(--pricing-gold);
+}
+
 
 /* Cards de Plano */
 .pricing-luxe-card-wrapper {

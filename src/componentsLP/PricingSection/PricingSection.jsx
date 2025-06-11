@@ -25,15 +25,15 @@ const plansData = {
         'Suporte via Email',
       ],
       buttonText: 'Começar Agora',
-      checkoutUrl: 'https://pay.hotmart.com/K100108898C',
+      checkoutUrl: 'https://www.asaas.com/c/yrrrjobvjunf95f5', // ATUALIZADO
       isFeatured: false,
     },
     {
       id: 'business_monthly',
-      name: 'Plano Total Control',
+      name: 'Plano Pessoal + Empresarial',
       icon: <ShopOutlined />,
-      price: '49',
-      priceSuffix: ',90',
+      price: '79',
+      priceSuffix: ',00',
       period: '/mês',
       description: 'A solução completa que unifica sua vida pessoal e o comando do seu negócio. Potência máxima para quem busca o topo.',
       features: [
@@ -45,7 +45,7 @@ const plansData = {
         'Suporte Prioritário via WhatsApp',
       ],
       buttonText: 'Assinar Total Control',
-      checkoutUrl: 'https://pay.hotmart.com/F100110333E',
+      checkoutUrl: 'https://www.asaas.com/c/iz8sx7yp784zsga3', // ATUALIZADO
       isFeatured: true,
     },
   ],
@@ -54,10 +54,10 @@ const plansData = {
         id: 'personal_yearly',
         name: 'Plano Pessoal Essencial',
         icon: <UserOutlined />,
-        price: '399',
+        price: '380',
         priceSuffix: ',00',
         period: '/ano',
-        originalPrice: 'R$ 478,80',
+        originalPrice: 'R$ 390,00',
         description: 'Um ano inteiro de organização e bem-estar com um desconto exclusivo para seu compromisso com o controle.',
         features: [
           'Perfis Financeiros Pessoais Ilimitados',
@@ -68,17 +68,17 @@ const plansData = {
           'Suporte via Email',
         ],
         buttonText: 'Assinar Plano Anual',
-        checkoutUrl: 'https://pay.hotmart.com/URL_PLANO_PESSOAL_ANUAL', // SUBSTITUIR
+        checkoutUrl: 'https://www.asaas.com/c/hqnp04qtl686uy6f', // ATUALIZADO
         isFeatured: false,
       },
       {
         id: 'business_yearly',
-        name: 'Plano Total Control',
+        name: 'Plano Pessoal + Empresarial',
         icon: <ShopOutlined />,
-        price: '499',
+        price: '780',
         priceSuffix: ',00',
         period: '/ano',
-        originalPrice: 'R$ 598,80',
+        originalPrice: 'R$ 790,00',
         description: 'Potência máxima para sua vida e seu negócio, com a tranquilidade de um ano inteiro de controle e um valor especial.',
         features: [
           'Todos os benefícios do Plano Pessoal',
@@ -89,7 +89,7 @@ const plansData = {
           'Suporte Prioritário via WhatsApp',
         ],
         buttonText: 'Assinar Total Control Anual',
-        checkoutUrl: 'https://pay.hotmart.com/URL_PLANO_BUSINESS_ANUAL', // SUBSTITUIR
+        checkoutUrl: 'https://www.asaas.com/c/9w71uq6ekx5r2u22', // ATUALIZADO
         isFeatured: true,
       },
   ]
@@ -147,7 +147,22 @@ const PricingSection = () => {
           Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados, sejam eles pessoais ou empresariais.
         </Paragraph>
 
+        {/* --- INÍCIO: SELETOR DE PLANO E AVISO ASAAS --- */}
+        <div className="billing-toggle-wrapper animate-on-scroll">
+            <span className={`billing-option ${billingCycle === 'monthly' ? 'active' : ''}`}>
+                Cobrança Mensal
+            </span>
+            <Switch onChange={handleBillingToggle} checked={billingCycle === 'yearly'} />
+            <span className={`billing-option ${billingCycle === 'yearly' ? 'active' : ''}`}>
+                Cobrança Anual
+                <Tag className="discount-tag">Economize 2 meses</Tag>
+            </span>
+        </div>
 
+        <Paragraph className="asaas-terms-notice animate-on-scroll">
+            Os pagamentos são processados de forma segura pelo Asaas. Ao continuar, você concorda com os <a href="https://www.asaas.com/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</a> da plataforma.
+        </Paragraph>
+        {/* --- FIM: SELETOR DE PLANO E AVISO ASAAS --- */}
 
 
         <Row gutter={[32, 48]} justify="center" align="stretch" className="pricing-luxe-cards-row">
@@ -176,7 +191,7 @@ const PricingSection = () => {
                                 <span className="price-period">{plan.period}</span>
                             </span>
                         </div>
-                        {plan.originalPrice && <Text className="original-price-strike">De {plan.originalPrice}</Text>}
+                        {plan.originalPrice ? <Text className="original-price-strike">De {plan.originalPrice}</Text> : <div className="original-price-strike"></div>}
                     </div>
 
                     <List

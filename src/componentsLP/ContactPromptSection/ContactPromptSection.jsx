@@ -31,7 +31,7 @@ const ContactPromptSection = () => {
   const handleContactClick = () => {
     console.log('Botão Fale Conosco clicado');
     // LEMBRE-SE DE ATUALIZAR SEU NÚMERO DE WHATSAPP AQUI
-    window.open('https://wa.me/SEUNUMEROWHATSAPP', '_blank');
+    window.open('https://wa.me/5521995557002', '_blank');
   };
 
   return (
