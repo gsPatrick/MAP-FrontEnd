@@ -1,0 +1,240 @@
+/* src/pages/AdminPage/AdminPage.css */
+
+/* --- Layout e Fundo --- */
+.admin-page-content {
+    padding: 24px 32px;
+    background: #f7f8fa; /* Fundo mais suave que o branco puro */
+    min-height: calc(100vh - 64px);
+    animation: fadeInAdminPage 0.5s ease-out;
+}
+@keyframes fadeInAdminPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Cabeçalho da Página (Título principal fora das abas) --- */
+.admin-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+.admin-page-title {
+    color: var(--header-text-primary, #262626);
+    font-weight: 700 !important;
+    font-size: 28px !important;
+    line-height: 1.2;
+    margin-bottom: 4px !important;
+}
+.admin-page-title .anticon {
+    color: var(--map-laranja);
+    margin-right: 14px;
+}
+.admin-page-subtitle {
+    margin-bottom: 24px !important;
+    font-size: 15px;
+    color: var(--header-text-secondary, #8c8c8c);
+}
+.add-user-btn-header.ant-btn-primary {
+    background: var(--map-laranja-escuro) !important;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+.add-user-btn-header.ant-btn-primary:hover {
+    background: var(--map-dourado) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* --- Abas Principais --- */
+.admin-page-tabs .ant-tabs-nav {
+    margin-bottom: 24px !important;
+}
+.admin-page-tabs .ant-tabs-tab {
+    font-size: 16px;
+    font-weight: 500;
+}
+.admin-page-tabs .ant-tabs-tab .anticon {
+    margin-right: 8px;
+}
+
+/* --- Cards de Estatísticas --- */
+.stat-card {
+    border-radius: 12px;
+    border: 1px solid #eef2f7;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(200, 208, 219, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(200, 208, 219, 0.6);
+}
+.stat-card .ant-statistic-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--header-text-secondary, #8c8c8c);
+}
+.stat-card .ant-statistic-content {
+    font-weight: 700 !important;
+    font-size: 28px !important;
+    color: var(--header-text-primary, #262626);
+}
+
+/* --- Card de Filtros --- */
+.filters-card-admin {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    background-color: #fff;
+    border: 1px solid #eef2f7;
+    box-shadow: 0 4px 15px rgba(200, 208, 219, 0.4);
+}
+.filters-card-admin .ant-card-body { padding: 20px 24px !important; }
+.filters-card-admin .ant-select-selector,
+.filters-card-admin .ant-picker,
+.filters-card-admin .ant-input-search .ant-input,
+.filters-card-admin .ant-btn {
+    border-radius: 8px;
+}
+
+/* --- Tabelas (Estilo Genérico) --- */
+.admin-users-table .ant-table-wrapper,
+.affiliates-table .ant-table-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eef2f7;
+    box-shadow: 0 4px 15px rgba(200, 208, 219, 0.4);
+    background: #fff;
+}
+.admin-users-table .ant-table-thead > tr > th,
+.affiliates-table .ant-table-thead > tr > th {
+    background-color: #f7f9fc !important;
+    font-weight: 600;
+    color: var(--header-text-primary);
+}
+.admin-users-table .ant-table-tbody > tr > td,
+.affiliates-table .ant-table-tbody > tr > td {
+    vertical-align: middle;
+}
+.admin-users-table .ant-table-tbody > tr:hover > td,
+.affiliates-table .ant-table-tbody > tr:hover > td {
+    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+}
+.admin-table-username { color: var(--map-laranja-escuro); font-weight: 600; }
+.admin-table-tag.ant-tag { font-weight: 500; border-radius: 4px; border: none; font-size: 11px; }
+.action-dropdown-btn.ant-btn { font-size: 18px; color: var(--header-text-secondary); }
+
+/* --- MODAIS MINIMALISTAS EM BRANCO (Estilo Genérico) --- */
+.admin-modal-white .ant-modal-content {
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    padding: 0;
+}
+.admin-modal-white .ant-modal-header, .admin-modal-white .ant-modal-body, .admin-modal-white .ant-modal-footer {
+    background-color: #fff;
+    border: none;
+    padding: 0;
+}
+.admin-modal-white .ant-modal-close { top: 20px; right: 20px; }
+.admin-modal-white .ant-modal-close-x { font-size: 16px; color: var(--header-text-secondary); }
+
+.modal-content-wrapper { padding: 32px; }
+.modal-title-custom { font-weight: 700 !important; margin-bottom: 8px !important; color: var(--header-text-primary, #262626); }
+.modal-title-custom .anticon { color: var(--map-laranja); margin-right: 12px; }
+.modal-subtitle-custom { margin-bottom: 28px !important; color: var(--header-text-secondary, #8c8c8c); }
+
+.admin-modal-white .ant-form-item-label > label { font-weight: 500; color: var(--header-text-secondary); }
+
+/* Foco Laranja/Dourado nos Inputs */
+.admin-modal-white .ant-input:hover,
+.admin-modal-white .ant-input-password:hover,
+.admin-modal-white .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.admin-modal-white .ant-picker:not(.ant-picker-disabled):hover { border-color: var(--map-laranja); }
+.admin-modal-white .ant-input:focus, .admin-modal-white .ant-input-focused,
+.admin-modal-white .ant-input-password:focus, .admin-modal-white .ant-input-password-focused,
+.admin-modal-white .ant-select-focused:not(.ant-select-disabled) .ant-select-selector,
+.admin-modal-white .ant-picker-focused {
+  border-color: var(--map-dourado) !important;
+  box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+}
+
+/* Opções do Select sem azul */
+.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: var(--map-laranja-muito-claro) !important;
+    color: var(--map-laranja-escuro) !important;
+}
+.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background-color: #fcf4e8 !important;
+}
+
+/* Footer customizado para os modais */
+.modal-footer-custom {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
+}
+.submit-btn-form.ant-btn-primary {
+    background: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+    font-weight: 500; border-radius: 8px; padding: 0 24px;
+}
+.submit-btn-form.ant-btn-primary:hover {
+    background: var(--map-dourado) !important;
+    border-color: var(--map-dourado) !important;
+    color: var(--map-preto) !important;
+}
+.cancel-btn-form.ant-btn { border-radius: 8px; }
+.cancel-btn-form:hover {
+    color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+
+/* --- ESTILOS ESPECÍFICOS --- */
+
+/* Modal de Detalhes do Usuário */
+.details-avatar {
+    width: 90px !important; height: 90px !important; line-height: 90px !important;
+    font-size: 40px !important; border: 3px solid var(--map-laranja-claro); margin-bottom: 10px;
+}
+.details-title { text-align: center; margin-bottom: 24px !important; }
+.user-details-modal-content .ant-descriptions { width: 100%; }
+.user-details-modal-content .ant-descriptions-item-label { font-weight: 500 !important; color: #8c8c8c; }
+.user-details-modal-content .ant-descriptions-item-content { font-size: 15px; }
+
+/* Aba de Comunicação / Ferramentas */
+.tools-card {
+    border-radius: 12px;
+    padding: 24px;
+}
+.tools-card .ant-card-head-title {
+    font-weight: 600;
+}
+
+/* Modal de Broadcast */
+.broadcast-modal-content .ant-form-item-label {
+    font-weight: 500;
+}
+.broadcast-modal-content .ant-form-item textarea {
+    min-height: 120px !important;
+}
+.broadcast-modal-content .broadcast-warning {
+    margin-top: -12px;
+    margin-bottom: 24px;
+    font-size: 13px;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+    .admin-page-content { padding: 16px; }
+    .admin-page-header { flex-direction: column; align-items: stretch; gap: 16px; }
+    .filters-card-admin .ant-col { margin-bottom: 12px; }
+    .admin-modal-white { max-width: 95vw !important; }
+    .modal-content-wrapper { padding: 24px; }
+}

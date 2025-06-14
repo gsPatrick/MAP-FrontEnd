@@ -1,10 +1,9 @@
 // src/componentsPanel/HeaderPanel/HeaderPanel.jsx
 import React from 'react';
-import { Layout, Avatar, Typography, Select, Space, Dropdown, Menu, Tooltip, Button, Divider } from 'antd';
+import { Layout, Avatar, Typography, Space, Dropdown, Menu, Tooltip, Button, Divider, Select } from 'antd';
 import {
-  UserOutlined, SettingOutlined, LogoutOutlined, DownOutlined,
-  CreditCardOutlined, ShopOutlined, MessageOutlined, GlobalOutlined,
-  LineChartOutlined, SwapOutlined, MenuOutlined // <<< IMPORTAR MenuOutlined
+  UserOutlined, SettingOutlined, LogoutOutlined, CrownOutlined, MenuOutlined, MessageOutlined,
+  LineChartOutlined, SwapOutlined, DownOutlined
 } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
@@ -14,13 +13,7 @@ const { Header } = Layout;
 const { Text } = Typography;
 const { Option } = Select;
 
-// ACEITAR AS NOVAS PROPS: isMobile e onMenuClick
-const HeaderPanel = ({
-  userName = "Usuário Exemplo",
-  appName = "No Controle",
-  isMobile,
-  onMenuClick
-}) => {
+const HeaderPanel = ({ isMobile, onMenuClick }) => {
   const navigate = useNavigate();
   const {
     userProfiles,
@@ -28,22 +21,22 @@ const HeaderPanel = ({
     setSelectedProfileId,
     currentProfile
   } = useProfile();
-
-  const profilesToUse = userProfiles && userProfiles.length > 0 ? userProfiles : [{ id: 'loading_pf', name: 'Carregando...', type: 'PF', icon: <CreditCardOutlined /> }];
-  const currentProfileDetails = currentProfile || profilesToUse[0];
+  
+  const isAdmin = currentProfile?.type === 'ADMIN';
+  const headerTitle = isAdmin ? "Painel Administrativo" : "No Controle";
+  const userName = currentProfile?.name || "Usuário";
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // <<< IMPORTANTE: LIMPAR TOKEN NO LOGOUT
+    localStorage.removeItem('authToken');
     localStorage.removeItem('selectedProfileId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userData');
     setSelectedProfileId(null);
     navigate('/login');
   };
 
-  const handleProfileChangeInSelect = (value) => {
-    setSelectedProfileId(value);
-  };
-
-  const userMenu = (
+  // --- MENU DO USUÁRIO PARA CLIENTES (COMPORTAMENTO ORIGINAL RESTAURADO) ---
+  const clientUserMenu = (
     <Menu className="user-menu-dropdown-overlay">
       <Menu.Item key="profile" icon={<UserOutlined />}>
         <Link to="/painel/meu-perfil">Meu Perfil</Link>
@@ -51,15 +44,17 @@ const HeaderPanel = ({
       <Menu.Item key="settings" icon={<SettingOutlined />}>
         <Link to="/painel/configuracoes">Configurações</Link>
       </Menu.Item>
-      {profilesToUse.length > 1 && profilesToUse[0].id !== 'loading_pf' && (
+
+      {/* LÓGICA DE TROCA DE PERFIL RESTAURADA */}
+      {userProfiles && userProfiles.length > 1 && (
         <>
           <Menu.Divider />
           <Menu.SubMenu key="change-profile" title="Trocar Perfil" icon={<SwapOutlined />}>
-            {profilesToUse.map(profile => (
+            {userProfiles.map(profile => (
               <Menu.Item
                 key={profile.id}
-                onClick={() => handleProfileChangeInSelect(profile.id)}
-                icon={profile.icon || (profile.type === 'PF' ? <UserOutlined /> : <ShopOutlined />)}
+                onClick={() => setSelectedProfileId(profile.id)}
+                icon={profile.icon || <UserOutlined />}
               >
                 {profile.name}
               </Menu.Item>
@@ -67,7 +62,17 @@ const HeaderPanel = ({
           </Menu.SubMenu>
         </>
       )}
+
       <Menu.Divider />
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout} danger>
+        Sair
+      </Menu.Item>
+    </Menu>
+  );
+
+  // --- MENU DO USUÁRIO PARA ADMINS (SIMPLES, APENAS SAIR) ---
+  const adminUserMenu = (
+    <Menu className="user-menu-dropdown-overlay">
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout} danger>
         Sair
       </Menu.Item>
@@ -77,7 +82,6 @@ const HeaderPanel = ({
   return (
     <Header className="header-panel modern refined">
       <div className="header-panel-left-section">
-        {/* Renderiza o botão de menu em modo mobile */}
         {isMobile && (
           <Button
             className="menu-toggle-btn"
@@ -88,67 +92,78 @@ const HeaderPanel = ({
           />
         )}
         <div className="header-panel-brand">
-          <LineChartOutlined className="brand-icon" />
-          {/* Esconde o texto da marca em mobile para dar espaço */}
-          {!isMobile && <Text className="brand-name">{appName}</Text>}
+          {isAdmin ? <CrownOutlined className="brand-icon" /> : <LineChartOutlined className="brand-icon" />}
+          {!isMobile && <Text className="brand-name">{headerTitle}</Text>}
         </div>
-        {!isMobile && currentProfileDetails && currentProfileDetails.id !== 'loading_pf' && (
+        
+        {/* Mostra nome do perfil para CLIENTES */}
+        {!isMobile && !isAdmin && currentProfile && (
           <>
             <Divider type="vertical" className="brand-profile-divider" />
             <div className="current-profile-name-header">
-              {currentProfileDetails.icon || (currentProfileDetails.type === 'PF' ? <UserOutlined /> : <ShopOutlined />)}
-              <Text className="profile-name-text-header">
-                {currentProfileDetails.name}
-              </Text>
+              {currentProfile.icon || <UserOutlined />}
+              <Text className="profile-name-text-header">{currentProfile.name}</Text>
             </div>
           </>
         )}
       </div>
 
       <div className="header-panel-right-section">
-        {!isMobile && profilesToUse.length > 1 && profilesToUse[0].id !== 'loading_pf' && (
-            <Select
-                value={selectedProfileId}
-                className="profile-selector-modern header-item"
-                onChange={handleProfileChangeInSelect}
-                bordered={false}
-                dropdownMatchSelectWidth={false}
-                popupClassName="profile-selector-dropdown-modern"
-                suffixIcon={<DownOutlined />}
-                optionLabelProp="label"
-            >
-            {profilesToUse.map((profile) => (
-                <Option key={profile.id} value={profile.id} label={
-                    <Space className="profile-option-selected-label">
-                        {profile.icon || (profile.type === 'PF' ? <UserOutlined /> : <ShopOutlined />)}
-                        <span className="profile-name-short">{profile.name.length > 15 ? `${profile.name.substring(0,13)}...` : profile.name}</span>
-                    </Space>
-                }>
-                <Space className="profile-option-item-dropdown">
-                    {profile.icon || (profile.type === 'PF' ? <UserOutlined /> : <ShopOutlined />)}
-                    <span>{profile.name} ({profile.type})</span>
-                </Space>
-                </Option>
-            ))}
-            </Select>
+        {/* Mostra seletor de perfil e chatbot para CLIENTES */}
+        {!isAdmin && (
+          <Space size="middle" align="center">
+            {/* LÓGICA DO SELETOR DE PERFIL RESTAURADA */}
+            {!isMobile && userProfiles && userProfiles.length > 1 && (
+              <Select
+                  value={selectedProfileId}
+                  className="profile-selector-modern header-item"
+                  onChange={(value) => setSelectedProfileId(value)}
+                  bordered={false}
+                  dropdownMatchSelectWidth={false}
+                  popupClassName="profile-selector-dropdown-modern"
+                  suffixIcon={<DownOutlined />}
+                  optionLabelProp="label"
+              >
+              {userProfiles.map((profile) => (
+                  <Option key={profile.id} value={profile.id} label={
+                      <Space className="profile-option-selected-label">
+                          {profile.icon || <UserOutlined />}
+                          <span className="profile-name-short">{profile.name.length > 15 ? `${profile.name.substring(0,13)}...` : profile.name}</span>
+                      </Space>
+                  }>
+                  <Space className="profile-option-item-dropdown">
+                      {profile.icon || <UserOutlined />}
+                      <span>{profile.name} ({profile.type})</span>
+                  </Space>
+                  </Option>
+              ))}
+              </Select>
+            )}
+            <Tooltip title="Abrir Chatbot" placement="bottom">
+              <Button
+                  type="text"
+                  shape="circle"
+                  icon={<MessageOutlined />}
+                  className="header-panel-action-btn header-item"
+                  onClick={() => navigate('/painel/chat')}
+              />
+            </Tooltip>
+          </Space>
         )}
 
-        <Space size="small" align="center">
-          <Tooltip title="Abrir Chatbot" placement="bottom">
-            <Button
-                type="text"
-                shape="circle"
-                icon={<MessageOutlined />}
-                className="header-panel-action-btn header-item"
-                onClick={() => navigate('/painel/chat')}
-            />
-          </Tooltip>
-          <Dropdown overlay={userMenu} trigger={['click']} placement="bottomRight" overlayClassName="user-menu-dropdown-overlay">
-            <a onClick={(e) => e.preventDefault()} className="user-avatar-link header-item">
+        {/* Avatar e Dropdown para TODOS */}
+        <Dropdown 
+          overlay={isAdmin ? adminUserMenu : clientUserMenu} // Renderiza o menu correto
+          trigger={['click']} 
+          placement="bottomRight" 
+        >
+          <a onClick={(e) => e.preventDefault()} className="user-avatar-link header-item">
+            <Space>
+              {isAdmin && !isMobile && <Text style={{ color: 'white' }}>{userName}</Text>}
               <Avatar size={36} icon={<UserOutlined />} className="user-avatar-modern" />
-            </a>
-          </Dropdown>
-        </Space>
+            </Space>
+          </a>
+        </Dropdown>
       </div>
       <div className="header-bottom-accent-line"></div>
     </Header>

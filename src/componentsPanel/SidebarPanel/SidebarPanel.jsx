@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
-  UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, BlockOutlined
+  UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined // <<< IMPORTAR CrownOutlined
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -15,12 +15,17 @@ const { Title } = Typography;
 const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemClick, isMobile }) => {
   const location = useLocation();
 
-  const menuItems = [
+  // --- MENU PARA ADMINISTRADORES ---
+  const adminMenuItems = [
+    { key: '/admin/dashboard', icon: <CrownOutlined />, label: <Link to="/admin/dashboard">Admin</Link> },
+  ];
+
+  // --- MENU PARA CLIENTES ---
+  const clientMenuItems = [
     { key: '/painel', icon: <PieChartOutlined />, label: <Link to="/painel">Visão Geral</Link> },
     { key: '/painel/transacoes', icon: <SwapOutlined />, label: <Link to="/painel/transacoes">Transações</Link> },
     { key: '/painel/recorrencias', icon: <ScheduleOutlined />, label: <Link to="/painel/recorrencias">Recorrências</Link> },
     { key: '/painel/categorias', icon: <TagsOutlined />, label: <Link to="/painel/categorias">Categorias</Link> },
-    // { key: '/painel/kanban', icon: <BlockOutlined />, label: <Link to="/painel/kanban">Kanban</Link> },
     { key: '/painel/cartoes', icon: <CreditCardOutlined />, label: <Link to="/painel/cartoes">Cartões</Link> },
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
       key: '/painel/produtos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/produtos">Produtos & Estoque</Link>,
@@ -36,17 +41,18 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     { key: '/painel/configuracoes', icon: <SettingOutlined />, label: <Link to="/painel/configuracoes">Configurações</Link> },
   ].filter(Boolean);
 
+  // --- ESCOLHE O MENU CORRETO BASEADO NO TIPO DE PERFIL ---
+  const menuItems = selectedProfileType === 'ADMIN' ? adminMenuItems : clientMenuItems;
+
+  // Lógica para determinar a chave selecionada (funciona para ambos os menus)
   let selectedKey = '';
+  // Ordena para garantir que rotas mais específicas (ex: /painel/cartoes) sejam checadas antes de /painel
   const sortedMenuItems = [...menuItems].sort((a, b) => (b?.key?.length || 0) - (a?.key?.length || 0));
   for (const item of sortedMenuItems) {
     if (item && item.key && location.pathname.startsWith(item.key)) {
        selectedKey = item.key;
        break;
     }
-  }
-  if (!selectedKey && location.pathname.startsWith('/painel')) {
-      const basePanelItem = menuItems.find(item => item && item.key === '/painel');
-      if(basePanelItem) selectedKey = basePanelItem.key;
   }
 
   const sidebarContent = (
@@ -62,19 +68,15 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
         items={menuItems}
         className="sidebar-menu"
         onClick={onMenuItemClick}
-        // A propriedade style com overflow aqui garante que o menu tenha seu próprio scroll
-        // se o conteúdo for maior que o espaço disponível.
         style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}
       />
     </>
   );
 
   if (isMobile) {
-    // Para mobile, usamos flexbox para preencher a altura do Drawer
-    // O Menu terá o 'flex: 1' e 'overflowY: auto' para criar um scroll interno, se necessário.
     return (
       <div style={{ 
-          height: '100%', // Usa 100% da altura do pai (Drawer) em vez de 100vh
+          height: '100%',
           display: 'flex', 
           flexDirection: 'column', 
           backgroundColor: '#001529' 
@@ -84,7 +86,6 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     );
   }
 
-  // No modo desktop, o Sider já gerencia seu próprio scroll
   return (
     <Sider
       collapsible

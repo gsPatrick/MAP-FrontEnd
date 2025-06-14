@@ -1,25 +1,22 @@
 // src/pages/LoginPage/LoginPage.jsx
-import React, { useEffect, useState } from 'react'; // Adicionado useState
-import { Layout, Form, Input, Button, Typography, message } from 'antd'; // Adicionado message
+
+import React, { useEffect, useState } from 'react';
+import { Layout, Form, Input, Button, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 
-// Importar HeaderLP e FooterLP
- import HeaderLP from '../../componentsLP/Header/Header';
- import FooterLP from '../../componentsLP/FooterLP/FooterLP';
+import HeaderLP from '../../componentsLP/Header/Header';
+import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import './LoginPage.css';
 
-// Importar o apiClient
-import apiClient from '../../services/api'; // Ajuste o caminho se necessário
-import { useProfile } from '../../contexts/ProfileContext'; // Importar para atualizar o perfil no login
+import apiClient from '../../services/api';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false); // Estado para o loading do botão
-  const { setSelectedProfileId, fetchUserProfiles } = useProfile(); // Usar fetchUserProfiles do contexto
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loginCard = document.querySelector('.login-card-container');
@@ -32,92 +29,104 @@ const LoginPage = () => {
     };
   }, []);
 
+  const handleLoginSuccess = (token, userData, userRole, targetPath) => {
+    console.log(`[handleLoginSuccess] Salvando dados para role: ${userRole}`);
+    
+    // Salva os dados de autenticação no localStorage
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userRole', userRole);
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+    // Lógica específica para clientes (perfis financeiros)
+    if (userRole === 'client' && targetPath === '/painel') {
+      const financialAccounts = userData.financialAccounts || [];
+      if (financialAccounts.length > 0) {
+          const defaultAccount = financialAccounts.find(acc => acc.isDefault);
+          const initialProfileId = defaultAccount ? defaultAccount.id : financialAccounts[0].id;
+          localStorage.setItem('selectedProfileId', initialProfileId);
+      } else {
+          // Garante que não haja lixo de um login anterior
+          localStorage.removeItem('selectedProfileId');
+      }
+    } else if (userRole === 'admin') {
+        // Garante que não haja lixo de um perfil de cliente
+        localStorage.removeItem('selectedProfileId');
+    }
+
+    message.success(`Login bem-sucedido! Bem-vindo(a), ${userData.name || userData.email}!`);
+    navigate(targetPath);
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
+
+    // TENTATIVA 1: LOGIN COMO ADMINISTRADOR
     try {
-      // Seu backend espera 'identifier' e 'password' para /auth/client/login
-      const response = await apiClient.post('/auth/client/login', {
-        identifier: values.email, // Mapeia 'email' do formulário para 'identifier'
+      const adminResponse = await apiClient.post('/users/login', {
+        email: values.email,
         password: values.password,
       });
 
-      if (response.data && response.data.status === 'success' && response.data.data.token) {
-        const { token, client, financialAccounts } = response.data.data;
-        
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('userData', JSON.stringify(client)); // Salva dados do cliente
+      console.log('[Admin Login Attempt] Resposta da API:', adminResponse.data);
 
-        // Lógica para definir o perfil selecionado
-        // Se houver contas financeiras, tenta usar a default ou a primeira
-        // Se não houver, o ProfileContext deve lidar com isso ao buscar perfis (pode não ter perfis ainda)
-        let initialProfileId = null;
-        if (financialAccounts && financialAccounts.length > 0) {
-            const defaultAccount = financialAccounts.find(acc => acc.isDefault);
-            initialProfileId = defaultAccount ? defaultAccount.id : financialAccounts[0].id;
-        }
+      // <<< CORREÇÃO PRINCIPAL: Verificação mais direta e robusta
+      const responseData = adminResponse.data?.data;
+      if (adminResponse.data?.status === 'success' && responseData?.user?.role === 'admin') {
         
-        if (initialProfileId) {
-            localStorage.setItem('selectedProfileId', initialProfileId);
-            setSelectedProfileId(initialProfileId); // Atualiza o contexto diretamente se possível
-        } else {
-            localStorage.removeItem('selectedProfileId');
-            setSelectedProfileId(null);
-        }
-        
-        // Força a busca dos perfis atualizados pelo ProfileContext
-        // A função fetchUserProfiles deve ser implementada no ProfileContext
-        if (typeof fetchUserProfiles === 'function') {
-            await fetchUserProfiles(); // Espera buscar os perfis antes de navegar
-        } else {
-            // Se fetchUserProfiles não estiver disponível, pode ser necessário um reload ou
-            // uma estrutura onde o App detecta o login e força o reload do contexto.
-            // Para uma melhor UX, é ideal que o ProfileContext se atualize.
-            console.warn("ProfileContext não possui fetchUserProfiles. Perfis podem não ser atualizados imediatamente.");
-        }
+        console.log('[Admin Login Attempt] Sucesso! Role "admin" detectada.');
+        const { token, user } = responseData;
 
-        message.success(`Login bem-sucedido! Bem-vindo, ${client.name || client.email}!`);
-        navigate('/painel');
-      } else {
-        // Caso a API retorne sucesso mas sem token, ou formato inesperado
-        message.error(response.data?.message || 'Falha no login. Resposta inesperada do servidor.');
+        // Chama a função de sucesso com os parâmetros corretos
+        handleLoginSuccess(token, user, 'admin', '/admin/dashboard');
+        setLoading(false);
+        return; // <<< ESSENCIAL: Impede a execução da tentativa de login de cliente
       }
-    } catch (error) {
-      // Os erros da API já são tratados pelo interceptor do apiClient e mostram uma mensagem.
-      // Aqui podemos logar ou tratar especificidades, se necessário.
-      console.error('Erro no login:', error);
-
-      // Adiciona uma mensagem específica para erro de email/senha (ex: status 401 ou 400 com mensagem relevante)
-      // A label do campo é "E-mail ou Telefone", então a mensagem reflete isso.
-      if (error.response && 
-          (error.response.status === 401 || 
-           (error.response.status === 400 && error.response.data?.message && typeof error.response.data.message === 'string' && error.response.data.message.toLowerCase().includes('credenciais')) || // Exemplo: "Credenciais inválidas"
-           (error.response.status === 400 && error.response.data?.message && typeof error.response.data.message === 'string' && error.response.data.message.toLowerCase().includes('inválido')) // Exemplo: "Usuário ou senha inválido"
-          )
-         ) {
-        message.error('E-mail/telefone ou senha inválidos. Por favor, tente novamente.');
-      } else {
-        // Para outros erros, assume-se que o interceptor do apiClient (se configurado para tal)
-        // já exibiu uma mensagem adequada (ex: error.response.data.message).
-        // Se o interceptor não exibir mensagens ou uma mensagem genérica for desejada aqui como fallback,
-        // ela poderia ser adicionada, mas com cuidado para não duplicar mensagens.
-        // Exemplo de fallback (se o interceptor não cobrir):
-        // if (!error.response?.data?.message) {
-        //   message.error('Ocorreu uma falha ao tentar fazer login. Tente novamente mais tarde.');
-        // }
+      
+    } catch (adminError) {
+      // Se o erro NÃO for 401 ou 404, ele é um erro inesperado.
+      // Se for 401/404, simplesmente ignoramos e deixamos o código continuar para a tentativa de cliente.
+      if (!adminError.response || (adminError.response.status !== 401 && adminError.response.status !== 404)) {
+        console.error('Erro inesperado no login de administrador:', adminError);
+        message.error('Ocorreu um erro inesperado. Tente novamente.');
+        setLoading(false);
+        return;
       }
+      console.log('[Admin Login Attempt] Falhou (401/404). Tentando como cliente...');
+    }
+
+    // TENTATIVA 2: LOGIN COMO CLIENTE
+    try {
+      const clientResponse = await apiClient.post('/auth/client/login', {
+        identifier: values.email,
+        password: values.password,
+      });
+
+      console.log('[Client Login Attempt] Resposta da API:', clientResponse.data);
+
+      if (clientResponse.data?.status === 'success' && clientResponse.data?.data?.token) {
+        console.log('[Client Login Attempt] Sucesso!');
+        const { token, client, financialAccounts } = clientResponse.data.data;
+        const clientData = { ...client, financialAccounts };
+        handleLoginSuccess(token, clientData, 'client', '/painel');
+      } else {
+        // Se chegou aqui após a tentativa de admin falhar, a senha está errada para ambos.
+        message.error(clientResponse.data?.message || 'E-mail ou senha inválidos.');
+      }
+    } catch (clientError) {
+      console.error('Erro no login de cliente:', clientError);
+      message.error('E-mail ou senha inválidos. Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Falha ao submeter:', errorInfo);
     message.error('Por favor, preencha todos os campos corretamente.');
   };
 
   return (
     <Layout className="login-page-layout">
-      <HeaderLP /> 
+      <HeaderLP />
       <Content className="login-page-content">
         <div className="login-card-container">
           <Title level={2} className="login-title">
@@ -127,26 +136,12 @@ const LoginPage = () => {
             Acesse sua conta para continuar gerenciando tudo com o MAP no Controle.
           </Paragraph>
 
-          <Form
-            name="login_form"
-            className="login-form"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            layout="vertical"
-          >
-            <Form.Item
-              name="email"
-              label="E-mail ou Telefone" // Ajustado para refletir 'identifier'
-              rules={[{ required: true, message: 'Por favor, insira seu e-mail ou telefone!' }]}
-            >
-              <Input prefix={<MailOutlined className="site-form-item-icon" />} placeholder="seuemail@exemplo.com ou 55119..." size="large" />
+          <Form name="login_form" className="login-form" onFinish={onFinish} onFinishFailed={onFinishFailed} layout="vertical">
+            <Form.Item name="email" label="E-mail" rules={[{ required: true, message: 'Por favor, insira seu e-mail!' }]}>
+              <Input prefix={<MailOutlined className="site-form-item-icon" />} placeholder="seuemail@exemplo.com" size="large" />
             </Form.Item>
 
-            <Form.Item
-              name="password"
-              label="Senha"
-              rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}
-            >
+            <Form.Item name="password" label="Senha" rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}>
               <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} placeholder="Sua senha" size="large" />
             </Form.Item>
 
@@ -163,12 +158,12 @@ const LoginPage = () => {
             </Form.Item>
 
             <Paragraph className="login-register-prompt">
-              Ainda não tem uma conta? <Link to="/registro">Crie uma agora!</Link>
+              Ainda não tem uma conta? <Link to="/planos">Conheça nossos planos!</Link>
             </Paragraph>
           </Form>
         </div>
       </Content>
-       <FooterLP /> 
+      <FooterLP />
     </Layout>
   );
 };

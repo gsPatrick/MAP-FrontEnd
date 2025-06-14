@@ -147,48 +147,38 @@
     color: var(--map-preto) !important;
 }
   
-/* Card de Código de Referência */
-.referral-desc {
+/* Card de Dashboard de Afiliado */
+.affiliate-dashboard-card .ant-card-body {
+    padding: 0 !important;
+}
+.affiliate-dashboard-card .ant-list-item {
+    padding: 12px 20px !important;
+    border-bottom: 1px solid var(--product-border-color);
+}
+.affiliate-dashboard-card .ant-list-item:last-child {
+    border-bottom: none;
+}
+.affiliate-dashboard-card .ant-statistic-title {
+    font-size: 14px;
     color: var(--product-text-secondary);
-    margin-bottom: 16px !important;
-    line-height: 1.6;
 }
-.referral-desc .referral-highlight {
-    color: var(--map-laranja);
+.affiliate-dashboard-card .ant-statistic-content {
+    font-size: 20px;
+    font-weight: 600;
 }
-.referral-code-area {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f7f9fc;
-    padding: 12px 16px;
-    border-radius: 8px;
-    border: 1px dashed var(--map-dourado);
-}
-.referral-code-text {
-    font-size: 18px;
-    letter-spacing: 1px;
-    color: var(--map-laranja-escuro);
-}
-.copy-code-btn.ant-btn {
+.affiliate-dashboard-card .copy-code-btn {
     color: var(--map-laranja);
     border-color: var(--map-laranja);
 }
-.copy-code-btn.ant-btn:hover {
+.affiliate-dashboard-card .copy-code-btn:hover {
     color: var(--map-dourado);
     border-color: var(--map-dourado);
     background-color: rgba(224, 188, 99, 0.05);
 }
   
-/* Card de Benefícios */
+/* Card de Benefícios (Saque) */
 .benefits-card .ant-card-body {
     text-align: center;
-}
-.referral-statistic .statistic-title .ant-typography {
-    color: var(--product-text-secondary);
-    font-size: 15px;
-    font-weight: 500;
-    margin-bottom: 4px;
 }
 .referral-statistic .ant-statistic-content {
     margin-bottom: 20px;
@@ -238,6 +228,33 @@
 .profile-creation-modal .ant-select .anticon {
     color: var(--map-laranja);
 }
+
+/* Modal de Saque */
+.withdraw-modal .ant-modal-body {
+    padding-top: 16px;
+}
+.withdraw-modal .balance-info {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+}
+.withdraw-modal .balance-info .ant-typography {
+    margin: 0;
+}
+.withdraw-modal .balance-info .balance-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--map-dourado);
+}
+.withdraw-modal .ant-form-item-extra {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+.withdraw-modal .ant-alert {
+    margin-bottom: 20px;
+}
   
 /* Responsividade */
 @media (max-width: 991px) {
@@ -259,9 +276,5 @@
     .user-avatar-perfil.ant-avatar {
         margin-right: 0;
         margin-bottom: 15px;
-    }
-    .referral-code-area {
-        flex-direction: column;
-        gap: 10px;
     }
 }
