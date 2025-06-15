@@ -79,8 +79,8 @@ const RecorrenciasPage = () => {
       params.sortOrder = 'ASC';
 
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params });
-      if (response.data && response.data.status === 'success') {
-        setRecurrences(response.data.data.map(r => ({
+if (response.data && response.data.status === 'success' && response.data.data.rules) {
+        setRecurrences(response.data.data.rules.map(r => ({
             ...r, 
             value: parseFloat(r.value) 
         })) || []);
@@ -90,11 +90,14 @@ const RecorrenciasPage = () => {
       }
     } catch (error) {
       console.error("Erro ao carregar recorrências:", error);
+      const errorMessage = error.response?.data?.message || "Ocorreu um erro no servidor.";
+      message.error(`Falha ao carregar recorrências: ${errorMessage}`);
       setRecurrences([]);
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (!loadingProfiles && isAuthenticated) {
