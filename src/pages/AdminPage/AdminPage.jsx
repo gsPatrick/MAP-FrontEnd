@@ -142,7 +142,7 @@ const AdminPage = () => {
             planEditForm.setFieldsValue(data);
         } else if (modalType === 'user') {
             setEditingUser(data);
-            userForm.setFieldsValue(data ? { ...data, password: '' } : { name: '', email: '', phone: '', accessLevel: 'gratuito', status: 'Ativo' });
+            userForm.setFieldsValue(data ? { ...data, password: '' } : { name: '', email: '', phone: '', accessLevel: undefined, status: 'Ativo' });
         } else if (modalType === 'planUpdate') {
             setUserForPlanUpdate(data);
             const currentPlan = plans.find(p => p.id === data.planId || p.tier === data.accessLevel);
@@ -174,7 +174,7 @@ const AdminPage = () => {
                         message.success(`Usuário "${values.name}" atualizado!`);
                     } else {
                         await apiClient.post('/admin/clients', values);
-                        message.success(`Usuário "${values.name}" criado com sucesso!`);
+                        message.success(`Usuário criado com sucesso!`);
                     }
                     break;
                 case 'planUpdate':
@@ -376,22 +376,31 @@ const AdminPage = () => {
                 </TabPane>
             </Tabs>
 
+            {/* ================================================================== */}
+            {/* INÍCIO DA SEÇÃO MODIFICADA: MODAL DE USUÁRIO                       */}
+            {/* ================================================================== */}
             <Modal open={modalState.user} onCancel={handleCancelModals} footer={null} className="admin-modal-white" width={650} destroyOnClose>
                 <Spin spinning={loading.form}>
                     <div className="modal-content-wrapper">
                         <Title level={3} className="modal-title-custom"><UserOutlined/> {editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</Title>
                         <Form form={userForm} layout="vertical" onFinish={(v) => handleFormSubmit('user', v)}>
                            <Row gutter={24}>
-                                <Col span={12}><Form.Item name="name" label="Nome Completo" rules={[{ required: true }]}><Input size="large" placeholder="Nome do usuário" /></Form.Item></Col>
-                                <Col span={12}><Form.Item name="email" label="E-mail" rules={[{ type: 'email', required: true }]}><Input size="large" placeholder="email@dominio.com" /></Form.Item></Col>
+                                {/* Nome: Opcional na criação, obrigatório na edição */}
+                                <Col span={12}><Form.Item name="name" label="Nome Completo" rules={[{ required: !!editingUser, message: 'O nome é obrigatório para edição.' }]}><Input size="large" placeholder={editingUser ? "Nome do usuário" : "Nome (opcional)"} /></Form.Item></Col>
+                                {/* Email: Opcional na criação, obrigatório na edição */}
+                                <Col span={12}><Form.Item name="email" label="E-mail" rules={[{ type: 'email', message: 'Formato de e-mail inválido.' }, { required: !!editingUser, message: 'O e-mail é obrigatório para edição.' }]}><Input size="large" placeholder={editingUser ? "email@dominio.com" : "E-mail (opcional)"} /></Form.Item></Col>
                             </Row>
                             <Row gutter={24}>
-                                <Col span={12}><Form.Item name="phone" label="Telefone (com DDI)" rules={[{ required: true }]}><Input size="large" prefix={<PhoneOutlined />} placeholder="5511987654321" /></Form.Item></Col>
-                                <Col span={12}><Form.Item name="password" label={editingUser ? "Nova Senha (opcional)" : "Senha"} rules={[{ required: !editingUser, min: 6 }]}><Input.Password size="large" placeholder="••••••••" /></Form.Item></Col>
+                                {/* Telefone: Obrigatório sempre */}
+                                <Col span={12}><Form.Item name="phone" label="Telefone (com DDI)" rules={[{ required: true, message: 'O telefone é obrigatório.' }]}><Input size="large" prefix={<PhoneOutlined />} placeholder="5511987654321" /></Form.Item></Col>
+                                {/* Senha: Opcional sempre, com validação de tamanho se preenchida */}
+                                <Col span={12}><Form.Item name="password" label={editingUser ? "Nova Senha (opcional)" : "Senha (opcional)"} rules={[{ min: 6, message: 'A senha deve ter no mínimo 6 caracteres.' }]}><Input.Password size="large" placeholder="••••••••" /></Form.Item></Col>
                             </Row>
                              <Row gutter={24}>
-                                <Col span={12}><Form.Item name="status" label="Status" rules={[{ required: true }]}><Select size="large"><Option value="Ativo">Ativo</Option><Option value="Inativo">Inativo</Option><Option value="Bloqueado">Bloqueado</Option></Select></Form.Item></Col>
-                                {!editingUser && <Col span={12}><Form.Item name="accessLevel" label="Plano Inicial" rules={[{ required: true }]}><Select size="large" loading={loading.plans}>{plans.map(p => <Option key={p.id} value={p.tier}>{p.name}</Option>)}</Select></Form.Item></Col>}
+                                {/* Status: Opcional na criação, obrigatório na edição */}
+                                <Col span={12}><Form.Item name="status" label="Status" rules={[{ required: !!editingUser, message: 'O status é obrigatório para edição.' }]}><Select size="large" placeholder="Selecione o status"><Option value="Ativo">Ativo</Option><Option value="Inativo">Inativo</Option><Option value="Bloqueado">Bloqueado</Option></Select></Form.Item></Col>
+                                {/* Plano: Obrigatório e visível apenas na criação */}
+                                {!editingUser && <Col span={12}><Form.Item name="accessLevel" label="Plano Inicial" rules={[{ required: true, message: 'O plano inicial é obrigatório.' }]}><Select size="large" loading={loading.plans} placeholder="Selecione o plano">{plans.map(p => <Option key={p.id} value={p.tier}>{p.name}</Option>)}</Select></Form.Item></Col>}
                             </Row>
                             <div className="modal-footer-custom">
                                 <Button onClick={handleCancelModals} className="cancel-btn-form" size="large">Cancelar</Button>
@@ -401,6 +410,9 @@ const AdminPage = () => {
                     </div>
                 </Spin>
             </Modal>
+            {/* ================================================================== */}
+            {/* FIM DA SEÇÃO MODIFICADA                                            */}
+            {/* ================================================================== */}
 
             <Modal open={modalState.planUpdate} onCancel={handleCancelModals} footer={null} className="admin-modal-white" width={500} destroyOnClose>
                 <Spin spinning={loading.form}>
