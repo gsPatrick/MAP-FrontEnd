@@ -1,196 +1,249 @@
-/* src/pages/AgendamentosPage/AgendamentosPage.css */
-
-/* Paleta de Cores e Tema Escuro Premium */
-:root {
-    --page-bg: #000000;
-    --calendar-card-bg: #121212;
-    --calendar-day-bg: #1a1a1a;
-    --calendar-day-bg-hover: #212121;
-    --calendar-border-color: #2c2c2c;
-    
-    --text-primary: #f0f0f0;
-    --text-secondary: #a0a0a0;
-    --text-on-accent: #000000;
-
-    --accent-gold: var(--brand-cor-1-dourado, #e3be62);
-    --accent-orange: var(--brand-cor-2-laranja-ferrugem, #b24a0a);
-    --accent-terracota: var(--brand-cor-3-terracota-escuro, #903b07);
-
-    --pill-geral-bg: #34495e;
-    --pill-financeiro-bg: var(--accent-orange);
-    --pill-completed-bg: #2c3e50;
-    --pill-text-color: #ffffff;
-}
-
-/* Containers Globais da Página */
+/* Estilos Gerais da Página de Agendamentos */
 .agendamentos-page-content {
     padding: 24px;
-    background-color: var(--page-bg) !important;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 64px); /* Altura do header */
+    background-color: #f0f2f5;
 }
+
 .agendamentos-calendar-card {
-    background-color: var(--calendar-card-bg) !important;
-    border: 1px solid var(--calendar-border-color) !important;
-    border-radius: 12px;
-    padding: 24px;
-    color: var(--text-primary);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
 }
-.loading-container, .dark-placeholder-content {
-    display: flex; flex-direction: column; justify-content: center;
-    align-items: center; height: 70vh; color: var(--text-primary);
-}
-.dark-placeholder-content .ant-typography { color: var(--text-secondary) !important; }
 
-/* Cabeçalho do Calendário */
 .calendar-main-header {
-    margin-bottom: 24px; padding-bottom: 16px;
-    border-bottom: 1px solid var(--calendar-border-color);
+    margin-bottom: 24px;
+    padding: 0 8px;
 }
-.page-title-agendamentos { color: var(--text-primary) !important; }
-.profile-name-header { color: var(--accent-gold); font-size: 1.1rem; font-weight: 400; }
-.calendar-main-header .ant-btn {
-    background-color: #252525; border-color: #444; color: var(--text-secondary);
+
+.page-title-agendamentos {
+    margin-bottom: 0 !important;
+    color: #333;
 }
-.calendar-main-header .ant-btn:hover {
-    background-color: #333; border-color: var(--accent-gold); color: var(--accent-gold);
+
+.profile-name-header {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #888;
 }
+
 .clickable-month-title {
-    color: var(--text-primary) !important; text-transform: capitalize;
-    margin: 0 !important; cursor: pointer; padding: 4px 8px;
-    border-radius: 6px; transition: background-color 0.2s ease;
+    cursor: pointer;
+    transition: color 0.3s;
+    margin-bottom: 0 !important;
 }
-.clickable-month-title:hover { background-color: #252525; }
-
-/* <<< MUDANÇA: ESTILO PARA O NOVO SELETOR DE MÊS/ANO >>> */
-.month-picker-popover .ant-popover-inner {
-    background-color: #1e1e1e;
-    border: 1px solid var(--calendar-border-color);
-    padding: 8px;
-}
-.month-picker-popover .ant-popover-arrow { display: none; }
-.month-picker-container { width: 280px; }
-.month-picker-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px;
-}
-.month-picker-header .ant-typography { color: var(--text-primary); font-weight: 600; }
-.month-picker-header .ant-btn { color: var(--text-secondary); }
-.month-picker-header .ant-btn:hover { color: var(--text-primary); background-color: #333; }
-.month-picker-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-}
-.month-picker-button {
-    width: 100%; color: var(--text-secondary);
-}
-.month-picker-button:hover {
-    background-color: #333 !important; color: var(--text-primary) !important;
-}
-.month-picker-button.ant-btn-primary {
-    background-color: var(--accent-gold) !important;
-    color: var(--text-on-accent) !important;
-    font-weight: 600;
+.clickable-month-title:hover {
+    color: var(--ant-primary-color);
 }
 
-/* Grade do Calendário */
-.calendar-container { user-select: none; }
-.calendar-header-days { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 8px; }
-.calendar-weekday { text-align: center; font-weight: 500; color: var(--text-secondary); padding: 8px 0; }
+/* Grid do Calendário Principal */
+.calendar-container {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-header-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.calendar-weekday {
+    text-align: center;
+    padding: 12px 4px;
+    font-weight: 500;
+    color: #555;
+}
+
 .calendar-grid {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
-    background-color: var(--calendar-border-color); border: 1px solid var(--calendar-border-color);
-    border-radius: 8px; overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(120px, auto);
 }
+
 .calendar-day {
-    position: relative; min-height: 120px; background-color: var(--calendar-day-bg);
-    padding: 8px; transition: background-color 0.2s ease; cursor: pointer;
-    border: 1px solid transparent;
+    border-right: 1px solid #f0f0f0;
+    border-top: 1px solid #f0f0f0;
+    padding: 8px;
+    position: relative;
+    transition: background-color 0.3s;
 }
-.calendar-day:hover { background-color: var(--calendar-day-bg-hover); }
-.day-number {
-    font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);
-    text-align: right; margin-bottom: 4px;
+.calendar-day:nth-child(7n) {
+    border-right: none;
 }
-.calendar-day.not-current-month .day-number { opacity: 0.5; }
-.calendar-day.today {
-    border: 1px solid var(--accent-gold);
-    background-color: #201e16;
+.calendar-day.not-current-month .day-number {
+    color: #aaa;
 }
 .calendar-day.today .day-number {
-    color: var(--text-on-accent); background-color: var(--accent-gold);
-    font-weight: 700; border-radius: 50%; width: 24px; height: 24px;
-    line-height: 24px; text-align: center; float: right; margin: -3px;
+    background-color: var(--ant-primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    font-weight: bold;
+}
+.day-number {
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-bottom: 4px;
 }
 
 /* Pílulas de Agendamento */
-.appointments-container { display: flex; flex-direction: column; gap: 4px; }
+.appointments-container, .events-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 90px;
+    overflow-y: auto;
+}
 .appointment-pill {
-    padding: 4px 8px; border-radius: 4px; color: var(--pill-text-color); font-size: 0.8rem;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
-    transition: all 0.2s ease; border-left: 3px solid transparent;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-left: 4px solid;
+    transition: all 0.2s ease-in-out;
 }
-.appointment-pill:hover { filter: brightness(1.2); transform: translateX(2px); }
-.appointment-pill.type-geral { background-color: var(--pill-geral-bg); border-left-color: #5b7bbd; }
-.appointment-pill.type-financeiro { background-color: var(--pill-financeiro-bg); border-left-color: var(--accent-terracota); }
-.appointment-pill.completed {
-    background-color: var(--pill-completed-bg); text-decoration: line-through;
-    opacity: 0.6; border-left-color: var(--text-secondary);
+.appointment-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-.appointment-pill .anticon { font-size: 0.9em; vertical-align: middle; }
+.pill-title {
+    font-weight: 500;
+}
+.pill-time {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.65);
+}
 
-/* Popover Interativo */
-.calendar-popover .ant-popover-inner {
-    background-color: #252525; border: 1px solid var(--calendar-border-color);
-    border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+/* Popover de Detalhes */
+.popover-content-wrapper {
+    padding: 16px;
+    min-width: 320px;
 }
-.popover-content-wrapper { padding: 4px; }
-.popover-content-wrapper .ant-typography, .popover-content-wrapper .ant-typography .anticon { color: var(--text-primary); }
-.popover-title { margin-bottom: 4px !important; }
-.popover-status-tag { margin-left: 8px; }
-.popover-time { display: block; margin-bottom: 12px; color: var(--text-secondary) !important; }
-.popover-notes { font-style: italic; color: var(--text-secondary) !important; white-space: pre-wrap; margin-bottom: 12px !important; }
-.popover-divider { margin: 12px 0 !important; background-color: var(--calendar-border-color); }
-.popover-clients-section .popover-section-title { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary); }
-.popover-client-avatar { cursor: pointer; border: 1px solid var(--calendar-border-color); transition: all 0.2s ease; }
-.popover-client-avatar:hover { transform: scale(1.1); border-color: var(--accent-gold); }
-.popover-actions { width: 100%; justify-content: space-around; }
-.popover-actions .ant-btn { background: transparent; border: 1px solid #555; color: var(--text-secondary); }
-.popover-actions .ant-btn:hover { color: var(--accent-gold); border-color: var(--accent-gold); }
-.popover-actions .ant-btn-dangerous:hover { color: var(--accent-orange) !important; border-color: var(--accent-orange) !important; }
+.popover-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0 !important;
+}
+.popover-divider {
+    margin: 12px 0 !important;
+}
+.popover-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
 
-/* Modais e Botão Flutuante */
-.agendamento-modal .ant-modal-content, .client-details-modal .ant-modal-content { background-color: #1e1e1e; color: var(--text-primary); }
-.agendamento-modal .ant-modal-header, .client-details-modal .ant-modal-header { background-color: #1e1e1e; border-bottom: 1px solid var(--calendar-border-color); }
-.agendamento-modal .ant-modal-title, .agendamento-modal .ant-form-item-label > label, .client-details-modal .ant-modal-title { color: var(--text-primary) !important; }
-.agendamento-modal .ant-modal-close-x, .client-details-modal .ant-modal-close-x { color: var(--text-secondary); }
-.agendamento-modal .ant-input, .agendamento-modal .ant-select-selector, .agendamento-modal .ant-picker, .agendamento-modal .ant-input-number {
-    background-color: #2a2a2a !important; border: 1px solid #444 !important; color: var(--text-primary) !important;
+/* --- ESTILOS PARA O MODAL DE AGENDAMENTO (ETAPA DE DATA/HORA) --- */
+.agendamento-modal .ant-modal-content {
+    transition: width 0.3s ease-in-out;
 }
-.agendamento-modal .ant-input::placeholder { color: var(--text-secondary) !important; }
-.agendamento-modal .ant-btn-primary {
-    background-color: var(--accent-gold) !important; border-color: var(--accent-gold) !important; color: var(--text-on-accent) !important; font-weight: 600;
-}
-.agendamento-modal .ant-btn-primary:hover { background-color: var(--accent-orange) !important; border-color: var(--accent-orange) !important; color: var(--text-primary) !important; }
-.agendamento-modal .ant-btn:not(.ant-btn-primary) { background: #333; border-color: #555; color: var(--text-primary); }
-.client-details-content { text-align: center; padding-top: 16px; }
-.client-details-avatar { border: 2px solid var(--accent-gold); margin-bottom: 16px; }
-.client-details-name { color: var(--text-primary) !important; }
-.client-details-content .ant-typography { color: var(--text-secondary) !important; }
-.client-details-content .ant-typography .anticon { margin-right: 8px; color: var(--accent-gold); }
-.client-details-notes { white-space: pre-wrap; word-break: break-word; }
-.ant-float-btn-primary { background-color: var(--accent-gold) !important; }
-.ant-float-btn-primary:hover { background-color: var(--accent-orange) !important; }
 
-/* Responsividade */
-@media (max-width: 992px) {
-    .calendar-day { min-height: 100px; }
-    .appointment-pill .pill-title { display: none; }
-    .popover-actions .ant-btn-icon-only { font-size: 1rem; }
+.modal-date-time-container {
+    display: flex;
+    gap: 24px;
 }
-@media (max-width: 768px) {
-    .agendamentos-page-content { padding: 12px; }
-    .calendar-main-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .clickable-month-title { font-size: 1.2rem; }
-    .calendar-weekday { font-size: 0.75rem; }
-    .calendar-day { min-height: 80px; padding: 4px; }
+
+.modal-calendar-view {
+    flex: 1;
+    max-width: 350px;
+}
+
+.modal-month-navigator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    text-transform: capitalize;
+}
+.modal-month-navigator .ant-typography {
+    font-size: 16px;
+}
+
+.modal-weekdays-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.modal-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.modal-day-card {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+.modal-day-card:hover {
+    background-color: #f0f0f0;
+}
+.modal-day-card.selected {
+    background-color: var(--ant-primary-color);
+    color: white;
+    border-color: var(--ant-primary-color-hover);
+}
+
+.modal-slots-view {
+    flex: 1;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.available-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.centered-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+}
+
+/* Estilos Gerais de Loading e Empty State */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    width: 100%;
+}
+
+.dark-placeholder-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 8px;
 }

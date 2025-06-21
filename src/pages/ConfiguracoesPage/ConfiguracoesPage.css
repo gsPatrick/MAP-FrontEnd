@@ -68,7 +68,6 @@
     background-color: var(--map-branco);
     border-radius: 0 8px 8px 8px; /* Arredonda cantos, exceto topo-esquerdo se a aba estiver conectada */
     box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Sombra mais pronunciada */
-    /* border: 1px solid #dee2e6;  Removido para um look mais flat, ou pode ser #ddd */
     border-top: none; /* Remove a borda superior do card se a aba já tem */
 }
 .config-card .ant-card-head {
@@ -96,7 +95,8 @@
 .google-connect-btn.ant-btn-primary,
 .google-disconnect-btn.ant-btn-primary.ant-btn-dangerous,
 .submit-btn-form.ant-btn-primary,
-.cancel-btn-form.ant-btn {
+.cancel-btn-form.ant-btn,
+.save-schedule-btn.ant-btn-primary { /* Adicionado o botão de salvar horário */
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.2s ease-in-out;
@@ -105,23 +105,25 @@
 .edit-personal-info-btn.ant-btn-link:hover { color: var(--map-dourado) !important; }
 
 .add-access-btn.ant-btn-primary,
-.save-google-colors-btn.ant-btn-primary, /* Aplicando estilo laranja */
-.submit-btn-form.ant-btn-primary {
+.save-google-colors-btn.ant-btn-primary,
+.submit-btn-form.ant-btn-primary,
+.save-schedule-btn.ant-btn-primary { /* Adicionado o botão de salvar horário */
     background-color: var(--map-laranja) !important;
     border-color: var(--map-laranja) !important;
 }
 .add-access-btn.ant-btn-primary:hover,
 .save-google-colors-btn.ant-btn-primary:hover,
-.submit-btn-form.ant-btn-primary:hover {
+.submit-btn-form.ant-btn-primary:hover,
+.save-schedule-btn.ant-btn-primary:hover { /* Adicionado o botão de salvar horário */
     background-color: var(--map-dourado) !important;
     border-color: var(--map-dourado) !important;
     color: var(--map-preto) !important;
 }
 
-/* Google Connect/Disconnect específico (já definido no JSX, mas reforçando) */
+/* Google Connect/Disconnect específico */
 .google-connect-btn.ant-btn-primary { background-color: #4285F4 !important; border-color: #4285F4 !important; }
 .google-connect-btn.ant-btn-primary:hover { background-color: #357ae8 !important; border-color: #357ae8 !important;}
-.google-disconnect-btn.ant-btn-primary.ant-btn-dangerous { background-color: #DB4437 !important; border-color: #DB4437 !important; } /* Cor vermelha do Google para perigo */
+.google-disconnect-btn.ant-btn-primary.ant-btn-dangerous { background-color: #DB4437 !important; border-color: #DB4437 !important; }
 .google-disconnect-btn.ant-btn-primary.ant-btn-dangerous:hover { background-color: #c23321 !important; border-color: #c23321 !important; }
 
 
@@ -132,7 +134,7 @@
     border-radius: 6px;
     margin-bottom: 8px;
 }
-.shared-access-list .ant-list-item:hover { background-color: #fffcf5; } /* Laranja bem clarinho */
+.shared-access-list .ant-list-item:hover { background-color: #fffcf5; }
 .shared-user-avatar.ant-avatar { background-color: var(--map-dourado); color: var(--map-preto); }
 .shared-user-name { font-size: 15px; color: var(--map-preto); }
 .shared-access-list .list-action-btn .anticon { font-size: 16px; }
@@ -142,7 +144,28 @@
 .shared-access-list .list-action-btn.delete:hover { background-color: rgba(255, 77, 79, 0.08) !important; color: #cf1322 !important; }
 .shared-access-list .profile-access-type-list .anticon { margin-right: 4px; color: var(--map-laranja); }
 
-/* Modal Styles (Reutilizando e simplificando) */
+/* NOVOS ESTILOS PARA A LISTA DE DIAS DE FOLGA */
+.days-off-list {
+    background-color: #fcfcfd;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 16px;
+}
+.days-off-list .ant-list-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eef2f7;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.days-off-list .ant-list-item:last-child {
+    border-bottom: none;
+}
+.days-off-list .ant-list-item:hover {
+    background-color: #fafafa;
+}
+
+/* Modal Styles */
 .modal-style-map .ant-modal-header {
   background-color: var(--map-laranja-escuro) !important;
   border-bottom: 2px solid var(--map-dourado) !important;
@@ -164,7 +187,7 @@
     color: var(--header-text-secondary) !important;
     background-color: var(--map-branco) !important;
     transition: all 0.3s; margin-right: 8px; border-radius: 6px !important;
-    padding: 0 15px; /* Padding horizontal padrão do AntD */
+    padding: 0 15px;
 }
 .access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper:last-child { margin-right: 0; }
 .access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper:hover {
@@ -195,15 +218,16 @@
     border-color: var(--map-vermelho-escuro) !important;
 }
 
-
 /* Foco para inputs no modal */
 .modal-style-map .ant-input-affix-wrapper:hover,
-.modal-style-map .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+.modal-style-map .ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.modal-style-map .ant-picker:hover {
   border-color: var(--map-laranja) !important;
 }
 .modal-style-map .ant-input-affix-wrapper-focused,
 .modal-style-map .ant-input-affix-wrapper:focus-within,
-.modal-style-map .ant-select-focused:not(.ant-select-disabled) .ant-select-selector {
+.modal-style-map .ant-select-focused:not(.ant-select-disabled) .ant-select-selector,
+.modal-style-map .ant-picker-focused {
   border-color: var(--map-dourado) !important;
   box-shadow: 0 0 0 2px var(--map-laranja-focus) !important;
 }

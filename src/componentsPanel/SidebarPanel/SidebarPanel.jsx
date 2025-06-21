@@ -30,6 +30,9 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
       key: '/painel/produtos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/produtos">Produtos & Estoque</Link>,
     },
+        (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
+      key: '/painel/servicos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/servicos">Serviços</Link>,
+    },
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
         key: '/painel/clientes', icon: <TeamOutlined />, label: <Link to="/painel/clientes">Clientes de Negócio</Link>,
     },

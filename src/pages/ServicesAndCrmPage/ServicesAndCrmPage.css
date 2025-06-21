@@ -1,0 +1,175 @@
+/* src/pages/ServicesAndCrmPage/ServicesAndCrmPage.css */
+
+/* --- Layout Geral da Página (Tema Claro) --- */
+.services-crm-page-wrapper-light {
+  background-color: #f8f9fa; /* Fundo mais suave que o padrão do painel */
+  padding: 32px;
+  min-height: calc(100vh - 64px);
+}
+
+.services-crm-loading-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: calc(100vh - 64px); color: var(--map-cinza-texto); font-size: 16px;
+}
+.services-crm-loading-container p { margin-top: 20px; }
+
+.page-title-services-crm {
+  font-size: 28px !important; font-weight: 600 !important; color: var(--map-preto) !important;
+  margin-bottom: 8px !important;
+}
+.page-title-services-crm .anticon { color: var(--map-laranja); margin-right: 15px; }
+.page-subtitle-services-crm {
+  font-size: 16px !important; color: var(--map-cinza-texto) !important; margin-bottom: 30px !important;
+}
+
+/* --- Seletor de Abas (View Switcher) --- */
+.view-switcher.ant-segmented {
+  background-color: #e9ecef;
+  padding: 5px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+.view-switcher .ant-segmented-item {
+  border-radius: 8px !important;
+  font-weight: 500;
+  color: var(--map-cinza-texto);
+}
+.view-switcher .ant-segmented-item-selected {
+  background-color: var(--map-branco);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  color: var(--map-laranja) !important;
+}
+.view-switcher .ant-segmented-item-icon {
+  margin-right: 8px;
+}
+
+.view-container {
+  background-color: var(--map-branco);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.view-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0;
+}
+.view-header .ant-typography { margin: 0 !important; color: var(--map-preto); }
+
+/* --- Visão de Serviços --- */
+.btn-create-service.ant-btn-primary {
+  background: var(--map-laranja); border-color: var(--map-laranja);
+  font-weight: 500; border-radius: 8px;
+}
+.services-grid-container {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+}
+.service-manage-card {
+  border-radius: 12px !important; height: 100%; display: flex; flex-direction: column;
+}
+.service-manage-card .ant-card-body {
+  padding: 20px !important; display: flex; flex-direction: column; flex-grow: 1;
+}
+.service-status-tag { position: absolute; top: 15px; right: 15px; }
+.service-manage-title { color: var(--map-preto) !important; margin-bottom: 10px !important; }
+.service-meta-info { display: flex; gap: 20px; color: var(--map-cinza-texto); font-size: 14px; margin-bottom: 15px; }
+.service-meta-info .anticon { color: var(--map-laranja); margin-right: 6px; }
+.service-manage-description { color: var(--map-cinza-texto) !important; flex-grow: 1; margin-bottom: 20px !important; }
+.service-card-actions {
+  margin-top: auto; border-top: 1px solid #f0f0f0; padding-top: 15px;
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.pagination-container {
+  text-align: right;
+  margin-top: 24px;
+}
+
+/* --- Visão de CRM --- */
+.crm-filters {
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.filters-wrapper {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.crm-stats-row {
+  margin-bottom: 24px !important;
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+.crm-stats-row .ant-statistic-title { font-size: 14px !important; color: var(--map-cinza-texto); }
+.crm-stats-row .ant-statistic-content { font-size: 24px !important; color: var(--map-preto); }
+.crm-stats-row .ant-statistic-content .ant-statistic-content-prefix .anticon {
+  color: var(--map-dourado);
+}
+
+.crm-activity-list-full .ant-list-header {
+  font-weight: 600;
+  color: var(--map-preto);
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+.crm-activity-list-full .ant-list-item {
+  padding: 12px 8px !important;
+  transition: background-color 0.2s ease;
+}
+.crm-activity-list-full .ant-list-item:hover {
+  background-color: #fafafa;
+  border-radius: 6px;
+}
+.crm-activity-list-full .ant-list-item-meta-avatar .anticon {
+  color: var(--map-laranja);
+}
+.activity-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 13px;
+  color: var(--map-cinza-texto);
+}
+
+/* --- Modais --- */
+.service-form-modal .ant-modal-content, .share-modal .ant-modal-content { 
+    border-radius: 12px; 
+}
+.service-form-modal .ant-modal-header, .share-modal .ant-modal-header { 
+    border-radius: 12px 12px 0 0; 
+}
+.modal-form-actions { 
+    display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; 
+}
+.modal-form-actions .ant-btn-primary { 
+    background: var(--map-laranja); border-color: var(--map-laranja); 
+}
+
+/* Estilos para o Modal de Compartilhamento */
+.share-modal .ant-input-group-wrapper {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.share-modal .ant-input {
+    background-color: #f5f5f5;
+    color: #555;
+    font-family: monospace;
+    font-size: 14px;
+}
+.share-modal .ant-btn {
+    font-weight: 500;
+}
+.share-modal .ant-btn-primary:hover {
+    background-color: #128C7E !important;
+    border-color: #128C7E !important;
+}
+
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .services-crm-page-wrapper-light { padding: 20px; }
+  .view-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .filters-wrapper { width: 100%; flex-direction: column; }
+  .filters-wrapper .ant-select, .filters-wrapper .ant-picker { width: 100% !important; }
+}

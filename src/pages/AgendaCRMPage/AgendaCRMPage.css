@@ -1,0 +1,92 @@
+/* src/pages/AgendaCRMPage/AgendaCRMPage.css */
+
+.agenda-crm-page-wrapper {
+  padding: 32px;
+  background-color: #f4f7f6; /* Fundo um pouco mais quente */
+  min-height: calc(100vh - 64px);
+}
+
+.agenda-crm-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 64px);
+}
+
+.page-header-agenda-crm {
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 24px;
+}
+
+.page-title-agenda-crm {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: #1a202c !important;
+}
+.page-title-agenda-crm .anticon {
+  color: var(--map-laranja);
+  margin-right: 15px;
+}
+
+.page-subtitle-agenda-crm {
+  font-size: 16px !important;
+  color: #718096 !important;
+}
+
+/* Estilo dos Cards do Dashboard */
+.ant-card {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border: none !important;
+}
+.ant-card-head {
+    border-bottom: 1px solid #f0f0f0 !important;
+    font-weight: 600 !important;
+    color: #2d3748;
+}
+
+/* Card de Atalhos Rápidos */
+.quick-actions-card .ant-btn {
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.quick-actions-card .ant-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.quick-actions-card .ant-btn-primary {
+    background-color: var(--map-laranja) !important;
+    border-color: var(--map-laranja) !important;
+}
+
+/* Card de Disponibilidade */
+.availability-summary-card {
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+}
+.availability-summary-card .ant-card-head {
+    background-color: rgba(255,255,255,0.5);
+}
+.availability-summary-card .ant-typography strong {
+    color: #4a5568;
+}
+.availability-summary-card .anticon {
+    margin-right: 8px;
+    color: var(--map-laranja);
+}
+
+/* Card de Divulgação */
+.share-card .ant-input {
+    background-color: #f7fafc;
+    border-color: #e2e8f0;
+}
+
+/* Lista de Próximos Agendamentos */
+.ant-list-item-meta-title a {
+    color: #2d3748;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.ant-list-item-meta-title a:hover {
+    color: var(--map-laranja);
+}

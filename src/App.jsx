@@ -22,7 +22,10 @@ const MeuPerfilPage = lazy(() => import('./pages/MeuPerfilPage/MeuPerfilPage'));
 const CategoriasPage = lazy(() => import('./pages/CategoriasPage/CategoriasPage'));
 const ConfiguracoesPage = lazy(() => import('./pages/ConfiguracoesPage/ConfiguracoesPage'));
 const BusinessClientsPage = lazy(() => import('./pages/BusinessClientsPage/BusinessClientsPage'));
-const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage')); // <<< Adicionar novo import
+const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage'));
+const PublicBookingPage = lazy(() => import('./pages/PublicBookingPage/PublicBookingPage')); // <<< ADICIONAR IMPORT
+const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/ServicesAndCrmPage'))
+const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 
 
 // Componente de Layout Básico para Suspense
@@ -37,19 +40,17 @@ function App() {
     <Routes>
       {/* Rotas públicas ou com layout diferente */}
       <Route element={<AppLayoutSuspense />}>
-              <Route path="/planos" element={<PlanosPage />} /> 
-
+        <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} /> {/* <<< ADICIONAR NOVA ROTA PÚBLICA */}
       </Route>
-
-
 
       {/* ROTA PAI PARA O PAINEL, USANDO O NOVO PainelLayout */}
       <Route element={<PainelLayout />}>
         {/* Todas as rotas do painel agora são filhas e serão renderizadas dentro do <Outlet /> do PainelLayout */}
         <Route element={<AppLayoutSuspense />}>
-              <Route path="/admin/dashboard" element={<AdminPage />} /> 
+            <Route path="/admin/dashboard" element={<AdminPage />} /> 
             <Route path="/painel" element={<PainelUsuario />} />
             <Route path="/painel/chat" element={<ChatbotPage />} />
             <Route path="/painel/cartoes" element={<CartoesPage />} />
@@ -58,10 +59,12 @@ function App() {
             <Route path="/painel/hidratacao" element={<HidratacaoPage />} />
             <Route path="/painel/agendamentos" element={<AgendamentosPage />} />
             <Route path="/painel/produtos" element={<ProdutosEstoquePage />} />
+            <Route path="/painel/servicos" element={<ServicesAndCrmPage />} />
             <Route path="/painel/meu-perfil" element={<MeuPerfilPage />} />
             <Route path="/painel/categorias" element={<CategoriasPage />} />
             <Route path="/painel/configuracoes" element={<ConfiguracoesPage />} />
             <Route path="/painel/clientes" element={<BusinessClientsPage />} />
+            <Route path="/painel/agenda-crm" element={<AgendaCRMPage />} />
         </Route>
       </Route>
       

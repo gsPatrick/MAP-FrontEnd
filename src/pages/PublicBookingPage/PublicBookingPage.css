@@ -1,0 +1,466 @@
+/* src/pages/PublicBookingPage/PublicBookingPage.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-bg-dark: #0d1117;
+  --color-bg-panel: #161b22;
+  --color-border: #30363d;
+  --color-gold: #e3be62;
+  --color-gold-dark: #c5a450;
+  --color-text-primary: #c9d1d9;
+  --color-text-secondary: #8b949e;
+  --color-text-headings: #ffffff;
+  --font-family-main: 'Poppins', sans-serif;
+  --color-bg-input-dark: #1c222b;
+}
+
+/* --- Layout Principal e Fundo --- */
+.public-booking-wrapper {
+  min-height: 100vh;
+  background-color: var(--color-bg-dark);
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(227, 190, 98, 0.08), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(227, 190, 98, 0.06), transparent 40%);
+  font-family: var(--font-family-main);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.booking-container {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 80vh;
+  max-height: 85vh;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  overflow: hidden;
+}
+
+.booking-main-content {
+  flex: 3;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* <<< MUDANÇA PRINCIPAL AQUI: Adicionando scroll à area de conteúdo >>> */
+.step-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Faz com que este wrapper ocupe o espaço vertical disponível */
+  overflow-y: auto; /* Adiciona scroll vertical APENAS quando necessário */
+  padding-right: 15px; /* Espaço para a barra de rolagem */
+  margin-right: -15px; /* Compensa o padding para manter alinhamento */
+}
+
+/* <<< MUDANÇA: Estilização da Barra de Rolagem para o wrapper >>> */
+.step-content-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.step-content-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+.step-content-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 10px;
+  border: 2px solid var(--color-bg-panel);
+}
+.step-content-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gold-dark);
+}
+
+
+.booking-header {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.provider-title {
+  font-size: 26px !important;
+  font-weight: 600 !important;
+  color: var(--color-text-headings) !important;
+  margin: 0 !important;
+}
+.provider-title .anticon {
+  color: var(--color-gold);
+  margin-right: 12px;
+}
+
+/* --- Indicador de Etapas --- */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-node {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  color: var(--color-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600;
+  transition: all 0.4s ease;
+}
+.step-node.active {
+  background-color: var(--color-gold);
+  border-color: var(--color-gold);
+  color: var(--color-bg-dark);
+  box-shadow: 0 0 15px rgba(227, 190, 98, 0.4);
+}
+.step-connector {
+  width: 40px;
+  height: 2px;
+  background-color: var(--color-border);
+  transition: background-color 0.4s ease 0.2s;
+}
+.step-connector.active {
+  background-color: var(--color-gold);
+}
+
+/* --- Títulos e Subtítulos das Etapas --- */
+.step-title {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: var(--color-text-headings) !important;
+  margin-bottom: 8px !important;
+  flex-shrink: 0;
+}
+.step-subtitle {
+  font-size: 16px !important;
+  color: var(--color-text-secondary) !important;
+  margin-bottom: 35px !important;
+  max-width: 500px;
+  flex-shrink: 0;
+}
+
+/* --- Etapa 1: Cards de Serviço (com Scroll) --- */
+/* <<< MUDANÇA: A lógica de scroll foi movida para o wrapper pai (.step-content-wrapper) >>> */
+/* O container de serviços não precisa mais de sua própria lógica de scroll */
+.services-container-scrollable {
+  /* Este seletor pode ser removido ou mantido, mas a lógica de scroll agora está no pai */
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+.service-card {
+  background: var(--color-bg-input-dark);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.service-card:hover {
+  border-color: var(--color-gold);
+  background: #222933;
+}
+.service-card.selected {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 20px rgba(227, 190, 98, 0.2);
+  background: linear-gradient(145deg, var(--color-bg-input-dark), #2a211a);
+}
+.service-card-check {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 20px; color: var(--color-gold);
+  opacity: 0; transform: scale(0.5);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.service-card.selected .service-card-check {
+  opacity: 1; transform: scale(1);
+}
+.service-card-icon {
+  font-size: 32px; color: var(--color-gold); margin-bottom: 15px;
+}
+.service-card-title {
+  font-size: 16px !important; font-weight: 600 !important;
+  color: var(--color-text-primary) !important; margin-bottom: 5px !important;
+}
+.service-card-duration {
+  font-size: 13px; color: var(--color-text-secondary); margin-bottom: 15px;
+}
+.service-card-price {
+  font-size: 18px; font-weight: 700; color: var(--color-text-headings);
+}
+
+/* --- Etapa 2: NOVA SELEÇÃO DE DATA E HORA --- */
+.date-time-selector {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  background-color: var(--color-bg-input-dark);
+}
+.month-navigator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.month-navigator .ant-btn {
+  color: var(--color-text-primary);
+}
+.month-navigator .ant-btn:hover:not(:disabled) {
+  color: var(--color-gold);
+}
+.month-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-headings);
+  text-transform: capitalize;
+}
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+.day-card {
+  padding: 12px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-panel);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.day-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-gold-dark);
+}
+.day-card.selected {
+  background-color: var(--color-gold);
+  border-color: var(--color-gold);
+  color: var(--color-bg-dark);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(227, 190, 98, 0.2);
+}
+.day-card-weekday {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  opacity: 0.7;
+}
+.day-card.selected .day-card-weekday {
+  opacity: 1;
+}
+.day-card-day {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.slots-container { margin-top: 30px; }
+.slots-title { font-size: 18px; color: var(--color-text-headings); margin-bottom: 20px; }
+.slots-loading { text-align: center; padding: 20px; color: var(--color-gold); font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.slots-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px;
+}
+.slot-button {
+  background: var(--color-bg-input-dark); border: 1px solid var(--color-border);
+  color: var(--color-text-primary); padding: 12px; border-radius: 8px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+}
+.slot-button:hover {
+  border-color: var(--color-gold-dark); background-color: #222933;
+}
+.slot-button.active {
+  background-color: var(--color-gold); color: var(--color-bg-dark);
+  border-color: var(--color-gold); font-weight: 700;
+  box-shadow: 0 0 15px rgba(227, 190, 98, 0.3);
+}
+
+/* --- Etapa 3: Formulário --- */
+.details-form .ant-form-item-label > label {
+  color: var(--color-text-primary); font-weight: 500;
+}
+.details-form .ant-input-affix-wrapper {
+  background: var(--color-bg-input-dark) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 8px;
+  padding: 4px 12px;
+  transition: all 0.3s;
+}
+.details-form .ant-input-affix-wrapper:focus-within {
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 0 0 2px rgba(227, 190, 98, 0.2) !important;
+}
+.details-form .ant-input-affix-wrapper .ant-input {
+  background-color: transparent !important;
+  color: var(--color-text-primary) !important;
+  font-size: 16px;
+  height: 30px;
+  line-height: 30px;
+}
+.details-form .ant-input::placeholder {
+  color: var(--color-text-secondary);
+}
+.details-form .ant-input-prefix .anticon {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+.details-form .ant-input:-webkit-autofill,
+.details-form .ant-input:-webkit-autofill:hover,
+.details-form .ant-input:-webkit-autofill:focus,
+.details-form .ant-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  box-shadow: 0 0 0px 1000px var(--color-bg-input-dark) inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-bg-input-dark) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* --- Etapa 4: Resultado --- */
+.booking-result .ant-result-title { color: var(--color-text-headings) !important; }
+.booking-result .ant-result-subtitle { color: var(--color-text-primary) !important; max-width: 500px; margin: 0 auto; }
+.booking-result.success .success-icon-wrapper {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.2) 0%, transparent 70%);
+  display: inline-flex; align-items: center; justify-content: center;
+  animation: successPulse 2s infinite;
+}
+.booking-result.success .ant-result-icon .anticon {
+  font-size: 48px; color: #22c55e;
+}
+@keyframes successPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+.booking-result.error .error-icon-wrapper {
+  animation: errorPulse 2s infinite;
+}
+.booking-result.error .ant-result-icon .anticon {
+  font-size: 48px; color: #ef4444;
+}
+@keyframes errorPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+.result-button.ant-btn-primary {
+  background: var(--color-gold); border-color: var(--color-gold);
+  color: var(--color-bg-dark); font-weight: 600;
+}
+
+/* --- Navegação e Painel de Resumo --- */
+.step-navigation {
+  margin-top: auto;
+  padding-top: 30px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.nav-button.ant-btn {
+  border-radius: 8px; font-weight: 600;
+  min-width: 140px;
+}
+.nav-button.prev {
+  background: transparent; border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+.nav-button.prev:hover {
+  border-color: var(--color-gold-dark); color: var(--color-gold-dark);
+}
+.nav-button.next, .nav-button.confirm {
+  background: var(--color-gold); border-color: var(--color-gold);
+  color: var(--color-bg-dark);
+}
+.nav-button.next:hover, .nav-button.confirm:hover {
+  background: var(--color-gold-dark); border-color: var(--color-gold-dark);
+}
+.nav-button:disabled {
+  background: #222 !important; border-color: var(--color-border) !important;
+  color: #555 !important;
+}
+
+.booking-summary-panel {
+  flex: 2;
+  padding: 40px;
+  background: #12161d;
+}
+.summary-title {
+  font-size: 20px; font-weight: 600;
+  color: var(--color-text-headings); margin-bottom: 5px;
+}
+.summary-provider-name {
+  font-size: 14px; color: var(--color-text-secondary);
+}
+.summary-divider {
+  height: 1px; background-color: var(--color-border);
+  margin: 20px 0;
+}
+.summary-section-title {
+  font-size: 16px; font-weight: 500;
+  color: var(--color-text-primary); margin-bottom: 15px;
+}
+.summary-placeholder {
+  font-size: 14px; color: var(--color-text-secondary);
+  font-style: italic;
+}
+.summary-services-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.summary-services-list li {
+  display: flex; justify-content: space-between;
+  font-size: 14px; color: var(--color-text-primary);
+}
+.summary-total {
+  display: flex; justify-content: space-between;
+  font-size: 16px; color: var(--color-text-primary);
+  margin-bottom: 10px;
+}
+.summary-total .price-highlight {
+  font-size: 20px; font-weight: 700; color: var(--color-gold);
+}
+.summary-datetime-info {
+  font-size: 14px; color: var(--color-text-primary); margin-bottom: 8px !important;
+}
+.summary-datetime-info .anticon {
+  color: var(--color-gold); margin-right: 8px;
+}
+
+/* --- Responsividade --- */
+@media (max-width: 991px) {
+  .booking-container {
+    flex-direction: column;
+    min-height: 90vh;
+    max-height: none;
+  }
+  .booking-main-content {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+@media (max-width: 767px) {
+  .days-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 575px) {
+  .public-booking-wrapper { padding: 20px 10px; }
+  .booking-main-content, .booking-summary-panel { padding: 20px; }
+  .booking-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .step-title { font-size: 26px !important; }
+  .step-subtitle { font-size: 15px !important; }
+  .days-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

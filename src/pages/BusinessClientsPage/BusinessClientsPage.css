@@ -1,168 +1,218 @@
 /* src/pages/BusinessClientsPage/BusinessClientsPage.css */
-/* Reutiliza grande parte dos estilos da AgendamentosPage.css, garantindo consistência */
 
-.business-clients-page-content {
-    padding: 24px 32px; /* Aumentado padding horizontal para 32px */
+.business-clients-page-content.crm-page-wrapper {
+    padding: 24px 32px;
     background-color: #f0f2f5;
     min-height: calc(100vh - 64px);
 }
 
 .page-header-clients {
     margin-bottom: 24px;
-    padding-bottom: 20px; /* Aumentado padding inferior */
-    border-bottom: 1px solid var(--map-cinza-claro, #e8e8e8);
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e8e8e8;
 }
 
 .page-title-clients {
-    color: var(--header-text-primary, #333);
-    margin-bottom: 4px !important;
     font-weight: 600 !important;
-    font-size: 24px;
+    font-size: 24px !important;
 }
 
 .page-subtitle-clients {
-    color: var(--header-text-secondary, #777);
+    color: #777;
     font-size: 14px;
 }
 
 .btn-create-client.ant-btn-primary {
     background-color: var(--map-laranja, #FA8C16) !important;
     border-color: var(--map-laranja, #FA8C16) !important;
-    color: var(--map-branco, #ffffff) !important;
-    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
-    transition: all 0.3s ease;
 }
-.btn-create-client.ant-btn-primary:hover,
-.btn-create-client.ant-btn-primary:focus {
+.btn-create-client.ant-btn-primary:hover {
     background-color: var(--map-dourado, #FAAD14) !important;
     border-color: var(--map-dourado, #FAAD14) !important;
-    color: var(--header-text-primary, #303133) !important; /* Cor preta para texto no hover */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(250, 173, 20, 0.4);
 }
 
-.clients-card {
+/* --- Layout Mestre-Detalhe --- */
+.master-panel-col, .detail-panel-col {
+    transition: all 0.3s ease;
+}
+
+/* Coluna Mestre (Lista de Clientes) */
+.clients-master-card {
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    background-color: var(--map-branco, #ffffff);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background-color: #ffffff;
+    height: calc(100vh - 220px);
+    overflow-y: auto;
 }
 
-.business-clients-list .ant-list-item {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    background-color: var(--map-branco, #ffffff);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+.business-clients-list .client-list-item-selectable {
+    padding: 12px 16px;
+    border-left: 4px solid transparent;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
 }
-.business-clients-list .ant-list-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+.business-clients-list .client-list-item-selectable:hover {
+    background-color: #fafafa;
+    border-left-color: var(--map-dourado, #FAAD14);
 }
-.business-clients-list .ant-list-item:hover {
+.business-clients-list .client-list-item-selectable.active {
     background-color: var(--map-laranja-muito-claro, #FFF7E6);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
-    transform: translateY(-2px);
+    border-left-color: var(--map-laranja, #FA8C16);
+    box-shadow: inset 2px 0 5px -2px rgba(0,0,0,0.1);
+}
+.business-clients-list .client-list-item-selectable .client-name {
+    font-weight: 500;
+}
+.business-clients-list .client-list-item-selectable.active .client-name {
+    color: var(--map-laranja-escuro, #D48806);
+    font-weight: 600;
 }
 
-.business-clients-list .ant-list-item-meta-avatar .anticon {
-    font-size: 20px;
+/* Coluna Detalhe (Painel CRM) */
+.detail-panel-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 220px);
+    background-color: #fafbfd;
+    border: 1px dashed #d9d9d9;
+    border-radius: 8px;
+}
+.client-detail-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.client-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.client-detail-header .ant-avatar {
+    border: 2px solid var(--map-cinza-claro, #e8e8e8);
 }
 
-.client-name {
+/* <<< ESTILOS REFEITOS PARA O CARD DE PRÓXIMO AGENDAMENTO >>> */
+.next-appointment-card {
+    background-color: #fffbe6;
+    border-color: #ffe58f;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+.next-appointment-card .ant-card-body {
+    padding: 20px !important;
+}
+.next-appointment-content {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+.appointment-info-section {
+    flex: 1;
+}
+.appointment-actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    border-left: 1px solid #ffe58f;
+    padding-left: 24px;
+    min-width: 200px; /* Largura mínima para os botões */
+}
+.appointment-actions-section .ant-btn {
+    width: 100%;
+}
+
+/* <<< MUDANÇA: Botão principal do WhatsApp >>> */
+.whatsapp-main-button.ant-btn-primary {
+    background-color: #25D366 !important;
+    border-color: #25D366 !important;
+}
+.whatsapp-main-button.ant-btn-primary:hover {
+    background-color: #128C7E !important;
+    border-color: #128C7E !important;
+}
+
+.client-stats-row {
+    margin-bottom: 24px;
+    text-align: center;
+}
+.client-stats-row .ant-statistic-title {
+    font-size: 13px !important;
+}
+
+.history-timeline.ant-timeline {
+    padding-left: 8px;
+}
+.history-timeline .ant-timeline-item-content {
+    top: -8px; /* Alinhamento visual */
+}
+
+/* <<< MUDANÇA: Estilo para o Card de Serviços no Histórico >>> */
+.history-service-card {
+    border-color: #f0f0f0;
+    background-color: #fafafa;
+}
+.history-service-card .ant-card-body {
+    padding: 0 !important;
+}
+.service-history-list .ant-list-item {
+    padding: 6px 12px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+.service-history-list .ant-list-item:last-child {
+    border-bottom: none !important;
+}
+.service-history-list .ant-list-footer {
+    padding: 8px 12px;
+    text-align: right;
+    background-color: #f5f5f5;
+    border-top: 1px solid #e8e8e8;
+}
+
+.crm-loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+.crm-loading-container p {
+    margin-top: 16px;
     font-size: 16px;
-    transition: color 0.2s ease;
-    color: var(--header-text-primary, #303133);
-}
-.business-clients-list .ant-list-item:hover .client-name {
-    color: var(--map-dourado-escuro, #D48806);
+    color: #888;
 }
 
-.client-details {
-    margin-top: 4px;
+/* Responsividade */
+@media (max-width: 991px) {
+    .next-appointment-content {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+    .appointment-actions-section {
+        border-left: none;
+        border-top: 1px solid #ffe58f;
+        padding-left: 0;
+        padding-top: 16px;
+        min-width: unset;
+    }
 }
-
-.client-notes {
-     font-size: 13px;
-    color: var(--header-text-secondary, #888);
-    margin-top: 4px !important;
-}
-.client-notes .anticon {
-    margin-right: 4px;
-    color: var(--map-cinza-texto, #aaa);
-}
-
-.business-clients-list .ant-list-item-action > li {
-    padding: 0 6px !important;
-}
-.business-clients-list .action-btn-editar-client .anticon,
-.business-clients-list .action-btn-excluir-client .anticon {
-    font-size: 17px;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.business-clients-list .action-btn-editar-client {
-    color: var(--header-text-secondary, #606266);
-}
-.business-clients-list .action-btn-editar-client:hover .anticon,
-.business-clients-list .action-btn-editar-client:focus .anticon {
-    color: var(--map-dourado, #FAAD14) !important;
-    transform: scale(1.1);
-}
-
-.business-clients-list .action-btn-excluir-client {
-    color: var(--ant-error-color, #CF1322);
-}
-.business-clients-list .action-btn-excluir-client:hover .anticon,
-.business-clients-list .action-btn-excluir-client:focus .anticon {
-    color: var(--map-vermelho-escuro, #A8071A) !important;
-    transform: scale(1.1);
-}
-
 @media (max-width: 767px) {
-    .business-clients-page-content {
-      padding: 16px;
+    .business-clients-page-content.crm-page-wrapper {
+        padding: 16px;
     }
     .page-header-clients {
-      flex-direction: column;
-      align-items: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
     }
-    .page-header-clients .ant-col:last-child {
-      margin-top: 16px;
-      width: 100%;
+    .master-panel-col {
+        margin-bottom: 24px;
     }
-    .btn-create-client.ant-btn-primary {
-      width: 100%;
-    }
-    .business-clients-list .ant-list-item {
-      padding: 12px 15px;
-    }
-    .business-clients-list .ant-list-item-meta-title {
-      font-size: 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .page-title-clients {
-        font-size: 20px;
-    }
-    .business-clients-page-content {
-        padding: 12px;
-    }
-}
-
-/* Animação para itens da lista */
-.business-clients-list .ant-list-item {
-    animation: listItemFadeIn 0.4s ease-out forwards;
-    opacity: 0;
-    transform: translateY(10px);
-}
-
-/* Reutilizando a keyframes da AgendamentosPage.css se estiver global ou definir aqui */
-@keyframes listItemFadeIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .clients-master-card, .detail-panel-placeholder {
+        height: auto;
+        max-height: 40vh;
     }
 }
