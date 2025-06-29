@@ -1,0 +1,132 @@
+// src/pages/PrivacyPolicyPage/PrivacyPolicyPage.jsx
+import React from 'react';
+import { Layout, Typography } from 'antd';
+import './PrivacyPolicyPage.css'; // Importe o CSS
+
+const { Content } = Layout;
+const { Title, Paragraph } = Typography;
+
+const PrivacyPolicyPage = () => {
+  return (
+    <Layout className="privacy-policy-layout">
+      {/* Você pode adicionar um Header genérico aqui se tiver um */}
+      {/* <Header /> */}
+
+      <Content>
+        <div className="privacy-policy-page-content">
+          <Title level={1}>Política de Privacidade</Title>
+
+          <Paragraph>
+            Última atualização: 29 de Junho de 2024
+          </Paragraph>
+
+          <Paragraph>
+            Bem-vindo(a) ao MAP no Controle. Sua privacidade é importante para nós. Esta Política de Privacidade explica como coletamos, usamos, divulgamos e protegemos suas informações quando você utiliza nosso aplicativo web e a integração via WhatsApp.
+          </Paragraph>
+
+          <Title level={2}>1. Informações que Coletamos</Title>
+          <Paragraph>Coletamos informações para fornecer e melhorar nosso serviço para você. Os tipos de informações que podemos coletar incluem:</Paragraph>
+
+          <Title level={3}>Informações Fornecidas Diretamente Por Você:</Title>
+          <ul>
+            <li>**Informações de Cadastro:** Nome, endereço de e-mail, número de telefone (essencial para a integração WhatsApp) e senha (armazenada de forma segura).</li>
+            <li>**Dados Financeiros:** Detalhes de transações (receitas, despesas), categorias financeiras, informações de contas bancárias/cartões (podem ser armazenadas de forma agregada ou para registro, dependendo da funcionalidade), regras de recorrência.</li>
+            <li>**Dados de Negócio:** (Para contas PJ/MEI) Informações sobre seus clientes de negócio (nome, contato, notas), detalhes de produtos/servi estoque, informações sobre serviços oferecidos.</li>
+            <li>**Dados de Agendamento:** Título, data, hora, duração, localização, status, descrições, observações, e clientes de negócio associados a agendamentos.</li>
+            <li>**Preferências:** Configurações de notificação (como lembretes de hidratação e mensagens motivacionais), preferências de sincronização do Google Calendar (como IDs de cores).</li>
+             <li>**Dados de Afiliado:** Código de afiliado, clientes indicados e saldo de comissão.</li>
+          </ul>
+
+           <Title level={3}>Informações Coletadas Automaticamente:</Title>
+          <ul>
+            <li>**Informações de Uso:** Dados sobre como você interage com o aplicativo web (páginas visitadas, recursos utilizados) e a frequência e horário das suas interações via WhatsApp.</li>
+            <li>**Informações Técnicas:** Endereço IP, tipo de dispositivo, sistema operacional, tipo de navegador.</li>
+          </ul>
+
+          <Title level={3}>Informações de Integrações de Terceiros:</Title>
+          <ul>
+            <li>**Google Calendar:** Ao conectar sua conta Google, solicitamos permissão para **ler** (readonly) e **gerenciar** (events - criar, editar, excluir) seus eventos de calendário. Acessamos detalhes como título, data/hora, duração, descrição, localização e participantes dos eventos relevantes para a sincronização. Armazenamos tokens de acesso e refresh de forma criptografada e dados do canal de webhook para manter a sincronização.</li>
+             <li>**WhatsApp Business API:** Coletamos e processamos mensagens enviadas e recebidas através da API para fornecer as funcionalidades de interação e registro via chat.</li>
+          </ul>
+
+
+          <Title level={2}>2. Como Usamos Suas Informações</Title>
+          <Paragraph>Utilizamos as informações coletadas para:</Paragraph>
+          <ul>
+            <li>Fornecer, operar e manter nosso serviço.</li>
+            <li>Processar suas transações financeiras e gerenciar suas contas.</li>
+            <li>Gerenciar seus agendamentos, produtos/estoque e clientes de negócio.</li>
+            <li>Realizar a sincronização bidirecional com seu Google Calendar.</li>
+            <li>Enviar e receber mensagens via WhatsApp para operar as funcionalidades de registro e interação.</li>
+            <li>Comunicar com você, incluindo envio de notificações, lembretes (água, motivacionais, agendamentos) e atualizações sobre o serviço.</li>
+            <li>Melhorar, personalizar e expandir nosso serviço.</li>
+            <li>Analisar como você usa nosso serviço para fins de desenvolvimento e aprimoramento.</li>
+            <li>Detectar e prevenir fraudes e atividades maliciosas.</li>
+             <li>Gerenciar o programa de afiliados e calcular comissões.</li>
+          </ul>
+
+          <Title level={2}>3. Compartilhamento de Suas Informações</Title>
+          <Paragraph>Não vendemos suas informações pessoais para terceiros. Podemos compartilhar suas informações nas seguintes situações:</Paragraph>
+          <ul>
+            <li>**Com Provedores de Serviço:** Podemos compartilhar informações com terceiros que prestam serviços em nosso nome (ex: hospedagem, processamento de pagamentos, serviços de e-mail, serviços de API como Google e WhatsApp). Esses provedores têm acesso às informações necessárias apenas para executar suas funções e são obrigados a manter a confidencialidade.</li>
+            <li>**Integrações de Terceiros:** Ao usar a sincronização do Google Calendar, informações de agendamento são enviadas para o Google. Ao usar a integração WhatsApp, dados relevantes são enviados para a API do WhatsApp.</li>
+            <li>**Conformidade Legal:** Podemos divulgar suas informações se exigido por lei, processo legal ou solicitação governamental aplicável.</li>
+            <li>**Transferência de Negócios:** Em caso de fusão, aquisição ou venda de ativos, suas informações podem ser transferidas como parte dessa transação.</li>
+             <li>**Acesso Compartilhado:** Se você conceder acesso compartilhado a outro usuário, as informações das contas financeiras e/ou perfil pessoal que você escolher compartilhar serão acessíveis a esse usuário, conforme configurado por você.</li>
+          </ul>
+
+           <Title level={2}>4. Dados do Google Calendar</Title>
+           <Paragraph>
+               Conforme mencionado, a integração com o Google Calendar é uma funcionalidade central. Ao conectar sua conta Google, você nos autoriza a acessar seus eventos de calendário usando os escopos `https://www.googleapis.com/auth/calendar.readonly` e `https://www.googleapis.com/auth/calendar.events`.
+           </Paragraph>
+            <Paragraph>
+               Utilizamos esses dados estritamente para **sincronizar** seus agendamentos entre o MAP no Controle e seu Google Calendar. Isso inclui criar eventos no Google para agendamentos feitos no MAP, atualizar eventos no Google quando agendamentos são alterados no MAP, e ler eventos do Google para refletir mudanças (criações, edições, cancelamentos) no seu calendário dentro do MAP. **Não utilizamos os dados do seu Google Calendar para qualquer outro propósito que não seja diretamente ligado à funcionalidade de agendamento e sincronização do nosso serviço.**
+           </Paragraph>
+
+            <Title level={2}>5. Dados do WhatsApp</Title>
+             <Paragraph>
+                A integração com o WhatsApp é fundamental para a interação por chat. Processamos o número de telefone associado à sua conta e o conteúdo das mensagens que você envia e recebe através da nossa plataforma para:
+             </Paragraph>
+             <ul>
+                <li>Identificar e autenticar seu acesso via WhatsApp.</li>
+                <li>Registrar transações financeiras e outras informações enviadas por chat.</li>
+                <li>Responder às suas solicitações e comandos via chat.</li>
+                <li>Enviar notificações e lembretes configurados no sistema.</li>
+             </ul>
+             <Paragraph>
+                O conteúdo das mensagens é processado apenas para executar as funções do serviço solicitadas por você e não é usado para monitoramento não solicitado ou compartilhado além do necessário para operar a funcionalidade do serviço através da API oficial do WhatsApp Business.
+             </Paragraph>
+
+
+          <Title level={2}>6. Segurança dos Dados</Title>
+          <Paragraph>Empregamos medidas de segurança razoáveis para proteger suas informações contra acesso não autorizado, alteração, divulgação ou destruição. No entanto, lembre-se que nenhum método de transmissão pela Internet ou método de armazenamento eletrônico é 100% seguro.</Paragraph>
+           <Paragraph>Suas senhas são armazenadas utilizando técnicas de hashing seguras, o que significa que nem mesmo nós temos acesso à sua senha original.</Paragraph>
+
+
+          <Title level={2}>7. Retenção de Dados</Title>
+          <Paragraph>Retemos suas informações pessoais apenas pelo tempo necessário para os propósitos estabelecidos nesta Política de Privacidade. Podemos reter e usar suas informações na medida necessária para cumprir nossas obrigações legais, resolver disputas e aplicar nossos acordos legais.</Paragraph>
+
+          <Title level={2}>8. Seus Direitos de Privacidade</Title>
+          <Paragraph>Dependendo da sua localização, você pode ter direitos sobre suas informações pessoais, como o direito de acessar, corrigir ou excluir seus dados. Para exercer esses direitos, entre em contato conosco utilizando as informações fornecidas na seção "Entre em Contato" abaixo.</Paragraph>
+          <Paragraph>Você também pode revogar a permissão para acessar seu Google Calendar a qualquer momento através das configurações da sua conta Google ou desconectando a integração dentro do nosso aplicativo (se essa funcionalidade estiver disponível na interface do usuário).</Paragraph>
+
+
+          <Title level={2}>9. Alterações Nesta Política de Privacidade</Title>
+          <Paragraph>Podemos atualizar nossa Política de Privacidade periodicamente. Notificaremos você sobre quaisquer alterações publicando a nova Política de Privacidade nesta página. Aconselhamos que você revise esta Política de Privacidade periodicamente para quaisquer alterações. Alterações nesta Política de Privacidade são eficazes quando são publicadas nesta página.</Paragraph>
+
+          <Title level={2}>10. Entre em Contato</Title>
+          <Paragraph>Se você tiver alguma dúvida sobre esta Política de Privacidade, entre em contato conosco:</Paragraph>
+          <Paragraph>Por e-mail: [Seu E-mail de Contato, Ex: suporte@seudominio.com.br]</Paragraph>
+          {/* Opcional: Link para um formulário de contato ou número de WhatsApp, se apropriado para questões de privacidade */}
+           <Paragraph>Via WhatsApp: [Seu número de WhatsApp para suporte, Ex: +55 (XX) XXXXX-XXXX, ou link para WA]</Paragraph>
+           <Paragraph>Pelo site: [Link para a página de contato do seu site, se houver]</Paragraph>
+        </div>
+      </Content>
+
+      {/* Você pode adicionar um Footer genérico aqui se tiver um */}
+      {/* <Footer /> */}
+    </Layout>
+  );
+};
+
+export default PrivacyPolicyPage;

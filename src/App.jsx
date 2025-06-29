@@ -26,7 +26,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage'));
 const PublicBookingPage = lazy(() => import('./pages/PublicBookingPage/PublicBookingPage')); // <<< ADICIONAR IMPORT
 const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/ServicesAndCrmPage'))
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
-
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage')); // <<< ADICIONAR IMPORT
 
 // Componente de Layout Básico para Suspense
 const AppLayoutSuspense = () => (
@@ -44,13 +44,15 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} /> {/* <<< ADICIONAR NOVA ROTA PÚBLICA */}
+              <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
+
       </Route>
+            <Route path="/admin/dashboard" element={<AdminPage />} /> 
 
       {/* ROTA PAI PARA O PAINEL, USANDO O NOVO PainelLayout */}
       <Route element={<PainelLayout />}>
         {/* Todas as rotas do painel agora são filhas e serão renderizadas dentro do <Outlet /> do PainelLayout */}
         <Route element={<AppLayoutSuspense />}>
-            <Route path="/admin/dashboard" element={<AdminPage />} /> 
             <Route path="/painel" element={<PainelUsuario />} />
             <Route path="/painel/chat" element={<ChatbotPage />} />
             <Route path="/painel/cartoes" element={<CartoesPage />} />

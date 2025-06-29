@@ -4,13 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Layout, Card, Avatar, Typography, Button, Divider, Modal, Form, Input, Select,
   Statistic, Tag, Tooltip, List, Space, message, Row, Col,
-  Result, Alert, InputNumber, Spin
-} from 'antd';
+  Result, Alert, Spin
+} from 'antd'; // Removido InputNumber, Adicionado Alert
 import {
   UserOutlined, ShopOutlined, IdcardOutlined, CopyOutlined, GiftOutlined, CrownOutlined,
   PlusCircleOutlined, SolutionOutlined, WalletOutlined, GlobalOutlined,
   DollarCircleOutlined, TeamOutlined, LoadingOutlined,
-  KeyOutlined
+  KeyOutlined, PhoneOutlined // Adicionado PhoneOutlined para input (se necessário), IdcardOutlined para CPF
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
@@ -50,13 +50,17 @@ const MeuPerfilPage = () => {
 
   // Estados para os modais
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false);
-  const [isPixKeyModalVisible, setIsPixKeyModalVisible] = useState(false);
+  // MODIFICADO: Apenas um modal para o processo de saque via WhatsApp
+  const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false); 
+  // REMOVIDO: isPixKeyModalVisible não será mais usado
+  // const [isPixKeyModalVisible, setIsPixKeyModalVisible] = useState(false);
   
   // Estados de formulário e carregamento
   const [profileForm] = Form.useForm();
-  const [pixKeyForm] = Form.useForm();
-  const [withdrawForm] = Form.useForm();
+  // REMOVIDO: pixKeyForm não será mais usado
+  // const [pixKeyForm] = Form.useForm(); 
+  // MODIFICADO: Apenas um formulário de saque
+  const [withdrawForm] = Form.useForm(); 
   const [creatingProfile, setCreatingProfile] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -119,60 +123,88 @@ const MeuPerfilPage = () => {
   };
 
   const copyReferralCode = () => {
-    // <<<< CORREÇÃO AQUI: Usando 'affiliateCode' em vez de 'referralCode' >>>>
     if (!affiliateData?.summary?.affiliateCode) return;
     navigator.clipboard.writeText(affiliateData.summary.affiliateCode)
       .then(() => message.success("Código copiado!"))
       .catch(() => message.error('Falha ao copiar.'));
   };
 
-  // Funções para o modal de saque
+  // MODIFICADO: Função para abrir o modal de saque (agora unificado para WhatsApp)
   const handleWithdrawClick = () => {
-    if (!affiliateData?.summary?.asaasPayoutPixKey) {
-      pixKeyForm.resetFields();
-      setIsPixKeyModalVisible(true);
-    } else {
-      withdrawForm.resetFields();
-      setIsWithdrawModalVisible(true);
-    }
+    // Pré-preenche o formulário do modal de saque com dados existentes
+    withdrawForm.setFieldsValue({
+        cpf: mainUserData?.cpf, // Supondo que o CPF venha em mainUserData
+        pixKey: affiliateData?.summary?.asaasPayoutPixKey, // Supondo que a chave PIX venha aqui
+    });
+    setIsWithdrawModalVisible(true);
   };
 
-  const handleUpdatePixKey = async (values) => {
-    setSubmitting(true);
-    try {
-      await apiClient.put('/affiliate/me/payout-info', { asaasPayoutPixKey: values.pixKey });
-      message.success("Chave PIX atualizada com sucesso!");
-      setAffiliateData(prev => ({ ...prev, summary: { ...prev.summary, asaasPayoutPixKey: values.pixKey } }));
-      setIsPixKeyModalVisible(false);
-      setIsWithdrawModalVisible(true);
-    } catch (error) {
-      message.error(error.response?.data?.message || "Falha ao atualizar a chave PIX.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  // REMOVIDO: handleUpdatePixKey não será mais usado
+  // const handleUpdatePixKey = async (values) => {
+  //   setSubmitting(true);
+  //   try {
+  //     await apiClient.put('/affiliate/me/payout-info', { asaasPayoutPixKey: values.pixKey });
+  //     message.success("Chave PIX atualizada com sucesso!");
+  //     setAffiliateData(prev => ({ ...prev, summary: { ...prev.summary, asaasPayoutPixKey: values.pixKey } }));
+  //     setIsPixKeyModalVisible(false);
+  //     setIsWithdrawModalVisible(true);
+  //   } catch (error) {
+  //     message.error(error.response?.data?.message || "Falha ao atualizar a chave PIX.");
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
 
+  // MODIFICADO: Função para solicitar saque via WhatsApp
   const handleRequestWithdrawal = async (values) => {
     setSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log("Solicitando saque de:", values.amount);
-      
-      message.success("Solicitação de saque enviada! O valor será processado em breve.");
-      setIsWithdrawModalVisible(false);
-      
-      setAffiliateData(prev => ({
-        ...prev,
-        summary: {
-          ...prev.summary,
-          balance: (parseFloat(prev.summary.balance) - values.amount).toFixed(2)
-        }
-      }));
+        const { cpf, pixKey } = values;
+        const targetNumber = "5521998597002"; // Número da dona do sistema
+        
+        // Dados do usuário logado para a mensagem
+        const userName = mainUserData?.name || 'N/A';
+        const userEmail = mainUserData?.email || 'N/A';
+        const userPhone = mainUserData?.phone || 'N/A';
+        const currentBalance = referralBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // Mensagem formatada para o WhatsApp
+        const whatsappMessage = `
+Olá, gostaria de solicitar um saque de comissões.
+
+*Dados do Afiliado:*
+- Nome: ${userName}
+- E-mail: ${userEmail}
+- Telefone: ${userPhone}
+- CPF: ${cpf}
+- Chave PIX: ${pixKey}
+- Saldo Total Disponível: ${currentBalance}
+
+Por favor, prossiga com o pagamento para a chave PIX informada.
+        `.trim(); // Remove espaços em branco no início/fim
+
+        const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+        
+        // Abre o WhatsApp Web em uma nova aba
+        window.open(whatsappUrl, '_blank');
+        
+        message.success("Solicitação de saque enviada via WhatsApp! Aguarde o contato.");
+        setIsWithdrawModalVisible(false);
+
+        // REMOVIDO: A atualização local do saldo, pois o PIX é manual e o admin zera no backend
+        // setAffiliateData(prev => ({
+        //   ...prev,
+        //   summary: {
+        //     ...prev.summary,
+        //     balance: (parseFloat(prev.summary.balance) - values.amount).toFixed(2)
+        //   }
+        // }));
 
     } catch (error) {
-      message.error(error.response?.data?.message || "Falha ao solicitar o saque.");
+        message.error("Falha ao gerar a solicitação de saque via WhatsApp.");
+        console.error("Erro ao solicitar saque via WhatsApp:", error);
     } finally {
-      setSubmitting(false);
+        setSubmitting(false);
     }
   };
 
@@ -318,8 +350,9 @@ const MeuPerfilPage = () => {
                 className="referral-statistic"
                 loading={loadingAffiliateData}
               />
+              {/* MODIFICADO: Botão sempre abre o modal de saque via WhatsApp */}
               <Button type="default" block className="withdraw-benefits-btn" disabled={referralBalance < 50} onClick={handleWithdrawClick}>
-                {affiliateData?.summary?.asaasPayoutPixKey ? 'Solicitar Saque' : 'Configurar PIX para Saque'}
+                Solicitar Saque de Comissões
               </Button>
               <Paragraph className="benefits-footer-text">
                 O valor mínimo para saque é de R$ 50,00.
@@ -340,9 +373,6 @@ const MeuPerfilPage = () => {
                   <Text className="current-plan-detail">Você está utilizando o plano gratuito.</Text>
                 )}
               </div>
-              <Button type="primary" block className="manage-plan-btn" onClick={() => message.info("Redirecionar para página de planos...")}>
-                Ver Todos os Planos e Upgrades
-              </Button>
             </Card>
           </Space>
         </Col>
@@ -379,7 +409,8 @@ const MeuPerfilPage = () => {
         </Form>
       </Modal>
 
-      {/* Modal para Configurar Chave PIX */}
+      {/* REMOVIDO: Modal para Configurar Chave PIX (isPixKeyModalVisible) */}
+      {/*
       <Modal
         title={<Space><KeyOutlined /> Configurar Chave PIX para Saque</Space>}
         open={isPixKeyModalVisible}
@@ -408,48 +439,56 @@ const MeuPerfilPage = () => {
           </Form.Item>
         </Form>
       </Modal>
+      */}
 
-      {/* Modal para Solicitar Saque */}
+      {/* NOVO/MODIFICADO: Modal Unificado para Solicitar Saque via WhatsApp */}
       <Modal
         title={<Space><DollarCircleOutlined /> Solicitar Saque de Comissões</Space>}
         open={isWithdrawModalVisible}
         onCancel={() => setIsWithdrawModalVisible(false)}
         footer={null}
         className="withdraw-modal modal-style-map"
+        destroyOnClose // Garante que o formulário seja resetado ao fechar
       >
-        <div className="balance-info">
-            <Text>Saldo Disponível</Text>
-            <Title level={2} className="balance-value">R$ {referralBalance.toFixed(2).replace('.', ',')}</Title>
-        </div>
-        <Form form={withdrawForm} layout="vertical" onFinish={handleRequestWithdrawal}>
-            <Form.Item label="Chave PIX de Destino">
-                <Input value={affiliateData?.summary?.asaasPayoutPixKey} disabled addonAfter={<Button type="link" size="small" onClick={() => { setIsWithdrawModalVisible(false); setIsPixKeyModalVisible(true); }}>Alterar</Button>} />
-            </Form.Item>
-            <Form.Item
-                name="amount"
-                label="Valor do Saque (R$)"
-                rules={[
-                    { required: true, message: 'Por favor, insira o valor do saque!' },
-                    { type: 'number', min: 50, message: 'O valor mínimo para saque é R$ 50,00.' },
-                    { type: 'number', max: referralBalance, message: 'O valor não pode ser maior que seu saldo disponível.' }
-                ]}
-            >
-                <InputNumber
-                    style={{ width: '100%' }}
-                    min={50}
-                    max={referralBalance}
-                    step={10}
-                    precision={2}
-                    formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                    parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                />
-            </Form.Item>
-            <Form.Item>
-                <Button type="primary" htmlType="submit" loading={submitting} block className="submit-btn-form">
-                    Confirmar Solicitação de Saque
-                </Button>
-            </Form.Item>
-        </Form>
+        <Spin spinning={submitting}>
+            <div className="balance-info">
+                <Text>Saldo Disponível</Text>
+                <Title level={2} className="balance-value">R$ {referralBalance.toFixed(2).replace('.', ',')}</Title>
+            </div>
+            <Alert
+                message="Solicitação via WhatsApp"
+                description="Seu pedido de saque será enviado diretamente para nossa equipe via WhatsApp. Certifique-se de que os dados abaixo estão corretos."
+                type="info"
+                showIcon
+                style={{marginBottom: '20px'}}
+            />
+            <Form form={withdrawForm} layout="vertical" onFinish={handleRequestWithdrawal}>
+                <Form.Item
+                    name="cpf"
+                    label="Seu CPF (para verificação)"
+                    rules={[{ required: true, message: 'Por favor, insira seu CPF!' }]}
+                >
+                    <Input placeholder="000.000.000-00" prefix={<IdcardOutlined />} />
+                </Form.Item>
+                <Form.Item
+                    name="pixKey"
+                    label="Sua Chave PIX de Destino"
+                    rules={[{ required: true, message: 'Por favor, insira sua chave PIX!' }]}
+                >
+                    <Input placeholder="Email, CPF, CNPJ ou Telefone" prefix={<KeyOutlined />} />
+                </Form.Item>
+                {/* REMOVIDO: Campo de valor específico, o saque é do saldo TOTAL */}
+                {/* O valor total disponível será implicitamente enviado na mensagem */}
+                <Paragraph type="secondary" style={{textAlign: 'center', marginTop: '15px'}}>
+                    *O valor total disponível de R$ {referralBalance.toFixed(2).replace('.', ',')} será considerado para o saque.*
+                </Paragraph>
+                <Form.Item style={{marginTop: '20px'}}>
+                    <Button type="primary" htmlType="submit" loading={submitting} block size="large" className="submit-btn-form">
+                        Enviar Solicitação de Saque via WhatsApp
+                    </Button>
+                </Form.Item>
+            </Form>
+        </Spin>
       </Modal>
 
     </Content>

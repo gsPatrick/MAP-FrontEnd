@@ -1,0 +1,91 @@
+/* src/pages/PrivacyPolicyPage/PrivacyPolicyPage.css */
+
+/* Importar variáveis de cor globais se não estiverem já no index.css */
+/* Exemplo: @import '../../index.css'; */
+
+.privacy-policy-layout {
+  /* Fundo escuro geral da página, como muitas seções da LP */
+  background-color: var(--brand-cor-4-preto, #000000);
+  min-height: 100vh; /* Garante que o footer fique no final */
+  display: flex;
+  flex-direction: column;
+}
+
+.privacy-policy-main-content {
+  flex-grow: 1; /* Garante que o conteúdo principal ocupe o espaço disponível */
+  /* Padding superior/inferior da seção, usando uma classe similar à LP */
+  padding-top: 80px; /* Ajuste conforme a LP */
+  padding-bottom: 80px; /* Ajuste conforme a LP */
+  /* Remover padding horizontal padrão se o section-container já tiver */
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.privacy-policy-section-container {
+  /* Largura máxima e centralização similar às seções da LP */
+  max-width: 1100px; /* Ajuste conforme o max-width dos seus section-container */
+  margin: 0 auto;
+  padding: 0 20px; /* Padding horizontal interno para telas menores */
+  position: relative; /* Para z-index se houver fundos animados */
+  z-index: 1;
+}
+
+.privacy-policy-content-block {
+  /* Estilo do bloco de conteúdo da política (fundo branco/claro para leitura) */
+  background-color: var(--map-branco, #FFFFFF); /* Fundo branco */
+  color: var(--map-cinza-texto, #555); /* Texto cinza para o corpo */
+  border-radius: 8px; /* Cantos arredondados */
+  padding: 40px 30px; /* Padding interno generoso */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  line-height: 1.7; /* Melhora a legibilidade de parágrafos longos */
+}
+
+@media (max-width: 767px) {
+    .privacy-policy-main-content {
+        padding-top: 50px;
+        padding-bottom: 50px;
+    }
+     .privacy-policy-content-block {
+        padding: 30px 20px;
+     }
+}
+
+
+.privacy-policy-content-block h1,
+.privacy-policy-content-block h2,
+.privacy-policy-content-block h3 {
+  color: var(--map-preto, #2c3e50); /* Cores dos títulos mais escuras */
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+
+.privacy-policy-content-block h1 {
+    font-size: clamp(24px, 4vw, 32px); /* Título principal responsivo */
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--brand-cor-1-dourado, #e3be62); /* Título principal em dourado */
+}
+
+.privacy-policy-content-block h2 {
+    font-size: clamp(20px, 3vw, 26px);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.privacy-policy-content-block h3 {
+    font-size: clamp(16px, 2.5vw, 20px);
+    margin-bottom: 10px;
+}
+
+.privacy-policy-content-block p {
+    margin-bottom: 15px;
+}
+
+.privacy-policy-content-block ul {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+.privacy-policy-content-block li {
+    margin-bottom: 8px;
+}
