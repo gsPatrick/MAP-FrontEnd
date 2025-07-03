@@ -2,13 +2,14 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Button, Modal, Form, DatePicker, Select,
   Card, Space, Tooltip, Popconfirm, message, Tag, Row, Col,
-  Empty, ConfigProvider, Avatar, Spin, FloatButton, Popover, Divider, List, Statistic, Steps, Result, Calendar
+  Empty, ConfigProvider, Avatar, Spin, FloatButton, Popover, Divider, List, Statistic, Steps, Result, Calendar, Dropdown, Menu, Input
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined,
   UserOutlined, TeamOutlined, LeftOutlined, RightOutlined,
   InfoCircleOutlined, MailOutlined, PhoneOutlined, CalendarOutlined as CalendarIcon, DollarCircleOutlined,
-  CarryOutOutlined, LikeOutlined, StopOutlined, ShoppingOutlined, AppstoreAddOutlined
+  CarryOutOutlined, LikeOutlined, StopOutlined, ShoppingOutlined, AppstoreAddOutlined,
+  CalendarOutlined, UserAddOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -17,12 +18,16 @@ import ptBR from 'antd/lib/locale/pt_BR';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 
+import ModalPfAppointment from '../../modals/ModalPfAppointment/ModalPfAppointment'; // Importar novo modal PF
+import ModalPjClientAppointment from '../../modals/ModalPjClientAppointment/ModalPjClientAppointment'; // Importar novo modal PJ Cliente
+
 import './AgendamentosPage.css';
 
 moment.locale('pt-br');
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
+const { TextArea } = Input;
 
 // Função helper para escurecer cores para a borda
 const darkenColor = (colorStr, amount) => {
@@ -41,16 +46,31 @@ const darkenColor = (colorStr, amount) => {
 
 const AgendamentosPage = () => {
   const { currentProfile, loadingProfiles, isAuthenticated } = useProfile();
-  
+
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para submissão do modal PJ Serviço
+  
+  // --- Estados dos Modais ---
+  const [isPfModalVisible, setIsPfModalVisible] = useState(false); // Novo estado para modal PF
+  const [isPjClientModalVisible, setIsPjClientModalVisible] = useState(false); // Novo estado para modal PJ Cliente
+  const [isPjServiceModalVisible, setIsPjServiceModalVisible] = useState(false); // Estado existente para modal PJ Serviço
+  
+  const [formPjService] = Form.useForm(); // Renomeado o form para PJ Service
+  const [modalStepPjService, setModalStepPjService] = useState(0); // Renomeado step para PJ Service
+  const [modalDataPjService, setModalDataPjService] = useState({}); // Renomeado data para PJ Service
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDateForSlots, setSelectedDateForSlots] = useState(null);
+
   const [currentDate, setCurrentDate] = useState(moment());
   const [popoverVisibleFor, setPopoverVisibleFor] = useState(null);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const [pickerYear, setPickerYear] = useState(moment().year());
+
+  const [calendarEvents, setCalendarEvents] = useState([]); // Eventos para visualização PJ
+  const [agendamentosPf, setAgendamentosPf] = useState([]); // Agendamentos para visualização PF
   
-  const [calendarEvents, setCalendarEvents] = useState([]);
   const [businessClientsList, setBusinessClientsList] = useState([]);
   const [loadingBusinessClients, setLoadingBusinessClients] = useState(false);
   const [isClientDetailsModalVisible, setIsClientDetailsModalVisible] = useState(false);
@@ -60,44 +80,56 @@ const AgendamentosPage = () => {
   const [servicesList, setServicesList] = useState([]);
   const [loadingServices, setLoadingServices] = useState(false);
 
-  const [agendamentos, setAgendamentos] = useState([]);
-  
-  // --- Estados do Modal de Agendamento ---
-  const [modalStep, setModalStep] = useState(0);
-  const [modalData, setModalData] = useState({});
-  const [slotsLoading, setSlotsLoading] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [selectedDateForSlots, setSelectedDateForSlots] = useState(null);
-
   const isBusinessProfile = useMemo(() => ['PJ', 'MEI'].includes(currentProfile?.type), [currentProfile]);
 
   // --- Funções de Fetch de Dados ---
   const fetchAgendamentosClassic = useCallback(async () => {
-    if (!currentProfile || !isAuthenticated) { setAgendamentos([]); setIsLoading(false); return; }
+    if (!currentProfile || !isAuthenticated || isBusinessProfile) { setAgendamentosPf([]); setIsLoading(false); return; }
     setIsLoading(true);
     try {
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 500 } });
-      const mapped = response.data.data.appointments.map(app => ({
+      const mapped = response.data.data.map(app => ({
         id: app.id.toString(), titulo: app.title, prazo: app.eventDateTime,
         tipo: (app.associatedValue != null) ? 'Financeiro' : 'Geral',
         valor: app.associatedValue, concluido: app.status === 'Completed',
         notas: app.description || app.notes,
       }));
-      setAgendamentos(mapped);
-    } catch (error) { console.error("Erro ao carregar agendamentos (PF):", error); setAgendamentos([]); } 
+      setAgendamentosPf(mapped);
+    } catch (error) { console.error("Erro ao carregar agendamentos (PF):", error); setAgendamentosPf([]); }
     finally { setIsLoading(false); }
-  }, [currentProfile, isAuthenticated]);
+  }, [currentProfile, isAuthenticated, isBusinessProfile]);
 
-  const fetchCalendarEventsBusiness = useCallback(async (start, end) => {
-    if (!currentProfile || !isAuthenticated) { setCalendarEvents([]); setIsLoading(false); return; }
+  const fetchCalendarEventsBusiness = useCallback(async () => {
+    if (!currentProfile || !isAuthenticated || !isBusinessProfile) { setCalendarEvents([]); setIsLoading(false); return; }
     setIsLoading(true);
     try {
+      const start = currentDate.clone().startOf('month').startOf('week');
+      const end = currentDate.clone().endOf('month').endOf('week');
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/appointments/agenda-view`, { params: { start: start.format('YYYY-MM-DD'), end: end.format('YYYY-MM-DD') } });
-      setCalendarEvents(response.data.data || []);
-    } catch (error) { console.error("Erro ao carregar eventos da agenda (PJ):", error); setCalendarEvents([]); } 
+      
+      // Mapeia os eventos para garantir que os status e outros campos estejam em português
+      const translatedEvents = response.data.data.map(event => ({
+        ...event,
+        status: translateStatus(event.status), // Traduz o status
+        // Traduz o dia da semana e o mês se a API retornar em inglês
+        start: moment.tz(event.start, 'UTC').locale('pt-br').toDate(), // Converte para data local e define locale
+        end: moment.tz(event.end, 'UTC').locale('pt-br').toDate(),
+      }));
+      setCalendarEvents(translatedEvents);
+    } catch (error) { console.error("Erro ao carregar eventos da agenda (PJ):", error); setCalendarEvents([]); }
     finally { setIsLoading(false); }
-  }, [currentProfile, isAuthenticated]);
+  }, [currentProfile, isAuthenticated, isBusinessProfile, currentDate]);
+
+  // Função para traduzir status (exemplo)
+  const translateStatus = (status) => {
+    switch (status) {
+      case 'Scheduled': return 'Pendente';
+      case 'Confirmed': return 'Confirmado';
+      case 'Completed': return 'Concluído';
+      case 'Cancelled': return 'Cancelado';
+      default: return status;
+    }
+  };
 
   const fetchBusinessClientsForSelect = useCallback(async () => {
     if (!currentProfile || !isBusinessProfile) { setBusinessClientsList([]); return; }
@@ -105,7 +137,7 @@ const AgendamentosPage = () => {
     try {
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients`, { params: { isActive: true, limit: 500 } });
       setBusinessClientsList(response.data.data.map(c => ({ ...c, value: c.id.toString(), label: c.name })));
-    } catch (error) { console.error("Erro ao carregar clientes:", error); setBusinessClientsList([]); } 
+    } catch (error) { console.error("Erro ao carregar clientes:", error); setBusinessClientsList([]); }
     finally { setLoadingBusinessClients(false); }
   }, [currentProfile, isBusinessProfile]);
 
@@ -119,12 +151,11 @@ const AgendamentosPage = () => {
     finally { setLoadingServices(false); }
   }, [currentProfile, isBusinessProfile]);
 
+  // Efeito para carregar dados ao mudar de perfil ou carregar a página
   useEffect(() => {
     if (!loadingProfiles && isAuthenticated && currentProfile) {
       if (isBusinessProfile) {
-        const start = currentDate.clone().startOf('month').startOf('week');
-        const end = currentDate.clone().endOf('month').endOf('week');
-        fetchCalendarEventsBusiness(start, end);
+        fetchCalendarEventsBusiness();
         fetchBusinessClientsForSelect();
         fetchServicesForSelect();
       } else {
@@ -133,167 +164,182 @@ const AgendamentosPage = () => {
         setServicesList([]);
       }
     } else if (!isAuthenticated && !loadingProfiles) {
-      setIsLoading(false); 
-      setAgendamentos([]); 
+      setIsLoading(false);
+      setAgendamentosPf([]);
       setCalendarEvents([]);
     }
-  }, [currentProfile, isAuthenticated, loadingProfiles, isBusinessProfile, currentDate, fetchAgendamentosClassic, fetchCalendarEventsBusiness, fetchBusinessClientsForSelect, fetchServicesForSelect]);
+  }, [currentProfile, isAuthenticated, loadingProfiles, isBusinessProfile, fetchAgendamentosClassic, fetchCalendarEventsBusiness, fetchBusinessClientsForSelect, fetchServicesForSelect]);
 
-  const fetchAvailableSlots = useCallback(async (date, serviceIds) => {
-    if (!date || !serviceIds || serviceIds.length === 0 || !currentProfile?.id) return;
-    setSlotsLoading(true);
+  // Efeito para refetchar dados PJ/MEI ao mudar o mês no calendário
+   useEffect(() => {
+        if (isBusinessProfile && currentProfile?.id && !loadingProfiles && isAuthenticated) {
+             fetchCalendarEventsBusiness();
+        }
+   }, [currentDate, isBusinessProfile, currentProfile?.id, loadingProfiles, isAuthenticated, fetchCalendarEventsBusiness]);
+
+
+const fetchAvailableSlots = useCallback(async (date, serviceIdsParam) => {
+  if (!date || !serviceIdsParam || serviceIdsParam.length === 0 || !currentProfile?.id) {
     setAvailableSlots([]);
-    try {
-      const response = await apiClient.get(`/public/booking/${currentProfile.id}/availability`, {
-        params: {
-          date: date.format('YYYY-MM-DD'),
-          serviceIds: serviceIds.join(','),
-        },
-      });
-      setAvailableSlots(response.data.data.availableSlots || []);
-    } catch (error) {
-      message.error("Erro ao buscar horários disponíveis.");
-    } finally {
-      setSlotsLoading(false);
-    }
-  }, [currentProfile?.id]);
+    setSlotsLoading(false);
+    return;
+  }
 
-  // --- Funções de Manipulação do Modal ---
-  const showModal = () => {
-    setModalStep(0);
-    setModalData({});
+  setSlotsLoading(true);
+
+  try {
+    const response = await apiClient.get(`/public/booking/${currentProfile.id}/availability`, {
+      params: {
+        date: date.format('YYYY-MM-DD'),
+        serviceIds: serviceIdsParam.join(','),
+      },
+    });
+    setAvailableSlots(response.data.data.availableSlots || []);
+  } catch (error) {
+    setAvailableSlots([]);
+  } finally {
+    setSlotsLoading(false);
+  }
+}, [currentProfile?.id]);
+
+
+  // --- Funções para Abrir Modais ---
+  const handleShowPfModal = () => {
+    setIsPfModalVisible(true);
+  };
+
+  const handleShowPjClientModal = () => {
+    setIsPjClientModalVisible(true);
+  };
+
+  const handleShowPjServiceModal = () => {
+    setModalStepPjService(0); // Reinicia os passos
+    setModalDataPjService({}); // Reinicia os dados
     setSelectedDateForSlots(null);
     setSelectedSlot(null);
     setAvailableSlots([]);
-    form.resetFields();
-    setIsModalVisible(true);
+    formPjService.resetFields();
+    setIsPjServiceModalVisible(true);
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
+  // --- Funções de Cancelamento ---
+  const handleCancelAllModals = () => {
+    setIsPfModalVisible(false);
+    setIsPjClientModalVisible(false);
+    setIsPjServiceModalVisible(false);
+    formPjService.resetFields(); // Resetar o formulário do modal de serviço
   };
 
-  const handleModalNext = async () => {
-    try {
-      if (modalStep === 0) { // Validar serviços
-        const values = await form.validateFields(['serviceIds']);
-        setModalData(prev => ({ ...prev, ...values }));
-        setSelectedDateForSlots(null); // Resetar data ao mudar serviços
-        setSelectedSlot(null);
-        setAvailableSlots([]);
-      } else if (modalStep === 1) { // Validar data/hora
-        if (!selectedSlot) {
-            message.error('Por favor, selecione um horário.');
-            return;
-        }
-      }
-      setModalStep(prev => prev + 1);
-    } catch (errorInfo) {
-      console.log('Falha na validação:', errorInfo);
+  // --- Funções de Conclusão de Modal (Chamadas pelos modais filhos e pelo modal de serviço) ---
+  const handleAppointmentCreationSuccess = () => {
+    // Refetchar os dados de agendamento relevantes com base no tipo de perfil
+    if (isBusinessProfile) {
+      fetchCalendarEventsBusiness();
+    } else {
+      fetchAgendamentosClassic();
     }
   };
 
-  const handleModalPrev = () => {
-    setModalStep(prev => prev - 1);
+
+  // --- Funções de Manipulação do Modal PJ Serviço (Multi-step) ---
+  const handlePjServiceModalNext = async () => {
+    try {
+      if (modalStepPjService === 0) { // Validar serviços
+        const values = await formPjService.validateFields(['serviceIds']);
+        setModalDataPjService(prev => ({ ...prev, ...values }));
+        setSelectedDateForSlots(null); // Resetar data ao mudar serviços
+        setSelectedSlot(null);
+        setAvailableSlots([]);
+        // Não avança de step aqui, a validação da data/hora acontece no step 1
+        setModalStepPjService(prev => prev + 1);
+      } else if (modalStepPjService === 1) { // Validar data/hora
+        if (!selectedDateForSlots || !selectedSlot) {
+            message.error('Por favor, selecione uma data e um horário.');
+            return;
+        }
+        // Valida apenas se a data/slot foram selecionados, sem validar o form ainda
+         setModalStepPjService(prev => prev + 1);
+      } else if (modalStepPjService === 2) { // Validar clientes
+         await formPjService.validateFields(['businessClientIds']);
+         // Se chegou aqui, validação ok, pode ir para a submissão
+         // A submissão acontece no onFinishModal, que é chamado pelo botão "Finalizar"
+      }
+
+    } catch (errorInfo) {
+      console.log('Falha na validação PJ Service:', errorInfo);
+    }
   };
 
-  const onDateChangeInModal = (date) => {
+  const handlePjServiceModalPrev = () => {
+    setModalStepPjService(prev => prev - 1);
+  };
+
+  const onDateChangeInPjServiceModal = (date) => {
     setSelectedDateForSlots(date);
     setSelectedSlot(null);
-    const { serviceIds } = form.getFieldsValue(['serviceIds']);
-    if (date && serviceIds) {
+    const { serviceIds } = formPjService.getFieldsValue(['serviceIds']);
+    if (date && serviceIds && serviceIds.length > 0) {
       fetchAvailableSlots(date, serviceIds);
     } else {
       setAvailableSlots([]);
     }
   };
-
-  const onFinishModal = async () => {
+  
+  const onFinishPjServiceModal = async () => {
     if (!currentProfile) return;
+    setIsSubmitting(true); // Estado de submissão para o modal de serviço
     try {
-        const values = await form.validateFields(['businessClientIds']);
-        const finalModalData = { ...modalData, ...values };
+        // Validar todos os campos do formulário de uma vez no final
+        const values = await formPjService.validateFields();
+        const finalModalData = { ...modalDataPjService, ...values };
 
-        const finalEventDateTime = moment(`${selectedDateForSlots.format('YYYY-MM-DD')}T${selectedSlot}`).toISOString();
+        // A API retorna eventDateTime em UTC (com Z no final).
+        // Para exibir corretamente no formato local e traduzido, vamos usar o moment.
+        const eventDateTimeUTC = moment(finalModalData.eventDateTime); // Já deve vir como objeto moment se o modal estiver correto
+        const finalEventDateTime = eventDateTimeUTC.toISOString();
+        
+        // Buscar detalhes dos serviços selecionados para calcular duração e título
         const serviceDetails = servicesList.filter(s => finalModalData.serviceIds.includes(s.id.toString()));
-        const title = serviceDetails.map(s => s.name).join(' + ');
+        // Traduzir os nomes dos serviços se a API retornar em inglês
+        const translatedServiceNames = serviceDetails.map(s => s.name); // Assumindo que a API já retorna em português ou que servicesList já está traduzido
+        const title = translatedServiceNames.join(' + ');
+        const durationMinutes = serviceDetails.reduce((sum, s) => sum + s.durationMinutes, 0);
 
         const payload = {
-          title: title, 
+          title: title,
           eventDateTime: finalEventDateTime,
-          businessClientIds: finalModalData.businessClientIds.map(id => parseInt(id, 10)),
-          serviceIds: finalModalData.serviceIds.map(id => parseInt(id, 10)),
+          durationMinutes: durationMinutes > 0 ? durationMinutes : null, // Envia duração calculada
+          businessClientIds: finalModalData.businessClientIds ? finalModalData.businessClientIds.map(id => parseInt(id, 10)) : [],
+          serviceIds: finalModalData.serviceIds ? finalModalData.serviceIds.map(id => parseInt(id, 10)) : [],
+          // Campos gerais opcionais que podem ser adicionados ao formulário do modal se necessário
+          description: values.description, // Adicionar campo description se necessário
+          location: values.location, // Adicionar campo location se necessário
+          notes: values.notes, // Adicionar campo notes se necessário
+          origin: 'system_pj_mei', // Definir a origem
         };
+        
+        // Validação final antes de enviar
+        if (!payload.title || !payload.eventDateTime || payload.businessClientIds.length === 0 || payload.serviceIds.length === 0) {
+             throw new Error("Dados incompletos para o agendamento de serviço.");
+        }
+
 
         await apiClient.post(`/financial-accounts/${currentProfile.id}/appointments`, payload);
         message.success("Agendamento criado com sucesso!");
-        const start = currentDate.clone().startOf('month');
-        const end = currentDate.clone().endOf('month');
-        fetchCalendarEventsBusiness(start, end);
-        handleCancel();
-    } catch (error) { 
-        console.log('Erro ao finalizar:', error);
-        // Interceptor já deve tratar a mensagem de erro da API
+        handleAppointmentCreationSuccess(); // Refetch
+        handleCancelAllModals(); // Fecha o modal de serviço
+    } catch (errorInfo) {
+        console.log('Falha na submissão PJ Service:', errorInfo);
+         if (errorInfo.errorFields) {
+            // Mensagem de validação do Ant Design
+         } else {
+            // Outros erros (API, lógica)
+            // Mensagem de erro já é tratada pelo interceptor do apiClient
+         }
+    } finally {
+        setIsSubmitting(false); // Finaliza estado de submissão
     }
   };
-  
-  // --- Funções de Ações (Excluir, Confirmar, etc.) ---
-  const handleLifecycleAction = async (action, event) => {
-    if (!currentProfile || !event) return;
-    setPopoverVisibleFor(null);
-    try {
-      const endpoint = `/financial-accounts/${currentProfile.id}/appointments/${event.appointmentId}/${action}`;
-      await apiClient.post(endpoint);
-      message.success(`Agendamento ${action === 'confirm' ? 'confirmado' : 'concluído'}!`);
-      const start = currentDate.clone().startOf('month');
-      const end = currentDate.clone().endOf('month');
-      fetchCalendarEventsBusiness(start, end);
-    } catch (error) { /* O interceptor da API trata a exibição de erros */ }
-  };
-
-  const handleDelete = async (id) => {
-    if (!currentProfile) return;
-    setPopoverVisibleFor(null);
-    try {
-      await apiClient.delete(`/financial-accounts/${currentProfile.id}/appointments/${id}`);
-      message.warn("Agendamento excluído!");
-      if (isBusinessProfile) {
-        const start = currentDate.clone().startOf('month');
-        const end = currentDate.clone().endOf('month');
-        fetchCalendarEventsBusiness(start, end);
-      } else {
-        fetchAgendamentosClassic();
-      }
-    } catch (error) { /* O interceptor da API trata a exibição de erros */ }
-  };
-
-  const toggleConcluidoClassic = async (app) => {
-    if (!currentProfile || !app) return;
-    setPopoverVisibleFor(null);
-    try {
-      await apiClient.put(`/financial-accounts/${currentProfile.id}/appointments/${app.id}`, { 
-        status: app.concluido ? 'Scheduled' : 'Completed'
-      });
-      message.success(`Status alterado!`);
-      fetchAgendamentosClassic();
-    } catch (error) { /* O interceptor da API trata a exibição de erros */ }
-  };
-
-  const showClientDetailsModal = async (client) => {
-    if (!currentProfile || !client) return;
-    setPopoverVisibleFor(null); 
-    setIsClientDetailsModalVisible(true); 
-    setLoadingClientDetails(true);
-    try {
-      const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients/${client.id}/details`);
-      setSelectedClientForDetails(response.data.data);
-    } catch (error) { 
-      handleClientDetailsModalCancel(); 
-    } finally { 
-      setLoadingClientDetails(false); 
-    }
-  };
-  const handleClientDetailsModalCancel = () => { setIsClientDetailsModalVisible(false); setSelectedClientForDetails(null); };
 
   // --- Componentes de Renderização ---
   const renderMonthPickerContent = () => (
@@ -305,13 +351,13 @@ const AgendamentosPage = () => {
         </div>
         <div className="month-picker-grid">
           {moment.months().map((mes, index) => (
-            <Button 
-              key={mes} 
-              type={currentDate.year() === pickerYear && currentDate.month() === index ? "primary" : "text"} 
-              className="month-picker-button" 
-              onClick={() => { 
-                setCurrentDate(moment({ year: pickerYear, month: index })); 
-                setIsMonthPickerVisible(false); 
+            <Button
+              key={mes}
+              type={currentDate.year() === pickerYear && currentDate.month() === index ? "primary" : "text"}
+              className="month-picker-button"
+              onClick={() => {
+                setCurrentDate(moment({ year: pickerYear, month: index }));
+                setIsMonthPickerVisible(false);
               }}>
               {moment.monthsShort()[index]}
             </Button>
@@ -347,14 +393,14 @@ const AgendamentosPage = () => {
     <div className="popover-content-wrapper">
       <Title level={5} className="popover-title">{event.title}
         <Tag color={event.status === 'Completed' ? "default" : (event.status === 'Confirmed' ? 'cyan' : 'blue')} className="popover-status-tag">
-          {event.status}
+          {translateStatus(event.status)} {/* Usando a função de tradução */}
         </Tag>
       </Title>
       <Text type="secondary" className="popover-time">
         <ClockCircleOutlined /> {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
       </Text>
       {event.description && <Paragraph className="popover-notes"><InfoCircleOutlined /> {event.description}</Paragraph>}
-      
+
       {event.services?.length > 0 && (
         <>
           <Divider className="popover-divider" />
@@ -392,14 +438,14 @@ const AgendamentosPage = () => {
   );
 
   const renderClassicCalendar = () => {
-    const startDate = currentDate.clone().startOf('month').startOf('week'); 
+    const startDate = currentDate.clone().startOf('month').startOf('week');
     const days = Array.from({ length: 42 }).map((_, i) => {
         const day = startDate.clone().add(i, 'days');
         return {
             date: day,
             isCurrentMonth: day.isSame(currentDate, 'month'),
             isToday: day.isSame(moment(), 'day'),
-            apps: agendamentos.filter(a => moment(a.prazo).isSame(day, 'day'))
+            apps: agendamentosPf.filter(a => moment(a.prazo).isSame(day, 'day'))
         };
     });
     return (
@@ -424,9 +470,9 @@ const AgendamentosPage = () => {
         </div>
     );
   };
-  
+
   const renderBusinessCalendar = () => {
-    const startDate = currentDate.clone().startOf('month').startOf('week'); 
+    const startDate = currentDate.clone().startOf('month').startOf('week');
     const days = Array.from({ length: 42 }).map((_, i) => {
         const day = startDate.clone().add(i, 'days');
         return {
@@ -466,87 +512,213 @@ const AgendamentosPage = () => {
     );
   };
 
-  const modalSteps = [
-    {
-      title: 'Serviços',
-      content: (
-        <Form.Item
-          name="serviceIds"
-          label="Selecione o(s) serviço(s) desejado(s)"
-          rules={[{ required: true, message: 'Por favor, selecione pelo menos um serviço!' }]}
-        >
-          <Select
-            mode="multiple"
-            allowClear
-            loading={loadingServices}
-            placeholder="Ex: Corte de Cabelo, Manicure"
-            options={servicesList}
-            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-            notFoundContent={loadingServices ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum serviço encontrado" />}
-          />
-        </Form.Item>
-      ),
-    },
-    {
-      title: 'Data e Hora',
-      content: (
-        <div className="modal-step-container">
-            <div className="modal-calendar-wrapper">
-                <Calendar fullscreen={false} onSelect={onDateChangeInModal} value={selectedDateForSlots} />
-            </div>
-            <div className="modal-slots-wrapper">
-                <Text strong>{selectedDateForSlots ? selectedDateForSlots.format('dddd, DD [de] MMMM') : 'Selecione um dia no calendário'}</Text>
-                <Divider style={{margin: '12px 0'}}/>
-                {slotsLoading ? (
-                    <div className="centered-content"><Spin tip="Buscando horários..." /></div>
-                ) : (
-                    <>
-                    {selectedDateForSlots && availableSlots.length > 0 && (
-                        <div className="available-slots-grid">
-                        {availableSlots.map(slot => (
-                            <Button key={slot} type={selectedSlot === slot ? 'primary' : 'default'} onClick={() => setSelectedSlot(slot)}>
-                            {slot}
-                            </Button>
-                        ))}
-                        </div>
-                    )}
-                    {selectedDateForSlots && !slotsLoading && availableSlots.length === 0 && (
-                        <div className="centered-content">
-                            <Empty description="Nenhum horário disponível para esta data." />
-                        </div>
-                    )}
-                    {!selectedDateForSlots && (
-                        <div className="centered-content">
-                            <Empty description="Selecione uma data para ver os horários." image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                        </div>
-                    )}
-                    </>
-                )}
-            </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Cliente(s)',
-      content: (
-        <Form.Item
-          name="businessClientIds"
-          label="Selecione o(s) cliente(s) para o agendamento"
-          rules={[{ required: true, message: 'Por favor, selecione pelo menos um cliente!' }]}
-        >
-          <Select
-            mode="multiple"
-            allowClear
-            loading={loadingBusinessClients}
-            placeholder="Selecione os clientes"
-            options={businessClientsList}
-            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-            notFoundContent={loadingBusinessClients ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum cliente encontrado" />}
-          />
-        </Form.Item>
-      ),
-    },
-  ];
+  // --- Renderização dos Steps do Modal PJ Serviço ---
+  const renderPjServiceModalContent = () => {
+      switch (modalStepPjService) {
+          case 0: // Selecionar Serviços
+              return (
+                  <Form.Item
+                      name="serviceIds"
+                      label="Selecione o(s) serviço(s) desejado(s)"
+                      rules={[{ required: true, message: 'Por favor, selecione pelo menos um serviço!' }]}
+                  >
+                      <Select
+                          mode="multiple"
+                          allowClear
+                          loading={loadingServices}
+                          placeholder="Ex: Corte de Cabelo, Manicure"
+                          options={servicesList}
+                          filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                          notFoundContent={loadingServices ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum serviço encontrado" />}
+                          onChange={(selectedIds) => {
+                            // Opcional: Calcular duração total e exibir para o usuário
+                             const selectedSvcDetails = servicesList.filter(s => selectedIds.includes(s.id.toString()));
+                             const calculatedDuration = selectedSvcDetails.reduce((sum, s) => sum + s.durationMinutes, 0);
+                            // Você pode usar um estado para exibir a duração calculada na UI
+                          }}
+                      />
+                  </Form.Item>
+              );
+          case 1: // Selecionar Data e Hora
+              return (
+                  <div className="modal-step-container">
+                      <div className="modal-calendar-wrapper">
+                          <Calendar fullscreen={false} onSelect={onDateChangeInPjServiceModal} value={selectedDateForSlots} />
+                      </div>
+                      <div className="modal-slots-wrapper">
+                          <Text strong>{selectedDateForSlots ? selectedDateForSlots.format('dddd, DD [de] MMMM') : 'Selecione um dia no calendário'}</Text>
+                          <Divider style={{margin: '12px 0'}}/>
+                          {slotsLoading ? (
+                              <div className="centered-content"><Spin tip="Buscando horários..." /></div>
+                          ) : (
+                              <>
+                              {selectedDateForSlots && availableSlots.length > 0 && (
+                                  <div className="available-slots-grid">
+                                  {availableSlots.map(slot => (
+                                      <Button key={slot} type={selectedSlot === slot ? 'primary' : 'default'} onClick={() => setSelectedSlot(slot)}>
+                                      {slot}
+                                      </Button>
+                                  ))}
+                                  </div>
+                              )}
+                              {selectedDateForSlots && !slotsLoading && availableSlots.length === 0 && (
+                                  <div className="centered-content">
+                                      <Empty description="Nenhum horário disponível para esta data." />
+                                  </div>
+                              )}
+                              {!selectedDateForSlots && (
+                                  <div className="centered-content">
+                                      <Empty description="Selecione uma data para ver os horários." image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                                  </div>
+                              )}
+                              </>
+                          )}
+                      </div>
+                  </div>
+              );
+          case 2: // Selecionar Clientes e Detalhes Gerais
+              return (
+                  <>
+                    <Form.Item
+                        name="businessClientIds"
+                        label="Selecione o(s) cliente(s) associado(s)"
+                        rules={[{ required: true, message: 'Por favor, associe pelo menos um cliente!' }]}
+                    >
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            loading={loadingBusinessClients}
+                            placeholder="Selecione os clientes"
+                            options={businessClientsList}
+                            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                            notFoundContent={loadingBusinessClients ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum cliente encontrado" />}
+                        />
+                    </Form.Item>
+                    {/* Adicionar campos gerais opcionais */}
+                     <Form.Item
+                        name="location"
+                        label="Local (Opcional)"
+                     >
+                        <Input placeholder="Ex: Sala de Reunião, Videoconferência" />
+                     </Form.Item>
+                      <Form.Item
+                        name="notes"
+                        label="Observações Internas (Opcional)"
+                      >
+                        <TextArea rows={2} placeholder="Notas adicionais..." />
+                      </Form.Item>
+                  </>
+              );
+          default:
+              return null;
+      }
+  };
+
+
+  // --- Funções de Ações (Excluir, Confirmar, etc.) ---
+  const handleLifecycleAction = async (action, event) => {
+    if (!currentProfile || !event) return;
+    setPopoverVisibleFor(null);
+    message.loading({ content: 'Processando...', key: `appt-action-${event.appointmentId}` });
+    try {
+      const endpoint = `/financial-accounts/${currentProfile.id}/appointments/${event.appointmentId}/${action}`;
+      await apiClient.post(endpoint);
+      message.success({ content: `Agendamento ${action === 'confirm' ? 'confirmado' : 'concluído'}!`, key: `appt-action-${event.appointmentId}` });
+      fetchCalendarEventsBusiness(); // Refetcha para atualizar o status no calendário
+    } catch (error) {
+      // O interceptor da API trata a exibição de erros
+      message.error({ content: `Falha ao ${action} agendamento.`, key: `appt-action-${event.appointmentId}` });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!currentProfile) return;
+    setPopoverVisibleFor(null);
+    message.loading({ content: 'Excluindo...', key: `delete-appt-${id}` });
+    try {
+      await apiClient.delete(`/financial-accounts/${currentProfile.id}/appointments/${id}`);
+      message.success({ content: "Agendamento excluído!", key: `delete-appt-${id}`, duration: 2 });
+      if (isBusinessProfile) {
+        fetchCalendarEventsBusiness();
+      } else {
+        fetchAgendamentosClassic();
+      }
+    } catch (error) {
+        message.error({ content: `Falha ao excluir agendamento.`, key: `delete-appt-${id}` });
+    }
+  };
+
+  const toggleConcluidoClassic = async (app) => {
+    if (!currentProfile || !app) return;
+    setPopoverVisibleFor(null);
+    message.loading({ content: 'Atualizando...', key: `update-appt-${app.id}` });
+    try {
+      await apiClient.put(`/financial-accounts/${currentProfile.id}/appointments/${app.id}`, {
+        status: app.concluido ? 'Scheduled' : 'Completed'
+      });
+      message.success({ content: `Status alterado!`, key: `update-appt-${app.id}` });
+      fetchAgendamentosClassic();
+    } catch (error) {
+        message.error({ content: `Falha ao atualizar status.`, key: `update-appt-${app.id}` });
+    }
+  };
+
+  const showClientDetailsModal = async (client) => {
+    if (!currentProfile || !client) return;
+    setPopoverVisibleFor(null); // Fecha o popover antes de abrir o modal
+    setIsClientDetailsModalVisible(true);
+    setLoadingClientDetails(true);
+    setSelectedClientForDetails(null); // Limpa detalhes anteriores
+    try {
+      // Verifica se o client.id é válido antes de fazer a requisição
+      if (client.id) {
+        const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients/${client.id}/details`);
+        setSelectedClientForDetails(response.data.data);
+      } else {
+        // Trata o caso onde client.id pode não estar disponível ou ser inválido
+        message.error("ID do cliente inválido.");
+        handleClientDetailsModalCancel(); // Fecha o modal se o ID for inválido
+      }
+    } catch (error) {
+      console.error("Erro ao buscar detalhes do cliente:", error);
+      // Tenta exibir uma mensagem de erro mais específica se disponível
+      if (error.response && error.response.data && error.response.data.message) {
+        message.error(`Erro ao carregar detalhes: ${error.response.data.message}`);
+      } else {
+        message.error("Não foi possível carregar os detalhes deste cliente.");
+      }
+      handleClientDetailsModalCancel(); // Fecha o modal em caso de erro
+    } finally {
+      setLoadingClientDetails(false);
+    }
+  };
+  const handleClientDetailsModalCancel = () => { setIsClientDetailsModalVisible(false); setSelectedClientForDetails(null); };
+
+
+  // --- Conteúdo do Dropdown do Botão '+' ---
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const menu = (
+    <Menu
+      onClick={({ key }) => {
+        if (key === 'pj_client') {
+          handleShowPjClientModal();
+        } else if (key === 'pj_service') {
+          handleShowPjServiceModal();
+        }
+        // Fechar o dropdown após a seleção de um item
+        setIsDropdownOpen(false);
+      }}
+    >
+      <Menu.Item key="pj_client" icon={<UserOutlined />}>
+        Agendamento com Cliente
+      </Menu.Item>
+      <Menu.Item key="pj_service" icon={<AppstoreAddOutlined />}>
+        Agendamento com Serviço
+      </Menu.Item>
+    </Menu>
+  );
+
 
   if (loadingProfiles) return (<div className="loading-container"><Spin size="large" /></div>);
   if (!isAuthenticated && !loadingProfiles) return (<Content className="dark-placeholder-content"><Title level={3}>Acesso Negado</Title></Content>);
@@ -566,7 +738,8 @@ const AgendamentosPage = () => {
             <Col>
                 <Space>
                     <Popover content={renderMonthPickerContent} trigger="click" placement="bottom" open={isMonthPickerVisible} onOpenChange={setIsMonthPickerVisible} overlayClassName="month-picker-popover">
-                        <Title level={4} className="clickable-month-title">{currentDate.format('MMMM [de] YYYY')}</Title>
+                        {/* Formata o título do mês e ano para Português */}
+                        <Title level={4} className="clickable-month-title">{moment(currentDate).format('MMMM [de] YYYY')}</Title>
                     </Popover>
                     <Tooltip title="Mês Anterior"><Button shape="circle" icon={<LeftOutlined />} onClick={() => setCurrentDate(currentDate.clone().subtract(1, 'month'))} /></Tooltip>
                     <Tooltip title="Próximo Mês"><Button shape="circle" icon={<RightOutlined />} onClick={() => setCurrentDate(currentDate.clone().add(1, 'month'))} /></Tooltip>
@@ -575,47 +748,91 @@ const AgendamentosPage = () => {
             </Col>
           </Row>
           <div className="calendar-container">
+            {/* Dias da semana em Português */}
             <div className="calendar-header-days">{['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(wd => <div key={wd} className="calendar-weekday">{wd}</div>)}</div>
             {isLoading ? <div className="loading-container" style={{height: '50vh'}}><Spin size="large"/></div> : ( isBusinessProfile ? renderBusinessCalendar() : renderClassicCalendar() )}
           </div>
         </Card>
-        <FloatButton icon={<PlusOutlined />} type="primary" tooltip="Novo Agendamento" onClick={showModal} />
+
+        {/* FloatButton com Dropdown ou Direto */}
+        {isBusinessProfile ? (
+            <Dropdown
+              overlay={menu}
+              placement="topRight" // Ajustado para aparecer acima do botão
+              arrow={{ pointAtCenter: true }}
+              open={isDropdownOpen} // Controla a abertura do dropdown
+              onOpenChange={(open) => setIsDropdownOpen(open)} // Atualiza o estado quando o dropdown é aberto/fechado
+              trigger={['click']} // O dropdown só abre ao clicar no FloatButton
+            >
+                <FloatButton
+                    icon={<PlusOutlined />}
+                    type="primary"
+                    tooltip="Novo Agendamento"
+                    onClick={() => setIsDropdownOpen(true)} // Ao clicar, abre o dropdown
+                />
+            </Dropdown>
+        ) : (
+            <FloatButton icon={<PlusOutlined />} type="primary" tooltip="Novo Agendamento" onClick={handleShowPfModal} />
+        )}
+
       </Content>
-      
-      <Modal 
-        title="Novo Agendamento" 
-        open={isModalVisible} 
-        onCancel={handleCancel} 
+
+      {/* Modal de Agendamento PF */}
+      <ModalPfAppointment
+        open={isPfModalVisible}
+        onCancel={handleCancelAllModals}
+        onSuccess={handleAppointmentCreationSuccess}
+      />
+
+      {/* Modal de Agendamento PJ Cliente */}
+       <ModalPjClientAppointment
+        open={isPjClientModalVisible}
+        onCancel={handleCancelAllModals}
+        onSuccess={handleAppointmentCreationSuccess}
+        businessClientsList={businessClientsList}
+        loadingBusinessClients={loadingBusinessClients}
+      />
+
+      {/* Modal de Agendamento PJ Serviço (Multi-step) */}
+      <Modal
+        title="Novo Agendamento com Serviço"
+        open={isPjServiceModalVisible}
+        onCancel={handleCancelAllModals}
         footer={
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Button onClick={handleModalPrev} disabled={modalStep === 0}>
+            <Button onClick={handlePjServiceModalPrev} disabled={modalStepPjService === 0}>
               Anterior
             </Button>
-            {modalStep < modalSteps.length - 1 ? (
-              <Button type="primary" onClick={handleModalNext} disabled={modalStep === 1 && !selectedSlot}>
+            {modalStepPjService < 2 ? ( // Último step é o 2 (Clientes/Geral)
+              <Button type="primary" onClick={handlePjServiceModalNext} disabled={modalStepPjService === 1 && (!selectedDateForSlots || !selectedSlot)}>
                 Próximo
               </Button>
             ) : (
-              <Button type="primary" onClick={onFinishModal}>
+              <Button type="primary" onClick={onFinishPjServiceModal} loading={isSubmitting}>
                 Finalizar Agendamento
               </Button>
             )}
           </div>
-        } 
-        destroyOnClose 
-        width={modalStep === 1 ? 800 : 600} // Modal maior no passo do calendário
+        }
+        destroyOnClose
+        width={modalStepPjService === 1 ? 800 : 600} // Modal maior no passo do calendário
         className="agendamento-modal"
       >
-        <Steps current={modalStep} style={{ marginBottom: 24 }} items={modalSteps.map(item => ({ key: item.title, title: item.title }))} />
-        <Form form={form} layout="vertical" initialValues={{ serviceIds: [], businessClientIds: [] }}>
+        <Steps current={modalStepPjService} style={{ marginBottom: 24 }} items={[
+            { title: 'Serviços' },
+            { title: 'Data e Hora' },
+            { title: 'Cliente(s) e Detalhes' } // Renomeado o último passo
+        ]} />
+        <Form form={formPjService} layout="vertical" initialValues={{ serviceIds: [], businessClientIds: [] }}>
           <div className="steps-content" style={{ marginTop: 16 }}>
-            {modalSteps[modalStep].content}
+            {renderPjServiceModalContent()} {/* Renderiza o conteúdo do step atual */}
           </div>
         </Form>
       </Modal>
 
-      {isBusinessProfile && 
-        <Modal title={<Space><TeamOutlined />Detalhes do Cliente</Space>} open={isClientDetailsModalVisible} onCancel={handleClientDetailsModalCancel} footer={[<Button key="close" onClick={handleClientDetailsModalCancel}>Fechar</Button>]} className="client-details-modal" width={600}>
+
+      {isBusinessProfile &&
+        <Modal title={<Space><TeamOutlined />Detalhes do Cliente</Space>} open={isClientDetailsModalVisible} onCancel={handleClientDetailsModalCancel} footer={[<Button key="close" onClick={handleClientDetailsModalCancel}> Fechar</Button>]} className="client-details-modal" width={600}>
             {loadingClientDetails || !selectedClientForDetails ? <div className="loading-container" style={{height: 300}}><Spin/></div> : (
               <div className="client-details-content">
                   <Avatar size={80} src={selectedClientForDetails.photoUrl} icon={<UserOutlined />} className="client-details-avatar" />
@@ -625,7 +842,7 @@ const AgendamentosPage = () => {
                     {selectedClientForDetails.phone && <Text copyable><PhoneOutlined /> {selectedClientForDetails.phone}</Text>}
                   </Space>
                   {selectedClientForDetails.notes && <Paragraph className="client-details-notes" type='secondary'><InfoCircleOutlined /> {selectedClientForDetails.notes}</Paragraph>}
-                  
+
                   <Divider>Atividade do Cliente</Divider>
                   <Row gutter={16} style={{textAlign: 'left'}}>
                     <Col xs={24} md={12}>
@@ -645,7 +862,7 @@ const AgendamentosPage = () => {
                                     <List.Item.Meta
                                         avatar={<ShoppingOutlined />}
                                         title={<Text>{item.title}</Text>}
-                                        description={`${moment(item.eventDateTime).format('DD/MM/YYYY')} - R$ ${item.services.reduce((acc, s) => acc + parseFloat(s.price), 0).toFixed(2)}`}
+                                        description={`${moment(item.eventDateTime).format('DD/MM/YY')} - R$ ${item.services.reduce((acc, s) => acc + parseFloat(s.price), 0).toFixed(2)}`}
                                     />
                                 </List.Item>
                             )}

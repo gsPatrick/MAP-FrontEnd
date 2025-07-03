@@ -56,7 +56,10 @@ const ConfiguracoesPage = () => {
     const [editingAccessUser, setEditingAccessUser] = useState(null);
     const [accessForm] = Form.useForm();
     const [isSavingAccess, setIsSavingAccess] = useState(false);
-    const [ownerHasBusinessProfile, setOwnerHasBusinessProfile] = useState(false);
+    
+    const ownerHasBusinessProfile = userProfiles.some(p => p.type === 'PJ' || p.type === 'MEI');
+    const businessProfiles = userProfiles.filter(p => p.type === 'PJ' || p.type === 'MEI');
+
     const [googleSyncStatus, setGoogleSyncStatus] = useState(null);
     const [loadingGoogleStatus, setLoadingGoogleStatus] = useState(false);
     const [isSavingGoogleColors, setIsSavingGoogleColors] = useState(false);
@@ -163,15 +166,8 @@ const ConfiguracoesPage = () => {
             setAvailabilityRules([]);
         }
     }, [isAuthenticated, loadingProfiles, currentProfile, fetchClientData, fetchSharedAccesses, fetchGoogleSyncStatus, fetchAvailabilityRules]);
-
-    useEffect(() => {
-        if (userProfiles && userProfiles.length > 0) {
-            setOwnerHasBusinessProfile(userProfiles.some(p => p.type === 'PJ' || p.type === 'MEI'));
-        } else {
-            setOwnerHasBusinessProfile(false);
-        }
-    }, [userProfiles]);
-
+    
+    // <<< BLOCO DE FUNÇÕES RESTAURADO >>>
     const showEditInfoModal = () => {
         editInfoForm.setFieldsValue({
             name: mainUserData.name, email: mainUserData.email, phone: mainUserData.phone,
@@ -180,6 +176,8 @@ const ConfiguracoesPage = () => {
         setIsEditInfoModalVisible(true);
     };
     const handleEditInfoCancel = () => { setIsEditInfoModalVisible(false); editInfoForm.resetFields(); };
+    // <<< FIM DO BLOCO RESTAURADO >>>
+
     const handleEditInfoFinish = async (values) => {
         setIsSavingInfo(true);
         const payload = { name: values.name, email: values.email, phone: values.phone };
@@ -206,74 +204,71 @@ const ConfiguracoesPage = () => {
     const showAccessModal = (user = null) => {
         setEditingAccessUser(user);
         if (user) {
-            let accessType = 'Nenhum';
-            if (user.canAccessPersonalProfile && user.canAccessBusinessProfileId) accessType = 'Ambos';
-            else if (user.canAccessPersonalProfile) accessType = 'PF';
-            else if (user.canAccessBusinessProfileId) accessType = 'PJ';
-            
             accessForm.setFieldsValue({
-                sharedWithClientName: user.sharedWithClientName,
-                sharedAccessEmail: user.sharedAccessEmail,
                 sharedAccessPhone: user.sharedAccessPhone,
-                accessType: accessType,
+                canAccessPersonalProfile: user.canAccessPersonalProfile,
+                canAccessBusinessProfileId: user.canAccessBusinessProfileId || null,
             });
         } else {
             accessForm.resetFields();
-            accessForm.setFieldsValue({ accessType: 'Nenhum' });
+            accessForm.setFieldsValue({
+                canAccessPersonalProfile: true,
+                canAccessBusinessProfileId: null,
+            });
         }
         setIsAccessModalVisible(true);
     };
+
     const handleAccessModalCancel = () => {
-        setIsAccessModalVisible(false); setEditingAccessUser(null); accessForm.resetFields();
+        setIsAccessModalVisible(false);
+        setEditingAccessUser(null);
+        accessForm.resetFields();
     };
 
     const onAccessFormFinish = async (values) => {
         setIsSavingAccess(true);
-        let canAccessPersonalProfile = false;
-        let attemptBusinessAccess = false;
+        
+        const {
+            sharedAccessPhone,
+            sharedAccessPassword,
+            canAccessPersonalProfile,
+            canAccessBusinessProfileId,
+        } = values;
 
-        if (values.accessType === 'PF' || values.accessType === 'Ambos') {
-            canAccessPersonalProfile = true;
-        }
-        if (values.accessType === 'PJ' || values.accessType === 'Ambos') {
-            if (!ownerHasBusinessProfile) {
-                message.warn('Você não possui um perfil empresarial (PJ/MEI) para compartilhar. Acesso empresarial não será concedido.');
-            } else {
-                attemptBusinessAccess = true;
-            }
-        }
-
-        if (values.accessType === 'Nenhum' || (!canAccessPersonalProfile && !attemptBusinessAccess)) {
-            message.error('Selecione pelo menos um tipo de perfil (Pessoal ou Empresarial) para compartilhar.');
-            setIsSavingAccess(false); return;
+        if (!canAccessPersonalProfile && !canAccessBusinessProfileId) {
+            message.error('Selecione pelo menos um perfil (Pessoal ou Empresarial) para compartilhar.');
+            setIsSavingAccess(false);
+            return;
         }
 
         const payload = {
-            sharedAccessEmail: values.sharedAccessEmail,
-            sharedAccessPhone: values.sharedAccessPhone,
-            sharedWithClientName: values.sharedWithClientName,
-            sharedAccessPassword: values.sharedAccessPassword,
-            canAccessPersonalProfile,
-            canAccessAnyBusinessProfile: attemptBusinessAccess,
+            sharedAccessPhone,
+            sharedAccessPassword,
+            canAccessPersonalProfile: !!canAccessPersonalProfile,
+            canAccessBusinessProfileId: canAccessBusinessProfileId || null,
         };
         
-        if (editingAccessUser && !values.sharedAccessPassword) delete payload.sharedAccessPassword;
-        if (!payload.sharedAccessEmail && !payload.sharedAccessPhone) {
-            message.error('Email ou Telefone WhatsApp é obrigatório para o acesso.'); setIsSavingAccess(false); return;
+        if (editingAccessUser && !payload.sharedAccessPassword) {
+            delete payload.sharedAccessPassword;
         }
 
         try {
             if (editingAccessUser) {
                 await apiClient.put(`/shared-access/my-shares/${editingAccessUser.id}`, payload);
-                message.success(`Acesso para "${values.sharedWithClientName || values.sharedAccessEmail}" atualizado!`);
+                message.success(`Acesso para o telefone "${sharedAccessPhone}" foi atualizado!`);
             } else {
                 await apiClient.post('/shared-access/grant', payload);
-                message.success(`Acesso para "${values.sharedWithClientName || values.sharedAccessEmail}" concedido!`);
+                message.success(`Acesso concedido para o telefone "${sharedAccessPhone}"!`);
             }
-            fetchSharedAccesses(); handleAccessModalCancel();
-        } catch (error) { /* Interceptor */ } finally { setIsSavingAccess(false); }
+            fetchSharedAccesses();
+            handleAccessModalCancel();
+        } catch (error) {
+            // O interceptor de erro do apiClient já deve mostrar a mensagem
+        } finally {
+            setIsSavingAccess(false);
+        }
     };
-
+    
     const handleDeleteAccessUser = async (sharedAccessId, userName) => {
         try {
             await apiClient.delete(`/shared-access/my-shares/${sharedAccessId}`);
@@ -291,7 +286,6 @@ const ConfiguracoesPage = () => {
         if (labels.length === 0) return <Text type="secondary">Nenhum perfil</Text>;
         return labels.map((label, index) => <span key={index}>{label}{index < labels.length - 1 && ", "}</span>);
     };
-
     const handleConnectGoogle = async () => {
         setLoadingGoogleStatus(true);
         try {
@@ -341,7 +335,6 @@ const ConfiguracoesPage = () => {
             <Space><span style={{ display: 'inline-block', width: 16, height: 16, backgroundColor: color.hex, borderRadius: '3px', border: '1px solid #ccc' }} />{color.name}</Space>
         </Option>
     );
-
     const handleSaveSchedule = async (values) => {
         if (!currentProfile?.id) return;
         setIsSavingSchedule(true);
@@ -396,7 +389,6 @@ const ConfiguracoesPage = () => {
             setIsSavingSchedule(false);
         }
     };
-
     const handleAddDayOff = async (values) => {
         if (!currentProfile?.id) return;
         setIsSavingDayOff(true);
@@ -417,7 +409,6 @@ const ConfiguracoesPage = () => {
             setIsSavingDayOff(false);
         }
     };
-
     const handleDeleteDayOff = async (ruleId) => {
         if (!currentProfile?.id) return;
         try {
@@ -428,7 +419,7 @@ const ConfiguracoesPage = () => {
             console.error("Erro ao remover dia de folga:", error);
         }
     };
-
+    
     if (loadingProfiles && !isAuthenticated) return <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" tip="Verificando..." /></Content>;
     if (!isAuthenticated && !loadingProfiles) return <Content style={{ padding: 50, textAlign: 'center' }}><Title level={3}>Acesso Negado</Title><Paragraph>Faça login para continuar.</Paragraph><Button type="primary" href="/login">Login</Button></Content>;
     if (loadingProfiles || (!mainUserData.id && isAuthenticated)) {
@@ -437,7 +428,6 @@ const ConfiguracoesPage = () => {
 
     const daysOffData = availabilityRules.filter(r => r.type === 'day_off');
     
-    // <<< MELHORIA: Lógica para a Tooltip da aba desabilitada >>>
     const isScheduleTabDisabled = currentProfileType !== 'PJ' && currentProfileType !== 'MEI';
     const scheduleTabTitle = (
         <span><ScheduleOutlined /> Horários e Disponibilidade</span>
@@ -458,7 +448,7 @@ const ConfiguracoesPage = () => {
             </Paragraph>
 
             <Tabs defaultActiveKey="1" type="card" className="configuracoes-tabs">
-                <TabPane tab={<span><UserOutlined /> Minha Conta</span>} key="1" className="tab-pane-minha-conta">
+                 <TabPane tab={<span><UserOutlined /> Minha Conta</span>} key="1" className="tab-pane-minha-conta">
                     <Card title="Informações da Conta Principal" bordered={false} className="config-card animated-card"
                         extra={<Button type="link" icon={<EditOutlined />} onClick={showEditInfoModal} className="edit-personal-info-btn">Editar</Button>}
                     >
@@ -473,13 +463,12 @@ const ConfiguracoesPage = () => {
                         </Paragraph>
                     </Card>
                 </TabPane>
-
                 <TabPane tab={<span><ShareAltOutlined /> Acesso Compartilhado</span>} key="2" className="tab-pane-acesso-compartilhado">
                     <Card title="Gerenciar Acessos Concedidos" bordered={false} className="config-card animated-card" style={{ animationDelay: '0.1s' }}
                         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => showAccessModal()} className="add-access-btn">Conceder Acesso</Button>}
                     >
                         <Paragraph type="secondary" style={{ marginBottom: '20px' }}>
-                            Permita que outros usuários acessem seus perfis financeiros.
+                            Permita que outros usuários acessem seus perfis financeiros através do WhatsApp e da plataforma.
                         </Paragraph>
                         {loadingSharedUsers ? <div style={{ textAlign: 'center', padding: '20px' }}><Spin tip="Carregando..." /></div> :
                             sharedUsers.length > 0 ? (
@@ -488,17 +477,16 @@ const ConfiguracoesPage = () => {
                                         <List.Item
                                             actions={[
                                                 <Tooltip title="Editar Permissões" key={`edit-${sharedAccessRecord.id}`}><Button type="text" icon={<EditOutlined />} onClick={() => showAccessModal(sharedAccessRecord)} className="list-action-btn edit" /></Tooltip>,
-                                                <Popconfirm key={`delete-${sharedAccessRecord.id}`} title={`Remover acesso de "${sharedAccessRecord.sharedWithClientName || sharedAccessRecord.sharedAccessEmail}"?`} onConfirm={() => handleDeleteAccessUser(sharedAccessRecord.id, sharedAccessRecord.sharedWithClientName || sharedAccessRecord.sharedAccessEmail)} okText="Sim" cancelText="Não" okButtonProps={{ danger: true, className: 'popconfirm-delete-btn' }}><Tooltip title="Remover Acesso"><Button type="text" danger icon={<DeleteOutlined />} className="list-action-btn delete" /></Tooltip></Popconfirm>
+                                                <Popconfirm key={`delete-${sharedAccessRecord.id}`} title={`Remover acesso de "${sharedAccessRecord.sharedAccessPhone}"?`} onConfirm={() => handleDeleteAccessUser(sharedAccessRecord.id, sharedAccessRecord.sharedAccessPhone)} okText="Sim" cancelText="Não" okButtonProps={{ danger: true, className: 'popconfirm-delete-btn' }}><Tooltip title="Remover Acesso"><Button type="text" danger icon={<DeleteOutlined />} className="list-action-btn delete" /></Tooltip></Popconfirm>
                                             ]}>
                                             <List.Item.Meta
                                                 avatar={<Avatar icon={<UserOutlined />} className="shared-user-avatar" />}
-                                                title={<Text strong className="shared-user-name">{sharedAccessRecord.sharedWithClientName || sharedAccessRecord.sharedAccessEmail || 'Convidado'}</Text>}
-                                                description={<Space direction="vertical" size={2}> {sharedAccessRecord.sharedAccessEmail && <Text type="secondary" copyable={{ text: sharedAccessRecord.sharedAccessEmail }}><MailOutlined /> {sharedAccessRecord.sharedAccessEmail}</Text>} {sharedAccessRecord.sharedAccessPhone && <Text type="secondary" copyable={{ text: sharedAccessRecord.sharedAccessPhone }}><WhatsAppOutlined /> {sharedAccessRecord.sharedAccessPhone}</Text>} <Text type="secondary" className="profile-access-type-list">Perfis: <Text strong style={{ color: 'var(--map-laranja)' }}>{getProfileAccessTypeLabel(sharedAccessRecord)}</Text></Text> <Tag color={sharedAccessRecord.status === 'Ativo' ? 'success' : 'default'} icon={sharedAccessRecord.status === 'Ativo' ? <CheckCircleFilled /> : <CloseCircleFilled />}>Status: {sharedAccessRecord.status}</Tag> </Space>} />
+                                                title={<Text strong className="shared-user-name">{sharedAccessRecord.sharedAccessPhone}</Text>}
+                                                description={<Space direction="vertical" size={2}> <Text type="secondary" className="profile-access-type-list">Perfis: <Text strong style={{ color: 'var(--map-laranja)' }}>{getProfileAccessTypeLabel(sharedAccessRecord)}</Text></Text> <Tag color={sharedAccessRecord.status === 'Ativo' ? 'success' : 'default'} icon={sharedAccessRecord.status === 'Ativo' ? <CheckCircleFilled /> : <CloseCircleFilled />}>Status: {sharedAccessRecord.status}</Tag> </Space>} />
                                         </List.Item>)} />
                             ) : (<Empty description="Nenhum acesso compartilhado." image={<UsergroupAddOutlined style={{ fontSize: '48px', color: 'var(--map-cinza-texto)' }} />} ><Button type="primary" icon={<PlusOutlined />} onClick={() => showAccessModal()} className="add-access-btn">Conceder Primeiro Acesso</Button></Empty>)}
                     </Card>
                 </TabPane>
-
                 <TabPane tab={<span><LinkOutlined /> Integrações</span>} key="3" className="tab-pane-integracoes">
                     <Card title={<Space><GoogleOutlined style={{ color: '#DB4437' }} /> Google Calendar</Space>} bordered={false} className="config-card animated-card" style={{ animationDelay: '0.2s' }}>
                         {loadingGoogleStatus && <div style={{ textAlign: 'center', padding: '20px' }}><Spin tip="Verificando status..." /></div>}
@@ -525,7 +513,6 @@ const ConfiguracoesPage = () => {
                         )}
                     </Card>
                 </TabPane>
-
                 <TabPane tab={scheduleTab} key="4" disabled={isScheduleTabDisabled}>
                     <Spin spinning={loadingSchedule} tip="Carregando configurações de horário...">
                         <Card title={`Disponibilidade para o perfil "${currentProfileName}"`} bordered={false} className="config-card animated-card" style={{ animationDelay: '0.3s' }}>
@@ -591,7 +578,7 @@ const ConfiguracoesPage = () => {
                     </Spin>
                 </TabPane>
             </Tabs>
-
+            
             <Modal title={<Space><IdcardOutlined /> Editar Minhas Informações</Space>} open={isEditInfoModalVisible} onCancel={handleEditInfoCancel} footer={null} destroyOnClose width={600} className="edit-info-modal modal-style-map">
                 <Form form={editInfoForm} layout="vertical" onFinish={handleEditInfoFinish}>
                     <Form.Item name="name" label="Nome Completo" rules={[{ required: true, message: 'Insira seu nome!' }]}><Input prefix={<UserOutlined />} /></Form.Item>
@@ -610,29 +597,74 @@ const ConfiguracoesPage = () => {
                 </Form>
             </Modal>
 
-            <Modal title={<Space><ShareAltOutlined />{editingAccessUser ? "Editar Acesso Concedido" : "Conceder Novo Acesso"}</Space>} open={isAccessModalVisible} onCancel={handleAccessModalCancel} footer={null} destroyOnClose width={650} className="access-modal modal-style-map">
+            <Modal
+                title={<Space><ShareAltOutlined />{editingAccessUser ? "Editar Acesso Concedido" : "Conceder Novo Acesso"}</Space>}
+                open={isAccessModalVisible}
+                onCancel={handleAccessModalCancel}
+                footer={null}
+                destroyOnClose
+                width={600}
+                className="access-modal modal-style-map"
+            >
                 <Form form={accessForm} layout="vertical" onFinish={onAccessFormFinish} disabled={isSavingAccess}>
-                    <Title level={5} style={{ color: "var(--header-text-secondary)" }}>Credenciais para o Convidado</Title>
-                    <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>O convidado usará estas credenciais para acessar os perfis compartilhados.</Paragraph>
-                    <Form.Item name="sharedWithClientName" label="Apelido para o Convidado (Opcional)"><Input prefix={<UserOutlined />} placeholder="Ex: Contador João" /></Form.Item>
-                    <Row gutter={16}>
-                        <Col xs={24} sm={12}><Form.Item name="sharedAccessEmail" label="Email de Login do Convidado" rules={[{ type: 'email', message: 'Email inválido!' }, ({ getFieldValue }) => ({ required: !getFieldValue('sharedAccessPhone'), message: 'Email ou Telefone é obrigatório!' })]}><Input prefix={<MailOutlined />} /></Form.Item></Col>
-                        <Col xs={24} sm={12}><Form.Item name="sharedAccessPhone" label="Telefone WhatsApp do Convidado" rules={[({ getFieldValue }) => ({ required: !getFieldValue('sharedAccessEmail'), message: 'Email ou Telefone é obrigatório!' })]}><Input prefix={<WhatsAppOutlined />} /></Form.Item></Col>
-                    </Row>
-                    <Form.Item name="sharedAccessPassword" label={editingAccessUser ? "Nova Senha (deixe em branco para não alterar)" : "Senha para o Convidado"} rules={editingAccessUser ? [{ min: 6, message: "Mínimo 6 caracteres." }] : [{ required: true, message: 'Senha é obrigatória!' }, { min: 6, message: "Mínimo 6 caracteres." }]} hasFeedback={!editingAccessUser || !!accessForm.getFieldValue('sharedAccessPassword')}><Input.Password prefix={<LockOutlined />} /></Form.Item>
-                    <Divider className="form-divider">Permissões de Acesso aos SEUS Perfis</Divider>
-                    <Form.Item name="accessType" label="Quais dos SEUS perfis este convidado poderá acessar?" rules={[{ required: true, message: 'Selecione o tipo de acesso!' }]}>
-                        <Radio.Group buttonStyle="outline" className="access-type-radio-group-simplified">
-                            <Radio.Button value="PF"><CreditCardOutlined /> Apenas Pessoal (PF)</Radio.Button>
-                            {ownerHasBusinessProfile && <Radio.Button value="PJ"><ShopOutlined /> Apenas Empresarial (PJ/MEI)</Radio.Button>}
-                            {ownerHasBusinessProfile && <Radio.Button value="Ambos"><ProfileOutlined /> Ambos (Pessoal + Empresarial)</Radio.Button>}
-                            <Radio.Button value="Nenhum" danger><StopOutlined /> Nenhum Perfil</Radio.Button>
-                        </Radio.Group>
+                    <Title level={5} style={{ color: "var(--header-text-secondary)" }}>Dados do Convidado</Title>
+                    <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
+                        O convidado usará o número de telefone para interagir via WhatsApp e a senha para acessar a plataforma web.
+                    </Paragraph>
+
+                    <Form.Item
+                        name="sharedAccessPhone"
+                        label="Telefone WhatsApp do Convidado"
+                        rules={[{ required: true, message: 'O Telefone WhatsApp do convidado é obrigatório!' }]}
+                    >
+                        <Input
+                            prefix={<WhatsAppOutlined />}
+                            placeholder="Ex: 71982862912"
+                            disabled={!!editingAccessUser}
+                        />
                     </Form.Item>
-                    {!ownerHasBusinessProfile && (accessForm.getFieldValue('accessType') === 'PJ' || accessForm.getFieldValue('accessType') === 'Ambos') &&
-                        <Alert message="Você não possui um perfil Empresarial (PJ/MEI) para compartilhar." type="warning" showIcon style={{ marginBottom: '15px' }} />
+                    {editingAccessUser &&
+                        <Paragraph type="secondary" style={{ fontSize: '11px', marginTop: '-10px', marginBottom: '15px' }}>
+                            <InfoCircleOutlined/> O telefone não pode ser alterado após o acesso ser criado. Para mudar o número, remova este acesso e crie um novo.
+                        </Paragraph>
                     }
-                    <Form.Item className="form-action-buttons"><Button onClick={handleAccessModalCancel} className="cancel-btn-form" disabled={isSavingAccess}>Cancelar</Button><Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingAccess}>{editingAccessUser ? "Salvar" : "Conceder"}</Button></Form.Item>
+                    
+                    <Form.Item
+                        name="sharedAccessPassword"
+                        label={editingAccessUser ? "Nova Senha (deixe em branco para não alterar)" : "Senha para o Convidado"}
+                        rules={editingAccessUser ? [{ min: 6, message: "Mínimo 6 caracteres." }] : [{ required: true, message: 'Senha é obrigatória!' }, { min: 6, message: "Mínimo 6 caracteres." }]}
+                        hasFeedback={!editingAccessUser || !!accessForm.getFieldValue('sharedAccessPassword')}
+                    >
+                        <Input.Password prefix={<LockOutlined />} placeholder="Crie uma senha segura"/>
+                    </Form.Item>
+
+                    <Divider className="form-divider">Permissões de Acesso</Divider>
+                    <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
+                        Selecione quais dos SEUS perfis este convidado poderá visualizar e gerenciar.
+                    </Paragraph>
+
+                    <Form.Item name="canAccessPersonalProfile" valuePropName="checked">
+                        <Checkbox><CreditCardOutlined /> Acesso ao Perfil Pessoal (PF)</Checkbox>
+                    </Form.Item>
+                    
+                    {ownerHasBusinessProfile && (
+                        <Form.Item name="canAccessBusinessProfileId" label="Acesso ao Perfil Empresarial">
+                            <Select placeholder="Selecione um perfil empresarial ou nenhum" allowClear>
+                                {businessProfiles.map(profile => (
+                                    <Option key={profile.id} value={profile.id}>
+                                        <ShopOutlined /> {profile.name} ({profile.type})
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                    )}
+                    
+                    <Form.Item className="form-action-buttons">
+                        <Button onClick={handleAccessModalCancel} className="cancel-btn-form" disabled={isSavingAccess}>Cancelar</Button>
+                        <Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingAccess}>
+                            {editingAccessUser ? "Salvar Alterações" : "Conceder Acesso"}
+                        </Button>
+                    </Form.Item>
                 </Form>
             </Modal>
 
