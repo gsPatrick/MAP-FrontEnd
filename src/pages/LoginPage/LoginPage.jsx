@@ -32,6 +32,12 @@ const LoginPage = () => {
   const handleLoginSuccess = (token, userData, userRole, targetPath) => {
     console.log(`[handleLoginSuccess] Salvando dados para role: ${userRole}`);
     
+    // --- ADIÇÃO: Limpar completamente o localStorage antes de salvar a nova sessão ---
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('selectedProfileId'); // Limpa sempre qualquer ID de perfil selecionado anterior
+
     // Salva os dados de autenticação no localStorage
     localStorage.setItem('authToken', token);
     localStorage.setItem('userRole', userRole);
@@ -41,17 +47,12 @@ const LoginPage = () => {
     if (userRole === 'client' && targetPath === '/painel') {
       const financialAccounts = userData.financialAccounts || [];
       if (financialAccounts.length > 0) {
-          const defaultAccount = financialAccounts.find(acc => acc.isDefault);
-          const initialProfileId = defaultAccount ? defaultAccount.id : financialAccounts[0].id;
+          const defaultAccount = financialAccounts.find(acc => acc.isDefault) || financialAccounts[0];
+          const initialProfileId = defaultAccount.id.toString(); // Garante consistência (string vs number)
           localStorage.setItem('selectedProfileId', initialProfileId);
-      } else {
-          // Garante que não haja lixo de um login anterior
-          localStorage.removeItem('selectedProfileId');
       }
-    } else if (userRole === 'admin') {
-        // Garante que não haja lixo de um perfil de cliente
-        localStorage.removeItem('selectedProfileId');
     }
+    // Para ADMIN, o selectedProfileId já foi removido na limpeza inicial
 
     message.success(`Login bem-sucedido! Bem-vindo(a), ${userData.name || userData.email}!`);
     navigate(targetPath);
@@ -69,7 +70,7 @@ const LoginPage = () => {
 
       console.log('[Admin Login Attempt] Resposta da API:', adminResponse.data);
 
-      // <<< CORREÇÃO PRINCIPAL: Verificação mais direta e robusta
+      // CORREÇÃO PRINCIPAL: Verificação mais direta e robusta (já estava boa)
       const responseData = adminResponse.data?.data;
       if (adminResponse.data?.status === 'success' && responseData?.user?.role === 'admin') {
         
@@ -79,7 +80,7 @@ const LoginPage = () => {
         // Chama a função de sucesso com os parâmetros corretos
         handleLoginSuccess(token, user, 'admin', '/admin/dashboard');
         setLoading(false);
-        return; // <<< ESSENCIAL: Impede a execução da tentativa de login de cliente
+        return; // ESSENCIAL: Impede a execução da tentativa de login de cliente
       }
       
     } catch (adminError) {
