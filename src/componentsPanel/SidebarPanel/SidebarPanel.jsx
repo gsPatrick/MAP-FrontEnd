@@ -5,7 +5,8 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
-  UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined // <<< IMPORTAR CrownOutlined
+  UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined,
+  CheckSquareOutlined // <<< ADICIONE ESTE ÍCONE
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -30,11 +31,15 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
       key: '/painel/produtos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/produtos">Produtos & Estoque</Link>,
     },
-        (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
+    (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
       key: '/painel/servicos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/servicos">Serviços</Link>,
     },
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
         key: '/painel/clientes', icon: <TeamOutlined />, label: <Link to="/painel/clientes">Clientes de Negócio</Link>,
+    },
+    // <<< NOVO ITEM DE MENU AQUI >>>
+    (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
+        key: '/painel/checklist', icon: <CheckSquareOutlined />, label: <Link to="/painel/checklist">Checklist Diário</Link>,
     },
     { key: '/painel/agendamentos', icon: <CalendarOutlined />, label: <Link to="/painel/agendamentos">Agendamentos</Link> },
     { key: '/painel/chat', icon: <MessageOutlined />, label: <Link to="/painel/chat">Chat com Assistente</Link> },
@@ -44,12 +49,11 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     { key: '/painel/configuracoes', icon: <SettingOutlined />, label: <Link to="/painel/configuracoes">Configurações</Link> },
   ].filter(Boolean);
 
-  // --- ESCOLHE O MENU CORRETO BASEADO NO TIPO DE PERFIL ---
+  // ... (o resto do arquivo permanece igual) ...
+
   const menuItems = selectedProfileType === 'ADMIN' ? adminMenuItems : clientMenuItems;
 
-  // Lógica para determinar a chave selecionada (funciona para ambos os menus)
   let selectedKey = '';
-  // Ordena para garantir que rotas mais específicas (ex: /painel/cartoes) sejam checadas antes de /painel
   const sortedMenuItems = [...menuItems].sort((a, b) => (b?.key?.length || 0) - (a?.key?.length || 0));
   for (const item of sortedMenuItems) {
     if (item && item.key && location.pathname.startsWith(item.key)) {
