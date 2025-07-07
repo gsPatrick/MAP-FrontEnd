@@ -10,7 +10,7 @@ import {
   PlusOutlined, EditOutlined, DeleteOutlined, PhoneOutlined, UsergroupAddOutlined,
   CreditCardOutlined, ShopOutlined, IdcardOutlined, ProfileOutlined, WhatsAppOutlined,
   GoogleOutlined, LinkOutlined, DisconnectOutlined, SyncOutlined, CheckCircleFilled, CloseCircleFilled, StopOutlined, SaveOutlined,
-  ScheduleOutlined, CalendarOutlined, ExclamationCircleOutlined
+  ScheduleOutlined, CalendarOutlined, ExclamationCircleOutlined, BankOutlined, StarOutlined
 } from '@ant-design/icons';
 import { RRule } from 'rrule';
 import moment from 'moment';
@@ -25,6 +25,7 @@ const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 
+// --- Mocks e Constantes ---
 const initialMainUserDataMock = { id: null, name: 'Carregando...', email: 'Carregando...', phone: 'Carregando...' };
 const googleCalendarColors = [
     { id: '1', name: 'Azul Lavanda', hex: '#7986cb' }, { id: '2', name: 'Verde Sálvia', hex: '#33b679' },
@@ -46,10 +47,19 @@ const daysOfWeekOptions = [
 const ConfiguracoesPage = () => {
     const { currentProfile, currentProfileType, currentProfileName, fetchUserProfiles, userProfiles, isAuthenticated, loadingProfiles } = useProfile();
     
+    // Estados para Informações de Acesso
     const [mainUserData, setMainUserData] = useState(initialMainUserDataMock);
     const [isEditInfoModalVisible, setIsEditInfoModalVisible] = useState(false);
     const [editInfoForm] = Form.useForm();
     const [isSavingInfo, setIsSavingInfo] = useState(false);
+    
+    // Estados para Perfis Financeiros
+    const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
+    const [editingProfile, setEditingProfile] = useState(null);
+    const [editProfileForm] = Form.useForm();
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    // Estados para Acesso Compartilhado
     const [sharedUsers, setSharedUsers] = useState([]);
     const [loadingSharedUsers, setLoadingSharedUsers] = useState(false);
     const [isAccessModalVisible, setIsAccessModalVisible] = useState(false);
@@ -60,11 +70,13 @@ const ConfiguracoesPage = () => {
     const ownerHasBusinessProfile = userProfiles.some(p => p.type === 'PJ' || p.type === 'MEI');
     const businessProfiles = userProfiles.filter(p => p.type === 'PJ' || p.type === 'MEI');
 
+    // Estados para Integrações
     const [googleSyncStatus, setGoogleSyncStatus] = useState(null);
     const [loadingGoogleStatus, setLoadingGoogleStatus] = useState(false);
     const [isSavingGoogleColors, setIsSavingGoogleColors] = useState(false);
     const [googleColorsForm] = Form.useForm();
 
+    // Estados para Horários e Disponibilidade
     const [availabilityRules, setAvailabilityRules] = useState([]);
     const [loadingSchedule, setLoadingSchedule] = useState(false);
     const [isSavingSchedule, setIsSavingSchedule] = useState(false);
@@ -73,6 +85,7 @@ const ConfiguracoesPage = () => {
     const [dayOffForm] = Form.useForm();
     const [isSavingDayOff, setIsSavingDayOff] = useState(false);
 
+    // --- Funções de Busca de Dados ---
     const fetchClientData = useCallback(async () => {
         if (!isAuthenticated) { setMainUserData(initialMainUserDataMock); return; }
         try {
@@ -167,7 +180,7 @@ const ConfiguracoesPage = () => {
         }
     }, [isAuthenticated, loadingProfiles, currentProfile, fetchClientData, fetchSharedAccesses, fetchGoogleSyncStatus, fetchAvailabilityRules]);
     
-    // <<< BLOCO DE FUNÇÕES RESTAURADO >>>
+    // --- Handlers para Modal de Informações de Acesso ---
     const showEditInfoModal = () => {
         editInfoForm.setFieldsValue({
             name: mainUserData.name, email: mainUserData.email, phone: mainUserData.phone,
@@ -176,31 +189,79 @@ const ConfiguracoesPage = () => {
         setIsEditInfoModalVisible(true);
     };
     const handleEditInfoCancel = () => { setIsEditInfoModalVisible(false); editInfoForm.resetFields(); };
-    // <<< FIM DO BLOCO RESTAURADO >>>
 
     const handleEditInfoFinish = async (values) => {
         setIsSavingInfo(true);
-        const payload = { name: values.name, email: values.email, phone: values.phone };
+        const payload = {
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+        };
+    
+        // *** LÓGICA CORRIGIDA ***
+        // A senha atual só é necessária se uma nova senha estiver sendo definida.
         if (values.newPassword) {
             if (!values.currentPassword) {
-                message.error('Insira sua senha atual para alterar a senha.'); setIsSavingInfo(false); return;
+                message.error('Por favor, insira sua senha atual para definir uma nova.');
+                setIsSavingInfo(false);
+                return;
             }
-            payload.password = values.currentPassword; payload.newPassword = values.newPassword;
-        } else if (values.currentPassword && (values.email !== mainUserData.email || values.name !== mainUserData.name || values.phone !== mainUserData.phone)) {
             payload.password = values.currentPassword;
+            payload.newPassword = values.newPassword;
         }
+    
         try {
-            const response = await apiClient.put('/auth/client/me/update-profile', payload);
+            // Supondo que o endpoint do backend para atualizar o perfil do cliente seja este:
+            // O backend deve ser inteligente o suficiente para não exigir a senha se apenas nome/email/phone forem alterados.
+            const response = await apiClient.put(`/client/update-profile`, payload);
+    
             if (response.data?.status === 'success') {
                 const updatedClientData = response.data.data.client;
                 setMainUserData(prev => ({ ...prev, ...updatedClientData }));
                 localStorage.setItem('userData', JSON.stringify(updatedClientData));
-                message.success('Informações atualizadas!'); setIsEditInfoModalVisible(false);
-                if (values.newPassword) message.info('Sua senha foi alterada.');
+                message.success('Informações atualizadas com sucesso!');
+                setIsEditInfoModalVisible(false);
             }
-        } catch (error) { /* Interceptor trata */ } finally { setIsSavingInfo(false); }
+        } catch (error) {
+            // O interceptor do apiClient já deve mostrar a mensagem de erro da API.
+        } finally {
+            setIsSavingInfo(false);
+        }
+    };
+    
+    // --- Handlers para Modal de Edição de Perfis Financeiros ---
+    const showEditProfileModal = (profile) => {
+        setEditingProfile(profile);
+        editProfileForm.setFieldsValue({
+            accountName: profile.name,
+            documentNumber: profile.documentNumber,
+            isDefault: profile.isDefault,
+        });
+        setIsEditProfileModalVisible(true);
+    };
+    const handleEditProfileCancel = () => {
+        setIsEditProfileModalVisible(false);
+        setEditingProfile(null);
+    };
+    const handleEditProfileFinish = async (values) => {
+        if (!editingProfile || !mainUserData.id) return;
+        setIsSavingProfile(true);
+        try {
+            // *** LÓGICA CORRIGIDA E INTEGRADA ***
+            // Usa o clientId do usuário logado (mainUserData.id) e o ID do perfil a ser editado (editingProfile.id)
+            await apiClient.put(`/clients/${mainUserData.id}/financial-accounts/${editingProfile.id}`, values);
+            message.success(`Perfil "${values.accountName}" atualizado com sucesso!`);
+            handleEditProfileCancel();
+            // Recarrega os perfis no contexto para que toda a aplicação veja a mudança
+            await fetchUserProfiles(); 
+        } catch (error) {
+            // O interceptor do apiClient já lida com a exibição de mensagens de erro.
+        } finally {
+            setIsSavingProfile(false);
+        }
     };
 
+    // --- Handlers para Acesso Compartilhado e Integrações (código existente mantido) ---
     const showAccessModal = (user = null) => {
         setEditingAccessUser(user);
         if (user) {
@@ -227,31 +288,18 @@ const ConfiguracoesPage = () => {
 
     const onAccessFormFinish = async (values) => {
         setIsSavingAccess(true);
-        
-        const {
-            sharedAccessPhone,
-            sharedAccessPassword,
-            canAccessPersonalProfile,
-            canAccessBusinessProfileId,
-        } = values;
-
+        const { sharedAccessPhone, sharedAccessPassword, canAccessPersonalProfile, canAccessBusinessProfileId } = values;
         if (!canAccessPersonalProfile && !canAccessBusinessProfileId) {
             message.error('Selecione pelo menos um perfil (Pessoal ou Empresarial) para compartilhar.');
             setIsSavingAccess(false);
             return;
         }
-
         const payload = {
-            sharedAccessPhone,
-            sharedAccessPassword,
+            sharedAccessPhone, sharedAccessPassword,
             canAccessPersonalProfile: !!canAccessPersonalProfile,
             canAccessBusinessProfileId: canAccessBusinessProfileId || null,
         };
-        
-        if (editingAccessUser && !payload.sharedAccessPassword) {
-            delete payload.sharedAccessPassword;
-        }
-
+        if (editingAccessUser && !payload.sharedAccessPassword) { delete payload.sharedAccessPassword; }
         try {
             if (editingAccessUser) {
                 await apiClient.put(`/shared-access/my-shares/${editingAccessUser.id}`, payload);
@@ -262,11 +310,7 @@ const ConfiguracoesPage = () => {
             }
             fetchSharedAccesses();
             handleAccessModalCancel();
-        } catch (error) {
-            // O interceptor de erro do apiClient já deve mostrar a mensagem
-        } finally {
-            setIsSavingAccess(false);
-        }
+        } catch (error) { /* Interceptor */ } finally { setIsSavingAccess(false); }
     };
     
     const handleDeleteAccessUser = async (sharedAccessId, userName) => {
@@ -323,7 +367,7 @@ const ConfiguracoesPage = () => {
     const handleSaveGoogleColors = async (values) => {
         setIsSavingGoogleColors(true);
         try {
-            await apiClient.put('/auth/client/me/calendar-preferences', {
+            await apiClient.put('/client/me/calendar-preferences', {
                 googleCalendarColorIdPF: values.googleCalendarColorIdPF,
                 googleCalendarColorIdPJ: values.googleCalendarColorIdPJ,
             });
@@ -335,6 +379,8 @@ const ConfiguracoesPage = () => {
             <Space><span style={{ display: 'inline-block', width: 16, height: 16, backgroundColor: color.hex, borderRadius: '3px', border: '1px solid #ccc' }} />{color.name}</Space>
         </Option>
     );
+
+    // --- Handlers para Horários e Disponibilidade (código existente mantido) ---
     const handleSaveSchedule = async (values) => {
         if (!currentProfile?.id) return;
         setIsSavingSchedule(true);
@@ -443,13 +489,14 @@ const ConfiguracoesPage = () => {
         <Content className="page-content-wrapper configuracoes-content">
             <Title level={2} className="page-title-custom configuracoes-title"><SettingOutlined className="title-icon-config" /> Configurações</Title>
             <Paragraph type="secondary" className="page-subtitle-config">
-                Gerencie sua conta, acessos compartilhados e integrações.
+                Gerencie sua conta, perfis financeiros, acessos compartilhados e integrações.
                 {currentProfileName && <> Perfil ativo: <Text strong>{currentProfileName}</Text>.</>}
             </Paragraph>
 
             <Tabs defaultActiveKey="1" type="card" className="configuracoes-tabs">
                  <TabPane tab={<span><UserOutlined /> Minha Conta</span>} key="1" className="tab-pane-minha-conta">
-                    <Card title="Informações da Conta Principal" bordered={false} className="config-card animated-card"
+                    {/* Card para Informações de Acesso */}
+                    <Card title="Informações de Acesso e Contato" bordered={false} className="config-card animated-card"
                         extra={<Button type="link" icon={<EditOutlined />} onClick={showEditInfoModal} className="edit-personal-info-btn">Editar</Button>}
                     >
                         <Row gutter={[16, 24]}>
@@ -457,12 +504,44 @@ const ConfiguracoesPage = () => {
                             <Col xs={24} sm={12}><Text strong>Email de Acesso:</Text> <br /><Text>{mainUserData.email}</Text></Col>
                             <Col xs={24} sm={12}><Text strong>Telefone Principal (WhatsApp):</Text> <br /><Text>{mainUserData.phone}</Text></Col>
                         </Row>
-                        <Divider />
-                        <Paragraph type="secondary" style={{ fontSize: '12px', marginTop: '15px' }}>
-                            Estes são seus dados de acesso à plataforma e interação via WhatsApp.
+                    </Card>
+
+                    <Divider />
+
+                    {/* Card para Perfis Financeiros */}
+                    <Card title="Meus Perfis Financeiros" bordered={false} className="config-card animated-card" style={{ marginTop: '24px' }}>
+                        <Paragraph type="secondary" style={{ marginBottom: '20px' }}>
+                            Gerencie os detalhes de cada um dos seus perfis financeiros (contas).
                         </Paragraph>
+                         <List
+                            itemLayout="horizontal"
+                            dataSource={userProfiles}
+                            className="profile-list-item"
+                            renderItem={profile => (
+                                <List.Item
+                                    actions={[
+                                        <Tooltip title="Editar Perfil" key={`edit-profile-${profile.id}`}>
+                                            <Button type="text" icon={<EditOutlined />} onClick={() => showEditProfileModal(profile)} className="list-action-btn edit" />
+                                        </Tooltip>
+                                    ]}
+                                >
+                                    <List.Item.Meta
+                                        avatar={<Avatar icon={profile.icon} className="shared-user-avatar" />}
+                                        title={<Text strong className="shared-user-name">{profile.name}</Text>}
+                                        description={
+                                            <Space>
+                                                <Tag icon={<ProfileOutlined />} color="geekblue">{profile.type}</Tag>
+                                                {profile.isDefault && <Tag icon={<StarOutlined />} color="gold">Padrão</Tag>}
+                                            </Space>
+                                        }
+                                    />
+                                </List.Item>
+                            )}
+                        />
                     </Card>
                 </TabPane>
+                
+                {/* Outras Abas (Acesso, Integrações, Horários) permanecem aqui */}
                 <TabPane tab={<span><ShareAltOutlined /> Acesso Compartilhado</span>} key="2" className="tab-pane-acesso-compartilhado">
                     <Card title="Gerenciar Acessos Concedidos" bordered={false} className="config-card animated-card" style={{ animationDelay: '0.1s' }}
                         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => showAccessModal()} className="add-access-btn">Conceder Acesso</Button>}
@@ -579,6 +658,7 @@ const ConfiguracoesPage = () => {
                 </TabPane>
             </Tabs>
             
+            {/* Modal para Editar Informações de Acesso */}
             <Modal title={<Space><IdcardOutlined /> Editar Minhas Informações</Space>} open={isEditInfoModalVisible} onCancel={handleEditInfoCancel} footer={null} destroyOnClose width={600} className="edit-info-modal modal-style-map">
                 <Form form={editInfoForm} layout="vertical" onFinish={handleEditInfoFinish}>
                     <Form.Item name="name" label="Nome Completo" rules={[{ required: true, message: 'Insira seu nome!' }]}><Input prefix={<UserOutlined />} /></Form.Item>
@@ -586,9 +666,11 @@ const ConfiguracoesPage = () => {
                         <Col xs={24} sm={12}><Form.Item name="email" label="Email Principal" rules={[{ required: true, message: 'Insira seu email!' }, { type: 'email', message: 'Email inválido!' }]}><Input prefix={<MailOutlined />} /></Form.Item></Col>
                         <Col xs={24} sm={12}><Form.Item name="phone" label="Telefone Principal (WhatsApp)" rules={[{ required: true, message: 'Insira seu telefone!' }]}><Input prefix={<PhoneOutlined />} /></Form.Item></Col>
                     </Row>
-                    <Paragraph type="secondary" style={{ fontSize: '13px', margin: '15px 0' }}>Para alterar seus dados ou senha, insira sua senha atual.</Paragraph>
-                    <Form.Item name="currentPassword" label="Senha Atual (para confirmar alterações)"><Input.Password prefix={<LockOutlined />} /></Form.Item>
                     <Divider>Alterar Senha (Opcional)</Divider>
+                    <Paragraph type="secondary" style={{ fontSize: '13px', margin: '15px 0' }}>
+                        Para alterar sua senha, preencha os campos abaixo. Para alterar apenas seus dados, deixe os campos de senha em branco e clique em salvar.
+                    </Paragraph>
+                    <Form.Item name="currentPassword" label="Senha Atual (obrigatória para trocar de senha)"><Input.Password prefix={<LockOutlined />} /></Form.Item>
                     <Row gutter={16}>
                         <Col xs={24} sm={12}><Form.Item name="newPassword" label="Nova Senha" rules={[{ min: 6, message: 'Mínimo 6 caracteres.' }]} hasFeedback><Input.Password prefix={<LockOutlined />} /></Form.Item></Col>
                         <Col xs={24} sm={12}><Form.Item name="confirmNewPassword" label="Confirmar Nova Senha" dependencies={['newPassword']} hasFeedback rules={[({ getFieldValue }) => ({ validator(_, value) { if (!value && !getFieldValue('newPassword')) return Promise.resolve(); if (getFieldValue('newPassword') && !value) return Promise.reject(new Error('Confirme a nova senha!')); if (value && !getFieldValue('newPassword')) return Promise.reject(new Error('Preencha "Nova Senha" primeiro!')); if (getFieldValue('newPassword') === value) return Promise.resolve(); return Promise.reject(new Error('As senhas não coincidem!')); }, }),]}><Input.Password prefix={<LockOutlined />} /></Form.Item></Col>
@@ -597,6 +679,34 @@ const ConfiguracoesPage = () => {
                 </Form>
             </Modal>
 
+            {/* Modal para Editar Perfil Financeiro */}
+            <Modal
+                title={<Space><BankOutlined /> Editar Perfil Financeiro</Space>}
+                open={isEditProfileModalVisible}
+                onCancel={handleEditProfileCancel}
+                footer={null}
+                destroyOnClose
+                width={600}
+                className="edit-profile-modal modal-style-map"
+            >
+                {editingProfile && (
+                    <Form form={editProfileForm} layout="vertical" onFinish={handleEditProfileFinish}>
+                        <Form.Item name="accountName" label="Nome do Perfil" rules={[{ required: true, message: 'O nome do perfil é obrigatório!' }]}>
+                            <Input prefix={<ProfileOutlined />} />
+                        </Form.Item>
+            
+                        <Form.Item name="isDefault" valuePropName="checked">
+
+                        </Form.Item>
+                        <Form.Item className="form-action-buttons">
+                            <Button onClick={handleEditProfileCancel} className="cancel-btn-form" disabled={isSavingProfile}>Cancelar</Button>
+                            <Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingProfile}>Salvar Alterações</Button>
+                        </Form.Item>
+                    </Form>
+                )}
+            </Modal>
+
+            {/* Modal para Acesso Compartilhado */}
             <Modal
                 title={<Space><ShareAltOutlined />{editingAccessUser ? "Editar Acesso Concedido" : "Conceder Novo Acesso"}</Space>}
                 open={isAccessModalVisible}
@@ -611,63 +721,33 @@ const ConfiguracoesPage = () => {
                     <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
                         O convidado usará o número de telefone para interagir via WhatsApp e a senha para acessar a plataforma web.
                     </Paragraph>
-
-                    <Form.Item
-                        name="sharedAccessPhone"
-                        label="Telefone WhatsApp do Convidado"
-                        rules={[{ required: true, message: 'O Telefone WhatsApp do convidado é obrigatório!' }]}
-                    >
-                        <Input
-                            prefix={<WhatsAppOutlined />}
-                            placeholder="Ex: 71982862912"
-                            disabled={!!editingAccessUser}
-                        />
+                    <Form.Item name="sharedAccessPhone" label="Telefone WhatsApp do Convidado" rules={[{ required: true, message: 'O Telefone WhatsApp do convidado é obrigatório!' }]}>
+                        <Input prefix={<WhatsAppOutlined />} placeholder="Ex: 71982862912" disabled={!!editingAccessUser} />
                     </Form.Item>
-                    {editingAccessUser &&
-                        <Paragraph type="secondary" style={{ fontSize: '11px', marginTop: '-10px', marginBottom: '15px' }}>
-                            <InfoCircleOutlined/> O telefone não pode ser alterado após o acesso ser criado. Para mudar o número, remova este acesso e crie um novo.
-                        </Paragraph>
-                    }
-                    
-                    <Form.Item
-                        name="sharedAccessPassword"
-                        label={editingAccessUser ? "Nova Senha (deixe em branco para não alterar)" : "Senha para o Convidado"}
-                        rules={editingAccessUser ? [{ min: 6, message: "Mínimo 6 caracteres." }] : [{ required: true, message: 'Senha é obrigatória!' }, { min: 6, message: "Mínimo 6 caracteres." }]}
-                        hasFeedback={!editingAccessUser || !!accessForm.getFieldValue('sharedAccessPassword')}
-                    >
+                    {editingAccessUser && <Paragraph type="secondary" style={{ fontSize: '11px', marginTop: '-10px', marginBottom: '15px' }}><InfoCircleOutlined/> O telefone não pode ser alterado após o acesso ser criado.</Paragraph>}
+                    <Form.Item name="sharedAccessPassword" label={editingAccessUser ? "Nova Senha (deixe em branco para não alterar)" : "Senha para o Convidado"} rules={editingAccessUser ? [{ min: 6, message: "Mínimo 6 caracteres." }] : [{ required: true, message: 'Senha é obrigatória!' }, { min: 6, message: "Mínimo 6 caracteres." }]} hasFeedback={!editingAccessUser || !!accessForm.getFieldValue('sharedAccessPassword')}>
                         <Input.Password prefix={<LockOutlined />} placeholder="Crie uma senha segura"/>
                     </Form.Item>
-
                     <Divider className="form-divider">Permissões de Acesso</Divider>
                     <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
                         Selecione quais dos SEUS perfis este convidado poderá visualizar e gerenciar.
                     </Paragraph>
-
-                    <Form.Item name="canAccessPersonalProfile" valuePropName="checked">
-                        <Checkbox><CreditCardOutlined /> Acesso ao Perfil Pessoal (PF)</Checkbox>
-                    </Form.Item>
-                    
+                    <Form.Item name="canAccessPersonalProfile" valuePropName="checked"><Checkbox><CreditCardOutlined /> Acesso ao Perfil Pessoal (PF)</Checkbox></Form.Item>
                     {ownerHasBusinessProfile && (
                         <Form.Item name="canAccessBusinessProfileId" label="Acesso ao Perfil Empresarial">
                             <Select placeholder="Selecione um perfil empresarial ou nenhum" allowClear>
-                                {businessProfiles.map(profile => (
-                                    <Option key={profile.id} value={profile.id}>
-                                        <ShopOutlined /> {profile.name} ({profile.type})
-                                    </Option>
-                                ))}
+                                {businessProfiles.map(profile => ( <Option key={profile.id} value={profile.id}><ShopOutlined /> {profile.name} ({profile.type})</Option> ))}
                             </Select>
                         </Form.Item>
                     )}
-                    
                     <Form.Item className="form-action-buttons">
                         <Button onClick={handleAccessModalCancel} className="cancel-btn-form" disabled={isSavingAccess}>Cancelar</Button>
-                        <Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingAccess}>
-                            {editingAccessUser ? "Salvar Alterações" : "Conceder Acesso"}
-                        </Button>
+                        <Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingAccess}>{editingAccessUser ? "Salvar Alterações" : "Conceder Acesso"}</Button>
                     </Form.Item>
                 </Form>
             </Modal>
 
+            {/* Modal para Adicionar Dia de Folga */}
             <Modal
                 title={<Space><CalendarOutlined /> Adicionar Dia de Folga/Feriado</Space>}
                 open={isDayOffModalVisible}

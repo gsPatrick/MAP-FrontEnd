@@ -241,3 +241,49 @@
     .access-modal .access-type-radio-group-simplified { display: flex; flex-wrap: wrap; gap: 8px; }
     .access-modal .access-type-radio-group-simplified .ant-radio-button-wrapper { flex-grow: 1; margin-right: 0 !important; min-width: 120px; }
 }
+
+.profile-list-item .ant-list-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background-color: #fff;
+    border: 1px solid #e8e8e8;
+}
+.profile-list-item .ant-list-item:hover {
+    background-color: #fafcfe;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: var(--map-laranja-claro);
+}
+
+.profile-list-item .ant-list-item-meta-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--map-preto);
+}
+.profile-list-item .ant-list-item-meta-description .ant-tag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.profile-list-item .ant-list-item-meta-description .ant-tag-gold {
+    background-color: #fffbe6;
+    border-color: #ffe58f;
+    color: #d46b08;
+}
+.profile-list-item .ant-list-item-meta-description .ant-tag-geekblue {
+    background-color: #e6f4ff;
+    border-color: #91caff;
+    color: #0958d9;
+}
+.profile-list-item .ant-list-item-meta-avatar .ant-avatar {
+    background-color: var(--map-laranja-claro);
+    color: var(--map-laranja-escuro);
+}
+
+/* Estilo para o modal de edição de perfil */
+.edit-profile-modal .ant-modal-title .anticon {
+    color: var(--map-dourado) !important;
+}

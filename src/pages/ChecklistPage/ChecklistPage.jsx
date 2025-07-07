@@ -13,7 +13,7 @@ import 'dayjs/locale/pt-br';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { useProfile } from '../../contexts/ProfileContext';
-import apiClient from '../../services/api'; // <<< PASSO 1: Importar o apiClient
+import apiClient from '../../services/api';
 import './ChecklistPage.css';
 
 dayjs.locale('pt-br');
@@ -23,12 +23,9 @@ const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
-// --- DADOS MOCKADOS REMOVIDOS ---
-
 const ChecklistPage = () => {
   const { currentProfile, currentProfileType } = useProfile();
 
-  // <<< PASSO 2: Simplificar o estado para lidar com dados da API >>>
   const [checklistItems, setChecklistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
@@ -43,18 +40,33 @@ const ChecklistPage = () => {
 
   const viewingToday = useMemo(() => selectedDate.isSame(dayjs(), 'day'), [selectedDate]);
 
-  // <<< PASSO 3: Criar função para buscar dados da API >>>
   const fetchChecklist = useCallback(async (date) => {
+    // É crucial que currentProfile.id seja uma string para a comparação com item.checklist.financialAccountId.toString()
+    // Visto que o useProfile já retorna o ID como string (se for cliente), isso deve estar ok.
     if (!currentProfile?.id) return;
 
     setLoading(true);
+    setChecklistItems([]); 
     const dateKey = date.format('YYYY-MM-DD');
     try {
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/checklists/${dateKey}`);
-      // A API retorna um objeto de checklist com um array 'items'
-      setChecklistItems(response.data.data.items || []);
+      
+      const fetchedItems = response.data.data.items || [];
+      
+      // FILTRO CRÍTICO: Garante que apenas os itens que realmente pertencem ao perfil atual sejam exibidos.
+      // Isso evita que o frontend tente manipular itens de outras contas.
+      const filteredItems = fetchedItems.filter(item => 
+        item.checklist && item.checklist.financialAccountId.toString() === currentProfile.id.toString()
+      );
+      
+      setChecklistItems(filteredItems);
+
+      // Log para depuração: ver se algum item foi filtrado
+      if (fetchedItems.length !== filteredItems.length) {
+          console.warn(`[ChecklistPage] Foram carregados ${fetchedItems.length} itens, mas apenas ${filteredItems.length} pertencem ao perfil atual (${currentProfile.id}). Itens de outros perfis foram filtrados.`);
+      }
+
     } catch (error) {
-      // O interceptor já mostra a mensagem de erro, mas limpamos a lista
       setChecklistItems([]);
     } finally {
       setLoading(false);
@@ -63,8 +75,10 @@ const ChecklistPage = () => {
 
   // Efeito para buscar os dados sempre que a data ou o perfil mudar
   useEffect(() => {
+    console.log(`[ChecklistPage] useEffect fetch: currentProfile.id = ${currentProfile?.id}`);
+    console.log(`[ChecklistPage] useEffect fetch: selectedDate = ${selectedDate.format('YYYY-MM-DD')}`);
     fetchChecklist(selectedDate);
-  }, [selectedDate, fetchChecklist]);
+  }, [selectedDate, fetchChecklist, currentProfile]);
 
   const dailyProgress = useMemo(() => {
       const total = checklistItems.length;
@@ -73,7 +87,6 @@ const ChecklistPage = () => {
       return Math.round((completed / total) * 100);
   }, [checklistItems]);
 
-  // <<< PASSO 4: Modificar todas as funções de manipulação para usar a API >>>
   const handleAddItem = useCallback(async () => {
     if (!newItemText.trim() || !viewingToday || !currentProfile?.id) return;
     
@@ -94,9 +107,24 @@ const ChecklistPage = () => {
     }
   }, [newItemText, newItemPriority, viewingToday, currentProfile?.id, selectedDate, fetchChecklist]);
 
-  const handleToggleItem = useCallback(async (itemId, currentStatus) => {
-    if (!viewingToday || !currentProfile?.id) return;
+  // Modificado para incluir itemFinancialAccountId
+  const handleToggleItem = useCallback(async (itemId, currentStatus, itemFinancialAccountId) => {
+    console.log(`[ChecklistPage] handleToggleItem: Clicado no item ID: ${itemId}`);
+    console.log(`[ChecklistPage] handleToggleItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
+    console.log(`[ChecklistPage] handleToggleItem: itemFinancialAccountId: ${itemFinancialAccountId}`);
+
+    if (!viewingToday || !currentProfile?.id) {
+        console.warn('[ChecklistPage] handleToggleItem: Abortando porque não é hoje ou currentProfile.id está ausente.');
+        return;
+    }
     
+    // NOVA VERIFICAÇÃO: Se o item não pertence ao perfil ativo, previne a ação
+    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
+    if (currentProfile.id !== itemFinancialAccountId.toString()) {
+        message.error('Você não pode editar tarefas de outro perfil financeiro.');
+        return;
+    }
+
     // Optimistic Update
     const originalItems = [...checklistItems];
     const newItems = checklistItems.map(item => 
@@ -112,8 +140,23 @@ const ChecklistPage = () => {
     }
   }, [viewingToday, currentProfile?.id, checklistItems]);
 
-  const handleDeleteItem = useCallback(async (itemId) => {
-    if (!viewingToday || !currentProfile?.id) return;
+  // Modificado para incluir itemFinancialAccountId
+  const handleDeleteItem = useCallback(async (itemId, itemFinancialAccountId) => {
+    console.log(`[ChecklistPage] handleDeleteItem: Clicado no item ID: ${itemId}`);
+    console.log(`[ChecklistPage] handleDeleteItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
+    console.log(`[ChecklistPage] handleDeleteItem: itemFinancialAccountId: ${itemFinancialAccountId}`);
+
+    if (!viewingToday || !currentProfile?.id) {
+        console.warn('[ChecklistPage] handleDeleteItem: Abortando porque não é hoje ou currentProfile.id está ausente.');
+        return;
+    }
+
+    // NOVA VERIFICAÇÃO: Se o item não pertence ao perfil ativo, previne a ação
+    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
+    if (currentProfile.id !== itemFinancialAccountId.toString()) {
+        message.error('Você não pode excluir tarefas de outro perfil financeiro.');
+        return;
+    }
 
     const originalItems = [...checklistItems];
     const newItems = checklistItems.filter(item => item.id !== itemId);
@@ -136,6 +179,13 @@ const ChecklistPage = () => {
   
   const handleUpdateItem = async (values) => {
     if (!editingItem || !currentProfile?.id) return;
+
+    // Verificação de segurança adicional para a edição via modal
+    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
+    if (currentProfile.id !== editingItem.checklist.financialAccountId.toString()) {
+        message.error('Você não pode editar tarefas de outro perfil financeiro.');
+        return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -275,14 +325,16 @@ const ChecklistPage = () => {
           }}
           renderItem={(item) => (
             <List.Item
-              className={`checklist-item ${item.completed ? 'completed' : ''}`}
+              // Adiciona uma classe para depuração visual se o perfil não corresponder
+              // Se o filtro em fetchChecklist estiver funcionando, esta classe nunca deve ser aplicada
+              className={`checklist-item ${item.completed ? 'completed' : ''} ${currentProfile?.id !== item.checklist.financialAccountId.toString() ? 'mismatched-profile' : ''}`}
               actions={viewingToday ? [
                   <Space className="item-actions">
                     <Tooltip title="Editar Tarefa">
                         <Button type="text" shape="circle" icon={<EditOutlined />} onClick={() => showEditModal(item)} />
                     </Tooltip>
                     <Tooltip title="Excluir Tarefa">
-                        <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => handleDeleteItem(item.id)} />
+                        <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => handleDeleteItem(item.id, item.checklist.financialAccountId)} />
                     </Tooltip>
                   </Space>
               ] : []}
@@ -290,7 +342,7 @@ const ChecklistPage = () => {
                 <div className="checklist-item-main">
                     <Checkbox
                         checked={item.completed}
-                        onChange={() => handleToggleItem(item.id, item.completed)}
+                        onChange={() => handleToggleItem(item.id, item.completed, item.checklist.financialAccountId)}
                         disabled={!viewingToday}
                         className="checklist-item-checkbox"
                     />
@@ -344,4 +396,4 @@ const ChecklistPage = () => {
   );
 };
 
-export default ChecklistPage;   
+export default ChecklistPage;

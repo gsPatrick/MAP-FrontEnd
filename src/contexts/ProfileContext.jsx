@@ -11,7 +11,6 @@ export const ProfileProvider = ({ children }) => {
   const [selectedProfileId, setSelectedProfileIdState] = useState(null);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // <<< MUDANÇA 1: currentProfile agora é um estado explícito
   const [currentProfile, setCurrentProfile] = useState(null); 
 
   const mapProfileTypeToIcon = (type) => {
@@ -30,7 +29,6 @@ export const ProfileProvider = ({ children }) => {
     const userDataString = localStorage.getItem('userData');
 
     if (!token || !userRole || !userDataString) {
-      // Limpa todos os estados se não houver dados de login
       setUserProfiles([]);
       setSelectedProfileIdState(null);
       setCurrentProfile(null);
@@ -45,34 +43,30 @@ export const ProfileProvider = ({ children }) => {
 
     try {
       if (userRole === 'admin') {
-        console.log("[ProfileContext] Detectado userRole 'admin'. Configurando perfil de admin.");
-        
         const adminProfile = {
           id: 'admin_profile',
           name: userData.name || 'Administrador',
           type: 'ADMIN',
           icon: mapProfileTypeToIcon('ADMIN'),
         };
-
         setUserProfiles([adminProfile]);
         setSelectedProfileIdState(adminProfile.id);
-        // <<< MUDANÇA 2: Seta o perfil atual de forma explícita e garantida
         setCurrentProfile(adminProfile); 
-        
       } else if (userRole === 'client') {
-        console.log("[ProfileContext] Detectado userRole 'client'. Buscando perfis da API.");
         const response = await apiClient.get('/auth/client/me');
 
         if (response.data && response.data.status === 'success') {
           const financialAccounts = response.data.data.financialAccounts || [];
+          
           const fetchedProfiles = financialAccounts.map(acc => ({
             id: acc.id.toString(),
             name: acc.accountName,
             type: acc.accountType,
             icon: mapProfileTypeToIcon(acc.accountType),
             isDefault: acc.isDefault,
+            documentNumber: acc.documentNumber // Adicionando para o modal de edição
           }));
-
+          
           setUserProfiles(fetchedProfiles);
 
           let finalProfileId = null;
@@ -80,6 +74,7 @@ export const ProfileProvider = ({ children }) => {
               const savedProfileId = localStorage.getItem('selectedProfileId');
               const defaultProfile = fetchedProfiles.find(p => p.isDefault);
               
+              // Prioridade: ID salvo, se ainda for válido. Senão, novo padrão. Senão, primeiro da lista.
               if (savedProfileId && fetchedProfiles.find(p => p.id === savedProfileId)) {
                   finalProfileId = savedProfileId;
               } else {
@@ -90,8 +85,8 @@ export const ProfileProvider = ({ children }) => {
           setSelectedProfileIdState(finalProfileId);
           if (finalProfileId) {
             localStorage.setItem('selectedProfileId', finalProfileId);
-            // <<< MUDANÇA 3: Seta o perfil atual de forma explícita e garantida
-            setCurrentProfile(fetchedProfiles.find(p => p.id === finalProfileId));
+            const newCurrentProfile = fetchedProfiles.find(p => p.id === finalProfileId);
+            setCurrentProfile(newCurrentProfile);
           } else {
             localStorage.removeItem('selectedProfileId');
             setCurrentProfile(null);
@@ -101,7 +96,7 @@ export const ProfileProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error("Erro fatal ao buscar perfis, limpando sessão:", error);
+      console.error("[ProfileContext] Erro fatal ao buscar perfis, limpando sessão:", error);
       localStorage.removeItem('authToken');
       localStorage.removeItem('selectedProfileId');
       localStorage.removeItem('userRole');
@@ -113,7 +108,7 @@ export const ProfileProvider = ({ children }) => {
     } finally {
       setLoadingProfiles(false);
     }
-  }, []);
+  }, []); 
 
   useEffect(() => {
     fetchUserProfiles();
@@ -122,20 +117,19 @@ export const ProfileProvider = ({ children }) => {
   const setSelectedProfileId = (profileId) => {
     if (profileId && profileId !== 'admin_profile') {
       localStorage.setItem('selectedProfileId', profileId);
+    } else if (!profileId) {
+        localStorage.removeItem('selectedProfileId');
     }
     setSelectedProfileIdState(profileId);
-    // Atualiza o currentProfile quando o ID selecionado muda
     const newProfile = userProfiles.find(p => p.id === profileId);
     setCurrentProfile(newProfile || null);
   };
   
-  // <<< MUDANÇA 4: O useMemo agora apenas agrupa os valores, sem calcular o perfil
   const value = useMemo(() => ({
     userProfiles,
     selectedProfileId,
     setSelectedProfileId,
-    currentProfile, // Usa o estado diretamente
-    // Derivados simples são seguros aqui
+    currentProfile,
     currentProfileType: currentProfile?.type, 
     currentProfileName: currentProfile?.name,
     loadingProfiles,
