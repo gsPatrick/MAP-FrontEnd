@@ -32,7 +32,7 @@ const googleCalendarColors = [
     { id: '3', name: 'Uva', hex: '#8e24aa' }, { id: '4', name: 'Flamingo', hex: '#e67c73' },
     { id: '5', name: 'Banana', hex: '#f6c026' }, { id: '6', name: 'Tangerina', hex: '#f5511d' },
     { id: '7', name: 'Pavão', hex: '#039be5' }, { id: '8', name: 'Grafite', hex: '#616161' },
-    { id: '9', name: 'Mirtilo', hex: '#3f51b5' }, { id: '10', name: 'Manjericão', hex: '#0b8043' },
+    { id: '9', name: 'Mirtilo', hex: '#3f51b5' }, { id: '10', 'name': 'Manjericão', hex: '#0b8043' },
     { id: '11', name: 'Tomate', hex: '#d60000' },
 ];
 const daysOfWeekMap = { mon: RRule.MO, tue: RRule.TU, wed: RRule.WE, thu: RRule.TH, fri: RRule.FR, sat: RRule.SA, sun: RRule.SU };
@@ -192,14 +192,18 @@ const ConfiguracoesPage = () => {
 
     const handleEditInfoFinish = async (values) => {
         setIsSavingInfo(true);
-        const payload = {
-            name: values.name,
-            email: values.email,
-            phone: values.phone,
-        };
+        const payload = {};
     
-        // *** LÓGICA CORRIGIDA ***
-        // A senha atual só é necessária se uma nova senha estiver sendo definida.
+        if (values.name !== mainUserData.name) {
+            payload.name = values.name;
+        }
+        if (values.email !== mainUserData.email) {
+            payload.email = values.email;
+        }
+        if (values.phone !== mainUserData.phone) {
+            payload.phone = values.phone;
+        }
+    
         if (values.newPassword) {
             if (!values.currentPassword) {
                 message.error('Por favor, insira sua senha atual para definir uma nova.');
@@ -210,26 +214,33 @@ const ConfiguracoesPage = () => {
             payload.newPassword = values.newPassword;
         }
     
+        if (Object.keys(payload).length === 0) {
+            message.info('Nenhum dado foi alterado.');
+            setIsEditInfoModalVisible(false);
+            setIsSavingInfo(false);
+            return;
+        }
+    
         try {
-            // Supondo que o endpoint do backend para atualizar o perfil do cliente seja este:
-            // O backend deve ser inteligente o suficiente para não exigir a senha se apenas nome/email/phone forem alterados.
-            const response = await apiClient.put(`/client/update-profile`, payload);
+            // <<< MUDANÇA CRÍTICA AQUI >>>
+            // Corrigido o endpoint para corresponder à estrutura de rotas do back-end.
+            const response = await apiClient.put(`/auth/client/update-profile`, payload);
     
             if (response.data?.status === 'success') {
                 const updatedClientData = response.data.data.client;
                 setMainUserData(prev => ({ ...prev, ...updatedClientData }));
                 localStorage.setItem('userData', JSON.stringify(updatedClientData));
-                message.success('Informações atualizadas com sucesso!');
+                
+                message.success(response.data.data.message || 'Informações atualizadas com sucesso!');
                 setIsEditInfoModalVisible(false);
             }
         } catch (error) {
-            // O interceptor do apiClient já deve mostrar a mensagem de erro da API.
+            // O interceptor já trata o erro
         } finally {
             setIsSavingInfo(false);
         }
     };
     
-    // --- Handlers para Modal de Edição de Perfis Financeiros ---
     const showEditProfileModal = (profile) => {
         setEditingProfile(profile);
         editProfileForm.setFieldsValue({
@@ -242,26 +253,27 @@ const ConfiguracoesPage = () => {
     const handleEditProfileCancel = () => {
         setIsEditProfileModalVisible(false);
         setEditingProfile(null);
+        editProfileForm.resetFields();
     };
     const handleEditProfileFinish = async (values) => {
         if (!editingProfile || !mainUserData.id) return;
         setIsSavingProfile(true);
         try {
-            // *** LÓGICA CORRIGIDA E INTEGRADA ***
-            // Usa o clientId do usuário logado (mainUserData.id) e o ID do perfil a ser editado (editingProfile.id)
-            await apiClient.put(`/clients/${mainUserData.id}/financial-accounts/${editingProfile.id}`, values);
+            await apiClient.put(`/clients/${mainUserData.id}/financial-accounts/${editingProfile.id}`, {
+                accountName: values.accountName,
+                isDefault: values.isDefault,
+            });
             message.success(`Perfil "${values.accountName}" atualizado com sucesso!`);
             handleEditProfileCancel();
-            // Recarrega os perfis no contexto para que toda a aplicação veja a mudança
             await fetchUserProfiles(); 
         } catch (error) {
-            // O interceptor do apiClient já lida com a exibição de mensagens de erro.
+            // Interceptor lida com erro
         } finally {
             setIsSavingProfile(false);
         }
     };
 
-    // --- Handlers para Acesso Compartilhado e Integrações (código existente mantido) ---
+    // --- Handlers para Acesso Compartilhado e Integrações ---
     const showAccessModal = (user = null) => {
         setEditingAccessUser(user);
         if (user) {
@@ -380,7 +392,7 @@ const ConfiguracoesPage = () => {
         </Option>
     );
 
-    // --- Handlers para Horários e Disponibilidade (código existente mantido) ---
+    // --- Handlers para Horários e Disponibilidade ---
     const handleSaveSchedule = async (values) => {
         if (!currentProfile?.id) return;
         setIsSavingSchedule(true);
@@ -495,7 +507,6 @@ const ConfiguracoesPage = () => {
 
             <Tabs defaultActiveKey="1" type="card" className="configuracoes-tabs">
                  <TabPane tab={<span><UserOutlined /> Minha Conta</span>} key="1" className="tab-pane-minha-conta">
-                    {/* Card para Informações de Acesso */}
                     <Card title="Informações de Acesso e Contato" bordered={false} className="config-card animated-card"
                         extra={<Button type="link" icon={<EditOutlined />} onClick={showEditInfoModal} className="edit-personal-info-btn">Editar</Button>}
                     >
@@ -508,7 +519,6 @@ const ConfiguracoesPage = () => {
 
                     <Divider />
 
-                    {/* Card para Perfis Financeiros */}
                     <Card title="Meus Perfis Financeiros" bordered={false} className="config-card animated-card" style={{ marginTop: '24px' }}>
                         <Paragraph type="secondary" style={{ marginBottom: '20px' }}>
                             Gerencie os detalhes de cada um dos seus perfis financeiros (contas).
@@ -541,7 +551,6 @@ const ConfiguracoesPage = () => {
                     </Card>
                 </TabPane>
                 
-                {/* Outras Abas (Acesso, Integrações, Horários) permanecem aqui */}
                 <TabPane tab={<span><ShareAltOutlined /> Acesso Compartilhado</span>} key="2" className="tab-pane-acesso-compartilhado">
                     <Card title="Gerenciar Acessos Concedidos" bordered={false} className="config-card animated-card" style={{ animationDelay: '0.1s' }}
                         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => showAccessModal()} className="add-access-btn">Conceder Acesso</Button>}
@@ -658,7 +667,6 @@ const ConfiguracoesPage = () => {
                 </TabPane>
             </Tabs>
             
-            {/* Modal para Editar Informações de Acesso */}
             <Modal title={<Space><IdcardOutlined /> Editar Minhas Informações</Space>} open={isEditInfoModalVisible} onCancel={handleEditInfoCancel} footer={null} destroyOnClose width={600} className="edit-info-modal modal-style-map">
                 <Form form={editInfoForm} layout="vertical" onFinish={handleEditInfoFinish}>
                     <Form.Item name="name" label="Nome Completo" rules={[{ required: true, message: 'Insira seu nome!' }]}><Input prefix={<UserOutlined />} /></Form.Item>
@@ -679,7 +687,6 @@ const ConfiguracoesPage = () => {
                 </Form>
             </Modal>
 
-            {/* Modal para Editar Perfil Financeiro */}
             <Modal
                 title={<Space><BankOutlined /> Editar Perfil Financeiro</Space>}
                 open={isEditProfileModalVisible}
@@ -696,8 +703,17 @@ const ConfiguracoesPage = () => {
                         </Form.Item>
             
                         <Form.Item name="isDefault" valuePropName="checked">
-
+                           <Checkbox>
+                                <Space>
+                                    <StarOutlined />
+                                    Tornar este o perfil padrão
+                                </Space>
+                           </Checkbox>
                         </Form.Item>
+                        <Paragraph type="secondary" style={{fontSize: '12px', marginTop: '-15px', marginBottom: '20px'}}>
+                            O perfil padrão é o primeiro a ser exibido ao fazer login.
+                        </Paragraph>
+
                         <Form.Item className="form-action-buttons">
                             <Button onClick={handleEditProfileCancel} className="cancel-btn-form" disabled={isSavingProfile}>Cancelar</Button>
                             <Button type="primary" htmlType="submit" className="submit-btn-form" loading={isSavingProfile}>Salvar Alterações</Button>
@@ -706,7 +722,6 @@ const ConfiguracoesPage = () => {
                 )}
             </Modal>
 
-            {/* Modal para Acesso Compartilhado */}
             <Modal
                 title={<Space><ShareAltOutlined />{editingAccessUser ? "Editar Acesso Concedido" : "Conceder Novo Acesso"}</Space>}
                 open={isAccessModalVisible}
@@ -747,7 +762,6 @@ const ConfiguracoesPage = () => {
                 </Form>
             </Modal>
 
-            {/* Modal para Adicionar Dia de Folga */}
             <Modal
                 title={<Space><CalendarOutlined /> Adicionar Dia de Folga/Feriado</Space>}
                 open={isDayOffModalVisible}
