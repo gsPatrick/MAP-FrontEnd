@@ -1,122 +1,134 @@
 // src/modals/ModalPjClientAppointment/ModalPjClientAppointment.jsx
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, DatePicker, InputNumber, Button, Space, message, Select, Spin, Empty, Typography } from 'antd';
-import moment from 'moment';
-import { useProfile } from '../../contexts/ProfileContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Form, Input, DatePicker, Button, message, Select, Space } from 'antd';
+import { CalendarOutlined, TeamOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import apiClient from '../../services/api';
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { Text } = Typography;
 
-const ModalPjClientAppointment = ({ open, onCancel, onSuccess, businessClientsList, loadingBusinessClients }) => {
+// <<< MUDANÇA 1: Removendo as props desnecessárias e adicionando `currentProfile` que é essencial >>>
+const ModalPjClientAppointment = ({ 
+    open, 
+    onCancel, 
+    onSuccess, 
+    currentProfile, // Precisa do perfil para saber de onde buscar os clientes
+    editingAppointment 
+}) => {
   const [form] = Form.useForm();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { currentProfile } = useProfile();
+  const [loading, setLoading] = useState(false);
+  
+  // <<< MUDANÇA 2: Estados internos para clientes e seu carregamento >>>
+  const [clients, setClients] = useState([]);
+  const [loadingClients, setLoadingClients] = useState(false);
+
+  // <<< MUDANÇA 3: Função para buscar os clientes, agora DENTRO do modal >>>
+  const fetchClients = useCallback(async () => {
+    if (!currentProfile?.id) return;
+    setLoadingClients(true);
+    try {
+      const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients`, { params: { isActive: true, limit: 500 } });
+      setClients(response.data.data || []);
+    } catch (error) {
+      console.error("Erro ao buscar clientes no modal:", error);
+      message.error("Não foi possível carregar a lista de clientes.");
+    } finally {
+      setLoadingClients(false);
+    }
+  }, [currentProfile?.id]);
 
   useEffect(() => {
     if (open) {
-      form.resetFields();
+      // <<< MUDANÇA 4: Chamar a busca de clientes quando o modal abre >>>
+      fetchClients();
+      if (editingAppointment) {
+        form.setFieldsValue({
+          title: editingAppointment.title,
+          eventDateTime: dayjs(editingAppointment.eventDateTime),
+          businessClientIds: editingAppointment.businessClients?.map(c => c.id.toString()) || [],
+          location: editingAppointment.location,
+          notes: editingAppointment.notes,
+        });
+      } else {
+        form.resetFields();
+        form.setFieldsValue({ eventDateTime: dayjs().add(1, 'hour').minute(0) });
+      }
     }
-  }, [open, form]);
+  }, [open, editingAppointment, form, fetchClients]);
 
   const handleFinish = async (values) => {
-    if (!currentProfile?.id) return;
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        title: values.title,
-        description: values.description,
-        eventDateTime: values.eventDateTime ? values.eventDateTime.toISOString() : null,
-        durationMinutes: values.durationMinutes,
-        location: values.location,
-        notes: values.notes,
-        businessClientIds: values.businessClientIds ? values.businessClientIds.map(id => parseInt(id, 10)) : [],
-        // Não envia campos de serviço nem lembrete PF neste modal
-        origin: 'system_pj_mei', // Definir a origem
-      };
+    setLoading(true);
+    const payload = {
+      ...values,
+      eventDateTime: values.eventDateTime.toISOString(),
+      businessClientIds: values.businessClientIds.map(id => parseInt(id, 10)),
+      origin: 'system_pj_mei',
+    };
 
-      await apiClient.post(`/financial-accounts/${currentProfile.id}/appointments`, payload);
-      message.success("Agendamento criado com sucesso!");
-      onSuccess(); // Chama a função para refetchar dados na página pai
-      onCancel(); // Fecha o modal
+    try {
+      const endpoint = editingAppointment
+        ? `/financial-accounts/${currentProfile.id}/appointments/${editingAppointment.id}`
+        : `/financial-accounts/${currentProfile.id}/appointments`;
+      const method = editingAppointment ? 'patch' : 'put';
+
+      await apiClient[method](endpoint, payload);
+      message.success(`Agendamento ${editingAppointment ? 'atualizado' : 'criado'} com sucesso!`);
+      onSuccess();
+      onCancel();
     } catch (error) {
-      console.error("Erro ao criar agendamento PJ Cliente:", error);
-      // Mensagem de erro já é tratada pelo interceptor do apiClient
+       // Interceptor trata
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
     <Modal
-      title="Novo Agendamento com Cliente"
+      title={
+        <Space>
+          <TeamOutlined style={{ color: 'var(--map-laranja)' }} />
+          {editingAppointment ? 'Editar Agendamento com Cliente' : 'Novo Agendamento com Cliente'}
+        </Space>
+      }
       open={open}
       onCancel={onCancel}
       footer={null}
       destroyOnClose
+      className="modal-novo-compromisso"
     >
       <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <Form.Item
-          name="title"
-          label="Título do Compromisso"
-          rules={[{ required: true, message: 'Por favor, insira um título!' }]}
-        >
-          <Input placeholder="Ex: Reunião com o cliente X" />
+        <Form.Item name="title" label="Título do Agendamento" rules={[{ required: true, message: 'Insira o título!' }]}>
+          <Input placeholder="Ex: Reunião de Alinhamento, Apresentação de Proposta" />
         </Form.Item>
-
-        <Form.Item
-          name="businessClientIds"
-          label="Selecione o(s) cliente(s) associado(s)"
-          rules={[{ required: true, message: 'Por favor, associe pelo menos um cliente!' }]}
-        >
-          <Select
-            mode="multiple"
-            allowClear
-            loading={loadingBusinessClients}
-            placeholder="Selecione os clientes"
-            options={businessClientsList}
-            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-            notFoundContent={loadingBusinessClients ? <Spin size="small" /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum cliente encontrado" />}
-          />
+        {/* <<< MUDANÇA 5: Usando os estados internos `clients` e `loadingClients` >>> */}
+        <Form.Item name="businessClientIds" label="Cliente(s)" rules={[{ required: true, message: 'Selecione ao menos um cliente!' }]}>
+          <Select 
+            mode="multiple" 
+            allowClear 
+            placeholder="Selecione os clientes participantes" 
+            loading={loadingClients}
+            showSearch 
+            optionFilterProp="children"
+            filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+          >
+            {clients.map(client => <Option key={client.id} value={client.id.toString()}>{client.name}</Option>)}
+          </Select>
         </Form.Item>
-
-        <Form.Item
-          name="eventDateTime"
-          label="Data e Hora"
-          rules={[{ required: true, message: 'Por favor, selecione a data e hora!' }]}
-        >
-          <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} placeholder="Selecione a data e hora" />
+        <Form.Item name="eventDateTime" label="Data e Hora" rules={[{ required: true, message: 'Insira a data e hora!' }]}>
+          <DatePicker showTime style={{ width: '100%' }} format="DD/MM/YYYY HH:mm" />
         </Form.Item>
-
-        <Form.Item
-          name="durationMinutes"
-          label="Duração (minutos - Opcional)"
-        >
-          <InputNumber min={5} step={5} style={{ width: '100%' }} placeholder="Ex: 60" />
+        <Form.Item name="location" label="Local (Opcional)">
+            <Input placeholder="Ex: Sala de Reunião, Google Meet" />
         </Form.Item>
-
-        <Form.Item
-          name="location"
-          label="Local (Opcional)"
-        >
-          <Input placeholder="Ex: Sala de Reunião, Videoconferência" />
+        <Form.Item name="notes" label="Observações Internas (Opcional)">
+          <TextArea rows={3} placeholder="Detalhes importantes para você sobre este agendamento" />
         </Form.Item>
-
-         <Form.Item
-          name="notes"
-          label="Observações Internas (Opcional)"
-        >
-          <TextArea rows={2} placeholder="Notas adicionais..." />
-        </Form.Item>
-
-        <Form.Item style={{ marginTop: 24 }}>
-          <Space>
-            <Button onClick={onCancel}>Cancelar</Button>
-            <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              Agendar
-            </Button>
-          </Space>
+        <Form.Item style={{ textAlign: 'right', marginTop: '20px', marginBottom: 0 }}>
+          <Button onClick={onCancel} style={{ marginRight: 8 }} className="modal-btn-cancel">Cancelar</Button>
+          <Button type="primary" htmlType="submit" loading={loading} className="modal-btn-submit neutral">
+            {editingAppointment ? 'Salvar Alterações' : 'Criar Agendamento'}
+          </Button>
         </Form.Item>
       </Form>
     </Modal>

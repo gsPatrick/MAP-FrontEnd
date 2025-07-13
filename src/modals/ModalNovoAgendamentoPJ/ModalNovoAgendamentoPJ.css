@@ -1,0 +1,40 @@
+/* src/modals/ModalNovoAgendamentoPJ/ModalNovoAgendamentoPJ.css */
+.modal-agendamento-pj-chooser .ant-modal-content {
+    border-radius: 12px;
+}
+.modal-agendamento-pj-chooser .ant-modal-header {
+    background-color: #f7f8fa;
+    border-radius: 12px 12px 0 0;
+}
+.modal-agendamento-pj-chooser .ant-modal-title {
+    font-weight: 600;
+}
+
+.chooser-card {
+    border-radius: 10px;
+    border: 1px solid #e8e8e8;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+.chooser-card:hover {
+    border-color: var(--map-laranja);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.chooser-icon {
+    font-size: 42px;
+    color: var(--map-laranja);
+    margin-bottom: 15px;
+}
+
+.chooser-title {
+    color: var(--header-text-primary) !important;
+}
+
+.chooser-description {
+    color: var(--header-text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 60px; /* Para alinhar os cards verticalmente */
+}

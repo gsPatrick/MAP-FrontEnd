@@ -6,7 +6,7 @@ import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
   UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined,
-  CheckSquareOutlined // <<< ADICIONE ESTE ÍCONE
+  CheckSquareOutlined 
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -37,10 +37,13 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
         key: '/painel/clientes', icon: <TeamOutlined />, label: <Link to="/painel/clientes">Clientes de Negócio</Link>,
     },
-    // <<< NOVO ITEM DE MENU AQUI >>>
-    (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
+    // <<<< INÍCIO DA MUDANÇA >>>>
+    // A condição (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && foi removida desta linha.
+    // Agora o item do menu aparecerá para todos os tipos de perfil.
+    {
         key: '/painel/checklist', icon: <CheckSquareOutlined />, label: <Link to="/painel/checklist">Checklist Diário</Link>,
     },
+    // <<<< FIM DA MUDANÇA >>>>
     { key: '/painel/agendamentos', icon: <CalendarOutlined />, label: <Link to="/painel/agendamentos">Agendamentos</Link> },
     { key: '/painel/chat', icon: <MessageOutlined />, label: <Link to="/painel/chat">Chat com Assistente</Link> },
     { key: '/painel/hidratacao', icon: <CreditCardOutlined />, label: <Link to="/painel/hidratacao">Hidratação</Link> },
@@ -48,8 +51,6 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     { key: '/painel/meu-perfil', icon: <UserOutlined />, label: <Link to="/painel/meu-perfil">Meu Perfil</Link> },
     { key: '/painel/configuracoes', icon: <SettingOutlined />, label: <Link to="/painel/configuracoes">Configurações</Link> },
   ].filter(Boolean);
-
-  // ... (o resto do arquivo permanece igual) ...
 
   const menuItems = selectedProfileType === 'ADMIN' ? adminMenuItems : clientMenuItems;
 

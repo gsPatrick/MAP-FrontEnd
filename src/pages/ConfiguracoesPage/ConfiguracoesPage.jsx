@@ -222,8 +222,6 @@ const ConfiguracoesPage = () => {
         }
     
         try {
-            // <<< MUDANÇA CRÍTICA AQUI >>>
-            // Corrigido o endpoint para corresponder à estrutura de rotas do back-end.
             const response = await apiClient.put(`/auth/client/update-profile`, payload);
     
             if (response.data?.status === 'success') {
@@ -285,7 +283,7 @@ const ConfiguracoesPage = () => {
         } else {
             accessForm.resetFields();
             accessForm.setFieldsValue({
-                canAccessPersonalProfile: true,
+                canAccessPersonalProfile: true, // Define PF como padrão ao criar novo
                 canAccessBusinessProfileId: null,
             });
         }
@@ -300,21 +298,38 @@ const ConfiguracoesPage = () => {
 
     const onAccessFormFinish = async (values) => {
         setIsSavingAccess(true);
-        const { sharedAccessPhone, sharedAccessPassword, canAccessPersonalProfile, canAccessBusinessProfileId } = values;
+        // O proprietário fornecerá apenas sharedAccessPhone e as permissões de perfil.
+        // sharedAccessEmail e sharedAccessPassword foram removidos do formulário.
+        const { sharedAccessPhone, canAccessPersonalProfile, canAccessBusinessProfileId } = values;
+        
         if (!canAccessPersonalProfile && !canAccessBusinessProfileId) {
             message.error('Selecione pelo menos um perfil (Pessoal ou Empresarial) para compartilhar.');
             setIsSavingAccess(false);
             return;
         }
+        
         const payload = {
-            sharedAccessPhone, sharedAccessPassword,
+            sharedAccessPhone,
             canAccessPersonalProfile: !!canAccessPersonalProfile,
             canAccessBusinessProfileId: canAccessBusinessProfileId || null,
+            // sharedAccessEmail será null/undefined e sharedAccessPassword será null/undefined
+            // conforme o design revisado, pois o convidado que define no onboarding.
         };
-        if (editingAccessUser && !payload.sharedAccessPassword) { delete payload.sharedAccessPassword; }
+
+        // A propriedade sharedAccessPassword não é mais enviada pelo proprietário
+        // if (editingAccessUser && !payload.sharedAccessPassword) { delete payload.sharedAccessPassword; }
+
         try {
             if (editingAccessUser) {
-                await apiClient.put(`/shared-access/my-shares/${editingAccessUser.id}`, payload);
+                // Ao editar, não queremos que o proprietário altere o sharedAccessPhone
+                // nem tente fornecer email/senha de acesso compartilhado.
+                // O payload de edição deve ser mais restrito.
+                const updatePayload = {
+                    canAccessPersonalProfile: !!canAccessPersonalProfile,
+                    canAccessBusinessProfileId: canAccessBusinessProfileId || null,
+                    // Sem sharedAccessPhone, sharedAccessEmail, sharedAccessPassword
+                };
+                await apiClient.put(`/shared-access/my-shares/${editingAccessUser.id}`, updatePayload);
                 message.success(`Acesso para o telefone "${sharedAccessPhone}" foi atualizado!`);
             } else {
                 await apiClient.post('/shared-access/grant', payload);
@@ -502,7 +517,7 @@ const ConfiguracoesPage = () => {
             <Title level={2} className="page-title-custom configuracoes-title"><SettingOutlined className="title-icon-config" /> Configurações</Title>
             <Paragraph type="secondary" className="page-subtitle-config">
                 Gerencie sua conta, perfis financeiros, acessos compartilhados e integrações.
-                {currentProfileName && <> Perfil ativo: <Text strong>{currentProfileName}</Text>.</>}
+                {currentProfileName && <> Perfil ativo: <Text strong>{currentProfileName}</Text>.</>}{/*  */}
             </Paragraph>
 
             <Tabs defaultActiveKey="1" type="card" className="configuracoes-tabs">
@@ -734,15 +749,13 @@ const ConfiguracoesPage = () => {
                 <Form form={accessForm} layout="vertical" onFinish={onAccessFormFinish} disabled={isSavingAccess}>
                     <Title level={5} style={{ color: "var(--header-text-secondary)" }}>Dados do Convidado</Title>
                     <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
-                        O convidado usará o número de telefone para interagir via WhatsApp e a senha para acessar a plataforma web.
+                        O convidado usará o número de telefone para interagir via WhatsApp. As credenciais de acesso ao painel web serão configuradas pelo próprio convidado no primeiro uso, se ele ainda não tiver um cadastro.
                     </Paragraph>
                     <Form.Item name="sharedAccessPhone" label="Telefone WhatsApp do Convidado" rules={[{ required: true, message: 'O Telefone WhatsApp do convidado é obrigatório!' }]}>
                         <Input prefix={<WhatsAppOutlined />} placeholder="Ex: 71982862912" disabled={!!editingAccessUser} />
                     </Form.Item>
                     {editingAccessUser && <Paragraph type="secondary" style={{ fontSize: '11px', marginTop: '-10px', marginBottom: '15px' }}><InfoCircleOutlined/> O telefone não pode ser alterado após o acesso ser criado.</Paragraph>}
-                    <Form.Item name="sharedAccessPassword" label={editingAccessUser ? "Nova Senha (deixe em branco para não alterar)" : "Senha para o Convidado"} rules={editingAccessUser ? [{ min: 6, message: "Mínimo 6 caracteres." }] : [{ required: true, message: 'Senha é obrigatória!' }, { min: 6, message: "Mínimo 6 caracteres." }]} hasFeedback={!editingAccessUser || !!accessForm.getFieldValue('sharedAccessPassword')}>
-                        <Input.Password prefix={<LockOutlined />} placeholder="Crie uma senha segura"/>
-                    </Form.Item>
+                    {/* Campos sharedAccessEmail e sharedAccessPassword foram removidos daqui */}
                     <Divider className="form-divider">Permissões de Acesso</Divider>
                     <Paragraph type="secondary" style={{ fontSize: '12px', marginBottom: '15px' }}>
                         Selecione quais dos SEUS perfis este convidado poderá visualizar e gerenciar.

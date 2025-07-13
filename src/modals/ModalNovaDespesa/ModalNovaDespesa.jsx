@@ -1,226 +1,176 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, Row, Col, Checkbox, Radio, Divider, message } from 'antd';
+// src/modals/ModalNovaDespesa/ModalNovaDespesa.jsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message, Checkbox, Space } from 'antd';
+import { DollarCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { ShoppingCartOutlined, CreditCardOutlined, MoneyCollectOutlined } from '@ant-design/icons'; // Adicionando MoneyCollectOutlined
+import apiClient from '../../services/api';
 
 const { Option } = Select;
 
-// Mock de categorias e cartões (substituir por dados da API/contexto)
-const mockCategoriasDespesa = [
-  { id: 'ali', nome: 'Alimentação' }, { id: 'mor', nome: 'Moradia' },
-  { id: 'tra', nome: 'Transporte' }, { id: 'laz', nome: 'Lazer' },
-  { id: 'sau', nome: 'Saúde' }, { id: 'con', nome: 'Contas Fixas'},
-  { id: 'com', nome: 'Compras Diversas'}, { id: 'out', nome: 'Outras Despesas' },
-];
-const mockCartoes = [ 
-    {id: 'cartao1', nome: 'Nubank Final 1234'},
-    {id: 'cartao2', nome: 'Inter Final 5678'},
-];
-
-const ModalNovaDespesa = ({ visible, onCancel, onOk, currentProfile }) => {
+const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTransaction }) => {
   const [form] = Form.useForm();
-  const [tipoPagamento, setTipoPagamento] = useState('normal'); // 'normal' ou 'cartao'
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [creditCards, setCreditCards] = useState([]);
+  const [loadingCreditCards, setLoadingCreditCards] = useState(false);
   const [isParcelada, setIsParcelada] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState(null); // Para saber se um cartão foi selecionado
+  const [showCreditCardSelect, setShowCreditCardSelect] = useState(false);
 
-  const handleOk = () => {
-    form.validateFields()
-      .then(values => {
-        const despesaData = {
-            ...values,
-            financialAccountId: currentProfile?.id,
-            tipoMovimentacao: 'despesa', // Para diferenciar de receita no backend
-            formaPagamento: tipoPagamento, // 'normal' ou 'cartao'
-            cartaoId: tipoPagamento === 'cartao' ? selectedCardId : null,
-            isParcelada: tipoPagamento === 'cartao' && isParcelada,
-            numeroParcelas: tipoPagamento === 'cartao' && isParcelada ? values.numeroParcelas : 1,
-            data: dayjs(values.data).format('YYYY-MM-DD'), // Formata a data
-            valor: parseFloat(values.valor)
-        };
-        
-        if (tipoPagamento === 'cartao' && isParcelada && (!values.numeroParcelas || values.numeroParcelas < 2 )) {
-            message.error('Para compra parcelada no cartão, o número de parcelas deve ser no mínimo 2.');
-            return;
-        }
+  const fetchData = useCallback(async () => {
+    if (!currentProfile?.id) return;
+    setLoadingCategories(true);
+    setLoadingCreditCards(true);
+    try {
+      const [catRes, cardRes] = await Promise.all([
+        apiClient.get(`/financial-accounts/${currentProfile.id}/categories`),
+        apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`)
+      ]);
+      setCategories(catRes.data.data.filter(c => c.type === 'Saída' || !c.type) || []);
+      setCreditCards(cardRes.data.data || []);
+    } catch (error) {
+      console.error("Erro ao buscar dados para modal de despesa:", error);
+    } finally {
+      setLoadingCategories(false);
+      setLoadingCreditCards(false);
+    }
+  }, [currentProfile?.id]);
 
-
-        // Se não for parcelada no cartão, ou for despesa normal, o número de parcelas é 1
-        if (!(tipoPagamento === 'cartao' && isParcelada)) {
-            despesaData.numeroParcelas = 1;
-        }
-
-
-        onOk(despesaData);
-        // O reset será feito pelo afterClose + useEffect no componente pai
-      })
-      .catch(info => {
-        console.log('Validate Failed:', info);
-      });
-  };
-
-  const handleCancelModal = () => {
-    onCancel(); // O reset será feito pelo afterClose no Modal e useEffect
-  };
-
-  // Resetar estados locais e formulário quando o modal se torna visível
   useEffect(() => {
-    if (visible) {
-      form.resetFields();
-      setTipoPagamento('normal');
-      setIsParcelada(false);
-      setSelectedCardId(null);
-      form.setFieldsValue({ 
-        data: dayjs(), 
-        categoria: mockCategoriasDespesa[0]?.nome, // Usa o nome da categoria
-        numeroParcelas: 1 
-      });
-    }
-  }, [visible, form]);
-
-  const handleTipoPagamentoChange = (e) => {
-    const novoTipo = e.target.value;
-    setTipoPagamento(novoTipo);
-    if (novoTipo === 'normal') {
-      setIsParcelada(false); // Despesa normal não é parcelada desta forma
-      setSelectedCardId(null);
-      form.setFieldsValue({ cartaoId: undefined, isParceladaCheck: false, numeroParcelas: 1 });
-    }
-  };
-
-  const handleCartaoChange = (value) => {
-    setSelectedCardId(value);
-    if (!value) { // Se desmarcar o cartão
+    if (open) {
+      fetchData();
+      if (editingTransaction) {
+        form.setFieldsValue({
+          description: editingTransaction.description,
+          value: parseFloat(editingTransaction.value),
+          transactionDate: dayjs(editingTransaction.transactionDate),
+          financialCategoryId: editingTransaction.financialCategoryId,
+          notes: editingTransaction.notes,
+          paymentMethod: editingTransaction.creditCardId ? 'cartao_credito' : 'outros',
+          creditCardId: editingTransaction.creditCardId
+        });
+        setShowCreditCardSelect(!!editingTransaction.creditCardId);
+      } else {
+        form.resetFields();
+        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'outros' });
         setIsParcelada(false);
-        form.setFieldsValue({ isParceladaCheck: false, numeroParcelas: 1 });
+        setShowCreditCardSelect(false);
+      }
     }
-  };
+  }, [open, editingTransaction, form, fetchData]);
   
-  const handleParceladaChange = (e) => {
-    setIsParcelada(e.target.checked);
-    if (!e.target.checked) {
-        form.setFieldsValue({ numeroParcelas: 1 });
-    } else {
-        // Se marcar parcelada e não tiver um número de parcelas válido, pode setar um default > 1
-        if(form.getFieldValue('numeroParcelas') < 2) {
-            form.setFieldsValue({ numeroParcelas: 2 });
+  const handleFinish = async (values) => {
+    setLoading(true);
+    const payload = {
+      ...values,
+      type: 'Saída',
+      transactionDate: values.transactionDate.format('YYYY-MM-DD'),
+    };
+    
+    const isParcelledPurchase = values.paymentMethod === 'cartao_credito' && values.isParcelada;
+    
+    try {
+        let endpoint, method;
+        let finalPayload = { ...payload };
+
+        if(editingTransaction) {
+            // <<< MUDANÇA 4: Rota de edição usa PATCH e não PUT >>>
+            endpoint = `/financial-accounts/${currentProfile.id}/transactions/${editingTransaction.id}`;
+            method = 'patch';
+        } else if (isParcelledPurchase) {
+            endpoint = `/financial-accounts/${currentProfile.id}/transactions/parcelled`;
+            method = 'post';
+            finalPayload = {
+                description: values.description,
+                totalValue: values.value,
+                numberOfParcels: values.numeroParcelas,
+                transactionDate: values.transactionDate.format('YYYY-MM-DD'),
+                financialCategoryId: values.financialCategoryId,
+                creditCardId: values.creditCardId,
+                notes: values.notes,
+            };
+        } else {
+            endpoint = `/financial-accounts/${currentProfile.id}/transactions`;
+            method = 'post';
         }
+
+        await apiClient[method](endpoint, finalPayload);
+        message.success(`Despesa ${editingTransaction ? 'atualizada' : 'adicionada'} com sucesso!`);
+        onSuccess();
+        onCancel();
+    } catch (error) {
+       // Interceptor já cuida do erro
+    } finally {
+        setLoading(false);
     }
   };
 
 
   return (
     <Modal
-      title="Registrar Nova Despesa"
-      open={visible}
-      onCancel={handleCancelModal}
-      destroyOnHidden
-      afterClose={() => { // Garante reset completo após animação de fechar
-        form.resetFields();
-        setTipoPagamento('normal');
-        setIsParcelada(false);
-        setSelectedCardId(null);
-      }}
-      footer={[
-        <Button key="back" onClick={handleCancelModal} className="modal-btn-cancel">
-          Cancelar
-        </Button>,
-        <Button key="submit" type="primary" danger onClick={handleOk} className="modal-btn-submit expense">
-          Adicionar Despesa
-        </Button>,
-      ]}
-      className="modal-nova-transacao modal-nova-despesa" // Adiciona classe específica
-      width={600} // Um pouco maior para acomodar mais campos
+      title={
+        <Space>
+          <DollarCircleOutlined style={{ color: '#ff4d4f' }} />
+          {editingTransaction ? 'Editar Despesa' : 'Nova Despesa'}
+        </Space>
+      }
+      open={open}
+      onCancel={onCancel}
+      footer={null}
+      destroyOnClose
+      width={600}
+      className="modal-nova-transacao"
     >
-      <Form form={form} layout="vertical" name="form_in_modal_despesa">
-        <Form.Item
-          name="descricao"
-          label="Descrição da Despesa"
-          rules={[{ required: true, message: 'Por favor, insira a descrição!' }]}
-        >
-          <Input placeholder="Ex: Compras no supermercado, Mensalidade Netflix" />
+      <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={(changedValues) => {
+          if (changedValues.paymentMethod !== undefined) setShowCreditCardSelect(changedValues.paymentMethod === 'cartao_credito');
+          if (changedValues.isParcelada !== undefined) setIsParcelada(changedValues.isParcelada);
+      }}>
+        <Form.Item name="description" label="Descrição" rules={[{ required: true, message: 'Insira a descrição!' }]}>
+          <Input placeholder="Ex: Almoço, Compra Supermercado" />
         </Form.Item>
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="valor"
-              label={tipoPagamento === 'cartao' && isParcelada ? "Valor Total da Compra (R$)" : "Valor da Despesa (R$)"}
-              rules={[{ required: true, message: 'Por favor, insira o valor!' }, { type: 'number', min: 0.01, message: 'O valor deve ser positivo.'}]}
-            >
-              <InputNumber style={{ width: '100%' }} min={0.01} precision={2} decimalSeparator="," addonBefore="R$" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="data"
-              label="Data da Despesa/Compra"
-              rules={[{ required: true, message: 'Por favor, selecione a data!' }]}
-            >
-              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item
-          name="categoria"
-          label="Categoria"
-          rules={[{ required: true, message: 'Por favor, selecione uma categoria!' }]}
-        >
-          <Select placeholder="Selecione a categoria da despesa">
-            {mockCategoriasDespesa.map(cat => (
-              <Option key={cat.id} value={cat.nome}>{cat.nome}</Option>
-            ))}
+        <Form.Item name="value" label={isParcelada ? "Valor Total da Compra (R$)" : "Valor (R$)"} rules={[{ required: true, message: 'Insira o valor!' }]}>
+          <InputNumber style={{ width: '100%' }} min={0.01} precision={2} decimalSeparator="," addonBefore="R$" />
+        </Form.Item>
+        <Form.Item name="transactionDate" label="Data da Despesa" rules={[{ required: true, message: 'Insira a data!' }]}>
+          <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+        </Form.Item>
+        <Form.Item name="financialCategoryId" label="Categoria" rules={[{ required: true, message: 'Selecione uma categoria!' }]}>
+          <Select placeholder="Selecione a categoria da despesa" loading={loadingCategories} showSearch optionFilterProp="children">
+            {categories.map(cat => <Option key={cat.id} value={cat.id}>{cat.name}</Option>)}
           </Select>
         </Form.Item>
-
-        <Form.Item label="Forma de Pagamento">
-            <Radio.Group onChange={handleTipoPagamentoChange} value={tipoPagamento}>
-                <Radio.Button value="normal"><MoneyCollectOutlined /> Normal (Dinheiro/Débito/Pix)</Radio.Button>
-                <Radio.Button value="cartao"><CreditCardOutlined /> Cartão de Crédito</Radio.Button>
-            </Radio.Group>
+        <Form.Item name="paymentMethod" label="Forma de Pagamento">
+            <Select onChange={(value) => setShowCreditCardSelect(value === 'cartao_credito')}>
+                <Option value="outros">Outros (Dinheiro, Débito, PIX)</Option>
+                <Option value="cartao_credito">Cartão de Crédito</Option>
+            </Select>
         </Form.Item>
 
-        {tipoPagamento === 'cartao' && (
-          <>
-            <Divider dashed>Detalhes do Cartão</Divider>
-            <Form.Item 
-                name="cartaoId" 
-                label="Selecionar Cartão de Crédito"
-                rules={[{ required: true, message: 'Por favor, selecione um cartão!' }]}
-            >
-                <Select placeholder="Escolha o cartão utilizado" onChange={handleCartaoChange} allowClear>
-                    {mockCartoes.map(cartao => (
-                        <Option key={cartao.id} value={cartao.id}>{cartao.nome}</Option>
-                    ))}
-                </Select>
-            </Form.Item>
-            {selectedCardId && ( // Só mostra opção de parcelamento se um cartão foi selecionado
-                <>
-                    <Form.Item name="isParceladaCheck" valuePropName="checked" style={{marginBottom: isParcelada ? '8px' : '24px'}}>
-                        <Checkbox checked={isParcelada} onChange={handleParceladaChange}>
-                            Compra Parcelada no Cartão?
-                        </Checkbox>
+        {showCreditCardSelect && (
+            <>
+                <Form.Item name="creditCardId" label="Cartão de Crédito" rules={[{ required: true, message: "Selecione o cartão" }]}>
+                    <Select placeholder="Selecione o cartão utilizado" loading={loadingCreditCards}>
+                        {creditCards.map(card => <Option key={card.id} value={card.id}>{card.name} (Final {card.lastFourDigits})</Option>)}
+                    </Select>
+                </Form.Item>
+                <Form.Item name="isParcelada" valuePropName="checked">
+                    <Checkbox onChange={e => setIsParcelada(e.target.checked)}>Compra Parcelada?</Checkbox>
+                </Form.Item>
+                {isParcelada && (
+                    <Form.Item name="numeroParcelas" label="Número de Parcelas" rules={[{ required: true, message: "Informe o nº de parcelas" }]}>
+                        <InputNumber min={2} max={48} style={{ width: '100%' }} />
                     </Form.Item>
-                    {isParcelada && (
-                        <Form.Item
-                            name="numeroParcelas"
-                            label="Número de Parcelas"
-                            rules={[
-                                { required: true, message: 'Informe o número de parcelas!' },
-                                { type: 'number', min: 2, message: 'Mínimo de 2 parcelas para compra parcelada.'}
-                            ]}
-                        >
-                            <InputNumber style={{ width: '100%' }} min={2} max={48} placeholder="Ex: 2, 3, 10, 12"/>
-                        </Form.Item>
-                    )}
-                </>
-            )}
-          </>
+                )}
+            </>
         )}
-
-        <Form.Item
-          name="notas"
-          label="Observações (Opcional)"
-        >
-          <Input.TextArea rows={2} placeholder="Algum detalhe adicional sobre esta despesa?" />
+        <Form.Item name="notes" label="Observações (Opcional)">
+          <Input.TextArea rows={2} placeholder="Detalhes adicionais sobre a despesa" />
+        </Form.Item>
+        <Form.Item style={{ textAlign: 'right', marginTop: '20px', marginBottom: 0 }}>
+          <Button onClick={onCancel} style={{ marginRight: 8 }} className="modal-btn-cancel">Cancelar</Button>
+          <Button type="primary" htmlType="submit" loading={loading} className="modal-btn-submit expense">
+            {editingTransaction ? 'Salvar Alterações' : 'Adicionar Despesa'}
+          </Button>
         </Form.Item>
       </Form>
     </Modal>

@@ -41,8 +41,6 @@ const ChecklistPage = () => {
   const viewingToday = useMemo(() => selectedDate.isSame(dayjs(), 'day'), [selectedDate]);
 
   const fetchChecklist = useCallback(async (date) => {
-    // É crucial que currentProfile.id seja uma string para a comparação com item.checklist.financialAccountId.toString()
-    // Visto que o useProfile já retorna o ID como string (se for cliente), isso deve estar ok.
     if (!currentProfile?.id) return;
 
     setLoading(true);
@@ -53,15 +51,12 @@ const ChecklistPage = () => {
       
       const fetchedItems = response.data.data.items || [];
       
-      // FILTRO CRÍTICO: Garante que apenas os itens que realmente pertencem ao perfil atual sejam exibidos.
-      // Isso evita que o frontend tente manipular itens de outras contas.
       const filteredItems = fetchedItems.filter(item => 
         item.checklist && item.checklist.financialAccountId.toString() === currentProfile.id.toString()
       );
       
       setChecklistItems(filteredItems);
 
-      // Log para depuração: ver se algum item foi filtrado
       if (fetchedItems.length !== filteredItems.length) {
           console.warn(`[ChecklistPage] Foram carregados ${fetchedItems.length} itens, mas apenas ${filteredItems.length} pertencem ao perfil atual (${currentProfile.id}). Itens de outros perfis foram filtrados.`);
       }
@@ -73,7 +68,6 @@ const ChecklistPage = () => {
     }
   }, [currentProfile?.id]);
 
-  // Efeito para buscar os dados sempre que a data ou o perfil mudar
   useEffect(() => {
     console.log(`[ChecklistPage] useEffect fetch: currentProfile.id = ${currentProfile?.id}`);
     console.log(`[ChecklistPage] useEffect fetch: selectedDate = ${selectedDate.format('YYYY-MM-DD')}`);
@@ -99,7 +93,7 @@ const ChecklistPage = () => {
       message.success('Tarefa adicionada!');
       setNewItemText('');
       setNewItemPriority('medium');
-      fetchChecklist(selectedDate); // Recarrega a lista para mostrar o novo item
+      fetchChecklist(selectedDate); 
     } catch (error) {
       // O interceptor do apiClient já deve mostrar o erro
     } finally {
@@ -107,7 +101,6 @@ const ChecklistPage = () => {
     }
   }, [newItemText, newItemPriority, viewingToday, currentProfile?.id, selectedDate, fetchChecklist]);
 
-  // Modificado para incluir itemFinancialAccountId
   const handleToggleItem = useCallback(async (itemId, currentStatus, itemFinancialAccountId) => {
     console.log(`[ChecklistPage] handleToggleItem: Clicado no item ID: ${itemId}`);
     console.log(`[ChecklistPage] handleToggleItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
@@ -118,14 +111,11 @@ const ChecklistPage = () => {
         return;
     }
     
-    // NOVA VERIFICAÇÃO: Se o item não pertence ao perfil ativo, previne a ação
-    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
     if (currentProfile.id !== itemFinancialAccountId.toString()) {
         message.error('Você não pode editar tarefas de outro perfil financeiro.');
         return;
     }
 
-    // Optimistic Update
     const originalItems = [...checklistItems];
     const newItems = checklistItems.map(item => 
       item.id === itemId ? { ...item, completed: !currentStatus } : item
@@ -136,11 +126,10 @@ const ChecklistPage = () => {
       await apiClient.put(`/financial-accounts/${currentProfile.id}/checklists/items/${itemId}`, { completed: !currentStatus });
     } catch (error) {
       message.error('Não foi possível atualizar a tarefa. Desfazendo alteração.');
-      setChecklistItems(originalItems); // Reverte em caso de erro
+      setChecklistItems(originalItems);
     }
   }, [viewingToday, currentProfile?.id, checklistItems]);
 
-  // Modificado para incluir itemFinancialAccountId
   const handleDeleteItem = useCallback(async (itemId, itemFinancialAccountId) => {
     console.log(`[ChecklistPage] handleDeleteItem: Clicado no item ID: ${itemId}`);
     console.log(`[ChecklistPage] handleDeleteItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
@@ -151,8 +140,6 @@ const ChecklistPage = () => {
         return;
     }
 
-    // NOVA VERIFICAÇÃO: Se o item não pertence ao perfil ativo, previne a ação
-    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
     if (currentProfile.id !== itemFinancialAccountId.toString()) {
         message.error('Você não pode excluir tarefas de outro perfil financeiro.');
         return;
@@ -167,7 +154,7 @@ const ChecklistPage = () => {
       message.success('Tarefa excluída.');
     } catch (error) {
       message.error('Não foi possível excluir a tarefa. Desfazendo alteração.');
-      setChecklistItems(originalItems); // Reverte em caso de erro
+      setChecklistItems(originalItems);
     }
   }, [viewingToday, currentProfile?.id, checklistItems]);
 
@@ -180,8 +167,6 @@ const ChecklistPage = () => {
   const handleUpdateItem = async (values) => {
     if (!editingItem || !currentProfile?.id) return;
 
-    // Verificação de segurança adicional para a edição via modal
-    // Esta verificação no frontend é uma camada extra, o backend já faz a mesma.
     if (currentProfile.id !== editingItem.checklist.financialAccountId.toString()) {
         message.error('Você não pode editar tarefas de outro perfil financeiro.');
         return;
@@ -193,7 +178,7 @@ const ChecklistPage = () => {
       message.success('Tarefa atualizada com sucesso!');
       setIsEditModalVisible(false);
       setEditingItem(null);
-      fetchChecklist(selectedDate); // Recarrega a lista
+      fetchChecklist(selectedDate);
     } catch (error) {
       // Erro já tratado pelo interceptor
     } finally {
@@ -221,6 +206,9 @@ const ChecklistPage = () => {
     return selectedDate.format('dddd, DD [de] MMMM [de] YYYY');
   }, [selectedDate, viewingToday]);
 
+  // <<<< INÍCIO DA MUDANÇA >>>>
+  // Este bloco 'if' que verificava o tipo de perfil foi completamente removido.
+  /*
   if (currentProfileType !== 'PJ' && currentProfileType !== 'MEI') {
     return (
       <Content className="checklist-page-wrapper">
@@ -233,6 +221,8 @@ const ChecklistPage = () => {
       </Content>
     );
   }
+  */
+  // <<<< FIM DA MUDANÇA >>>>
 
   return (
     <Content className="checklist-page-wrapper">
@@ -309,7 +299,7 @@ const ChecklistPage = () => {
         <List
           className="checklist-list"
           dataSource={checklistItems}
-          loading={loading} // <<< Usa o estado de loading da API
+          loading={loading}
           locale={{
             emptyText: (
               <Empty
@@ -325,8 +315,6 @@ const ChecklistPage = () => {
           }}
           renderItem={(item) => (
             <List.Item
-              // Adiciona uma classe para depuração visual se o perfil não corresponder
-              // Se o filtro em fetchChecklist estiver funcionando, esta classe nunca deve ser aplicada
               className={`checklist-item ${item.completed ? 'completed' : ''} ${currentProfile?.id !== item.checklist.financialAccountId.toString() ? 'mismatched-profile' : ''}`}
               actions={viewingToday ? [
                   <Space className="item-actions">
