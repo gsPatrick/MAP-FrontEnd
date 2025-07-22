@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Card, List, Button, Input, Checkbox,
-  Space, Tooltip, Empty, Divider, Result, Tag, Modal, Form, Select, Progress, message, Spin
+  Space, Tooltip, Empty, Divider, Result, Tag, Modal, Form, Select, Progress, message, Spin, Row, Col
 } from 'antd';
 import {
   CheckSquareOutlined, PlusOutlined, HistoryOutlined, LeftOutlined, RightOutlined, StopOutlined,
@@ -24,18 +24,19 @@ const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 const ChecklistPage = () => {
-  const { currentProfile, currentProfileType } = useProfile();
+  const { currentProfile } = useProfile();
 
   const [checklistItems, setChecklistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
   
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [newItemText, setNewItemText] = useState('');
-  const [newItemPriority, setNewItemPriority] = useState('medium');
 
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+
+  const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
   const viewingToday = useMemo(() => selectedDate.isSame(dayjs(), 'day'), [selectedDate]);
@@ -44,24 +45,14 @@ const ChecklistPage = () => {
     if (!currentProfile?.id) return;
 
     setLoading(true);
-    setChecklistItems([]); 
     const dateKey = date.format('YYYY-MM-DD');
     try {
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/checklists/${dateKey}`);
-      
-      const fetchedItems = response.data.data.items || [];
-      
-      const filteredItems = fetchedItems.filter(item => 
-        item.checklist && item.checklist.financialAccountId.toString() === currentProfile.id.toString()
-      );
-      
-      setChecklistItems(filteredItems);
-
-      if (fetchedItems.length !== filteredItems.length) {
-          console.warn(`[ChecklistPage] Foram carregados ${fetchedItems.length} itens, mas apenas ${filteredItems.length} pertencem ao perfil atual (${currentProfile.id}). Itens de outros perfis foram filtrados.`);
-      }
-
+      // A API retorna os itens aninhados, garantimos que pegamos o array correto ou um array vazio
+      const fetchedItems = response.data?.data?.items || [];
+      setChecklistItems(fetchedItems);
     } catch (error) {
+      // O interceptor de erro já deve exibir a mensagem, aqui apenas garantimos que a lista fique vazia
       setChecklistItems([]);
     } finally {
       setLoading(false);
@@ -69,9 +60,9 @@ const ChecklistPage = () => {
   }, [currentProfile?.id]);
 
   useEffect(() => {
-    console.log(`[ChecklistPage] useEffect fetch: currentProfile.id = ${currentProfile?.id}`);
-    console.log(`[ChecklistPage] useEffect fetch: selectedDate = ${selectedDate.format('YYYY-MM-DD')}`);
-    fetchChecklist(selectedDate);
+    if (currentProfile?.id) {
+      fetchChecklist(selectedDate);
+    }
   }, [selectedDate, fetchChecklist, currentProfile]);
 
   const dailyProgress = useMemo(() => {
@@ -81,69 +72,49 @@ const ChecklistPage = () => {
       return Math.round((completed / total) * 100);
   }, [checklistItems]);
 
-  const handleAddItem = useCallback(async () => {
-    if (!newItemText.trim() || !viewingToday || !currentProfile?.id) return;
+  const handleAddItem = useCallback(async (values) => {
+    if (!values.text?.trim() || !viewingToday || !currentProfile?.id) return;
     
     setIsSubmitting(true);
     const dateKey = selectedDate.format('YYYY-MM-DD');
-    const payload = { text: newItemText.trim(), priority: newItemPriority };
+    const payload = { 
+        text: values.text.trim(), 
+        priority: values.priority,
+        notes: values.notes?.trim() || null
+    };
 
     try {
       await apiClient.post(`/financial-accounts/${currentProfile.id}/checklists/${dateKey}/items`, payload);
-      message.success('Tarefa adicionada!');
-      setNewItemText('');
-      setNewItemPriority('medium');
+      message.success('Tarefa adicionada com sucesso!');
+      setIsAddModalVisible(false);
+      addForm.resetFields();
       fetchChecklist(selectedDate); 
     } catch (error) {
       // O interceptor do apiClient já deve mostrar o erro
     } finally {
       setIsSubmitting(false);
     }
-  }, [newItemText, newItemPriority, viewingToday, currentProfile?.id, selectedDate, fetchChecklist]);
+  }, [viewingToday, currentProfile?.id, selectedDate, fetchChecklist, addForm]);
 
-  const handleToggleItem = useCallback(async (itemId, currentStatus, itemFinancialAccountId) => {
-    console.log(`[ChecklistPage] handleToggleItem: Clicado no item ID: ${itemId}`);
-    console.log(`[ChecklistPage] handleToggleItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
-    console.log(`[ChecklistPage] handleToggleItem: itemFinancialAccountId: ${itemFinancialAccountId}`);
-
-    if (!viewingToday || !currentProfile?.id) {
-        console.warn('[ChecklistPage] handleToggleItem: Abortando porque não é hoje ou currentProfile.id está ausente.');
-        return;
-    }
-    
-    if (currentProfile.id !== itemFinancialAccountId.toString()) {
-        message.error('Você não pode editar tarefas de outro perfil financeiro.');
-        return;
-    }
+  const handleToggleItem = useCallback(async (item) => {
+    if (!viewingToday || !currentProfile?.id) return;
 
     const originalItems = [...checklistItems];
-    const newItems = checklistItems.map(item => 
-      item.id === itemId ? { ...item, completed: !currentStatus } : item
+    const newItems = checklistItems.map(i => 
+      i.id === item.id ? { ...i, completed: !i.completed } : i
     );
     setChecklistItems(newItems);
 
     try {
-      await apiClient.put(`/financial-accounts/${currentProfile.id}/checklists/items/${itemId}`, { completed: !currentStatus });
+      await apiClient.put(`/financial-accounts/${currentProfile.id}/checklists/items/${item.id}`, { completed: !item.completed });
     } catch (error) {
-      message.error('Não foi possível atualizar a tarefa. Desfazendo alteração.');
+      message.error('Não foi possível atualizar a tarefa.');
       setChecklistItems(originalItems);
     }
   }, [viewingToday, currentProfile?.id, checklistItems]);
 
-  const handleDeleteItem = useCallback(async (itemId, itemFinancialAccountId) => {
-    console.log(`[ChecklistPage] handleDeleteItem: Clicado no item ID: ${itemId}`);
-    console.log(`[ChecklistPage] handleDeleteItem: currentProfile.id (no momento do clique): ${currentProfile?.id}`);
-    console.log(`[ChecklistPage] handleDeleteItem: itemFinancialAccountId: ${itemFinancialAccountId}`);
-
-    if (!viewingToday || !currentProfile?.id) {
-        console.warn('[ChecklistPage] handleDeleteItem: Abortando porque não é hoje ou currentProfile.id está ausente.');
-        return;
-    }
-
-    if (currentProfile.id !== itemFinancialAccountId.toString()) {
-        message.error('Você não pode excluir tarefas de outro perfil financeiro.');
-        return;
-    }
+  const handleDeleteItem = useCallback(async (itemId) => {
+    if (!viewingToday || !currentProfile?.id) return;
 
     const originalItems = [...checklistItems];
     const newItems = checklistItems.filter(item => item.id !== itemId);
@@ -153,24 +124,22 @@ const ChecklistPage = () => {
       await apiClient.delete(`/financial-accounts/${currentProfile.id}/checklists/items/${itemId}`);
       message.success('Tarefa excluída.');
     } catch (error) {
-      message.error('Não foi possível excluir a tarefa. Desfazendo alteração.');
+      message.error('Não foi possível excluir a tarefa.');
       setChecklistItems(originalItems);
     }
   }, [viewingToday, currentProfile?.id, checklistItems]);
 
   const showEditModal = (item) => {
     setEditingItem(item);
-    editForm.setFieldsValue(item);
+    editForm.setFieldsValue({
+        ...item,
+        notes: item.notes || ''
+    });
     setIsEditModalVisible(true);
   };
   
   const handleUpdateItem = async (values) => {
     if (!editingItem || !currentProfile?.id) return;
-
-    if (currentProfile.id !== editingItem.checklist.financialAccountId.toString()) {
-        message.error('Você não pode editar tarefas de outro perfil financeiro.');
-        return;
-    }
 
     setIsSubmitting(true);
     try {
@@ -197,7 +166,7 @@ const ChecklistPage = () => {
           low: { color: 'blue', text: 'Baixa' },
       };
       const { color, text } = config[priority] || { color: 'default', text: 'N/D'};
-      return <Tag color={color} className={`priority-tag-${priority}`}>{text}</Tag>
+      return <Tag color={color} className={`priority-tag priority-tag-${priority}`}>{text}</Tag>
   };
 
   const formattedDateTitle = useMemo(() => {
@@ -206,164 +175,168 @@ const ChecklistPage = () => {
     return selectedDate.format('dddd, DD [de] MMMM [de] YYYY');
   }, [selectedDate, viewingToday]);
 
-  // <<<< INÍCIO DA MUDANÇA >>>>
-  // Este bloco 'if' que verificava o tipo de perfil foi completamente removido.
-  /*
-  if (currentProfileType !== 'PJ' && currentProfileType !== 'MEI') {
-    return (
-      <Content className="checklist-page-wrapper">
-        <Result
-          icon={<StopOutlined />}
-          status="warning"
-          title="Funcionalidade Exclusiva para Perfis de Negócio"
-          subTitle="O Checklist Diário está disponível apenas para perfis PJ ou MEI."
-        />
-      </Content>
-    );
-  }
-  */
-  // <<<< FIM DA MUDANÇA >>>>
-
   return (
-    <Content className="checklist-page-wrapper">
-      <Title level={2} className="page-title-checklist">
-        <CheckSquareOutlined /> Checklist Diário
-      </Title>
-      <Paragraph className="page-subtitle-checklist">
-        Organize suas tarefas diárias para o perfil <Text strong>{currentProfile?.name}</Text>. As tarefas são zeradas a cada dia.
-      </Paragraph>
+    <Content className="checklist-page-container">
+      <div className="page-header">
+        <Title level={2} className="page-title-checklist">
+          <CheckSquareOutlined /> Checklist Diário
+        </Title>
+        <Paragraph className="page-subtitle-checklist">
+          Organize suas tarefas diárias para o perfil <Text strong>{currentProfile?.name}</Text>.
+        </Paragraph>
+      </div>
 
-      <Card className="date-navigator-card" bordered={false}>
-        <div className="date-navigator-header">
-            <div className="date-navigator-controls">
-                <Tooltip title="Dia Anterior">
-                    <Button icon={<LeftOutlined />} onClick={() => handleDateChange(-1)} />
-                </Tooltip>
-                <Title level={4} className="date-navigator-title">{formattedDateTitle}</Title>
-                <Tooltip title="Próximo Dia">
-                    <Button icon={<RightOutlined />} onClick={() => handleDateChange(1)} disabled={viewingToday} />
-                </Tooltip>
-            </div>
-            <div className="progress-section">
+      <Row gutter={[24, 24]}>
+        {/* Coluna da Esquerda: Navegação e Progresso */}
+        <Col xs={24} md={8} lg={7}>
+          <Card className="date-navigator-card" bordered={false}>
+              <Title level={4} className="date-navigator-title">{formattedDateTitle}</Title>
+              <div className="date-navigator-controls">
+                  <Tooltip title="Dia Anterior">
+                      <Button icon={<LeftOutlined />} onClick={() => handleDateChange(-1)} />
+                  </Tooltip>
+                  <Tooltip title="Próximo Dia">
+                      <Button icon={<RightOutlined />} onClick={() => handleDateChange(1)} disabled={viewingToday} />
+                  </Tooltip>
+              </div>
+              
+              <Divider />
+
+              <div className="progress-section">
                 <Spin spinning={loading}>
                     <Progress 
                         type="circle" 
                         percent={dailyProgress} 
-                        width={60}
+                        width={120}
+                        strokeWidth={10}
                         strokeColor={{'0%': '#108ee9', '100%': '#87d068'}}
                         format={(percent) => `${percent}%`}
                     />
                 </Spin>
-            </div>
-        </div>
-        {!viewingToday && (
-            <Button type="primary" icon={<HistoryOutlined />} onClick={() => setSelectedDate(dayjs())} className="back-to-today-btn">
-                Voltar para Hoje
-            </Button>
-        )}
-      </Card>
+                <Text className="progress-label">Progresso do Dia</Text>
+              </div>
 
-      <Card className="checklist-card" bordered={false}>
-        {viewingToday && (
-          <>
-            <div className="add-item-section">
-              <Space.Compact style={{ width: '100%' }}>
-                <Input
-                    placeholder="Adicionar nova tarefa para hoje..."
-                    value={newItemText}
-                    onChange={(e) => setNewItemText(e.target.value)}
-                    onPressEnter={handleAddItem}
-                    size="large"
-                    disabled={submitting}
-                />
-                <Select
-                    value={newItemPriority}
-                    onChange={(value) => setNewItemPriority(value)}
-                    size="large"
-                    style={{ width: 130 }}
-                    disabled={submitting}
+              {!viewingToday && (
+                  <Button type="primary" icon={<HistoryOutlined />} onClick={() => setSelectedDate(dayjs())} className="back-to-today-btn" block>
+                      Voltar para Hoje
+                  </Button>
+              )}
+          </Card>
+        </Col>
+
+        {/* Coluna da Direita: Lista de Tarefas */}
+        <Col xs={24} md={16} lg={17}>
+          <Card 
+            className="checklist-card" 
+            bordered={false}
+            title={<Title level={4} className="checklist-card-title">Tarefas do Dia</Title>}
+            extra={viewingToday && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsAddModalVisible(true)} size="middle">
+                Adicionar Tarefa
+              </Button>
+            )}
+          >
+            <List
+              className="checklist-list"
+              dataSource={checklistItems}
+              loading={loading}
+              locale={{
+                emptyText: (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={
+                      loading ? "Carregando tarefas..." : 
+                      (viewingToday
+                        ? "Nenhuma tarefa para hoje. Que tal adicionar uma?"
+                        : "Nenhuma tarefa registrada para este dia.")
+                    }
+                  />
+                ),
+              }}
+              renderItem={(item) => (
+                <List.Item
+                  className={`checklist-item ${item.completed ? 'completed' : ''}`}
+                  actions={viewingToday ? [
+                      <Space className="item-actions">
+                        <Tooltip title="Editar Tarefa">
+                            <Button type="text" shape="circle" icon={<EditOutlined />} onClick={() => showEditModal(item)} />
+                        </Tooltip>
+                        <Tooltip title="Excluir Tarefa">
+                            <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => handleDeleteItem(item.id)} />
+                        </Tooltip>
+                      </Space>
+                  ] : []}
                 >
-                    <Option value="high">Prioridade Alta</Option>
-                    <Option value="medium">Prioridade Média</Option>
-                    <Option value="low">Prioridade Baixa</Option>
-                </Select>
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAddItem} size="large" loading={submitting}>
-                    Adicionar
-                </Button>
-              </Space.Compact>
-            </div>
-            <Divider />
-          </>
-        )}
-
-        <List
-          className="checklist-list"
-          dataSource={checklistItems}
-          loading={loading}
-          locale={{
-            emptyText: (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={
-                  loading ? "Carregando tarefas..." : 
-                  (viewingToday
-                    ? "Nenhuma tarefa para hoje. Adicione uma acima!"
-                    : "Nenhuma tarefa registrada para este dia.")
-                }
-              />
-            ),
-          }}
-          renderItem={(item) => (
-            <List.Item
-              className={`checklist-item ${item.completed ? 'completed' : ''} ${currentProfile?.id !== item.checklist.financialAccountId.toString() ? 'mismatched-profile' : ''}`}
-              actions={viewingToday ? [
-                  <Space className="item-actions">
-                    <Tooltip title="Editar Tarefa">
-                        <Button type="text" shape="circle" icon={<EditOutlined />} onClick={() => showEditModal(item)} />
-                    </Tooltip>
-                    <Tooltip title="Excluir Tarefa">
-                        <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => handleDeleteItem(item.id, item.checklist.financialAccountId)} />
-                    </Tooltip>
-                  </Space>
-              ] : []}
-            >
-                <div className="checklist-item-main">
-                    <Checkbox
-                        checked={item.completed}
-                        onChange={() => handleToggleItem(item.id, item.completed, item.checklist.financialAccountId)}
-                        disabled={!viewingToday}
-                        className="checklist-item-checkbox"
-                    />
-                    <div className="checklist-item-content">
-                        <Text className="checklist-item-text">{item.text}</Text>
-                        <div className="checklist-item-tags">
-                            {renderPriorityTag(item.priority)}
-                            {item.notes && (
-                                <Tooltip title={<div style={{whiteSpace: 'pre-wrap'}}>{item.notes}</div>}>
-                                    <InfoCircleOutlined className="notes-indicator" />
-                                </Tooltip>
-                            )}
+                    <div className="checklist-item-main">
+                        <Checkbox
+                            checked={item.completed}
+                            onChange={() => handleToggleItem(item)}
+                            disabled={!viewingToday}
+                            className="checklist-item-checkbox"
+                        />
+                        <div className="checklist-item-content">
+                            <Text className="checklist-item-text">{item.text}</Text>
+                            <div className="checklist-item-tags">
+                                {renderPriorityTag(item.priority)}
+                                {item.notes && (
+                                    <Tooltip title={<div style={{whiteSpace: 'pre-wrap'}}>{item.notes}</div>}>
+                                        <Tag icon={<InfoCircleOutlined />} className="notes-indicator">Nota</Tag>
+                                    </Tooltip>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </List.Item>
-          )}
-        />
-      </Card>
+                </List.Item>
+              )}
+            />
+          </Card>
+        </Col>
+      </Row>
 
+      {/* Modal para Adicionar Tarefa */}
+      <Modal
+        title="Adicionar Nova Tarefa"
+        open={isAddModalVisible}
+        onCancel={() => setIsAddModalVisible(false)}
+        footer={null}
+        destroyOnClose
+        className="task-modal"
+      >
+        <Form form={addForm} layout="vertical" onFinish={handleAddItem} initialValues={{ priority: 'medium' }}>
+            <Form.Item name="text" label="Tarefa" rules={[{ required: true, message: 'A tarefa não pode ficar em branco.'}]}>
+                <Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} placeholder="Ex: Fazer o faturamento mensal" disabled={submitting} />
+            </Form.Item>
+            <Form.Item name="priority" label="Prioridade" rules={[{ required: true }]}>
+                <Select disabled={submitting}>
+                    <Option value="high">Alta</Option>
+                    <Option value="medium">Média</Option>
+                    <Option value="low">Baixa</Option>
+                </Select>
+            </Form.Item>
+            <Form.Item name="notes" label="Notas (Opcional)">
+                <Input.TextArea autoSize={{ minRows: 3, maxRows: 6 }} placeholder="Detalhes, links, informações extras..." disabled={submitting}/>
+            </Form.Item>
+            <Form.Item style={{textAlign: 'right', marginBottom: 0, marginTop: '24px'}}>
+                <Button onClick={() => setIsAddModalVisible(false)} style={{ marginRight: 8 }} disabled={submitting}>Cancelar</Button>
+                <Button type="primary" htmlType="submit" loading={submitting}>Adicionar Tarefa</Button>
+            </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal para Editar Tarefa */}
       <Modal
         title="Editar Tarefa"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
         destroyOnClose
-        className="edit-item-modal"
+        className="task-modal"
       >
         <Form form={editForm} layout="vertical" onFinish={handleUpdateItem}>
             <Form.Item name="text" label="Tarefa" rules={[{ required: true, message: 'A tarefa não pode ficar em branco.'}]}>
                 <Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} disabled={submitting} />
             </Form.Item>
-            <Form.Item name="priority" label="Prioridade">
+            <Form.Item name="priority" label="Prioridade" rules={[{ required: true }]}>
                 <Select disabled={submitting}>
                     <Option value="high">Alta</Option>
                     <Option value="medium">Média</Option>
