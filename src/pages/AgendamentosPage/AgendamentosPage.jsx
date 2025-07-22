@@ -1,8 +1,10 @@
+// START OF FILE AgendamentosPage.jsx
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Button, Modal, Form, DatePicker, Select,
   Card, Space, Tooltip, Popconfirm, message, Tag, Row, Col,
-  Empty, ConfigProvider, Avatar, Spin, FloatButton, Popover, Divider, List, Statistic, Steps, Result, Calendar, Dropdown, Menu, Input
+  Empty, ConfigProvider, Avatar, Spin, FloatButton, Popover, Divider, List, Statistic, Steps, Result, Calendar, Dropdown, Menu, Input, Drawer
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined,
@@ -63,16 +65,6 @@ const AgendamentosPage = () => {
     const [isPjClientModalVisible, setIsPjClientModalVisible] = useState(false);
     const [isPjServiceModalVisible, setIsPjServiceModalVisible] = useState(false);
     
-    // Removidas as props de controle do modal PJ Service do estado do pai,
-    // pois o próprio modal irá gerenciar internamente o seu formulário e passos.
-    // const [formPjService] = Form.useForm();
-    // const [modalStepPjService, setModalStepPjService] = useState(0);
-    // const [modalDataPjService, setModalDataPjService] = useState({});
-    // const [slotsLoading, setSlotsLoading] = useState(false);
-    // const [availableSlots, setAvailableSlots] = useState([]);
-    // const [selectedSlot, setSelectedSlot] = useState(null);
-    // const [selectedDateForSlots, setSelectedDateForSlots] = useState(null);
-  
     const [currentDate, setCurrentDate] = useState(moment());
     const [popoverVisibleFor, setPopoverVisibleFor] = useState(null);
     const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
@@ -88,6 +80,18 @@ const AgendamentosPage = () => {
   
     const [servicesList, setServicesList] = useState([]);
     const [loadingServices, setLoadingServices] = useState(false);
+
+    // --- NOVOS ESTADOS PARA CONTROLE DA VISUALIZAÇÃO MOBILE ---
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
+    const [isMobileDrawerVisible, setIsMobileDrawerVisible] = useState(false);
+    const [selectedMobileDate, setSelectedMobileDate] = useState(null); // Armazena o dia { date, events }
+
+    // Efeito para detectar o tamanho da tela e atualizar isMobileView
+    useEffect(() => {
+        const handleResize = () => setIsMobileView(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
   
     const isBusinessProfile = useMemo(() => ['PJ', 'MEI'].includes(currentProfile?.type), [currentProfile]);
 
@@ -109,23 +113,14 @@ const AgendamentosPage = () => {
         if (!currentProfile || !isAuthenticated) { setCalendarEvents([]); setIsLoading(false); return; }
         setIsLoading(true);
         try {
-            // A rota GET /appointments já foi ajustada no backend para aceitar sem barra final.
             const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 500 } });
             const normalizedEvents = (response.data.data || []).map(app => ({
-                id: `appt_${app.id}`,
-                appointmentId: app.id,
-                type: 'appointment',
-                title: app.title,
+                id: `appt_${app.id}`, appointmentId: app.id, type: 'appointment', title: app.title,
                 start: moment.tz(app.eventDateTime, 'UTC').local().toDate(),
                 end: moment.tz(app.eventDateTime, 'UTC').add(app.durationMinutes || 60, 'minutes').local().toDate(),
-                status: translateStatus(app.status),
-                description: app.description || app.notes,
-                backgroundColor: '#3788d8', // Cor padrão para PF
-                borderColor: '#3788d8',
-                businessClients: [], // Para PF, não haverá businessClients
-                services: [], // Para PF, não haverá services
-                isPf: true,
-                associatedValue: app.associatedValue,
+                status: translateStatus(app.status), description: app.description || app.notes,
+                backgroundColor: '#3788d8', borderColor: '#3788d8',
+                businessClients: [], services: [], isPf: true, associatedValue: app.associatedValue,
             }));
             setCalendarEvents(normalizedEvents);
         } catch (error) { console.error("Erro ao carregar agendamentos (PF):", error); setCalendarEvents([]); }
@@ -145,15 +140,14 @@ const AgendamentosPage = () => {
                 title: event.title, description: event.description,
                 start: moment.tz(event.start, 'UTC').local().toDate(),
                 end: moment.tz(event.end, 'UTC').local().toDate(),
-                status: translateStatus(event.status),
-                backgroundColor: event.backgroundColor, borderColor: event.borderColor,
+                status: translateStatus(event.status), backgroundColor: event.backgroundColor, borderColor: event.borderColor,
                 businessClients: event.businessClients || [], services: event.services || [],
-                isPf: false, // Indica que é um evento PJ/MEI
+                isPf: false,
             }));
             setCalendarEvents(normalizedEvents);
         } catch (error) { console.error("Erro ao carregar eventos da agenda (PJ):", error); setCalendarEvents([]); }
         finally { setIsLoading(false); }
-    }, [currentProfile, isAuthenticated, isBusinessProfile, currentDate]);
+    }, [currentProfile, isAuthenticated, currentDate]);
 
     const fetchBusinessClientsForSelect = useCallback(async () => {
         if (!currentProfile || !isBusinessProfile) { setBusinessClientsList([]); return; }
@@ -190,51 +184,28 @@ const AgendamentosPage = () => {
         }
     }, [currentProfile, isAuthenticated, loadingProfiles, isBusinessProfile, fetchAgendamentosClassic, fetchCalendarEventsBusiness, fetchBusinessClientsForSelect, fetchServicesForSelect]);
     
-    // Este useEffect é para quando o mês no calendário é alterado, disparando nova busca
     useEffect(() => {
         if (currentProfile?.id && !loadingProfiles && isAuthenticated) {
-            if (isBusinessProfile) {
-                fetchCalendarEventsBusiness();
-            } else {
-                fetchAgendamentosClassic();
-            }
+            if (isBusinessProfile) { fetchCalendarEventsBusiness(); } else { fetchAgendamentosClassic(); }
         }
     }, [currentDate, isBusinessProfile, currentProfile?.id, loadingProfiles, isAuthenticated, fetchCalendarEventsBusiness, fetchAgendamentosClassic]);
 
-    // A função fetchAvailableSlots não é mais necessária aqui, pois ela será gerenciada internamente pelo ModalPjServiceAppointment.
-    // const fetchAvailableSlots = useCallback(async (date, serviceIdsParam) => {
-    //     if (!date || !serviceIdsParam || serviceIdsParam.length === 0 || !currentProfile?.id) { setAvailableSlots([]); setSlotsLoading(false); return; }
-    //     setSlotsLoading(true);
-    //     try {
-    //         const response = await apiClient.get(`/public/booking/${currentProfile.id}/availability`, {
-    //         params: { date: date.format('YYYY-MM-DD'), serviceIds: serviceIdsParam.join(',') },
-    //         });
-    //         setAvailableSlots(response.data.data.availableSlots || []);
-    //     } catch (error) { console.error("Erro ao buscar slots disponíveis:", error); setAvailableSlots([]); } finally { setSlotsLoading(false); }
-    // }, [currentProfile?.id]);
-
     const handleAppointmentCreationSuccess = () => {
-        // Recarrega os eventos do calendário após uma criação, edição ou exclusão bem-sucedida
         if (isBusinessProfile) { fetchCalendarEventsBusiness(); } else { fetchAgendamentosClassic(); }
+        // Se o drawer mobile estiver aberto, fecha ele para refletir as atualizações
+        if (isMobileDrawerVisible) { setIsMobileDrawerVisible(false); }
     };
     
-    // Funções para controlar a visibilidade dos modais de criação/edição
-    const handleShowPfModal = () => { setIsPfModalVisible(true); };
-    const handleShowPjClientModal = () => { setIsPjClientModalVisible(true); };
-    const handleShowPjServiceModal = () => {
-        // Quando o modal PJ Service é aberto, apenas o controlamos via 'isVisible'
-        // Seu estado interno é gerenciado pelo próprio componente ModalPjServiceAppointment.
-        setIsPjServiceModalVisible(true);
-    };
+    const handleShowPfModal = () => setIsPfModalVisible(true);
+    const handleShowPjClientModal = () => setIsPjClientModalVisible(true);
+    const handleShowPjServiceModal = () => setIsPjServiceModalVisible(true);
+    
     const handleCancelAllModals = () => {
         setIsPfModalVisible(false);
         setIsPjClientModalVisible(false);
         setIsPjServiceModalVisible(false);
-        // Não é necessário resetar formPjService aqui, pois ele é interno ao modal
-        // e o modal tem destroyOnClose.
     };
 
-    // Renderização do popover de seleção de mês no calendário
     const renderMonthPickerContent = () => (
         <div className="month-picker-container">
             <div className="month-picker-header">
@@ -244,9 +215,7 @@ const AgendamentosPage = () => {
             </div>
             <div className="month-picker-grid">
             {moment.months().map((_, index) => (
-                <Button
-                key={index}
-                type={currentDate.year() === pickerYear && currentDate.month() === index ? "primary" : "text"}
+                <Button key={index} type={currentDate.year() === pickerYear && currentDate.month() === index ? "primary" : "text"}
                 className="month-picker-button"
                 onClick={() => {
                     setCurrentDate(moment({ year: pickerYear, month: index }));
@@ -259,167 +228,158 @@ const AgendamentosPage = () => {
         </div>
     );
 
-    // Conteúdo do Popover para detalhes do agendamento
     const renderPopoverContent = (event) => {
-        // Agendamento PF
-        if (event.isPf) {
-            const isCompleted = event.status === 'Concluído';
-            return (
-                <div className="popover-content-wrapper">
-                    <Title level={5} className="popover-title">{event.title}<Tag color={isCompleted ? "default" : "blue"}>{event.status}</Tag></Title>
-                    <Text type="secondary" className="popover-time"><ClockCircleOutlined /> {moment(event.start).format('DD/MM/YYYY [às] HH:mm')}</Text>
-                    {event.description && <Paragraph className="popover-notes"><InfoCircleOutlined /> {event.description}</Paragraph>}
-                    <Divider className="popover-divider" />
-                    <Space className="popover-actions">
-                        <Button onClick={() => handleLifecycleAction(isCompleted ? 'schedule' : 'complete', event)} icon={<CheckCircleOutlined />}>{isCompleted ? "Reabrir" : "Concluir"}</Button>
-                        <Popconfirm title="Tem certeza?" onConfirm={() => handleDelete(event.appointmentId)} okText="Sim"><Button danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
-                    </Space>
-                </div>
-            );
-        }
-        // Agendamento PJ/MEI
+        if (!event) return null;
+        const isCompleted = event.status === 'Concluído';
+        const isConfirmed = event.status === 'Confirmado';
+        const isPending = event.status === 'Pendente';
+
         return (
             <div className="popover-content-wrapper">
-                <Title level={5} className="popover-title">{event.title}<Tag color={event.status === 'Concluídoc' ? "default" : (event.status === 'Confirmado' ? 'cyan' : 'blue')}>{event.status}</Tag></Title>
-                <Text type="secondary" className="popover-time"><ClockCircleOutlined /> {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}</Text>
+                <Title level={5} className="popover-title">{event.title}<Tag color={isCompleted ? "default" : (isConfirmed ? 'cyan' : 'blue')}>{event.status}</Tag></Title>
+                <Text type="secondary" className="popover-time"><ClockCircleOutlined /> {moment(event.start).format(event.isPf ? 'DD/MM/YYYY [às] HH:mm' : 'HH:mm')} - {moment(event.end).format('HH:mm')}</Text>
                 {event.description && <Paragraph className="popover-notes"><InfoCircleOutlined /> {event.description}</Paragraph>}
-                {/* Serviços associados */}
-                {event.services?.length > 0 && (
+                
+                {!event.isPf && (
                     <>
-                        <Divider />
-                        <div className="popover-clients-section">
-                            <Text strong><AppstoreAddOutlined /> Serviços</Text>
-                            <div>{event.services.map(s => <Tag key={s.id}>{s.name}</Tag>)}</div>
-                        </div>
+                        {event.services?.length > 0 && (
+                            <><Divider /><div className="popover-clients-section"><Text strong><AppstoreAddOutlined /> Serviços</Text><div>{event.services.map(s => <Tag key={s.id}>{s.name}</Tag>)}</div></div></>
+                        )}
+                        {event.businessClients?.length > 0 && (
+                            <><Divider /><div className="popover-clients-section"><Text strong><TeamOutlined /> Clientes</Text><Avatar.Group maxCount={4}>{event.businessClients.filter(Boolean).map(c => (<Tooltip title={c.name} key={c.id}><Avatar src={c.photoUrl} icon={<UserOutlined />} onClick={() => showClientDetailsModal(c)} className="popover-client-avatar"/></Tooltip>))}</Avatar.Group></div></>
+                        )}
                     </>
                 )}
-                {/* Clientes associados */}
-                {event.businessClients?.length > 0 && (
-                    <>
-                        <Divider />
-                        <div className="popover-clients-section">
-                            <Text strong><TeamOutlined /> Clientes</Text>
-                            <Avatar.Group maxCount={4}>
-                                {event.businessClients.filter(Boolean).map(c => (
-                                    <Tooltip title={c.name} key={c.id}>
-                                        <Avatar src={c.photoUrl} icon={<UserOutlined />} onClick={() => showClientDetailsModal(c)} className="popover-client-avatar"/>
-                                    </Tooltip>
-                                ))}
-                            </Avatar.Group>
-                        </div>
-                    </>
-                )}
+                
                 <Divider className="popover-divider" />
-                {/* Ações de ciclo de vida e exclusão */}
                 <Space className="popover-actions">
-                    {event.status === 'Pendente' && <Button onClick={() => handleLifecycleAction('confirm', event)} icon={<LikeOutlined />}>Confirmar</Button>}
-                    {event.status === 'Confirmado' && <Button onClick={() => handleLifecycleAction('complete', event)} icon={<CheckCircleOutlined />}>Concluir</Button>}
-                    <Popconfirm title="Excluir este agendamento?" onConfirm={() => handleDelete(event.appointmentId)}><Button danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
+                    {event.isPf && <Button onClick={() => handleLifecycleAction(isCompleted ? 'schedule' : 'complete', event)} icon={<CheckCircleOutlined />}>{isCompleted ? "Reabrir" : "Concluir"}</Button>}
+                    {isPending && !event.isPf && <Button onClick={() => handleLifecycleAction('confirm', event)} icon={<LikeOutlined />}>Confirmar</Button>}
+                    {isConfirmed && !event.isPf && <Button onClick={() => handleLifecycleAction('complete', event)} icon={<CheckCircleOutlined />}>Concluir</Button>}
+                    <Popconfirm title="Tem certeza?" onConfirm={() => handleDelete(event.appointmentId)} okText="Sim"><Button danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
                 </Space>
             </div>
         );
     };
 
-    // Renderização da grade do calendário
     const renderCalendarGrid = () => {
         const startDate = currentDate.clone().startOf('month').startOf('week');
-        const days = Array.from({ length: 42 }).map((_, i) => { // 6 semanas para cobrir o mês inteiro
+        const days = Array.from({ length: 42 }).map((_, i) => {
+            const day = startDate.clone().add(i, 'days');
+            return { date: day, isCurrentMonth: day.isSame(currentDate, 'month'), isToday: day.isSame(moment(), 'day'), events: calendarEvents.filter(e => moment(e.start).isSame(day, 'day')) };
+        });
+
+        return (
+            <>
+                <div className="calendar-header-days">
+                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(wd => (<div key={wd} className="calendar-weekday">{wd}</div>))}
+                </div>
+                <div className="calendar-grid">
+                    {days.map((d, i) => (
+                        <div key={i} className={`calendar-day ${!d.isCurrentMonth ? 'not-current-month' : ''} ${d.isToday ? 'today' : ''}`}>
+                            <div className="day-number">{d.date.date()}</div>
+                            <div className="events-wrapper">
+                                {d.events.filter(e => e.display === 'background').map(evt => (
+                                    <div key={evt.id} className="background-event-block" style={{ backgroundColor: evt.backgroundColor }}><Tooltip title={evt.title}><span>{evt.title}</span></Tooltip></div>
+                                ))}
+                                <div className="appointments-container">
+                                    {d.events.filter(e => e.type === 'appointment').map(evt => (
+                                        <Popover key={evt.id} content={renderPopoverContent(evt)} trigger="click" open={popoverVisibleFor === evt.id} onOpenChange={v => setPopoverVisibleFor(v ? evt.id : null)}>
+                                            <div className="appointment-pill" style={{ backgroundColor: evt.backgroundColor, borderLeftColor: darkenColor(evt.backgroundColor, 0.2) }}>
+                                                <Space size={4}><span className="pill-time">{moment(evt.start).format('HH:mm')}</span><span className="pill-title">{evt.title}</span></Space>
+                                            </div>
+                                        </Popover>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </>
+        );
+    };
+
+    // --- NOVA FUNÇÃO ---
+    // Lida com o clique no dia no calendário mobile
+    const handleMobileDayClick = (dayData) => {
+        if (dayData.events.length > 0) {
+            setSelectedMobileDate(dayData);
+            setIsMobileDrawerVisible(true);
+        }
+    };
+
+    const renderMobileCalendarGrid = () => {
+        const startDate = currentDate.clone().startOf('month').startOf('week');
+        const days = Array.from({ length: 42 }).map((_, i) => {
             const day = startDate.clone().add(i, 'days');
             return {
                 date: day,
                 isCurrentMonth: day.isSame(currentDate, 'month'),
                 isToday: day.isSame(moment(), 'day'),
-                events: calendarEvents.filter(e => moment(e.start).isSame(day, 'day'))
+                events: calendarEvents.filter(e => moment(e.start).isSame(day, 'day') && e.type === 'appointment')
             };
         });
 
         return (
-            <div className="calendar-grid">
-                {days.map((d, i) => (
-                    <div key={i} className={`calendar-day ${!d.isCurrentMonth ? 'not-current-month' : ''} ${d.isToday ? 'today' : ''}`}>
-                        <div className="day-number">{d.date.date()}</div>
-                        <div className="events-wrapper">
-                            {/* Renderizar eventos de background (folgas, pausas) */}
-                            {d.events.filter(e => e.display === 'background').map(evt => (
-                                <div key={evt.id} className="background-event-block" style={{ backgroundColor: evt.backgroundColor }}>
-                                    <Tooltip title={evt.title}>
-                                        <span>{evt.title}</span>
-                                    </Tooltip>
-                                </div>
-                            ))}
-                            {/* Renderizar agendamentos como "pílulas" */}
-                            <div className="appointments-container">
-                                {d.events.filter(e => e.type === 'appointment').map(evt => (
-                                    <Popover
-                                        key={evt.id}
-                                        content={renderPopoverContent(evt)}
-                                        trigger="click"
-                                        open={popoverVisibleFor === evt.id}
-                                        onOpenChange={v => setPopoverVisibleFor(v ? evt.id : null)}
-                                    >
-                                        <div
-                                            className="appointment-pill"
-                                            style={{ backgroundColor: evt.backgroundColor, borderLeftColor: darkenColor(evt.backgroundColor, 0.2) }}
-                                        >
-                                            <Space size={4}>
-                                                <span className="pill-time">{moment(evt.start).format('HH:mm')}</span>
-                                                <span className="pill-title">{evt.title}</span>
-                                            </Space>
-                                        </div>
-                                    </Popover>
-                                ))}
-                            </div>
+            <>
+                <div className="modal-weekdays-header">
+                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(wd => (<div key={wd}>{wd}</div>))}
+                </div>
+                <div className="modal-days-grid">
+                    {days.map((d, i) => (
+                        <div key={i}
+                            className={`modal-day-card ${!d.isCurrentMonth ? 'not-current-month' : ''} ${d.isToday ? 'today' : ''} ${d.events.length > 0 ? 'has-events' : ''}`}
+                            onClick={() => handleMobileDayClick(d)}>
+                            <span className="day-number">{d.date.date()}</span>
+                            {d.events.length > 0 && <span className="event-indicator-dot"></span>}
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            </>
         );
     };
     
-    // Lógica para Ações de Ciclo de Vida do Agendamento (Concluir, Confirmar, Reabrir)
     const handleLifecycleAction = async (action, event) => {
         if (!currentProfile || !event) return;
-        const appointmentId = event.appointmentId; // ID do agendamento
-            console.log("Debug: appointmentId para a requisição PUT:", appointmentId); 
-
-        setPopoverVisibleFor(null); // Fecha o popover ao iniciar a ação
+        const appointmentId = event.appointmentId;
+        setPopoverVisibleFor(null);
+        if (isMobileDrawerVisible) setIsMobileDrawerVisible(false); // Fecha o drawer se a ação vier do mobile
         message.loading({ content: 'Atualizando agendamento...', key: `appt-action-${appointmentId}` });
         try {
-            if (action === 'schedule' && event.isPf) { // Reabrir um agendamento PF
+            if (action === 'schedule' && event.isPf) {
                 await apiClient.put(`/financial-accounts/${currentProfile.id}/appointments/${event.appointmentId}`, { status: 'Scheduled' });
-            } else { // Confirmar ou Concluir (PJ/MEI)
+            } else {
                 await apiClient.post(`/financial-accounts/${currentProfile.id}/appointments/${appointmentId}/${action}`);
             }
             message.success({ content: `Agendamento atualizado!`, key: `appt-action-${appointmentId}` });
-            handleAppointmentCreationSuccess(); // Recarrega os eventos do calendário
+            handleAppointmentCreationSuccess();
         } catch (error) {
             console.error(`Falha ao atualizar agendamento ${action}:`, error);
             message.error({ content: `Falha ao atualizar agendamento. ${error.response?.data?.message || 'Erro desconhecido.'}`, key: `appt-action-${appointmentId}` });
         }
     };
     
-    // Lógica para Excluir Agendamento
     const handleDelete = async (id) => {
         if (!currentProfile) return;
-        setPopoverVisibleFor(null); // Fecha o popover ao iniciar a ação
+        setPopoverVisibleFor(null);
+        if (isMobileDrawerVisible) setIsMobileDrawerVisible(false); // Fecha o drawer se a ação vier do mobile
         message.loading({ content: 'Excluindo...', key: `delete-appt-${id}` });
         try {
           await apiClient.delete(`/financial-accounts/${currentProfile.id}/appointments/${id}`);
           message.success({ content: "Agendamento excluído!", key: `delete-appt-${id}`, duration: 2 });
-          handleAppointmentCreationSuccess(); // Recarrega os eventos do calendário
+          handleAppointmentCreationSuccess();
         } catch (error) {
             console.error("Falha ao excluir agendamento:", error);
             message.error({ content: `Falha ao excluir agendamento. ${error.response?.data?.message || 'Erro desconhecido.'}`, key: `delete-appt-${id}` });
         }
     };
 
-    // Lógica para exibir modal de detalhes do cliente (PJ/MEI)
     const showClientDetailsModal = async (client) => {
         if (!currentProfile || !client) return;
-        setPopoverVisibleFor(null); // Fecha o popover se estiver aberto
+        setPopoverVisibleFor(null);
         setIsClientDetailsModalVisible(true);
         setLoadingClientDetails(true);
-        setSelectedClientForDetails(null); // Limpa os detalhes anteriores
+        setSelectedClientForDetails(null);
         try {
           if (client.id) {
             const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/business-clients/${client.id}/details`);
@@ -428,16 +388,12 @@ const AgendamentosPage = () => {
         } catch (error) {
             console.error("Erro ao buscar detalhes do cliente:", error);
             message.error(`Falha ao carregar detalhes do cliente. ${error.response?.data?.message || ''}`);
-            handleClientDetailsModalCancel(); // Fecha o modal em caso de erro
-        } finally {
-            setLoadingClientDetails(false);
-        }
+            handleClientDetailsModalCancel();
+        } finally { setLoadingClientDetails(false); }
     };
     const handleClientDetailsModalCancel = () => { setIsClientDetailsModalVisible(false); setSelectedClientForDetails(null); };
 
-    // Dropdown para tipos de agendamento (PJ/MEI)
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    // *** CORREÇÃO: Usar a prop 'items' em vez de 'children' para o componente Menu do Ant Design ***
     const menu = {
         items: [
             { key: 'pj_client', icon: <UserOutlined />, label: 'Agendamento com Cliente' },
@@ -446,11 +402,10 @@ const AgendamentosPage = () => {
         onClick: ({ key }) => {
             if (key === 'pj_client') handleShowPjClientModal();
             else if (key === 'pj_service') handleShowPjServiceModal();
-            setIsDropdownOpen(false); // Fecha o dropdown após a seleção
+            setIsDropdownOpen(false);
         },
     };
 
-    // Exibe loaders ou mensagens de acesso negado enquanto carrega perfis
     if (loadingProfiles) return (<div className="loading-container"><Spin size="large" /></div>);
     if (!isAuthenticated && !loadingProfiles) return (<Content className="dark-placeholder-content"><Title level={3}>Acesso Negado</Title></Content>);
     if (!currentProfile && isAuthenticated && !loadingProfiles) return (<Content className="dark-placeholder-content"><Title level={3}>Nenhum Perfil Selecionado</Title></Content>);
@@ -468,135 +423,45 @@ const AgendamentosPage = () => {
                         </Col>
                         <Col>
                             <Space>
-                                {/* Botão para o seletor de mês/ano */}
-                                <Popover
-                                    content={renderMonthPickerContent}
-                                    trigger="click"
-                                    open={isMonthPickerVisible}
-                                    onOpenChange={setIsMonthPickerVisible}
-                                >
+                                <Popover content={renderMonthPickerContent} trigger="click" open={isMonthPickerVisible} onOpenChange={setIsMonthPickerVisible}>
                                     <Title level={4} className="clickable-month-title">{getFormattedMonthTitle(currentDate)}</Title>
                                 </Popover>
-                                {/* Botões de navegação de mês */}
-                                <Tooltip title="Mês Anterior">
-                                    <Button shape="circle" icon={<LeftOutlined />} onClick={() => setCurrentDate(currentDate.clone().subtract(1, 'month'))} />
-                                </Tooltip>
-                                <Tooltip title="Próximo Mês">
-                                    <Button shape="circle" icon={<RightOutlined />} onClick={() => setCurrentDate(currentDate.clone().add(1, 'month'))} />
-                                </Tooltip>
+                                <Tooltip title="Mês Anterior"><Button shape="circle" icon={<LeftOutlined />} onClick={() => setCurrentDate(currentDate.clone().subtract(1, 'month'))} /></Tooltip>
+                                <Tooltip title="Próximo Mês"><Button shape="circle" icon={<RightOutlined />} onClick={() => setCurrentDate(currentDate.clone().add(1, 'month'))} /></Tooltip>
                                 <Button onClick={() => setCurrentDate(moment())}>Hoje</Button>
                             </Space>
                         </Col>
                     </Row>
                     <div className="calendar-container">
-                        <div className="calendar-header-days">
-                            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(wd => (
-                                <div key={wd} className="calendar-weekday">{wd}</div>
-                            ))}
-                        </div>
-                        {isLoading ? (
-                            <div className="loading-container" style={{height: '50vh'}}>
-                                <Spin size="large"/>
-                            </div>
-                        ) : (
-                            renderCalendarGrid()
-                        )}
+                        {isLoading ? ( <div className="loading-container" style={{height: '50vh'}}><Spin size="large"/></div> ) 
+                                  : ( isMobileView ? renderMobileCalendarGrid() : renderCalendarGrid() )}
                     </div>
                 </Card>
 
-                {/* Botão flutuante para adicionar novo agendamento */}
                 {isBusinessProfile ? (
-                    <Dropdown
-                        overlay={
-                            <Menu onClick={menu.onClick} items={menu.items} /> // Renderiza o Menu usando a prop items
-                        }
-                        placement="topRight"
-                        arrow={{ pointAtCenter: true }}
-                        open={isDropdownOpen}
-                        onOpenChange={setIsDropdownOpen}
-                        trigger={['click']}
-                    >
-                        <FloatButton
-                            icon={<PlusOutlined />}
-                            type="primary"
-                            tooltip="Novo Agendamento"
-                            onClick={() => setIsDropdownOpen(true)}
-                        />
+                    <Dropdown menu={menu} placement="topRight" arrow={{ pointAtCenter: true }} open={isDropdownOpen} onOpenChange={setIsDropdownOpen} trigger={['click']}>
+                        <FloatButton icon={<PlusOutlined />} type="primary" tooltip="Novo Agendamento" onClick={() => setIsDropdownOpen(true)} />
                     </Dropdown>
                 ) : (
-                    <FloatButton
-                        icon={<PlusOutlined />}
-                        type="primary"
-                        tooltip="Novo Agendamento"
-                        onClick={handleShowPfModal}
-                    />
+                    <FloatButton icon={<PlusOutlined />} type="primary" tooltip="Novo Agendamento" onClick={handleShowPfModal} />
                 )}
             </Content>
 
-            {/* Modais de Agendamento */}
-            <ModalPfAppointment
-                open={isPfModalVisible}
-                onCancel={handleCancelAllModals}
-                onSuccess={handleAppointmentCreationSuccess}
-                currentProfile={currentProfile}
-            />
-            <ModalPjClientAppointment
-                open={isPjClientModalVisible}
-                onCancel={handleCancelAllModals}
-                onSuccess={handleAppointmentCreationSuccess}
-                businessClientsList={businessClientsList}
-                loadingBusinessClients={loadingBusinessClients}
-                currentProfile={currentProfile}
-            />
-            <ModalPjServiceAppointment
-                open={isPjServiceModalVisible}
-                onCancel={handleCancelAllModals}
-                onSuccess={handleAppointmentCreationSuccess}
-                currentProfile={currentProfile}
-                // As props abaixo foram removidas pois o modal as gerencia internamente:
-                // form={formPjService}
-                // modalStep={modalStepPjService}
-                // setModalStep={setModalStepPjService}
-                // modalData={modalDataPjService}
-                // setModalData={setModalDataPjService}
-                // servicesList={servicesList}
-                // loadingServices={loadingServices}
-                // slotsLoading={slotsLoading}
-                // availableSlots={availableSlots}
-                // fetchAvailableSlots={fetchAvailableSlots}
-                // selectedSlot={selectedSlot}
-                // setSelectedSlot={setSelectedSlot}
-                // selectedDateForSlots={selectedDateForSlots}
-                // setSelectedDateForSlots={setSelectedDateForSlots}
-            />
+            <ModalPfAppointment open={isPfModalVisible} onCancel={handleCancelAllModals} onSuccess={handleAppointmentCreationSuccess} currentProfile={currentProfile} />
+            <ModalPjClientAppointment open={isPjClientModalVisible} onCancel={handleCancelAllModals} onSuccess={handleAppointmentCreationSuccess} businessClientsList={businessClientsList} loadingBusinessClients={loadingBusinessClients} currentProfile={currentProfile} />
+            <ModalPjServiceAppointment open={isPjServiceModalVisible} onCancel={handleCancelAllModals} onSuccess={handleAppointmentCreationSuccess} currentProfile={currentProfile} />
         
-            {/* Modal de Detalhes do Cliente (apenas para perfil de negócio) */}
             {isBusinessProfile && (
-                <Modal
-                    title={<Space><TeamOutlined />Detalhes do Cliente</Space>}
-                    open={isClientDetailsModalVisible}
-                    onCancel={handleClientDetailsModalCancel}
-                    footer={[<Button key="close" onClick={handleClientDetailsModalCancel}> Fechar</Button>]}
-                    className="client-details-modal"
-                    width={600}
-                >
-                    {loadingClientDetails || !selectedClientForDetails ? (
-                        <div className="loading-container" style={{height: 300}}>
-                            <Spin/>
-                        </div>
-                    ) : (
-                        <div className="client-details-content">
+                <Modal title={<Space><TeamOutlined />Detalhes do Cliente</Space>} open={isClientDetailsModalVisible} onCancel={handleClientDetailsModalCancel} footer={[<Button key="close" onClick={handleClientDetailsModalCancel}> Fechar</Button>]} className="client-details-modal" width={600}>
+                    {loadingClientDetails || !selectedClientForDetails ? ( <div className="loading-container" style={{height: 300}}><Spin/></div> ) 
+                    : ( <div className="client-details-content">
                             <Avatar size={80} src={selectedClientForDetails.photoUrl} icon={<UserOutlined />} className="client-details-avatar" />
                             <Title level={4} className="client-details-name">{selectedClientForDetails.name}</Title>
                             <Space size="large" wrap style={{justifyContent: 'center', marginBottom: 24}}>
                                 {selectedClientForDetails.email && <Text copyable><MailOutlined /> {selectedClientForDetails.email}</Text>}
                                 {selectedClientForDetails.phone && <Text copyable><PhoneOutlined /> {selectedClientForDetails.phone}</Text>}
                             </Space>
-                            {selectedClientForDetails.notes && (
-                                <Paragraph className="client-details-notes" type='secondary'>
-                                    <InfoCircleOutlined /> {selectedClientForDetails.notes}
-                                </Paragraph>
-                            )}
+                            {selectedClientForDetails.notes && (<Paragraph className="client-details-notes" type='secondary'><InfoCircleOutlined /> {selectedClientForDetails.notes}</Paragraph>)}
                             <Divider>Atividade do Cliente</Divider>
                             <Row gutter={16} style={{textAlign: 'left'}}>
                                 <Col xs={24} md={12}>
@@ -605,28 +470,64 @@ const AgendamentosPage = () => {
                                 </Col>
                                 <Col xs={24} md={12}>
                                     <Title level={5}><CarryOutOutlined /> Histórico Recente</Title>
-                                    <List
-                                        itemLayout="horizontal"
-                                        dataSource={selectedClientForDetails.appointmentHistory || []}
-                                        size="small"
-                                        className="client-history-list"
-                                        locale={{emptyText: "Nenhum histórico encontrado."}}
-                                        renderItem={item => (
-                                            <List.Item>
-                                                <List.Item.Meta
-                                                    avatar={<ShoppingOutlined />}
-                                                    title={<Text>{item.title}</Text>}
-                                                    description={`${moment(item.eventDateTime).format('DD/MM/YY')} - R$ ${item.services.reduce((acc, s) => acc + parseFloat(s.price || 0), 0).toFixed(2)}`}
-                                                />
-                                            </List.Item>
-                                        )}
-                                    />
+                                    <List itemLayout="horizontal" dataSource={selectedClientForDetails.appointmentHistory || []} size="small" className="client-history-list" locale={{emptyText: "Nenhum histórico encontrado."}}
+                                        renderItem={item => (<List.Item><List.Item.Meta avatar={<ShoppingOutlined />} title={<Text>{item.title}</Text>} description={`${moment(item.eventDateTime).format('DD/MM/YY')} - R$ ${item.services.reduce((acc, s) => acc + parseFloat(s.price || 0), 0).toFixed(2)}`} /></List.Item>)} />
                                 </Col>
                             </Row>
                         </div>
                     )}
                 </Modal>
             )}
+
+            {/* --- NOVO DRAWER PARA MOBILE --- */}
+            <Drawer
+                title={`Agenda de ${selectedMobileDate ? moment(selectedMobileDate.date).format('DD [de] MMMM') : ''}`}
+                placement="bottom"
+                onClose={() => setIsMobileDrawerVisible(false)}
+                open={isMobileDrawerVisible}
+                height="auto"
+                className="mobile-day-drawer"
+            >
+                {selectedMobileDate && (
+                    <List
+                        dataSource={selectedMobileDate.events}
+                        renderItem={event => {
+                            const isCompleted = event.status === 'Concluído';
+                            const isConfirmed = event.status === 'Confirmado';
+                            const isPending = event.status === 'Pendente';
+                            return (
+                                <List.Item className="drawer-appointment-item">
+                                    <div className="drawer-item-header">
+                                        <Text strong>{event.title}</Text>
+                                        <Tag color={isCompleted ? "default" : (isConfirmed ? 'cyan' : 'blue')}>{event.status}</Tag>
+                                    </div>
+                                    <div className="drawer-item-body">
+                                        <Text type="secondary"><ClockCircleOutlined /> {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}</Text>
+                                        {event.description && <Paragraph type="secondary" ellipsis={{ rows: 2, expandable: true, symbol: 'mais' }} style={{marginTop: '8px'}}>{event.description}</Paragraph>}
+                                        {!event.isPf && (
+                                            <>
+                                                {event.services?.length > 0 && (
+                                                    <div className="drawer-tag-section"><Text strong><AppstoreAddOutlined /></Text> {event.services.map(s => <Tag key={s.id}>{s.name}</Tag>)}</div>
+                                                )}
+                                                {event.businessClients?.length > 0 && (
+                                                    <div className="drawer-tag-section"><Text strong><TeamOutlined /></Text> {event.businessClients.map(c => <Tag key={c.id} icon={<Avatar size="small" src={c.photoUrl} />} style={{cursor: 'pointer'}} onClick={() => showClientDetailsModal(c)}>{c.name}</Tag>)}</div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <Space className="drawer-item-actions">
+                                        {event.isPf && <Button size="small" onClick={() => handleLifecycleAction(isCompleted ? 'schedule' : 'complete', event)} icon={<CheckCircleOutlined />}>{isCompleted ? "Reabrir" : "Concluir"}</Button>}
+                                        {isPending && !event.isPf && <Button size="small" onClick={() => handleLifecycleAction('confirm', event)} icon={<LikeOutlined />}>Confirmar</Button>}
+                                        {isConfirmed && !event.isPf && <Button size="small" onClick={() => handleLifecycleAction('complete', event)} icon={<CheckCircleOutlined />}>Concluir</Button>}
+                                        <Popconfirm title="Tem certeza?" onConfirm={() => handleDelete(event.appointmentId)} okText="Sim"><Button size="small" danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
+                                    </Space>
+                                </List.Item>
+                            );
+                        }}
+                    />
+                )}
+            </Drawer>
+
         </ConfigProvider>
     );
 };

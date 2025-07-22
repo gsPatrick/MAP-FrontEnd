@@ -1,341 +1,320 @@
 /* src/pages/PainelUsuario/TransacoesPage/TransacoesPage.css */
 
-/* :root { */
-    /* Defina suas variáveis de cor aqui ou em um arquivo global se ainda não o fez */
-    /* --map-laranja: #FA8C16; */
-    /* --map-laranja-claro: #FFE7BA; /* Um laranja mais claro para fundos de hover suaves */
-    /* --map-laranja-muito-claro: #FFF7E6; */
-    /* --map-dourado: #FAAD14; */
-    /* --map-dourado-escuro: #D48806; */
-    /* --map-verde-claro: #8BC34A; */
-    /* --map-verde-escuro: #689F38; */
-    /* --map-verde-muito-claro: #F6FFED; */
-    /* --map-vermelho-claro: #F44336; */
-    /* --map-vermelho-escuro: #CF1322; */
-    /* --map-vermelho-muito-claro: #FFF1F0; */
-    /* --map-branco: #ffffff; */
-    /* --map-cinza-claro: #f0f0f0; */
-    /* --map-cinza-medio: #d9d9d9; */
-    /* --header-text-primary: #303133; */
-    /* --header-text-secondary: #606266; */
-    /* --link-hover-color: var(--map-dourado-escuro, #D48806); */
-/* } */
+/* --- Importação da Fonte e Estilos de Base --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Layout Geral da Página */
-.transacoes-page-main-layout .panel-content-area.transacoes-content {
-    background-color: #f8f9fc;
-    padding: 24px;
-    transition: background-color 0.3s ease;
+body {
+    font-family: 'Inter', sans-serif;
 }
 
-.page-title-transactions {
-    font-size: 26px !important;
-    font-weight: 700 !important;
-    color: var(--header-text-primary, #333);
-    margin-bottom: 10px !important;
+/* --- Variáveis de Cor (Exemplo, idealmente globais) --- */
+:root {
+  --laranja: #FA8C16;
+  --laranja-escuro: #D46B08;
+  --laranja-claro: #FFF7E6;
+  --verde: #8BC34A;
+  --verde-escuro: #389E0D;
+  --verde-claro: #F6FFED;
+  --vermelho: #F44336;
+  --vermelho-escuro: #CF1322;
+  --vermelho-claro: #FFF1F0;
+  --texto-primario: #2c3e50;
+  --texto-secundario: #7f8c8d;
+  --fundo-app: #f4f6f8;
+  --fundo-card: #ffffff;
+  --borda: #e8eaed;
 }
 
-.filters-card-transactions .ant-typography strong,
-.transacoes-content .ant-typography[type="secondary"] {
-    color: var(--header-text-secondary, #555);
+/* --- Layout Geral e Cabeçalho --- */
+.transactions-container-clean {
+    padding: 1.5rem;
+    background-color: var(--fundo-app, #f4f6f8);
+    min-height: 100vh;
 }
 
-/* Card de Filtros e Ações */
-.filters-card-transactions {
-    margin-bottom: 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    background-color: var(--map-branco, #fff);
-    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+.page-header-clean h1 {
+    font-size: 2rem; /* Aumentado */
+    font-weight: 700;
+    color: var(--texto-primario, #2c3e50);
+    margin: 0;
+    letter-spacing: -0.03em; /* Mais moderno */
 }
-.filters-card-transactions .ant-card-body {
-    padding: 24px !important;
-}
-.filters-card-transactions .ant-typography strong {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--header-text-secondary, #555);
-}
-.filters-card-transactions .ant-select .ant-select-selector,
-.filters-card-transactions .ant-picker {
-    border-radius: 6px;
-    border-color: var(--map-cinza-medio, #d9d9d9);
-}
-.filters-card-transactions .ant-select-focused .ant-select-selector,
-.filters-card-transactions .ant-picker-focused,
-.filters-card-transactions .ant-select:hover .ant-select-selector, /* Hover para select */
-.filters-card-transactions .ant-picker:hover { /* Hover para datepicker */
-    border-color: var(--map-laranja, #FA8C16) !important;
-    box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.2) !important;
+.page-header-clean p {
+    font-size: 1rem;
+    color: var(--texto-secundario, #7f8c8d);
+    margin: 0.5rem 0 2rem 0; /* Mais margem */
+    line-height: 1.5;
 }
 
-/* Estilo para opções do Select no hover/focus (se o padrão azul estiver aparecendo) */
-.ant-select-dropdown .ant-select-item-option-active,
-.ant-select-dropdown .ant-select-item-option-selected {
-    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
-    color: var(--map-laranja, #FA8C16) !important;
-    font-weight: 500;
-}
-.ant-select-dropdown .ant-select-item-option-selected:hover { /* Para quando já está selecionado e passa o mouse */
-    background-color: var(--map-laranja-claro, #FFE7BA) !important;
-}
-
-
-/* Botões de Adicionar Receita/Despesa */
-.filters-card-transactions .btn-add-receita {
-    background: var(--map-verde-claro, #8BC34A);
-    border-color: transparent;
-    color: var(--map-branco, #fff);
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.filters-card-transactions .btn-add-receita:hover,
-.filters-card-transactions .btn-add-receita:focus {
-    background: var(--map-verde-escuro, #689F38) !important;
-    border-color: transparent !important; /* Mantido transparente ou cor do hover */
-    color: var(--map-branco, #fff) !important;
-}
-
-.filters-card-transactions .btn-add-despesa {
-    background: var(--map-vermelho-claro, #F44336);
-    border-color: transparent;
-    color: var(--map-branco, #fff);
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.filters-card-transactions .btn-add-despesa:hover,
-.filters-card-transactions .btn-add-despesa:focus {
-    background: var(--map-vermelho-escuro, #D32F2F) !important;
-    border-color: transparent !important;
-    color: var(--map-branco, #fff) !important;
-}
-
-/* Cards de Resumo Financeiro */
-.summary-stat-card {
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    text-align: center;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    background-color: var(--map-branco, #fff);
-    padding: 16px;
-}
-.summary-stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-.summary-stat-card .ant-statistic-title {
-    font-size: 14px;
-    color: var(--header-text-secondary, #6c757d);
-    margin-bottom: 8px !important;
-    font-weight: 500;
-}
-.summary-stat-card .ant-statistic-content {
-    font-size: 26px !important;
-    font-weight: 700 !important;
-    line-height: 1.2;
-}
-.summary-stat-card.receita .ant-statistic-content { color: var(--map-verde-escuro, #3f8600); }
-.summary-stat-card.despesa .ant-statistic-content { color: var(--map-vermelho-escuro, #cf1322); }
-.summary-stat-card.saldo .ant-statistic-content { color: var(--map-dourado, #FAAD14); }
-
-.summary-stat-card.receita { border-left: 5px solid var(--map-verde-claro, #8BC34A); }
-.summary-stat-card.despesa { border-left: 5px solid var(--map-vermelho-claro, #F44336); }
-.summary-stat-card.saldo { border-left: 5px solid var(--map-dourado-escuro, #D48806); }
-
-
-/* Cards de Gráficos */
-.chart-card-transactions {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    min-height: 380px;
+/* --- Filtros e Busca --- */
+.filter-controls {
     display: flex;
-    flex-direction: column;
-    background-color: var(--map-branco, #fff);
-    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+    gap: 8px;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding-bottom: 8px;
 }
-.chart-card-transactions .ant-card-head-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--header-text-primary, #333);
+.filter-controls button {
+    padding: 8px 16px;
+    border: 1px solid var(--borda, #e8eaed);
+    background-color: var(--fundo-card, #fff);
+    color: var(--texto-secundario, #7f8c8d);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
-.chart-card-transactions .ant-card-body {
-    padding: 20px !important;
-    flex-grow: 1;
+.filter-controls button.active {
+    background-color: var(--texto-primario, #2c3e50);
+    color: #fff;
+    border-color: var(--texto-primario, #2c3e50);
+}
+.search-bar-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+.search-bar-container .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: var(--texto-secundario, #7f8c8d);
+}
+.search-bar-container input {
+    width: 100%;
+    padding: 12px 16px 12px 48px;
+    border-radius: 12px;
+    border: 1px solid var(--borda, #e8eaed);
+    background-color: var(--fundo-card, #fff);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-bar-container input:focus {
+    outline: none;
+    border-color: var(--laranja, #FA8C16);
+    box-shadow: 0 0 0 3px rgba(250, 140, 22, 0.15);
+}
+
+.add-buttons-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.btn-add {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
-.chart-card-transactions .ant-empty-description {
-    color: var(--header-text-secondary, #888);
+.btn-add:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.btn-add.income { background-color: var(--verde, #8BC34A); }
+.btn-add.expense { background-color: var(--vermelho, #F44336); }
+
+
+/* --- Lista de Transações em Grid --- */
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.loading-text, .empty-text {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--texto-secundario, #7f8c8d);
+}
+.empty-state-container {
+    grid-column: 1 / -1;
 }
 
-/* Tabela de Transações */
-.transactions-table-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    background-color: var(--map-branco, #fff);
-    border: 1px solid var(--map-cinza-claro, #e8e8e8);
+/* --- Card de Transação (REFINADO) --- */
+.transaction-card {
+    background-color: var(--fundo-card, #fff);
+    border-radius: 16px;
+    padding: 1.25rem; /* Mais respiro */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* Mais espaçamento interno */
 }
-.transactions-table-card .ant-table-thead > tr > th {
-    background-color: #fafcff;
+.card-main-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.card-description {
+    font-size: 1.05rem; /* Tamanho ajustado */
     font-weight: 600;
-    color: var(--header-text-primary, #333);
-    border-bottom: 2px solid var(--map-cinza-medio, #f0f0f0);
+    color: var(--texto-primario, #2c3e50);
 }
-.transactions-table-card .ant-table-tbody > tr > td {
-    font-size: 13px;
-    color: var(--header-text-secondary, #555);
-    border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
+.card-value {
+    font-size: 1.05rem; /* Tamanho ajustado */
+    font-weight: 700; /* Mais peso para destaque */
 }
-.transactions-table-card .ant-table-tbody > tr:hover > td {
-    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important;
+.card-value.income { color: var(--verde-escuro, #389E0D); }
+.card-value.expense { color: var(--vermelho-escuro, #CF1322); }
+
+.card-metadata {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Espaçamento entre metadados */
+    font-size: 0.8rem; /* Menor para ser secundário */
+    color: var(--texto-secundario, #7f8c8d);
 }
-.transactions-table-card .ant-tag {
-    font-size: 11px;
-    padding: 3px 8px;
+.card-category {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 500;
-    border-radius: 4px;
+    margin-right: auto; /* Empurra a data e o menu para a direita */
 }
-.transactions-table-card .ant-tag-green {
-    background-color: var(--map-verde-muito-claro, #F6FFED);
-    border-color: var(--map-verde-claro, #B7EB8F);
-    color: var(--map-verde-escuro, #389E0D);
+.card-category.income { color: var(--verde-escuro, #389E0D); }
+.card-category.expense { color: var(--vermelho-escuro, #CF1322); }
+
+.card-status-wrapper {
+    margin-top: 0.5rem; /* Mais espaço acima da tag */
 }
-.transactions-table-card .ant-tag-volcano {
-    background-color: var(--map-vermelho-muito-claro, #FFF1F0);
-    border-color: var(--map-vermelho-claro, #FFCCC7);
-    color: var(--map-vermelho-escuro, #CF1322);
+.card-status-tag {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-block;
 }
-.transactions-table-card .ant-table-cell-ellipsis {
+.card-status-tag.pago { background-color: var(--vermelho-claro, #FFF1F0); color: var(--vermelho-escuro, #CF1322); }
+.card-status-tag.recebido { background-color: var(--verde-claro, #F6FFED); color: var(--verde-escuro, #389E0D); }
+.card-status-tag.a-pagar, .card-status-tag.a-receber { background-color: var(--laranja-claro, #FFF7E6); color: var(--laranja-escuro, #D46B08); }
+
+.card-menu-container { 
+    position: relative; 
+}
+.card-menu-button { 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    color: var(--texto-secundario); 
+    padding: 4px; 
+}
+.card-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px);
+    background-color: var(--fundo-card, #fff);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 10;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 120px;
+}
+.card-menu button { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    width: 100%; 
+    padding: 10px; 
+    background: none; 
+    border: none; 
+    text-align: left; 
+    cursor: pointer; 
+    font-size: 0.9rem; 
+}
+.card-menu button:hover { 
+    background-color: #f8f9fc; 
+}
+.card-menu button.danger { 
+    color: var(--vermelho, #F44336); 
 }
 
-/* Botões de Ação na Tabela (Editar/Excluir) */
-.transactions-table-card .ant-btn-text { /* Estilo base para botões de texto */
-    color: var(--map-laranja, #FA8C16); /* Cor laranja para ícones */
-    transition: color 0.2s ease, background-color 0.2s ease;
+/* --- Paginação --- */
+.pagination-controls-clean { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 8px; 
+    margin-top: 2rem; 
 }
-.transactions-table-card .ant-btn-text:hover,
-.transactions-table-card .ant-btn-text:focus {
-    color: var(--map-dourado-escuro, #D48806) !important; /* Dourado escuro no hover */
-    background-color: var(--map-laranja-muito-claro, #FFF7E6) !important; /* Fundo laranja bem claro */
+.pagination-controls-clean button { 
+    padding: 8px 16px; 
+    border: 1px solid var(--borda, #e8eaed); 
+    background-color: #fff; 
+    border-radius: 8px; 
+    font-weight: 500; 
+    cursor: pointer; 
 }
-.transactions-table-card .ant-btn-text[danger] {
-    color: var(--map-vermelho-claro, #F44336); /* Cor vermelha para botão de perigo */
+.pagination-controls-clean button:disabled { 
+    opacity: 0.5; 
+    cursor: not-allowed; 
 }
-.transactions-table-card .ant-btn-text[danger]:hover,
-.transactions-table-card .ant-btn-text[danger]:focus {
-    color: var(--map-vermelho-escuro, #CF1322) !important;
-    background-color: var(--map-vermelho-muito-claro, #FFF1F0) !important;
+.pagination-controls-clean .page-number { 
+    padding: 8px 14px; 
+    border-radius: 8px; 
+    font-weight: 500; 
 }
-
-
-/* Paginação da Tabela */
-.transactions-table-card .ant-pagination-item a {
-    color: var(--header-text-secondary, #555);
-}
-.transactions-table-card .ant-pagination-item-active {
-    background-color: var(--map-laranja, #FA8C16) !important;
-    border-color: var(--map-laranja, #FA8C16) !important;
-}
-.transactions-table-card .ant-pagination-item-active a {
-    color: var(--map-branco, #fff) !important;
-}
-.transactions-table-card .ant-pagination-item:hover,
-.transactions-table-card .ant-pagination-item:focus {
-    border-color: var(--map-dourado, #FAAD14) !important;
-}
-.transactions-table-card .ant-pagination-item:hover a,
-.transactions-table-card .ant-pagination-item:focus a {
-    color: var(--map-dourado, #FAAD14) !important;
-}
-.transactions-table-card .ant-pagination-prev:hover .ant-pagination-item-link,
-.transactions-table-card .ant-pagination-next:hover .ant-pagination-item-link,
-.transactions-table-card .ant-pagination-jump-prev:hover .ant-pagination-item-link-icon,
-.transactions-table-card .ant-pagination-jump-next:hover .ant-pagination-item-link-icon {
-    color: var(--map-dourado, #FAAD14) !important;
+.pagination-controls-clean .page-number.active { 
+    background-color: var(--texto-primario, #2c3e50); 
+    color: #fff; 
 }
 
+/* --- Modals e Loading --- */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+.confirmation-modal {
+    max-width: 450px;
+}
+.confirmation-text { 
+    margin: 1rem 0; 
+    color: var(--texto-secundario); 
+}
+.confirmation-actions { 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 1rem; 
+    margin-top: 1.5rem; 
+}
+.btn-cancel { 
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    background: none; 
+    border: 1px solid var(--borda); 
+    cursor: pointer; 
+}
+.btn-confirm-danger { 
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    background-color: var(--vermelho); 
+    color: #fff; 
+    border: none; 
+    cursor: pointer; 
+}
 
-/* Modal de Adicionar/Editar Transação */
-.add-transaction-modal .ant-modal-content {
-    border-radius: 12px;
-}
-.add-transaction-modal .ant-modal-header {
-    border-radius: 12px 12px 0 0;
-    background-color: #f7f8fa;
-    border-bottom: 1px solid #e8e8e8;
-    padding: 16px 24px;
-}
-.add-transaction-modal .ant-modal-title {
-    font-weight: 600;
-    color: var(--header-text-primary, #333);
-}
-.add-transaction-modal .ant-form-item-label > label {
-    font-weight: 500;
-    color: var(--header-text-secondary, #555);
+/* --- RESPONSIVIDADE PARA DESKTOP --- */
+@media (min-width: 768px) {
+    .transaction-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
 }
 
-/* Botão de submit do Modal */
-.add-transaction-modal .modal-submit-btn.ant-btn-primary { /* Mais específico */
-    background: var(--map-laranja, #FA8C16) !important;
-    border-color: var(--map-laranja, #FA8C16) !important;
-    color: var(--map-branco, #fff) !important;
-    font-weight: 500;
-    height: 40px;
-    font-size: 14px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-.add-transaction-modal .modal-submit-btn.ant-btn-primary:hover,
-.add-transaction-modal .modal-submit-btn.ant-btn-primary:focus {
-    background: var(--map-dourado, #D48806) !important;
-    border-color: var(--map-dourado, #D48806) !important;
-    color: var(--map-branco, #fff) !important;
-}
-
-/* Responsividade */
-@media (max-width: 767px) {
-    .transacoes-page-main-layout .panel-content-area.transacoes-content {
-        padding: 16px;
+@media (min-width: 1200px) {
+    .transactions-container-clean {
+        max-width: none;
     }
-    .page-title-transactions {
-        font-size: 22px !important;
-    }
-    .filters-card-transactions .ant-card-body {
-        padding: 16px !important;
-    }
-    .filters-card-transactions .ant-row > .ant-col {
-        margin-bottom: 16px;
-    }
-    .filters-card-transactions .ant-space-vertical {
-        width: 100% !important;
-    }
-    .filters-card-transactions .btn-add-receita,
-    .filters-card-transactions .btn-add-despesa {
-        width: 100%;
-    }
-    
-    .summary-stat-card {
-        margin-bottom: 16px;
-    }
-    .summary-stat-card .ant-statistic-content {
-        font-size: 22px !important;
-    }
-    .chart-card-transactions {
-        min-height: 300px;
-        margin-bottom: 16px;
-    }
-    .add-transaction-modal .ant-modal-wrap {
-        overflow-x: hidden;
-    }
-    .add-transaction-modal .ant-modal {
-        max-width: 95vw !important;
-        padding: 0 !important;
+    .transaction-list {
+        grid-template-columns: repeat(3, 1fr);
     }
 }

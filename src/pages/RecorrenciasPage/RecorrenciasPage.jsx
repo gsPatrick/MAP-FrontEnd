@@ -1,13 +1,5 @@
-// src/pages/RecorrenciasPage/RecorrenciasPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Typography, Button, Row, Col, Card, Select, Table, Tag,
-  Space, Tooltip, Modal, Empty, message, Layout
-} from 'antd';
-import {
-  PlusOutlined, EditOutlined, DeleteOutlined,
-  BellOutlined, CheckCircleOutlined, RetweetOutlined
-} from '@ant-design/icons';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FaPlus, FaPen, FaTrash, FaRetweet, FaBell, FaCheckCircle, FaEllipsisV } from 'react-icons/fa';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -20,34 +12,93 @@ import './RecorrenciasPage.css';
 
 dayjs.locale('pt-br');
 
-const { Content } = Layout;
-const { Title, Paragraph, Text } = Typography;
-const { Option } = Select;
-
-// <<< MUDANÇA 1: Importar useModal >>>
-const { useModal } = Modal;
-
+// --- Helpers ---
 const frequencyMap = {
-  daily: 'Diária',
-  weekly: 'Semanal',
-  'bi-weekly': 'Quinzenal',
-  monthly: 'Mensal',
-  quarterly: 'Trimestral',
-  'semi-annually': 'Semestral',
-  annually: 'Anual',
+  daily: 'Diária', weekly: 'Semanal', 'bi-weekly': 'Quinzenal', monthly: 'Mensal',
+  quarterly: 'Trimestral', 'semi-annually': 'Semestral', annually: 'Anual',
+};
+const translateFrequency = (freq) => frequencyMap[freq] || freq;
+const formatCurrency = (value) => (parseFloat(value) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+
+// --- Componente de Card de Recorrência ---
+const RecurrenceCard = ({ recurrence, onEdit, onDelete }) => {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [menuRef]);
+
+    return (
+        <div className="recurrence-card">
+            <header className="card-header">
+                <span className="recurrence-description">{recurrence.description}</span>
+                <span className={`recurrence-value ${recurrence.type.toLowerCase()}`}>{formatCurrency(recurrence.value)}</span>
+            </header>
+            <div className="card-body">
+                <div className="recurrence-meta-item">
+                    <span className="meta-label">Tipo:</span>
+                    <span className={`tag ${recurrence.type.toLowerCase()}`}>{recurrence.type}</span>
+                </div>
+                <div className="recurrence-meta-item">
+                    <span className="meta-label">Frequência:</span>
+                    <span>{translateFrequency(recurrence.frequency)}</span>
+                </div>
+                <div className="recurrence-meta-item">
+                    <span className="meta-label">Próxima Data:</span>
+                    <span>{recurrence.nextDueDate ? dayjs(recurrence.nextDueDate).format('DD/MM/YYYY') : 'N/A'}</span>
+                </div>
+            </div>
+            <footer className="card-footer">
+                <span className={`recurrence-status ${recurrence.isActive ? 'ativa' : 'inativa'}`}>
+                    {recurrence.isActive ? 'Ativa' : 'Inativa'}
+                </span>
+                <span className="auto-action-status">
+                    {recurrence.autoCreateTransaction ? <FaCheckCircle /> : <FaBell />}
+                    {recurrence.autoCreateTransaction ? 'Cria Transação' : 'Apenas Lembra'}
+                </span>
+                <div className="card-menu-container" ref={menuRef}>
+                    <button className="card-menu-button" onClick={() => setMenuOpen(!menuOpen)}><FaEllipsisV /></button>
+                    {menuOpen && (
+                        <div className="card-menu">
+                            <button onClick={() => { onEdit(recurrence); setMenuOpen(false); }}><FaPen /> Editar</button>
+                            <button onClick={() => { onDelete(recurrence); setMenuOpen(false); }} className="danger"><FaTrash /> Excluir</button>
+                        </div>
+                    )}
+                </div>
+            </footer>
+        </div>
+    );
 };
 
-const translateFrequency = (freq) => frequencyMap[freq] || freq;
+
+// --- Componente de Modal de Confirmação ---
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content confirmation-modal">
+                <h3 className="modal-title">{title}</h3>
+                <p className="confirmation-text">{children}</p>
+                <div className="confirmation-actions">
+                    <button onClick={onClose} className="btn-cancel">Cancelar</button>
+                    <button onClick={onConfirm} className="btn-confirm-danger">Excluir</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const RecorrenciasPage = () => {
-  const { 
-    currentProfile,
-    loadingProfiles,
-    isAuthenticated
-  } = useProfile();
-  
-  // <<< MUDANÇA 2: Inicializar o hook useModal >>>
-  const [modal, contextHolder] = useModal();
+  const { currentProfile, loadingProfiles, isAuthenticated } = useProfile();
 
   const [recurrences, setRecurrences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +109,9 @@ const RecorrenciasPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecurrence, setEditingRecurrence] = useState(null);
 
-  // ... (o resto das funções como fetchRecurrences, handleOpenModal, etc., permanecem iguais) ...
+  const [isConfirmDeleteModalVisible, setIsConfirmDeleteModalVisible] = useState(false);
+  const [recurrenceToDelete, setRecurrenceToDelete] = useState(null);
+
   const fetchRecurrences = useCallback(async () => {
     if (!currentProfile || !isAuthenticated) {
       setRecurrences([]); setLoading(false); return;
@@ -69,15 +122,9 @@ const RecorrenciasPage = () => {
       if (filterType !== 'todas') params.type = filterType; 
       if (filterStatus === 'ativa') params.isActive = true;
       if (filterStatus === 'inativa') params.isActive = false;
-      params.sortBy = 'nextDueDate';
-      params.sortOrder = 'ASC';
-
+      
       const response = await apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params });
-      if (response.data && response.data.status === 'success' && response.data.data.rules) {
-        setRecurrences(response.data.data.rules.map(r => ({ ...r, value: parseFloat(r.value) })) || []);
-      } else {
-        setRecurrences([]);
-      }
+      setRecurrences(response.data?.data?.rules || []);
     } catch (error) {
       console.error("Erro ao carregar recorrências:", error);
       setRecurrences([]);
@@ -98,114 +145,91 @@ const RecorrenciasPage = () => {
     setIsModalVisible(true);
   };
   
-  const handleModalCancel = () => {
-      setIsModalVisible(false);
-      setEditingRecurrence(null);
-  };
-  
-  const handleModalSuccess = () => {
-      fetchRecurrences();
-      handleModalCancel();
+  const handleDeleteClick = (recurrence) => {
+    setRecurrenceToDelete(recurrence);
+    setIsConfirmDeleteModalVisible(true);
   };
 
-  // <<< MUDANÇA 3: Usar a instância `modal` do hook em vez da chamada estática `Modal` >>>
-  const handleDeleteRecurrence = (recurrenceId, recurrenceDescription) => {
-    console.log(`[handleDeleteRecurrence] Função chamada para ID: ${recurrenceId}, Descrição: "${recurrenceDescription}"`);
-    
-    if (!currentProfile) {
-        console.error("[handleDeleteRecurrence] ERRO: currentProfile é nulo. Ação abortada.");
-        return;
+  const confirmDelete = async () => {
+    if (!recurrenceToDelete || !currentProfile) return;
+    try {
+        await apiClient.delete(`/financial-accounts/${currentProfile.id}/recurring-rules/${recurrenceToDelete.id}`);
+        fetchRecurrences();
+    } catch (error) {
+        console.error("Erro ao excluir recorrência:", error);
+    } finally {
+        setIsConfirmDeleteModalVisible(false);
+        setRecurrenceToDelete(null);
     }
-    
-    modal.confirm({ // <-- Usando a instância `modal`
-        title: "Confirmar Exclusão",
-        content: `Tem certeza que deseja excluir a recorrência "${recurrenceDescription}"?`,
-        okText: "Excluir",
-        okType: "danger",
-        cancelText: "Cancelar",
-        onOk: async () => {
-            console.log(`[handleDeleteRecurrence -> onOk] Usuário confirmou a exclusão. Tentando chamar a API para o ID: ${recurrenceId}`);
-            try {
-                const endpoint = `/financial-accounts/${currentProfile.id}/recurring-rules/${recurrenceId}`;
-                console.log(`[handleDeleteRecurrence -> onOk] Enviando requisição DELETE para: ${endpoint}`);
-                
-                await apiClient.delete(endpoint);
-                
-                console.log(`[handleDeleteRecurrence -> onOk] API retornou sucesso. Mensagem de sucesso será exibida.`);
-                message.success(`Recorrência "${recurrenceDescription}" excluída.`);
-                fetchRecurrences();
-            } catch (error) {
-                console.error(`[handleDeleteRecurrence -> onOk] ERRO na chamada da API para exclusão:`, error);
-                message.error('Falha ao excluir a recorrência. Verifique o console para detalhes.');
-            }
-        },
-        onCancel() {
-            console.log('[handleDeleteRecurrence -> onCancel] Usuário cancelou a exclusão.');
-        },
-    });
   };
 
-  const columns = [
-    { title: 'Descrição', dataIndex: 'description', key: 'description', ellipsis: true, width: 250, sorter: (a,b) => a.description.localeCompare(b.description) },
-    { title: 'Tipo', dataIndex: 'type', key: 'type', width: 100, render: t => <Tag color={t === 'Entrada' ? 'green' : 'volcano'}>{t.toUpperCase()}</Tag>, sorter: (a,b) => a.type.localeCompare(b.type) },
-    { title: 'Valor (R$)', dataIndex: 'value', key: 'value', align: 'right', width: 120, render: v => parseFloat(v).toFixed(2).replace('.',','), sorter: (a,b) => a.value - b.value },
-    { title: 'Frequência', dataIndex: 'frequency', key: 'frequency', width: 120, render: (freq) => translateFrequency(freq), sorter: (a,b) => a.frequency.localeCompare(b.frequency) },
-    { title: 'Próxima Data', dataIndex: 'nextDueDate', key: 'nextDueDate', width: 130, render: d => d ? dayjs(d).format('DD/MM/YYYY') : 'N/A', sorter: (a,b) => dayjs(a.nextDueDate).unix() - dayjs(b.nextDueDate).unix(), defaultSortOrder: 'ascend' },
-    { title: 'Status', dataIndex: 'isActive', key: 'isActive', width: 100, render: s => <Tag color={s ? 'blue' : 'default'}>{s ? 'Ativa' : 'Inativa'}</Tag>, sorter: (a,b) => a.isActive - b.isActive },
-    { title: 'Ação Automática', dataIndex: 'autoCreateTransaction', key: 'autoCreateTransaction', width: 180, render: a => (a ? <Space><CheckCircleOutlined/> Criar Transação</Space> : <Space><BellOutlined/> Apenas Lembrar</Space>) },
-    { title: 'Ações', key: 'action', width: 100, align: 'center', fixed: 'right',
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Editar"><Button type="text" icon={<EditOutlined />} onClick={() => handleOpenModal(record)}/></Tooltip>
-          <Tooltip title="Excluir">
-              <Button 
-                  type="text" 
-                  danger 
-                  icon={<DeleteOutlined />} 
-                  onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteRecurrence(record.id, record.description);
-                  }}
-              />
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
-
-  if (loadingProfiles || (!isAuthenticated && !currentProfile)) {
-      return (<Content style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)'}}><Title level={4}>Carregando...</Title></Content>);
-  }
+  if (loadingProfiles) return <div className="loading-container"><p>Carregando perfil...</p></div>;
+  if (!isAuthenticated) return <div className="loading-container"><p>Acesso negado.</p></div>;
+  if (!currentProfile) return <div className="loading-container"><p>Nenhum perfil selecionado.</p></div>;
 
   return (
-    <Content className="panel-content-area recorrencias-content">
-      <Title level={2} className="page-title-recorrencias"><RetweetOutlined style={{marginRight: '10px'}}/>Gerenciar Recorrências</Title>
-      <Paragraph type="secondary" style={{marginBottom: '25px'}}>Configure suas receitas e despesas recorrentes do perfil: <Text strong>{currentProfile?.name}</Text></Paragraph>
+    <main className="recurrences-container">
+      <header className="page-header-recurrence">
+        <h1><FaRetweet /> Gerenciar Recorrências</h1>
+        <p>Configure suas receitas e despesas recorrentes do perfil: <strong>{currentProfile.name}</strong></p>
+      </header>
 
-      <Card className="filters-card-recorrencias" bordered={false}>
-        <Row gutter={[16, 16]} align="bottom">
-          <Col xs={24} sm={12} md={8}><Text strong>Tipo:</Text><Select value={filterType} onChange={setFilterType} style={{ width: '100%' }}><Option value="todas">Todas</Option><Option value="Entrada">Receitas</Option><Option value="Saída">Despesas</Option></Select></Col>
-          <Col xs={24} sm={12} md={8}><Text strong>Status:</Text><Select value={filterStatus} onChange={setFilterStatus} style={{ width: '100%' }}><Option value="todas">Todos</Option><Option value="ativa">Ativas</Option><Option value="inativa">Inativas</Option></Select></Col>
-          <Col xs={24} sm={24} md={8} style={{textAlign: 'right'}}><Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal()} className="btn-add-recorrencia">Nova Recorrência</Button></Col>
-        </Row>
-      </Card>
+      <section className="filter-controls-recurrence">
+        <div className="filter-group">
+            <label>Tipo</label>
+            <select value={filterType} onChange={e => setFilterType(e.target.value)}>
+                <option value="todas">Todas</option>
+                <option value="Entrada">Receitas</option>
+                <option value="Saída">Despesas</option>
+            </select>
+        </div>
+        <div className="filter-group">
+            <label>Status</label>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                <option value="todas">Todos</option>
+                <option value="ativa">Ativas</option>
+                <option value="inativa">Inativas</option>
+            </select>
+        </div>
+        <button className="btn-add-recurrence" onClick={() => handleOpenModal()}><FaPlus /> Nova Recorrência</button>
+      </section>
 
-      <Card title="Minhas Regras de Recorrência" bordered={false} style={{ marginTop: '24px' }} className="recurrences-table-card">
-        <Table columns={columns} dataSource={recurrences} rowKey="id" loading={loading} pagination={{ pageSize: 10 }} scroll={{ x: 1000 }}/>
-      </Card>
+      <section className="recurrence-list">
+        {loading ? (
+            <p className="loading-text">Carregando...</p>
+        ) : recurrences.length > 0 ? (
+            recurrences.map(rec => (
+                <RecurrenceCard 
+                    key={rec.id} 
+                    recurrence={rec}
+                    onEdit={() => handleOpenModal(rec)}
+                    onDelete={() => handleDeleteClick(rec)}
+                />
+            ))
+        ) : (
+            <div className="empty-state-container">
+                <p className="empty-text">Nenhuma recorrência encontrada.</p>
+            </div>
+        )}
+      </section>
 
       <ModalNovaRecorrencia
         open={isModalVisible}
-        onCancel={handleModalCancel}
-        onSuccess={handleModalSuccess}
+        onCancel={() => setIsModalVisible(false)}
+        onSuccess={() => { fetchRecurrences(); setIsModalVisible(false); }}
         currentProfile={currentProfile}
         editingRecorrencia={editingRecurrence}
       />
       
-      {/* <<< MUDANÇA 4: Adicionar o contextHolder ao final do JSX >>> */}
-      {/* Isso é necessário para que o modal de confirmação possa ser renderizado no DOM */}
-      {contextHolder}
-    </Content>
+      <ConfirmationModal
+          isOpen={isConfirmDeleteModalVisible}
+          onClose={() => setIsConfirmDeleteModalVisible(false)}
+          onConfirm={confirmDelete}
+          title="Confirmar Exclusão"
+      >
+          Tem certeza que deseja excluir a recorrência "{recurrenceToDelete?.description}"?
+      </ConfirmationModal>
+    </main>
   );
 };
 
