@@ -23,6 +23,10 @@ import WhyChooseMapSection from '../../componentsLP/WhyChooseMapSection/WhyChoos
 import BrandValuesSection from '../../componentsLP/BrandValuesSection/BrandValuesSection';
 import DashboardSection from '../../componentsLP/DashboardSection/DashboardSection';
 import AccountTypesSection from '../../componentsLP/AccountTypesSection/AccountTypesSection'; // <<< NOVO IMPORT
+import ChecklistSection from '../../componentsLP/ChecklistSection/ChecklistSection'; // <<< ADICIONE ESTA LINHA
+import DedicatedSupportSection from '../../componentsLP/DedicatedSupportSection/DedicatedSupportSection'; // <<< ADICIONE ESTA LINHA
+import CreditCardSection from '../../componentsLP/CreditCardSection/CreditCardSection'; // <<< ADICIONE ESTA LINHA
+import AffiliateSection from '../../componentsLP/AffiliateSection/AffiliateSection'; // <<< ADICIONE ESTA LINHA
 
 
 
@@ -46,6 +50,8 @@ const LandingPage = () => {
         <div id="funcionalidades">
           <FeaturesSection />
         </div>
+                <CreditCardSection /> {/* <<< ADICIONADO AQUI >>> */}
+
                           <TechSecuritySection />
 
         <HowItWorksSection />
@@ -67,6 +73,7 @@ const LandingPage = () => {
         
         <TargetAudienceSection />
                 <AccountTypesSection /> {/* <<< ADICIONE A NOVA SEÇÃO AQUI >>> */}
+        <ChecklistSection /> {/* <<< ADICIONADO A SEÇÃO CHECKLIST AQUI >>> */}
 
         <WhatsAppIntegrationSection />
                 <DashboardSection />
@@ -78,6 +85,7 @@ const LandingPage = () => {
                 <MotivationalMessageSection />
 
         <WaterReminderSection />
+        <AffiliateSection /> {/* <<< ADICIONADO AQUI >>> */}
 
 
         {/* 
@@ -91,7 +99,7 @@ const LandingPage = () => {
         <div id="faq"> {/* Adicionado ID para a seção FAQ, caso queira linkar a ela */}
           <FaqSection />
         </div>
-        
+        <DedicatedSupportSection /> {/* <<< ADICIONADO AQUI, ENTRE FAQ E CONTATO */}
         <ContactPromptSection />
         
         {/* Espaço vazio mantido do original */}

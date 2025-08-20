@@ -1,0 +1,453 @@
+:root {
+  /* Cores baseadas na sua paleta principal */
+  --map-dourado: #e3be62;
+  --map-dourado-rgb: 227, 190, 98; /* Adicionado para uso em rgba() */
+  --map-laranja: #b24a0a;
+  --map-laranja-rgb: 178, 74, 10; /* Adicionado para uso em rgba() */
+  --map-preto: #000000;
+  --map-cinza-texto: #555;
+  --map-branco: #FFFFFF;
+
+  /* Cores específicas para a seção Checklist (derivadas das principais) */
+  --checklist-bg-main: #fcfcfc; /* Branco muito suave */
+  --checklist-bg-alt: #f0f2f5; /* Um cinza claro para detalhes */
+  --checklist-dark-text: var(--map-preto);
+  --checklist-secondary-text: var(--map-cinza-texto);
+  --checklist-accent-color: var(--map-laranja); /* Usar laranja para acento */
+  --checklist-accent-color-rgb: var(--map-laranja-rgb);
+  --checklist-gradient-start: var(--map-laranja);
+  --checklist-gradient-end: var(--map-dourado);
+
+  /* Mockup colors */
+  --mockup-frame: #1c1c1e;
+  --mockup-screen-bg: #f0f2f5;
+  --mockup-header-bg: #FFFFFF;
+  --mockup-task-item-bg: #FFFFFF;
+  --mockup-task-border: #e8e8e8;
+  --mockup-completed-green: #38c172;
+  --mockup-incomplete-gray: #999;
+}
+
+.checklist-section-wrapper {
+  background-color: var(--checklist-bg-main);
+  color: var(--checklist-dark-text);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border-top: 1px solid var(--mockup-task-border);
+  border-bottom: 1px solid var(--mockup-task-border);
+}
+
+/* Elementos de fundo abstratos */
+.checklist-bg-elements {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.checklist-bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+.checklist-bg-elements .animate-on-scroll.visible ~ .checklist-bg-shape {
+  opacity: 0.1;
+}
+
+.shape-1 {
+  width: 400px;
+  height: 400px;
+  background-color: rgba(var(--map-laranja-rgb), 0.08);
+  top: 10%;
+  left: -150px;
+  animation: subtleBlobMove 25s infinite alternate ease-in-out;
+}
+.shape-2 {
+  width: 350px;
+  height: 350px;
+  background-color: rgba(var(--map-dourado-rgb), 0.08);
+  bottom: 5%;
+  right: -120px;
+  animation: subtleBlobMove 20s infinite alternate-reverse ease-in-out;
+}
+.checklist-bg-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 60vw; height: 60vw;
+    max-width: 800px; max-height: 800px;
+    background: radial-gradient(circle, rgba(var(--map-dourado-rgb), 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(100px);
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    animation: pulseGlow 8s infinite alternate ease-in-out;
+}
+.checklist-bg-elements .animate-on-scroll.visible ~ .checklist-bg-glow {
+    opacity: 1;
+}
+
+@keyframes subtleBlobMove {
+  0% { transform: translate(0, 0) scale(0.95); border-radius: 40% 60% 70% 30% / 30% 50% 50% 70%; }
+  100% { transform: translate(20px, -15px) scale(1.05); border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%; }
+}
+@keyframes pulseGlow {
+    0%, 100% { transform: translate(-50%, -50%) scale(0.9); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+
+/* Animações de entrada para elementos de conteúdo */
+.checklist-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-delay: inherit !important; /* Permite que o JS controle o delay */
+}
+.checklist-section-wrapper .animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.checklist-container {
+  max-width: 1100px;
+  position: relative; /* Para z-index sobre os elementos de fundo */
+  z-index: 2;
+}
+
+/* Header */
+.checklist-header-row {
+  margin-bottom: 70px;
+}
+.checklist-main-title {
+  font-size: clamp(32px, 4.5vw, 40px) !important;
+  font-weight: 700 !important;
+  color: var(--checklist-dark-text) !important;
+  margin-bottom: 15px !important;
+  line-height: 1.25 !important;
+}
+.highlight-checklist-gradient {
+  background: linear-gradient(90deg, var(--checklist-gradient-start), var(--checklist-gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  padding: 0 2px;
+}
+.checklist-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--checklist-secondary-text) !important;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Coluna de Features */
+.checklist-features-col {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 991px) { /* lg */
+  .checklist-features-col {
+    text-align: center;
+    align-items: center;
+    margin-bottom: 50px;
+  }
+  .checklist-feature-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.checklist-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.checklist-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.feature-icon-wrapper {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background-color: var(--checklist-bg-alt); /* Fundo claro para o wrapper do ícone */
+  border: 1px solid var(--mockup-task-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--checklist-accent-color); /* Cor de acento para o ícone */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.checklist-feature-item:hover .feature-icon-wrapper {
+  background-color: var(--checklist-accent-color);
+  color: var(--map-branco);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 15px rgba(var(--checklist-accent-color-rgb), 0.3);
+}
+
+.feature-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--checklist-dark-text) !important;
+  margin-bottom: 8px !important;
+}
+.feature-description {
+  font-size: 15px !important;
+  color: var(--checklist-secondary-text) !important;
+  line-height: 1.6;
+  margin-bottom: 0 !important;
+}
+
+/* Coluna do Mockup do Celular */
+.checklist-mockup-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.checklist-mockup-wrapper {
+  position: relative;
+  width: 320px;
+  height: 650px;
+  perspective: 1200px;
+}
+.checklist-mockup-wrapper.visible .checklist-mockup {
+  transform: rotateY(0deg) scale(1);
+  opacity: 1;
+}
+
+.checklist-mockup {
+  width: 100%;
+  height: 100%;
+  background-color: var(--mockup-frame); /* Cor do frame do celular */
+  border-radius: 40px;
+  padding: 15px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), inset 0 2px 5px rgba(255, 255, 255, 0.08);
+  position: relative;
+  transform: rotateY(15deg) scale(0.9); /* Posição inicial para animação 3D */
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+}
+.checklist-mockup:hover {
+  transform: rotateY(-5deg) scale(1.02);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+.checklist-mockup-notch {
+  width: 120px;
+  height: 20px;
+  background-color: #000;
+  border-radius: 0 0 12px 12px;
+  margin: 0 auto 10px auto;
+}
+
+.checklist-mockup-screen {
+  background-color: var(--mockup-screen-bg); /* Fundo da tela do celular */
+  width: 100%;
+  height: calc(100% - 20px);
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Para o overlay de celebração */
+}
+
+.checklist-screen-header {
+  background-color: var(--mockup-header-bg);
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--checklist-dark-text);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--mockup-task-border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Sombra sutil para o header */
+}
+.checklist-screen-header .anticon {
+  margin-right: 10px;
+  color: var(--checklist-accent-color);
+  font-size: 20px;
+}
+
+.checklist-tasks-area {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: var(--checklist-bg-alt); /* Fundo da área de tarefas */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--mockup-task-item-bg);
+  padding: 12px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--mockup-task-border);
+  transition: all 0.2s ease;
+}
+.task-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.task-status-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.task-item.completed .task-status-icon {
+  color: var(--mockup-completed-green); /* Verde para concluído */
+}
+.task-item:not(.completed) .task-status-icon {
+  color: var(--mockup-incomplete-gray); /* Cinza para não concluído */
+}
+
+.task-text {
+  font-size: 15px;
+  color: var(--checklist-dark-text);
+  flex-grow: 1;
+  text-align: left;
+}
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: var(--checklist-secondary-text);
+  opacity: 0.8;
+}
+
+/* Overlay de celebração da IA */
+.ai-celebration-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(var(--map-laranja-rgb), 0.95), rgba(var(--map-dourado-rgb), 0.8)); /* Gradiente */
+  color: var(--map-branco);
+  padding: 20px 15px;
+  border-radius: 0 0 28px 28px; /* Borda inferior arredondada do mockup screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0; /* Começa invisível */
+  transform: translateY(100%); /* Começa fora da tela */
+  transition: opacity 0.8s ease-out 1s, transform 0.8s ease-out 1s; /* Animação de entrada */
+}
+/* Para demonstrar, faremos o overlay aparecer no hover do mockup, ou quando o mockup estiver visível */
+.checklist-mockup-wrapper:hover .ai-celebration-overlay,
+.checklist-mockup-col.visible .ai-celebration-overlay { /* Isso fará aparecer com a seção */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ai-celebration-overlay .sparkle-icon { /* Ícone de estrela/brilho */
+  font-size: 36px;
+  color: var(--map-branco);
+  margin-bottom: 10px;
+  animation: sparkleRotate 2s infinite ease-in-out;
+}
+@keyframes sparkleRotate {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(30deg) scale(1.1); }
+}
+
+.ai-celebration-overlay p {
+  font-size: 15px !important;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 0 !important;
+  color: var(--map-branco) !important;
+}
+
+
+/* Responsividade */
+@media (max-width: 991px) { /* lg */
+  .checklist-mockup-wrapper {
+    width: 280px;
+    height: 570px;
+  }
+}
+
+@media (max-width: 767px) { /* md */
+  .checklist-header-row {
+    margin-bottom: 50px;
+  }
+  .checklist-main-title {
+    font-size: 30px !important;
+  }
+  .checklist-main-subtitle {
+    font-size: 16px !important;
+  }
+  .checklist-mockup-wrapper {
+    transform: none; /* Desativa a transformação 3D em telas menores */
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+  .feature-icon-wrapper {
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+  }
+  .feature-title {
+    font-size: 19px !important;
+  }
+  .feature-description {
+    font-size: 14.5px !important;
+  }
+  .ai-celebration-overlay {
+    border-radius: 0 0 20px 20px; /* Ajusta borda para mockup menor */
+  }
+}
+
+@media (max-width: 575px) { /* sm */
+  .checklist-mockup-wrapper {
+    width: 90%;
+    max-width: 280px;
+    height: auto;
+    min-height: 550px;
+    padding: 10px;
+  }
+  .checklist-mockup-screen {
+    border-radius: 20px;
+  }
+  .checklist-screen-header {
+    font-size: 15px;
+    padding: 12px 15px;
+  }
+  .checklist-screen-header .anticon {
+    font-size: 18px;
+  }
+  .checklist-tasks-area {
+    padding: 15px;
+  }
+  .task-item {
+    padding: 10px 12px;
+  }
+  .task-status-icon {
+    font-size: 18px;
+  }
+  .task-text {
+    font-size: 14px;
+  }
+  .ai-celebration-overlay {
+    padding: 15px 10px;
+  }
+  .ai-celebration-overlay .sparkle-icon {
+    font-size: 30px;
+  }
+  .ai-celebration-overlay p {
+    font-size: 14px !important;
+  }
+}

@@ -1,0 +1,199 @@
+/* src/componentsLP/DedicatedSupportSection/DedicatedSupportSection.css */
+
+:root {
+  /* Cores Globais da Marca (assumindo que já existem) */
+  /* --cor-preto-absoluto, --cor-branco, --texto-cinza-claro, --map-dourado, etc. */
+  
+  /* Cores Específicas para esta Seção */
+  --support-section-bg: var(--cor-preto-absoluto);
+  --wpp-green-primary: #25D366;
+  --wpp-green-primary-rgb: 37, 211, 102;
+  --support-card-bg: #0d1117; /* Preto levemente azulado */
+  --support-card-border: rgba(var(--wpp-green-primary-rgb), 0.2);
+  --support-card-hover-border: rgba(var(--wpp-green-primary-rgb), 0.6);
+}
+
+.support-section-wrapper {
+  background-color: var(--support-section-bg);
+  color: var(--texto-cinza-claro);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border-top: 1px solid var(--support-card-border);
+}
+
+/* Elementos de Fundo */
+.support-bg-glow {
+  position: absolute; top: 50%; left: 50%;
+  width: 70vw; height: 70vw; max-width: 900px; max-height: 900px;
+  background: radial-gradient(circle, rgba(var(--wpp-green-primary-rgb), 0.08) 0%, transparent 70%);
+  border-radius: 50%; transform: translate(-50%, -50%);
+  filter: blur(100px);
+}
+.support-bg-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(var(--wpp-green-primary-rgb), 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(var(--wpp-green-primary-rgb), 0.05) 1px, transparent 1px);
+  background-size: 70px 70px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 90%);
+  opacity: 0.3;
+}
+
+/* Animações */
+.support-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-delay: inherit !important;
+}
+.support-section-wrapper .animate-on-scroll.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+.support-container {
+  max-width: 1100px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header */
+.support-header-row { margin-bottom: 70px; }
+.support-main-title {
+  font-size: clamp(32px, 4.5vw, 40px) !important;
+  font-weight: 700 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 15px !important;
+}
+.highlight-support-green {
+  color: var(--wpp-green-primary);
+  text-shadow: 0 0 15px rgba(var(--wpp-green-primary-rgb), 0.4);
+}
+.support-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--texto-cinza-medio) !important;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Mockup Visual */
+.support-mockup-col {
+  display: flex; justify-content: center; align-items: center;
+}
+.support-mockup-card {
+  background-color: var(--support-card-bg);
+  border: 1px solid var(--support-card-border);
+  border-radius: 20px;
+  padding: 35px 30px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 15px 40px -10px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  transform: perspective(1200px) rotateY(15deg) scale(0.95);
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.support-mockup-col.visible .support-mockup-card {
+  transform: perspective(1200px) rotateY(0deg) scale(1);
+}
+.support-mockup-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  border-color: var(--support-card-hover-border);
+  box-shadow: 0 20px 50px -10px rgba(var(--wpp-green-primary-rgb), 0.15);
+}
+
+.mockup-icon-header {
+  font-size: 48px;
+  color: var(--wpp-green-primary);
+  margin-bottom: 20px;
+}
+.mockup-contact-name {
+  color: var(--cor-branco) !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+.mockup-phone-number {
+  color: var(--texto-cinza-claro) !important;
+  font-size: 18px !important;
+  font-family: 'Courier New', Courier, monospace;
+  margin-bottom: 15px !important;
+}
+.mockup-info-text {
+  font-size: 14px !important;
+  color: var(--texto-cinza-medio) !important;
+  margin-bottom: 30px !important;
+}
+.mockup-cta-button {
+  background-color: var(--wpp-green-primary) !important;
+  border-color: var(--wpp-green-primary) !important;
+  color: var(--cor-preto-absoluto) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+.mockup-cta-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(var(--wpp-green-primary-rgb), 0.3);
+}
+
+/* Lista de Features do Suporte */
+.support-features-col {
+  text-align: left;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.support-features-list { display: flex; flex-direction: column; gap: 30px; }
+.support-feature-item { display: flex; align-items: flex-start; gap: 20px; }
+
+.support-feature-icon-wrapper {
+  flex-shrink: 0;
+  width: 50px; height: 50px;
+  background-color: rgba(var(--wpp-green-primary-rgb), 0.1);
+  border: 1px solid var(--support-card-border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: var(--wpp-green-primary);
+  transition: all 0.3s ease;
+}
+.support-feature-item:hover .support-feature-icon-wrapper {
+  background-color: var(--wpp-green-primary);
+  color: var(--cor-preto-absoluto);
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.support-feature-title {
+  font-size: 19px !important;
+  font-weight: 600 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 8px !important;
+}
+.support-feature-description {
+  font-size: 15px !important;
+  color: var(--texto-cinza-medio) !important;
+  line-height: 1.6;
+  margin-bottom: 0 !important;
+}
+
+/* Responsividade */
+@media (max-width: 991px) { /* lg */
+  .support-content-row {
+    flex-direction: column-reverse;
+  }
+  .support-features-col {
+    text-align: center;
+    align-items: center;
+    margin-top: 50px;
+  }
+  .support-feature-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .support-mockup-card {
+     transform: perspective(1200px) rotateY(0deg) scale(0.95);
+  }
+}
+@media (max-width: 575px) { /* sm */
+  .support-main-title { font-size: 28px !important; }
+  .support-main-subtitle { font-size: 16px !important; }
+}

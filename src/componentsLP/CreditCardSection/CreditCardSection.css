@@ -1,0 +1,226 @@
+/* src/componentsLP/CreditCardSection/CreditCardSection.css - VERSÃO MELHORADA */
+
+:root {
+  /* Cores Globais da Marca (assumindo que já existem) */
+  /* --cor-preto-absoluto, --cor-branco, --map-dourado, --map-laranja, etc. */
+  
+  /* Cores Específicas para esta Seção */
+  --cc-section-bg: var(--cor-preto-absoluto);
+  --cc-text-light: var(--texto-cinza-claro, #c9d1d9);
+  --cc-text-secondary: var(--texto-cinza-medio, #8b949e);
+  --cc-accent-color: var(--map-dourado);
+  --cc-accent-color-rgb: 227, 190, 98;
+}
+
+.credit-card-section-wrapper {
+  background-color: var(--cc-section-bg);
+  color: var(--cc-text-light);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border-top: 1px solid rgba(var(--cc-accent-color-rgb), 0.2);
+}
+
+/* Elementos de Fundo */
+.cc-background-glow {
+  position: absolute; top: 50%; left: 50%;
+  width: 60vw; height: 60vw; max-width: 800px; max-height: 800px;
+  background: radial-gradient(circle, rgba(var(--cc-accent-color-rgb), 0.07) 0%, transparent 70%);
+  border-radius: 50%; transform: translate(-50%, -50%);
+  filter: blur(100px);
+}
+.cc-background-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(var(--cc-accent-color-rgb), 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(var(--cc-accent-color-rgb), 0.05) 1px, transparent 1px);
+  background-size: 80px 80px; opacity: 0.3;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+}
+
+/* Animações */
+.credit-card-section-wrapper .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-delay: inherit !important;
+}
+.credit-card-section-wrapper .animate-on-scroll.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+.credit-card-container {
+  max-width: 1100px; position: relative; z-index: 2;
+}
+
+/* Header */
+.credit-card-header-row { margin-bottom: 70px; }
+.credit-card-main-title {
+  font-size: clamp(32px, 4.5vw, 40px) !important;
+  font-weight: 700 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 15px !important;
+}
+.highlight-credit-card-text {
+  background: linear-gradient(90deg, var(--map-laranja), var(--map-dourado));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; text-fill-color: transparent;
+  padding: 0 2px;
+}
+.credit-card-main-subtitle {
+  font-size: clamp(16px, 2vw, 18px) !important;
+  color: var(--cc-text-secondary) !important;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Coluna de Mockups Visuais */
+.credit-card-visuals-col {
+  display: flex; justify-content: center; align-items: center; min-height: 450px;
+}
+.credit-card-mockup-stack {
+  position: relative;
+  width: 300px;
+  height: 200px; /* Altura de um cartão */
+  transform-style: preserve-3d;
+  perspective: 2000px;
+}
+
+.card-mockup {
+  width: 280px;
+  height: 175px;
+  border-radius: 15px;
+  position: absolute;
+  top: 12.5px; /* (200 - 175) / 2 */
+  left: 10px; /* (300 - 280) / 2 */
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+  transform-origin: center center;
+}
+.credit-card-mockup-stack:hover .card-mockup {
+  box-shadow: 0 15px 40px -10px rgba(0,0,0,0.5);
+}
+
+.card-1 {
+  background: linear-gradient(135deg, #232526, #414345); /* Grafite */
+  transform: rotate(0deg) translateZ(0px);
+  z-index: 3;
+}
+.credit-card-mockup-stack:hover .card-1 {
+  transform: rotate(-12deg) translateX(-80px) translateY(-10px) translateZ(0px) scale(0.95);
+}
+
+.card-2 {
+  background: linear-gradient(135deg, #1e3c72, #2a5298); /* Azul */
+  transform: rotate(0deg) translateZ(-20px);
+  z-index: 2;
+}
+.credit-card-mockup-stack:hover .card-2 {
+  transform: rotate(0deg) translateZ(20px) scale(1.05); /* Traz pra frente no hover */
+}
+
+.card-3 {
+  background: linear-gradient(135deg, #c31432, #240b36); /* Vinho */
+  transform: rotate(0deg) translateZ(-40px);
+  z-index: 1;
+}
+.credit-card-mockup-stack:hover .card-3 {
+  transform: rotate(12deg) translateX(80px) translateY(10px) translateZ(0px) scale(0.95);
+}
+
+/* Conteúdo interno dos cartões mockup */
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.card-bank { font-size: 14px; font-weight: 500; opacity: 0.8; }
+.card-chip { width: 40px; height: 30px; background: #d4af37; border-radius: 4px; opacity: 0.7;}
+.card-number { font-size: 18px; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.card-footer { display: flex; justify-content: space-between; align-items: flex-end; }
+.card-holder { font-size: 12px; font-weight: 300; text-transform: uppercase; }
+.card-logo { width: 50px; height: 30px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.card-logo.visa { background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg'); }
+.card-logo.mastercard { background-image: url('https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg'); }
+.card-logo.elo { background-image: url('https://upload.wikimedia.org/wikipedia/commons/a/a9/Elo_logo.svg'); filter: invert(1) brightness(1.5); }
+
+/* Overlay de Informações */
+.card-info-overlay {
+  position: absolute;
+  bottom: -90px;
+  left: 50%;
+  width: 240px;
+  background-color: rgba(13, 17, 23, 0.7); /* Fundo "glassmorphism" escuro */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--cc-accent-color-rgb), 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  z-index: 4;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translate(-50%, 20px) scale(0.9);
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+}
+.credit-card-mockup-stack:hover .card-info-overlay {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+.overlay-title { color: var(--cc-text-secondary) !important; font-size: 14px !important; margin-bottom: 5px !important; }
+.overlay-value { color: var(--cor-branco) !important; font-size: 24px !important; font-weight: 700 !important; margin-bottom: 2px !important; }
+.overlay-meta { color: var(--cc-text-secondary) !important; font-size: 12px !important; margin-bottom: 0 !important; }
+
+
+/* Coluna de Features */
+.credit-card-features-col {
+  text-align: left;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.credit-card-features-list { display: flex; flex-direction: column; gap: 30px; }
+.credit-card-feature-item { display: flex; align-items: flex-start; gap: 20px; }
+
+.cc-feature-icon-wrapper {
+  flex-shrink: 0; width: 55px; height: 55px;
+  background-color: rgba(var(--cc-accent-color-rgb), 0.1);
+  border: 1px solid rgba(var(--cc-accent-color-rgb), 0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  color: var(--cc-accent-color);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.credit-card-feature-item:hover .cc-feature-icon-wrapper {
+  background-color: var(--cc-accent-color);
+  color: var(--cor-preto-absoluto);
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.cc-feature-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--cor-branco) !important;
+  margin-bottom: 8px !important;
+}
+.cc-feature-description {
+  font-size: 15px !important;
+  color: var(--cc-text-secondary) !important;
+  line-height: 1.6;
+  margin-bottom: 0 !important;
+}
+
+/* Responsividade */
+@media (max-width: 991px) { /* lg */
+  .credit-card-content-row {
+    flex-direction: column;
+  }
+  .credit-card-visuals-col { margin-bottom: 120px; } /* Aumenta a margem para o overlay não sobrepor o texto */
+  .credit-card-features-col { text-align: center; align-items: center; }
+  .credit-card-feature-item { flex-direction: column; align-items: center; text-align: center; }
+}
+
+@media (max-width: 575px) { /* sm */
+  .credit-card-mockup-stack {
+    transform: scale(0.9);
+  }
+  .credit-card-visuals-col { margin-bottom: 100px; }
+}
