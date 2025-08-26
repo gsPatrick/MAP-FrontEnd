@@ -1,16 +1,20 @@
-// src/componentsLP/PricingSection/PricingSection.jsx - VERSÃO LUXO
-import React, { useEffect, useState, useRef } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag, Switch } from 'antd';
+// src/componentsLP/PricingSection/PricingSection.jsx
+import React, { useState } from 'react';
+import { Row, Col, Card, Typography, Button, List, Tag, Switch, message } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import './PricingSection.css'; // Usará o novo CSS de Luxo
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../../services/api';
+import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Os IDs dos planos foram ajustados para serem strings, o que é mais seguro
+// para chaves e consistência.
 const plansData = {
   monthly: [
     {
-      id: 'personal_monthly',
-      name: 'Plano Pessoal Essencial',
+      id: '1',
+      name: 'Básico Mensal',
       icon: <UserOutlined />,
       price: '39',
       priceSuffix: ',90',
@@ -24,40 +28,38 @@ const plansData = {
         'Relatórios Financeiros Detalhados',
         'Suporte via Email',
       ],
-      buttonText: 'Começar Agora',
-      checkoutUrl: 'https://www.asaas.com/c/yrrrjobvjunf95f5', // ATUALIZADO
+      buttonText: 'Assinar Agora',
       isFeatured: false,
     },
     {
-      id: 'business_monthly',
-      name: 'Plano Pessoal + Empresarial',
+      id: '3',
+      name: 'Avançado Mensal',
       icon: <ShopOutlined />,
       price: '79',
-      priceSuffix: ',00',
+      priceSuffix: ',90',
       period: '/mês',
       description: 'A solução completa que unifica sua vida pessoal e o comando do seu negócio. Potência máxima para quem busca o topo.',
       features: [
-        'Todos os benefícios do Plano Pessoal',
-        'Perfis Empresariais (PJ/MEI) Ilimitados',
-        'Gestão de Clientes (CRM)',
+        'Todos os benefícios do Plano Básico',
+        'Perfis Empresariais (PJ/MEI)',
+        'Gestão de Clientes (CRM) e Serviços',
         'Controle de Produtos e Estoque',
-        'Análises e Relatórios Empresariais',
+        'Agenda Pública e Agendamentos Online',
         'Suporte Prioritário via WhatsApp',
       ],
       buttonText: 'Assinar Total Control',
-      checkoutUrl: 'https://www.asaas.com/c/iz8sx7yp784zsga3', // ATUALIZADO
       isFeatured: true,
     },
   ],
   yearly: [
     {
-        id: 'personal_yearly',
-        name: 'Plano Pessoal Essencial',
+        id: '2',
+        name: 'Básico Anual',
         icon: <UserOutlined />,
-        price: '380',
-        priceSuffix: ',00',
+        price: '389',
+        priceSuffix: ',90',
         period: '/ano',
-        originalPrice: 'R$ 390,00',
+        originalPrice: 'R$ 478,80',
         description: 'Um ano inteiro de organização e bem-estar com um desconto exclusivo para seu compromisso com o controle.',
         features: [
           'Perfis Financeiros Pessoais Ilimitados',
@@ -68,28 +70,26 @@ const plansData = {
           'Suporte via Email',
         ],
         buttonText: 'Assinar Plano Anual',
-        checkoutUrl: 'https://www.asaas.com/c/hqnp04qtl686uy6f', // ATUALIZADO
         isFeatured: false,
       },
       {
-        id: 'business_yearly',
-        name: 'Plano Pessoal + Empresarial',
+        id: '4',
+        name: 'Avançado Anual',
         icon: <ShopOutlined />,
-        price: '780',
-        priceSuffix: ',00',
+        price: '789',
+        priceSuffix: ',90',
         period: '/ano',
-        originalPrice: 'R$ 790,00',
+        originalPrice: 'R$ 958,80',
         description: 'Potência máxima para sua vida e seu negócio, com a tranquilidade de um ano inteiro de controle e um valor especial.',
         features: [
-          'Todos os benefícios do Plano Pessoal',
-          'Perfis Empresariais (PJ/MEI) Ilimitados',
-          'Gestão de Clientes (CRM)',
+          'Todos os benefícios do Plano Básico',
+          'Perfis Empresariais (PJ/MEI)',
+          'Gestão de Clientes (CRM) e Serviços',
           'Controle de Produtos e Estoque',
-          'Análises e Relatórios Empresariais',
+          'Agenda Pública e Agendamentos Online',
           'Suporte Prioritário via WhatsApp',
         ],
         buttonText: 'Assinar Total Control Anual',
-        checkoutUrl: 'https://www.asaas.com/c/9w71uq6ekx5r2u22', // ATUALIZADO
         isFeatured: true,
       },
   ]
@@ -97,35 +97,35 @@ const plansData = {
 
 const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
-    const sectionRef = useRef(null);
+    const [loadingPlanId, setLoadingPlanId] = useState(null);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        const currentSection = sectionRef.current;
-        if (!currentSection) return;
+    // Verifica se o usuário está logado de forma síncrona
+    const isLoggedIn = !!localStorage.getItem('authToken');
 
-        const elementsToAnimate = currentSection.querySelectorAll('.animate-on-scroll');
-        const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+    const handlePlanSelect = async (planId) => {
+        if (isLoggedIn) {
+            // FLUXO PARA USUÁRIO LOGADO (RENOVAÇÃO)
+            setLoadingPlanId(planId);
+            try {
+                message.loading({ content: 'Gerando seu link de pagamento seguro...', key: 'mp_checkout', duration: 10 });
+                const response = await apiClient.post('/mercado-pago/checkout', { planId: parseInt(planId, 10) });
+                
+                if (response.data?.status === 'success' && response.data.data?.checkoutUrl) {
+                    message.success({ content: 'Redirecionando para o pagamento!', key: 'mp_checkout' });
+                    window.location.href = response.data.data.checkoutUrl;
+                } else {
+                    throw new Error('Não foi possível obter o link de pagamento.');
+                }
+            } catch (error) {
+                message.error({ content: 'Erro ao iniciar o pagamento. Tente novamente.', key: 'mp_checkout' });
+                console.error("Erro no checkout MP para usuário logado:", error);
+                setLoadingPlanId(null);
             }
-        });
-        }, { threshold: 0.1 });
-
-        elementsToAnimate.forEach((el, index) => {
-        if (el.classList.contains('pricing-luxe-card-wrapper')) {
-            el.style.transitionDelay = `${0.4 + index * 0.15}s`;
         } else {
-            el.style.transitionDelay = `${0.1 + index * 0.1}s`;
+            // FLUXO PARA NOVO USUÁRIO (CADASTRO)
+            navigate(`/assinar/${planId}`);
         }
-        observer.observe(el);
-        });
-
-        return () => observer.disconnect();
-    }, [billingCycle]); // Re-executa ao mudar o ciclo para aplicar animações
-
-    const handlePlanSelect = (url) => {
-        window.open(url, '_blank');
     };
 
     const handleBillingToggle = (checked) => {
@@ -133,22 +133,21 @@ const PricingSection = () => {
     };
 
   return (
-    <div ref={sectionRef} id="planos" className="pricing-luxe-section-wrapper">
+    <div id="planos" className="pricing-luxe-section-wrapper">
       <div className="pricing-luxe-bg-elements">
         <div className="bg-luxe-shape shape-1"></div>
         <div className="bg-luxe-shape shape-2"></div>
         <div className="bg-luxe-flare"></div>
       </div>
       <div className="section-container pricing-luxe-container">
-        <Title level={2} className="pricing-luxe-main-title animate-on-scroll">
+        <Title level={2} className="pricing-luxe-main-title">
           Um Plano para Cada <span className="highlight-luxe-text">Nível de Ambição</span>.
         </Title>
-        <Paragraph className="pricing-luxe-main-subtitle animate-on-scroll">
+        <Paragraph className="pricing-luxe-main-subtitle">
           Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados, sejam eles pessoais ou empresariais.
         </Paragraph>
-
-        {/* --- INÍCIO: SELETOR DE PLANO E AVISO ASAAS --- */}
-        <div className="billing-toggle-wrapper animate-on-scroll">
+        
+        <div className="billing-toggle-wrapper">
             <span className={`billing-option ${billingCycle === 'monthly' ? 'active' : ''}`}>
                 Cobrança Mensal
             </span>
@@ -159,17 +158,15 @@ const PricingSection = () => {
             </span>
         </div>
 
-        <Paragraph className="asaas-terms-notice animate-on-scroll">
-            Os pagamentos são processados de forma segura pelo Asaas. Ao continuar, você concorda com os <a href="https://www.asaas.com/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</a> da plataforma.
+        <Paragraph className="asaas-terms-notice">
+            Os pagamentos são processados de forma segura pelo Mercado Pago.
         </Paragraph>
-        {/* --- FIM: SELETOR DE PLANO E AVISO ASAAS --- */}
-
-
+        
         <Row gutter={[32, 48]} justify="center" align="stretch" className="pricing-luxe-cards-row">
           {plansData[billingCycle].map((plan) => (
-            <Col xs={24} md={12} lg={10} key={plan.id} className="pricing-luxe-card-wrapper animate-on-scroll">
-              <div className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
-                 <div className="card-luxe-background-shine"></div>
+            <Col xs={24} md={12} lg={10} key={plan.id}>
+              {/* O wrapper de animação foi removido daqui */}
+              <Card className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
                  {plan.isFeatured && (
                   <div className="featured-luxe-banner">
                     <StarFilled /> Mais Escolhido
@@ -209,12 +206,13 @@ const PricingSection = () => {
                     size="large"
                     block
                     className="plan-luxe-cta-button"
-                    onClick={() => handlePlanSelect(plan.checkoutUrl)}
+                    onClick={() => handlePlanSelect(plan.id)}
+                    loading={loadingPlanId === plan.id}
                     >
                     {plan.buttonText} <ArrowRightOutlined />
                     </Button>
                 </div>
-              </div>
+              </Card>
             </Col>
           ))}
         </Row>

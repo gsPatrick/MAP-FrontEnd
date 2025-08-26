@@ -9,6 +9,7 @@ import PlanosPage from './pages/Planos/Planos';
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
 const PainelUsuario = lazy(() => import('./pages/PainelUsuario/PainelUsuario'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
+const Signup = lazy(() => import('./pages/Signup/Signup')); // <<< ADICIONAR IMPORT
 const ChatbotPage = lazy(() => import('./pages/ChatbotPage/ChatbotPage'));
 const CartoesPage = lazy(() => import('./pages/CartoesPage/CartoesPage'));
 const TransacoesPage = lazy(() => import('./pages/TransacoesPage/TransacoesPage'));
@@ -25,7 +26,7 @@ const PublicBookingPage = lazy(() => import('./pages/PublicBookingPage/PublicBoo
 const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/ServicesAndCrmPage'));
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
-const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage')); // <<< ADICIONAR IMPORT
+const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
 
 const AppLayoutSuspense = () => (
   <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
@@ -40,6 +41,7 @@ function App() {
         <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/assinar/:planId" element={<Signup />} /> {/* <<< ADICIONAR NOVA ROTA */}
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
       </Route>
@@ -61,7 +63,7 @@ function App() {
             <Route path="/painel/configuracoes" element={<ConfiguracoesPage />} />
             <Route path="/painel/clientes" element={<BusinessClientsPage />} />
             <Route path="/painel/agenda-crm" element={<AgendaCRMPage />} />
-            <Route path="/painel/checklist" element={<ChecklistPage />} /> {/* <<< ADICIONAR NOVA ROTA */}
+            <Route path="/painel/checklist" element={<ChecklistPage />} />
         </Route>
       </Route>
       
