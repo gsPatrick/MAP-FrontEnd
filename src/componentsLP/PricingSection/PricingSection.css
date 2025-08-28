@@ -1,10 +1,10 @@
-/* src/componentsLP/PricingSection/PricingSection.css - VERSÃO LUXO (Ajustada) */
+/* src/componentsLP/PricingSection/PricingSection.css - VERSÃO 2D PLANA E ELEGANTE */
 
 :root {
-  --pricing-luxe-bg: #fdfcf9; /* Branco com um toque de creme */
+  --pricing-luxe-bg: #fdfcf9;
   --pricing-gold: #c5a450;
   --pricing-gold-dark: #8c7333;
-  --pricing-orange: #ff8c00; /* Laranja mais vibrante */
+  --pricing-orange: #ff8c00;
   --pricing-text-dark: #3a3222;
   --pricing-text-light: #6e624a;
   --cor-branco: #ffffff;
@@ -17,26 +17,20 @@
   overflow: hidden;
 }
 
-/* Elementos Gráficos de Fundo */
+/* Elementos Gráficos de Fundo (mantidos para profundidade sutil) */
 .pricing-luxe-bg-elements {
   position: absolute; inset: 0;
   z-index: 0; pointer-events: none;
 }
 .bg-luxe-shape {
-  position: absolute;
-  border-radius: 50%;
+  position: absolute; border-radius: 50%;
   background: radial-gradient(circle, rgba(197, 164, 80, 0.1) 0%, transparent 70%);
   filter: blur(50px);
 }
-.bg-luxe-shape.shape-1 {
-  width: 50vw; height: 50vw; top: -20%; left: -20%;
-}
-.bg-luxe-shape.shape-2 {
-  width: 40vw; height: 40vw; bottom: -15%; right: -15%;
-}
+.bg-luxe-shape.shape-1 { width: 50vw; height: 50vw; top: -20%; left: -20%; }
+.bg-luxe-shape.shape-2 { width: 40vw; height: 40vw; bottom: -15%; right: -15%; }
 .bg-luxe-flare {
-    position: absolute; top: 10%; right: 10%;
-    width: 300px; height: 300px;
+    position: absolute; top: 10%; right: 10%; width: 300px; height: 300px;
     background: radial-gradient(circle, rgba(255, 140, 0, 0.08) 0%, transparent 70%);
     animation: flarePulse 8s infinite ease-in-out;
 }
@@ -44,222 +38,120 @@
     50% { transform: scale(1.2); opacity: 0.7; }
 }
 
-
 .pricing-luxe-container {
-  max-width: 1000px;
-  margin: 0 auto; padding: 0 20px;
+  max-width: 1000px; margin: 0 auto; padding: 0 20px;
   text-align: center; position: relative; z-index: 1;
 }
 
-/* Animações de Entrada */
-.pricing-luxe-section-wrapper .animate-on-scroll {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.pricing-luxe-section-wrapper .animate-on-scroll.visible {
-  opacity: 1; transform: translateY(0);
-}
-
 .pricing-luxe-main-title {
-  font-size: clamp(32px, 4vw, 40px) !important;
-  font-weight: 700 !important;
-  color: var(--pricing-text-dark) !important;
-  margin-bottom: 15px !important;
+  font-size: clamp(32px, 4vw, 40px) !important; font-weight: 700 !important;
+  color: var(--pricing-text-dark) !important; margin-bottom: 15px !important;
 }
-.highlight-luxe-text {
-  color: var(--pricing-gold);
-}
+.highlight-luxe-text { color: var(--pricing-gold); }
 .pricing-luxe-main-subtitle {
-  font-size: clamp(16px, 2vw, 18px) !important;
-  color: var(--pricing-text-light) !important;
-  max-width: 650px; margin: 0 auto 40px auto;
-  line-height: 1.7;
+  font-size: clamp(16px, 2vw, 18px) !important; color: var(--pricing-text-light) !important;
+  max-width: 650px; margin: 0 auto 40px auto; line-height: 1.7;
 }
 
 /* Toggle de Cobrança */
 .billing-toggle-wrapper {
   display: flex; justify-content: center; align-items: center;
-  gap: 15px;
-  margin-bottom: 25px; 
+  gap: 15px; margin-bottom: 25px; 
 }
-.billing-toggle-wrapper .billing-option {
-  font-size: 16px; font-weight: 500;
-  color: var(--pricing-text-light);
-  transition: color 0.3s ease;
-}
-.billing-toggle-wrapper .billing-option.active {
-  color: var(--pricing-gold-dark);
-  font-weight: 600;
-}
-.billing-toggle-wrapper .ant-switch {
-  background-color: var(--pricing-gold-dark);
-}
-.billing-toggle-wrapper .ant-switch-checked {
-  background-color: var(--pricing-gold);
-}
+.billing-toggle-wrapper .billing-option { font-size: 16px; font-weight: 500; color: var(--pricing-text-light); transition: color 0.3s ease; }
+.billing-toggle-wrapper .billing-option.active { color: var(--pricing-gold-dark); font-weight: 600; }
+.billing-toggle-wrapper .ant-switch { background-color: var(--pricing-gold-dark); }
+.billing-toggle-wrapper .ant-switch-checked { background-color: var(--pricing-gold); }
 .discount-tag {
-  background-color: var(--pricing-orange) !important;
-  color: white !important;
-  border: none !important;
-  font-size: 11px !important;
-  margin-left: 8px !important;
+  background-color: var(--pricing-orange) !important; color: white !important;
+  border: none !important; font-size: 11px !important; margin-left: 8px !important;
 }
 
-/* Aviso de Termos e Ajustes de Espaçamento */
 .asaas-terms-notice {
-  font-size: 13px;
-  color: var(--pricing-text-light);
-  margin-top: 0;
-  margin-bottom: 50px !important; /* AJUSTE FINAL: Aumentado para criar mais espaço antes dos cards */
-}
-.asaas-terms-notice a {
-  color: var(--pricing-gold-dark);
-  font-weight: 500;
-  text-decoration: underline;
-  transition: color 0.3s ease;
-}
-.asaas-terms-notice a:hover {
-  color: var(--pricing-gold);
+  font-size: 13px; color: var(--pricing-text-light); margin-top: 0;
+  margin-bottom: 50px !important;
 }
 
+/* ================================================================ */
+/* <<< MUDANÇAS PRINCIPAIS NOS CARDS PARA O VISUAL 2D PLANO >>> */
+/* ================================================================ */
 
-/* Cards de Plano */
-.pricing-luxe-card-wrapper {
-    perspective: 1500px;
-}
 .pricing-luxe-card {
   width: 100%; height: 100%;
-  background: linear-gradient(150deg, #ffffff 0%, #f9f6f0 100%);
+  background: var(--cor-branco);
   border: 1px solid #e9e2d0;
   border-radius: 18px;
-  box-shadow: 0 10px 30px -15px rgba(140, 115, 51, 0.1);
+  box-shadow: 0 4px 15px rgba(140, 115, 51, 0.08); /* Sombra mais sutil */
   position: relative;
-  transform-style: preserve-3d;
-  transform: rotateY(-20deg) rotateX(10deg);
-  transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.6s ease;
-}
-.pricing-luxe-card-wrapper.visible .pricing-luxe-card {
-  transform: rotateY(0deg) rotateX(0deg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transição 2D */
 }
 
 .pricing-luxe-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 45px -15px rgba(140, 115, 51, 0.2);
+  transform: translateY(-8px); /* Efeito de elevação suave */
+  box-shadow: 0 12px 25px rgba(140, 115, 51, 0.12);
 }
 
 .pricing-luxe-card.featured {
-  background: linear-gradient(150deg, #fffcf2 0%, #f5ead1 100%);
   border-color: var(--pricing-gold);
-  transform: rotateY(-20deg) rotateX(10deg) scale(1.05); /* Começa um pouco maior */
+  background: linear-gradient(150deg, #fffcf2 0%, #f5ead1 100%);
+  transform: scale(1.03); /* Levemente maior para destaque */
 }
-.pricing-luxe-card-wrapper.visible .pricing-luxe-card.featured {
-  transform: rotateY(0deg) rotateX(0deg) scale(1.05);
-}
+
 .pricing-luxe-card.featured:hover {
-  transform: translateY(-10px) scale(1.07);
+  transform: translateY(-8px) scale(1.05); /* Efeito de elevação um pouco maior */
 }
 
-
-/* Efeito de brilho no card */
-.card-luxe-background-shine {
-  position: absolute; inset: -1px;
-  border-radius: 18px;
-  background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3), transparent 40%);
-  z-index: 1;
-  opacity: 0; transition: opacity 0.5s;
-}
-.pricing-luxe-card:hover .card-luxe-background-shine {
-  opacity: 1;
-}
-
+/* Conteúdo do Card */
 .card-luxe-content {
-  padding: 30px;
-  display: flex; flex-direction: column;
-  height: 100%; position: relative; z-index: 2;
+  padding: 30px; display: flex; flex-direction: column;
+  height: 100%; position: relative;
 }
 
 .featured-luxe-banner {
   position: absolute; top: 20px; right: -1px;
-  background: var(--pricing-gold);
-  color: var(--pricing-text-dark);
-  padding: 6px 15px 6px 20px;
-  font-size: 12px; font-weight: 600;
-  border-radius: 15px 0 0 15px;
-  box-shadow: -3px 3px 10px rgba(140, 115, 51, 0.2);
+  background: var(--pricing-gold); color: var(--pricing-text-dark);
+  padding: 6px 15px 6px 20px; font-size: 12px; font-weight: 600;
+  border-radius: 15px 0 0 15px; box-shadow: -3px 3px 10px rgba(140, 115, 51, 0.2);
 }
 .featured-luxe-banner .anticon { margin-right: 6px; }
 
-.plan-luxe-icon-header {
-  margin-bottom: 20px;
-}
-.plan-luxe-title-icon {
-  font-size: 32px; color: var(--pricing-gold-dark);
-}
-.featured .plan-luxe-title-icon {
-    color: var(--pricing-gold);
-}
-
+.plan-luxe-icon-header { margin-bottom: 20px; }
+.plan-luxe-title-icon { font-size: 32px; color: var(--pricing-gold-dark); }
+.featured .plan-luxe-title-icon { color: var(--pricing-gold); }
 
 .plan-luxe-name {
   font-size: 24px !important; font-weight: 600 !important;
   color: var(--pricing-text-dark) !important; margin-bottom: 8px !important;
 }
-
 .plan-luxe-description {
   font-size: 15px !important; color: var(--pricing-text-light) !important;
-  line-height: 1.6; margin-bottom: 25px !important;
-  min-height: 65px;
+  line-height: 1.6; margin-bottom: 25px !important; min-height: 65px;
 }
 
-.plan-luxe-price-container {
-  margin-bottom: 25px;
-}
+.plan-luxe-price-container { margin-bottom: 25px; }
 .price-tag { display: flex; align-items: baseline; justify-content: center; }
-.price-currency {
-  font-size: 20px; font-weight: 500;
-  color: var(--pricing-text-light); margin-right: 4px;
-}
-.price-value {
-  font-size: 48px; font-weight: 700;
-  color: var(--pricing-text-dark); line-height: 1;
-}
+.price-currency { font-size: 20px; font-weight: 500; color: var(--pricing-text-light); margin-right: 4px; }
+.price-value { font-size: 48px; font-weight: 700; color: var(--pricing-text-dark); line-height: 1; }
 .price-meta { display: flex; flex-direction: column; align-items: flex-start; margin-left: 4px; }
-.price-suffix, .price-period {
-  font-size: 14px; font-weight: 500;
-  color: var(--pricing-text-light); line-height: 1.2;
-}
+.price-suffix, .price-period { font-size: 14px; font-weight: 500; color: var(--pricing-text-light); line-height: 1.2; }
 .original-price-strike {
   font-size: 13px; color: #aaa; text-decoration: line-through;
-  margin-top: 5px; display: block;
-  height: 20px; /* Garante espaço mesmo quando não visível */
+  margin-top: 5px; display: block; height: 20px;
 }
 
-/* Lista de Features */
 .plan-luxe-features-list {
-  text-align: left; margin-bottom: 30px;
-  flex-grow: 1;
+  text-align: left; margin-bottom: 30px; flex-grow: 1;
 }
-.plan-luxe-features-list .ant-list-item {
-  padding: 10px 0 !important;
-  border-bottom: 1px solid #f0eade !important;
-}
-.plan-luxe-features-list .ant-list-item:last-child {
-  border-bottom: none !important;
-}
-.feature-luxe-icon {
-  color: var(--pricing-gold) !important; margin-right: 12px; font-size: 16px;
-}
-.plan-luxe-features-list .ant-list-item .ant-typography {
-  font-size: 15px; color: var(--pricing-text-light);
-}
+.plan-luxe-features-list .ant-list-item { padding: 10px 0 !important; border-bottom: 1px solid #f0eade !important; }
+.plan-luxe-features-list .ant-list-item:last-child { border-bottom: none !important; }
+.feature-luxe-icon { color: var(--pricing-gold) !important; margin-right: 12px; font-size: 16px; }
+.plan-luxe-features-list .ant-list-item .ant-typography { font-size: 15px; color: var(--pricing-text-light); }
 
-
-/* Botão CTA */
+/* Botões CTA com cores da imagem de referência */
 .plan-luxe-cta-button {
-  background: var(--pricing-text-dark) !important;
+  background: var(--pricing-text-dark) !important; /* Cor escura para o botão do plano básico */
   border-color: var(--pricing-text-dark) !important;
-  color: var(--pricing-gold) !important;
+  color: var(--cor-branco) !important; /* Texto branco */
   font-weight: 600 !important; border-radius: 8px !important;
   transition: all 0.3s ease;
 }
@@ -267,11 +159,11 @@
 .plan-luxe-cta-button:focus {
   background: var(--pricing-gold-dark) !important;
   border-color: var(--pricing-gold-dark) !important;
-  color: var(--cor-branco) !important;
   transform: scale(1.03);
 }
+
 .featured .plan-luxe-cta-button {
-  background: linear-gradient(45deg, var(--pricing-orange), var(--pricing-gold)) !important;
+  background: linear-gradient(45deg, var(--pricing-orange), var(--pricing-gold)) !important; /* Gradiente para o plano em destaque */
   border: none !important;
   color: var(--cor-branco) !important;
   box-shadow: 0 5px 15px rgba(197, 164, 80, 0.4);
@@ -280,8 +172,6 @@
 .featured .plan-luxe-cta-button:focus {
     box-shadow: 0 8px 20px rgba(197, 164, 80, 0.5);
 }
-
-
 
 .plan-luxe-cta-button .anticon { margin-left: 5px; transition: transform 0.3s ease; }
 .plan-luxe-cta-button:hover .anticon { transform: translateX(4px); }
