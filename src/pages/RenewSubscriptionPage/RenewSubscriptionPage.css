@@ -1,0 +1,51 @@
+/* src/pages/RenewSubscriptionPage/RenewSubscriptionPage.css */
+.renew-subscription-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  min-height: calc(100vh - 64px); /* Subtrai a altura do header */
+  background-color: #f8f9fa; /* Um cinza muito claro para o fundo */
+}
+
+.renew-header {
+  text-align: center;
+  max-width: 700px;
+  margin-bottom: 30px;
+}
+
+.renew-title {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: var(--texto-primario) !important;
+}
+
+.renew-subtitle {
+  font-size: 16px !important;
+  color: var(--texto-secundario) !important;
+}
+
+/* 
+  Container para a seção de preços, para garantir que ela se comporte bem dentro do painel
+  e sobrescrever alguns estilos se necessário.
+*/
+.pricing-section-in-panel {
+  width: 100%;
+  max-width: 1100px;
+}
+
+/* 
+  Sobrescreve o padding e fundo da seção de preços original para que se integre melhor.
+  A classe .pricing-luxe-section-wrapper vem do componente PricingSection.
+*/
+.pricing-section-in-panel .pricing-luxe-section-wrapper {
+  padding: 20px 0;
+  background-color: transparent; /* Remove o fundo original para usar o da página de renovação */
+}
+
+.pricing-section-in-panel .pricing-luxe-main-title,
+.pricing-section-in-panel .pricing-luxe-main-subtitle {
+    /* Escondemos os títulos originais da seção de planos, pois a página já tem os seus próprios */
+    display: none;
+}

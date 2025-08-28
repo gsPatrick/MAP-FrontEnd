@@ -5,9 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
-import apiClient from '../../services/api';
-import CustomModal from '../../components/CustomModal/CustomModal'; // Importa o modal customizado
 import './LoginPage.css';
+import apiClient from '../../services/api';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -15,17 +14,6 @@ const { Title, Paragraph } = Typography;
 const LoginPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  
-  // Estado unificado para controlar o modal
-  const [modalState, setModalState] = useState({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'error',
-    okText: 'Entendi',
-    cancelText: null,
-    onOk: () => setModalState({ ...modalState, visible: false }),
-  });
 
   useEffect(() => {
     const loginCard = document.querySelector('.login-card-container');
@@ -33,24 +21,41 @@ const LoginPage = () => {
     document.body.classList.add('login-page-active');
     return () => { document.body.classList.remove('login-page-active'); };
   }, []);
+  
+  // <<< FUNÇÃO handleLoginSuccess CORRIGIDA PARA SEMPRE SALVAR A SESSÃO >>>
+  const handleLoginSuccess = useCallback((loginData) => {
+    const { token, client, financialAccounts, subscriptionStatus, user, role } = loginData;
 
-  const handleLoginSuccess = useCallback((token, userData, userRole, targetPath) => {
+    // Garante que a sessão anterior seja completamente limpa
     localStorage.clear();
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('userRole', userRole);
-    localStorage.setItem('userData', JSON.stringify(userData));
 
-    if (userRole === 'client') {
-      const accounts = userData.financialAccounts || [];
-      if (accounts.length > 0) {
-        const profile = accounts.find(a => a.isDefault) || accounts.find(a => a.accountType === 'PF') || accounts[0];
+    // Salva a nova sessão no localStorage
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userRole', role); // 'client' ou 'admin'
+    localStorage.setItem('userData', JSON.stringify(role === 'admin' ? user : client));
+    localStorage.setItem('subscriptionStatus', subscriptionStatus || 'active'); // Salva o status da assinatura
+
+    let targetPath;
+    
+    if (role === 'admin') {
+        targetPath = '/admin/dashboard';
+        message.success(`Login de administrador bem-sucedido! Bem-vindo(a), ${user.name}!`);
+    } else { // Lógica para cliente
+      if (financialAccounts && financialAccounts.length > 0) {
+        const profile = financialAccounts.find(a => a.isDefault) || financialAccounts.find(a => a.accountType === 'PF') || financialAccounts[0];
         localStorage.setItem('selectedProfileId', profile.id.toString());
-        targetPath = '/painel';
+      }
+      
+      // Decide para onde redirecionar com base no status da assinatura
+      if (subscriptionStatus === 'expired') {
+        message.warning('Sua assinatura expirou! Por favor, renove para ter acesso completo.');
+        targetPath = '/planos';
       } else {
-        targetPath = '/painel/meu-perfil';
+        message.success(`Bem-vindo(a) de volta, ${client.name || client.email}!`);
+        targetPath = '/painel';
       }
     }
-    message.success(`Bem-vindo(a) de volta, ${userData.name || userData.email}!`);
+    
     navigate(targetPath);
   }, [navigate]);
 
@@ -61,13 +66,11 @@ const LoginPage = () => {
     try {
       // Tenta login de admin
       const adminResponse = await apiClient.post('/users/login', { email, password });
-      if (adminResponse.data?.data?.user?.role === 'admin') {
-        const { token, user } = adminResponse.data.data;
-        handleLoginSuccess(token, user, 'admin', '/admin/dashboard');
-        return;
-      }
+      const { token, user } = adminResponse.data.data;
+      handleLoginSuccess({ token, user, role: 'admin' });
+      return;
     } catch (adminError) {
-      if (adminError.response?.status !== 401) {
+      if (adminError.response?.status !== 401 && adminError.response?.status !== 404) {
         setLoading(false);
         return; 
       }
@@ -76,38 +79,11 @@ const LoginPage = () => {
     try {
       // Tenta login de cliente
       const clientResponse = await apiClient.post('/auth/client/login', { identifier: email, password });
-      const { token, client, financialAccounts } = clientResponse.data.data;
-      handleLoginSuccess(token, { ...client, financialAccounts }, 'client', '/painel');
+      const { token, client, financialAccounts, subscriptionStatus } = clientResponse.data.data;
+      handleLoginSuccess({ token, client, financialAccounts, subscriptionStatus, role: 'client' });
     } catch (clientError) {
-      const errorData = clientError.response?.data;
-      const errorMessage = errorData?.message || 'Falha no login. Verifique seus dados.';
-
-      // Ativa o modal para todos os cenários de erro do cliente
-      if (errorData?.status === 'fail_subscription') {
-        setModalState({
-          visible: true,
-          title: 'Assinatura Expirada',
-          message: 'Sua assinatura expirou. Para reativar o acesso, por favor, renove seu plano.',
-          type: 'warning',
-          okText: 'Renovar Plano',
-          cancelText: 'Fechar',
-          onOk: () => {
-            setModalState({ ...modalState, visible: false });
-            navigate('/planos');
-          },
-        });
-      } else {
-        // Para QUALQUER OUTRO ERRO (senha incorreta, usuário não existe, etc.)
-        setModalState({
-          visible: true,
-          title: 'Falha no Login',
-          message: errorMessage,
-          type: 'error',
-          okText: 'Tentar Novamente',
-          cancelText: null,
-          onOk: () => setModalState({ ...modalState, visible: false }),
-        });
-      }
+      const errorMessage = clientError.response?.data?.message || 'Falha no login. Verifique seus dados.';
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -118,46 +94,33 @@ const LoginPage = () => {
   };
 
   return (
-    <>
-      <Layout className="login-page-layout">
-        <HeaderLP />
-        <Content className="login-page-content">
-          <div className="login-card-container">
-            <Title level={2} className="login-title">Bem-vindo de Volta!</Title>
-            <Paragraph className="login-subtitle">Acesse sua conta para continuar no controle.</Paragraph>
-            <Form name="login_form" className="login-form" onFinish={onFinish} onFinishFailed={onFinishFailed} layout="vertical">
-              <Form.Item name="email" label="E-mail" rules={[{ required: true, type: 'email', message: 'Por favor, insira um e-mail válido!' }]}>
-                <Input prefix={<MailOutlined />} placeholder="seuemail@exemplo.com" size="large" autoComplete="email" />
-              </Form.Item>
-              <Form.Item name="password" label="Senha" rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}>
-                <Input.Password prefix={<LockOutlined />} placeholder="Sua senha" size="large" autoComplete="current-password" />
-              </Form.Item>
-              <Form.Item className="login-form-options-simplified">
-                <Link className="login-form-forgot" to="/esqueci-senha">Esqueceu sua senha?</Link>
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" className="login-form-button" size="large" block loading={loading}>Entrar</Button>
-              </Form.Item>
-              <Paragraph className="login-register-prompt">
-                Ainda não tem uma conta? <Link to="/planos">Conheça nossos planos!</Link>
-              </Paragraph>
-            </Form>
-          </div>
-        </Content>
-        <FooterLP />
-      </Layout>
-
-      <CustomModal
-        visible={modalState.visible}
-        onClose={() => setModalState({ ...modalState, visible: false })}
-        onOk={modalState.onOk}
-        title={modalState.title}
-        message={modalState.message}
-        type={modalState.type}
-        okText={modalState.okText}
-        cancelText={modalState.cancelText}
-      />
-    </>
+    <Layout className="login-page-layout">
+      <HeaderLP />
+      <Content className="login-page-content">
+        <div className="login-card-container">
+          <Title level={2} className="login-title">Bem-vindo de Volta!</Title>
+          <Paragraph className="login-subtitle">Acesse sua conta para continuar no controle.</Paragraph>
+          <Form name="login_form" onFinish={onFinish} onFinishFailed={onFinishFailed} layout="vertical">
+            <Form.Item name="email" label="E-mail" rules={[{ required: true, type: 'email' }]}>
+              <Input prefix={<MailOutlined />} placeholder="seuemail@exemplo.com" size="large" />
+            </Form.Item>
+            <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
+              <Input.Password prefix={<LockOutlined />} placeholder="Sua senha" size="large" />
+            </Form.Item>
+            <Form.Item className="login-form-options-simplified">
+              <Link className="login-form-forgot" to="/esqueci-senha">Esqueceu sua senha?</Link>
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="login-form-button" size="large" block loading={loading}>Entrar</Button>
+            </Form.Item>
+            <Paragraph className="login-register-prompt">
+              Ainda não tem uma conta? <Link to="/planos">Conheça nossos planos!</Link>
+            </Paragraph>
+          </Form>
+        </div>
+      </Content>
+      <FooterLP />
+    </Layout>
   );
 };
 

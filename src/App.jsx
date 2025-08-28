@@ -3,10 +3,11 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { Spin, ConfigProvider, App as AntApp } from 'antd';
-import ptBR from 'antd/locale/pt_BR'; // Importa a localização em português
+import ptBR from 'antd/locale/pt_BR';
 
 import PainelLayout from './PainelLayout/PainelLayout';
 import PlanosPage from './pages/Planos/Planos';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'; // Importa a rota protegida
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -32,6 +33,7 @@ const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
 
+
 const AppLayoutSuspense = () => (
   <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
     <Outlet />
@@ -42,17 +44,28 @@ const AppLayoutSuspense = () => (
 const AppRoutes = () => (
     <Routes>
       <Route element={<AppLayoutSuspense />}>
-        <Route path="/planos" element={<PlanosPage />} /> 
+        {/* Rotas Públicas ou semi-públicas (não precisam de assinatura ativa) */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/assinar/:planId" element={<Signup />} />
         <Route path="/assinatura/sucesso" element={<SubscriptionSuccessPage />} />
+        <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
+        
+        {/* Rota de Admin (proteção específica) */}
+        <Route path="/admin/dashboard" element={<AdminPage />} /> 
       </Route>
-      <Route path="/admin/dashboard" element={<AdminPage />} /> 
 
-      <Route element={<PainelLayout />}>
+      {/* <<< ESTRUTURA DE ROTA PROTEGIDA CORRIGIDA >>> */}
+      {/* O `ProtectedRoute` agora envolve o `PainelLayout` */}
+      <Route 
+        element={
+            <ProtectedRoute>
+                <PainelLayout />
+            </ProtectedRoute>
+        }
+      >
         <Route element={<AppLayoutSuspense />}>
             <Route path="/painel" element={<PainelUsuario />} />
             <Route path="/painel/chat" element={<ChatbotPage />} />
@@ -72,22 +85,18 @@ const AppRoutes = () => (
         </Route>
       </Route>
       
-      <Route path="*" element={
-        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
-          <div><h1>404 - Página Não Encontrada</h1></div>
-        </Suspense>
-      } />
+      <Route path="*" element={ <div><h1>404 - Página Não Encontrada</h1></div> } />
     </Routes>
 );
 
-// Componente principal App que provê o contexto do Ant Design
+
 function App() {
   return (
     <ConfigProvider
       locale={ptBR}
       theme={{
         token: {
-          colorPrimary: '#b24a0a', // Laranja Ferrugem (cor principal da marca)
+          colorPrimary: '#b24a0a',
           colorInfo: '#b24a0a',
           colorSuccess: '#389e0d',
           colorWarning: '#faad14',
@@ -97,7 +106,6 @@ function App() {
         },
       }}
     >
-      {/* O <AntApp> é essencial para que message, Modal.useModal() e notification funcionem globalmente */}
       <AntApp>
         <AppRoutes />
       </AntApp>
