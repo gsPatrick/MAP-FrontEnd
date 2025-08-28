@@ -126,6 +126,96 @@
   text-decoration: underline;
 }
 
+/* src/pages/SubscriptionSuccessPage/SubscriptionSuccessPage.css */
+
+.success-page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f9;
+}
+
+.success-page-content {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 50px;
+}
+
+.success-card-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px 35px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 64px !important;
+  color: #52c41a !important; /* Verde do Ant Design */
+  margin-bottom: 24px;
+}
+
+.success-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: #2c3e50 !important;
+  margin-bottom: 8px !important;
+}
+
+.success-subtitle {
+  font-size: 16px !important;
+  color: #555 !important;
+  margin-bottom: 30px !important;
+}
+
+.affiliate-code-box {
+  background-color: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.affiliate-label {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 4px !important;
+}
+
+.affiliate-code {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px;
+  color: #b24a0a !important; /* Cor Laranja Ferrugem da marca */
+  margin-bottom: 8px !important;
+}
+
+.affiliate-description {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 0 !important;
+}
+
+.whatsapp-button {
+  background: linear-gradient(45deg, #25D366 0%, #128C7E 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3) !important;
+  height: 50px !important;
+  font-size: 16px !important;
+}
+
+.whatsapp-prompt {
+  margin-top: 15px !important;
+  font-size: 14px !important;
+  color: #888;
+}
+
 /* Responsividade para a página de login */
 @media (max-width: 480px) {
   .login-page-content {

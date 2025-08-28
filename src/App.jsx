@@ -2,14 +2,18 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
-import { Spin } from 'antd';
+import { Spin, ConfigProvider, App as AntApp } from 'antd';
+import ptBR from 'antd/locale/pt_BR'; // Importa a localização em português
+
 import PainelLayout from './PainelLayout/PainelLayout';
 import PlanosPage from './pages/Planos/Planos';
 
+// Lazy-loaded components
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
 const PainelUsuario = lazy(() => import('./pages/PainelUsuario/PainelUsuario'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
-const Signup = lazy(() => import('./pages/Signup/Signup')); // <<< ADICIONAR IMPORT
+const Signup = lazy(() => import('./pages/Signup/Signup'));
+const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage'));
 const ChatbotPage = lazy(() => import('./pages/ChatbotPage/ChatbotPage'));
 const CartoesPage = lazy(() => import('./pages/CartoesPage/CartoesPage'));
 const TransacoesPage = lazy(() => import('./pages/TransacoesPage/TransacoesPage'));
@@ -34,14 +38,15 @@ const AppLayoutSuspense = () => (
   </Suspense>
 );
 
-function App() {
-  return (
+// Componente que define todas as rotas da aplicação
+const AppRoutes = () => (
     <Routes>
       <Route element={<AppLayoutSuspense />}>
         <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/assinar/:planId" element={<Signup />} /> {/* <<< ADICIONAR NOVA ROTA */}
+        <Route path="/assinar/:planId" element={<Signup />} />
+        <Route path="/assinatura/sucesso" element={<SubscriptionSuccessPage />} />
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
       </Route>
@@ -73,6 +78,30 @@ function App() {
         </Suspense>
       } />
     </Routes>
+);
+
+// Componente principal App que provê o contexto do Ant Design
+function App() {
+  return (
+    <ConfigProvider
+      locale={ptBR}
+      theme={{
+        token: {
+          colorPrimary: '#b24a0a', // Laranja Ferrugem (cor principal da marca)
+          colorInfo: '#b24a0a',
+          colorSuccess: '#389e0d',
+          colorWarning: '#faad14',
+          colorError: '#cf1322',
+          borderRadius: 8,
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        },
+      }}
+    >
+      {/* O <AntApp> é essencial para que message, Modal.useModal() e notification funcionem globalmente */}
+      <AntApp>
+        <AppRoutes />
+      </AntApp>
+    </ConfigProvider>
   );
 }
 

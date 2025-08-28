@@ -281,5 +281,7 @@
     box-shadow: 0 8px 20px rgba(197, 164, 80, 0.5);
 }
 
+
+
 .plan-luxe-cta-button .anticon { margin-left: 5px; transition: transform 0.3s ease; }
 .plan-luxe-cta-button:hover .anticon { transform: translateX(4px); }

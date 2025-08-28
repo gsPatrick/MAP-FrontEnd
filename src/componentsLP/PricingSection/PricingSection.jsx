@@ -1,8 +1,9 @@
 // src/componentsLP/PricingSection/PricingSection.jsx
-import React, { useState } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag, Switch, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Card, Typography, Button, List, Tag, Switch, message, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 import './PricingSection.css';
 
@@ -99,12 +100,35 @@ const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
     const [loadingPlanId, setLoadingPlanId] = useState(null);
     const navigate = useNavigate();
+    
+    const { isAuthenticated, currentProfile, loadingProfiles } = useProfile();
+    const [userSubscription, setUserSubscription] = useState(null);
+    const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
 
-    // Verifica se o usuário está logado de forma síncrona
-    const isLoggedIn = !!localStorage.getItem('authToken');
+    useEffect(() => {
+        const checkSubscription = async () => {
+            if (isAuthenticated) {
+                try {
+                    // Usamos a chamada de perfil que já traz a assinatura
+                    const response = await apiClient.get('/auth/client/me');
+                    if (response.data?.status === 'success' && response.data.data?.subscription) {
+                        setUserSubscription(response.data.data.subscription);
+                    }
+                } catch (error) {
+                    // Se o perfil der erro (ex: 401), o interceptor já trata, mas logamos aqui
+                    console.error("Não foi possível verificar a assinatura ativa.", error);
+                }
+            }
+            setIsCheckingSubscription(false);
+        };
+        
+        if (!loadingProfiles) {
+            checkSubscription();
+        }
+    }, [isAuthenticated, loadingProfiles]);
 
     const handlePlanSelect = async (planId) => {
-        if (isLoggedIn) {
+        if (isAuthenticated) {
             // FLUXO PARA USUÁRIO LOGADO (RENOVAÇÃO)
             setLoadingPlanId(planId);
             try {
@@ -132,93 +156,134 @@ const PricingSection = () => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
     };
 
-  return (
-    <div id="planos" className="pricing-luxe-section-wrapper">
-      <div className="pricing-luxe-bg-elements">
-        <div className="bg-luxe-shape shape-1"></div>
-        <div className="bg-luxe-shape shape-2"></div>
-        <div className="bg-luxe-flare"></div>
-      </div>
-      <div className="section-container pricing-luxe-container">
-        <Title level={2} className="pricing-luxe-main-title">
-          Um Plano para Cada <span className="highlight-luxe-text">Nível de Ambição</span>.
-        </Title>
-        <Paragraph className="pricing-luxe-main-subtitle">
-          Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados, sejam eles pessoais ou empresariais.
-        </Paragraph>
-        
-        <div className="billing-toggle-wrapper">
-            <span className={`billing-option ${billingCycle === 'monthly' ? 'active' : ''}`}>
-                Cobrança Mensal
-            </span>
-            <Switch onChange={handleBillingToggle} checked={billingCycle === 'yearly'} />
-            <span className={`billing-option ${billingCycle === 'yearly' ? 'active' : ''}`}>
-                Cobrança Anual
-                <Tag className="discount-tag">Economize 2 meses</Tag>
-            </span>
-        </div>
+    if (loadingProfiles || isCheckingSubscription) {
+        return (
+            <div id="planos" className="pricing-luxe-section-wrapper" style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
 
-        <Paragraph className="asaas-terms-notice">
-            Os pagamentos são processados de forma segura pelo Mercado Pago.
-        </Paragraph>
-        
-        <Row gutter={[32, 48]} justify="center" align="stretch" className="pricing-luxe-cards-row">
-          {plansData[billingCycle].map((plan) => (
-            <Col xs={24} md={12} lg={10} key={plan.id}>
-              {/* O wrapper de animação foi removido daqui */}
-              <Card className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
-                 {plan.isFeatured && (
-                  <div className="featured-luxe-banner">
-                    <StarFilled /> Mais Escolhido
-                  </div>
-                )}
-                <div className="card-luxe-content">
-                    <div className="plan-luxe-icon-header">
-                        {plan.icon && React.cloneElement(plan.icon, {className: 'plan-luxe-title-icon'})}
-                    </div>
-                    <Title level={3} className="plan-luxe-name">{plan.name}</Title>
-                    <Paragraph className="plan-luxe-description">{plan.description}</Paragraph>
+    if (isAuthenticated && userSubscription && userSubscription.status === 'Ativa') {
+        const isVitalicio = userSubscription.plan.tier.includes('vitalicio');
+        const endDate = new Date(userSubscription.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-                    <div className="plan-luxe-price-container">
-                        <div className="price-tag">
-                            <span className="price-currency">R$</span>
-                            <span className="price-value">{plan.price}</span>
-                            <span className="price-meta">
-                                <span className="price-suffix">{plan.priceSuffix}</span>
-                                <span className="price-period">{plan.period}</span>
-                            </span>
-                        </div>
-                        {plan.originalPrice ? <Text className="original-price-strike">De {plan.originalPrice}</Text> : <div className="original-price-strike"></div>}
-                    </div>
-
-                    <List
-                    className="plan-luxe-features-list"
-                    dataSource={plan.features}
-                    renderItem={(item) => (
-                        <List.Item>
-                            <CheckCircleFilled className="feature-luxe-icon" /> 
-                            <Text>{item}</Text>
-                        </List.Item>
-                    )}
-                    />
-                    <Button
-                    type="primary"
-                    size="large"
-                    block
-                    className="plan-luxe-cta-button"
-                    onClick={() => handlePlanSelect(plan.id)}
-                    loading={loadingPlanId === plan.id}
-                    >
-                    {plan.buttonText} <ArrowRightOutlined />
-                    </Button>
+        return (
+            <div id="planos" className="pricing-luxe-section-wrapper">
+                <div className="section-container pricing-luxe-container">
+                    <Title level={2} className="pricing-luxe-main-title">Seu Plano Atual</Title>
+                    <Paragraph className="pricing-luxe-main-subtitle">
+                        Você já está no controle! Continue aproveitando todos os benefícios.
+                    </Paragraph>
+                    <Card style={{ maxWidth: 600, margin: '40px auto', textAlign: 'left', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                        <Title level={4} style={{ color: 'var(--pricing-gold-dark)' }}>Plano: {userSubscription.plan.name}</Title>
+                        <Paragraph>
+                            Status: <Tag color="green" style={{ fontSize: '14px', padding: '4px 10px' }}>{userSubscription.status}</Tag>
+                        </Paragraph>
+                        <Paragraph style={{ fontSize: '16px' }}>
+                            {isVitalicio
+                                ? "Você possui acesso vitalício! 🎉"
+                                : `Seu acesso é válido até: ${endDate}`
+                            }
+                        </Paragraph>
+                        <Button type="primary" size="large" onClick={() => navigate('/painel')} className="plan-luxe-cta-button" style={{ marginTop: '20px' }}>
+                            Acessar Painel <ArrowRightOutlined />
+                        </Button>
+                    </Card>
                 </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
-    </div>
-  );
+            </div>
+        );
+    }
+
+    return (
+        <div id="planos" className="pricing-luxe-section-wrapper">
+            <div className="pricing-luxe-bg-elements">
+                <div className="bg-luxe-shape shape-1"></div>
+                <div className="bg-luxe-shape shape-2"></div>
+                <div className="bg-luxe-flare"></div>
+            </div>
+            <div className="section-container pricing-luxe-container">
+                <Title level={2} className="pricing-luxe-main-title">
+                    Um Plano para Cada <span className="highlight-luxe-text">Nível de Ambição</span>.
+                </Title>
+                <Paragraph className="pricing-luxe-main-subtitle">
+                    {isAuthenticated 
+                        ? 'Sua assinatura expirou. Renove agora para continuar no controle total!' 
+                        : 'Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados.'
+                    }
+                </Paragraph>
+
+                <div className="billing-toggle-wrapper">
+                    <span className={`billing-option ${billingCycle === 'monthly' ? 'active' : ''}`}>
+                        Cobrança Mensal
+                    </span>
+                    <Switch onChange={handleBillingToggle} checked={billingCycle === 'yearly'} />
+                    <span className={`billing-option ${billingCycle === 'yearly' ? 'active' : ''}`}>
+                        Cobrança Anual
+                        <Tag className="discount-tag">Economize 2 meses</Tag>
+                    </span>
+                </div>
+
+                <Paragraph className="asaas-terms-notice">
+                    Os pagamentos são processados de forma segura pelo Mercado Pago.
+                </Paragraph>
+
+                <Row gutter={[32, 48]} justify="center" align="stretch" className="pricing-luxe-cards-row">
+                    {plansData[billingCycle].map((plan) => (
+                        <Col xs={24} md={12} lg={10} key={plan.id}>
+                            <Card className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
+                                {plan.isFeatured && (
+                                    <div className="featured-luxe-banner">
+                                        <StarFilled /> Mais Escolhido
+                                    </div>
+                                )}
+                                <div className="card-luxe-content">
+                                    <div className="plan-luxe-icon-header">
+                                        {plan.icon && React.cloneElement(plan.icon, { className: 'plan-luxe-title-icon' })}
+                                    </div>
+                                    <Title level={3} className="plan-luxe-name">{plan.name}</Title>
+                                    <Paragraph className="plan-luxe-description">{plan.description}</Paragraph>
+
+                                    <div className="plan-luxe-price-container">
+                                        <div className="price-tag">
+                                            <span className="price-currency">R$</span>
+                                            <span className="price-value">{plan.price}</span>
+                                            <span className="price-meta">
+                                                <span className="price-suffix">{plan.priceSuffix}</span>
+                                                <span className="price-period">{plan.period}</span>
+                                            </span>
+                                        </div>
+                                        {plan.originalPrice ? <Text className="original-price-strike">De {plan.originalPrice}</Text> : <div className="original-price-strike"></div>}
+                                    </div>
+
+                                    <List
+                                        className="plan-luxe-features-list"
+                                        dataSource={plan.features}
+                                        renderItem={(item) => (
+                                            <List.Item>
+                                                <CheckCircleFilled className="feature-luxe-icon" />
+                                                <Text>{item}</Text>
+                                            </List.Item>
+                                        )}
+                                    />
+                                    <Button
+                                        type="primary"
+                                        size="large"
+                                        block
+                                        className="plan-luxe-cta-button"
+                                        onClick={() => handlePlanSelect(plan.id)}
+                                        loading={loadingPlanId === plan.id}
+                                    >
+                                        {isAuthenticated ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
+                                    </Button>
+                                </div>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            </div>
+        </div>
+    );
 };
 
 export default PricingSection;

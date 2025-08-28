@@ -1,0 +1,35 @@
+/* src/components/CustomModal/CustomModal.css */
+.custom-modal-container .ant-modal-content {
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.custom-modal-container .ant-modal-footer {
+  border-top: none;
+  padding: 0 24px 24px;
+}
+
+.custom-modal-content {
+  text-align: center;
+}
+
+.modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+.modal-icon.error { color: #cf1322; }
+.modal-icon.success { color: #389e0d; }
+.modal-icon.info { color: #0958d9; }
+.modal-icon.warning { color: #faad14; }
+
+.custom-modal-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.custom-modal-message {
+  font-size: 15px !important;
+  color: #555;
+  line-height: 1.6;
+}
