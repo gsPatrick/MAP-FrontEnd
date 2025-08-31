@@ -32,7 +32,8 @@ const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/Servic
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
-
+// <<< 1. IMPORTE A NOVA PÁGINA DE CHECKOUT AQUI >>>
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 
 const AppLayoutSuspense = () => (
   <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
@@ -52,7 +53,8 @@ const AppRoutes = () => (
         <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
-        
+             {/* <<< 2. ADICIONE A NOVA ROTA DE CHECKOUT AQUI >>> */}
+        <Route path="/checkout/:planId" element={<CheckoutPage />} />
         {/* Rota de Admin (proteção específica) */}
         <Route path="/admin/dashboard" element={<AdminPage />} /> 
       </Route>

@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Typography, Button, List, Tag, Switch, message, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useProfile } from '../../contexts/ProfileContext'; // Ainda usamos para os dados do perfil
+import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Os dados dos planos agora vêm de um arquivo central para consistência
 const plansData = {
   monthly: [
     {
@@ -44,70 +45,64 @@ const plansData = {
 
 const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
-    const [loadingPlanId, setLoadingPlanId] = useState(null);
+    const [loadingPlanId, setLoadingPlanId] = useState(null); // Para o loading do botão específico
     const navigate = useNavigate();
     
-    // <<< MUDANÇA PRINCIPAL AQUI >>>
-    // Verificação síncrona e imediata no localStorage.
-    // Isso garante que, após o redirect do login, a página já sabe que o usuário está logado.
+    // Verificação síncrona do token para determinar o estado inicial de login
     const isLoggedIn = !!localStorage.getItem('authToken');
 
-    // Ainda usamos o contexto para obter detalhes do usuário e saber se a assinatura está ativa
-    const { isAuthenticated, loadingProfiles } = useProfile();
+    // Contexto para obter detalhes do usuário e saber se a assinatura está ativa
+    const { loadingProfiles } = useProfile();
     const [userSubscription, setUserSubscription] = useState(null);
     const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
 
     useEffect(() => {
         const checkSubscription = async () => {
-            // A verificação só roda se o token existir (sincronizado com `isLoggedIn`)
             if (isLoggedIn) {
                 try {
+                    // API para verificar a assinatura ativa do usuário logado
                     const response = await apiClient.get('/subscriptions/me/active');
                     if (response.data?.status === 'success' && response.data.data) {
                         setUserSubscription(response.data.data);
                     }
                 } catch (error) {
-                    console.error("Não foi possível verificar a assinatura ativa.", error);
+                    // Se der erro 404 (sem assinatura ativa), é um estado normal.
+                    if (error.response?.status !== 404) {
+                        console.error("Não foi possível verificar a assinatura ativa.", error);
+                    }
                 }
             }
             setIsCheckingSubscription(false);
         };
         
-        // Roda a verificação quando o carregamento inicial de perfis termina
         if (!loadingProfiles) {
             checkSubscription();
         }
     }, [isLoggedIn, loadingProfiles]);
 
-    const handlePlanSelect = async (planId) => {
-        // A lógica aqui já estava correta e vai funcionar com o `isLoggedIn` síncrono.
+    // <<< FUNÇÃO handlePlanSelect CORRIGIDA E FINAL >>>
+    const handlePlanSelect = (planId) => {
+        setLoadingPlanId(planId); // Ativa o loading no botão clicado
+
+        // A decisão de para onde navegar é baseada unicamente no estado de login.
         if (isLoggedIn) {
-            setLoadingPlanId(planId);
-            try {
-                message.loading({ content: 'Gerando seu link de pagamento seguro...', key: 'mp_checkout' });
-                const response = await apiClient.post('/mercado-pago/checkout', { planId: parseInt(planId, 10) });
-                
-                if (response.data?.data?.checkoutUrl) {
-                    message.success({ content: 'Redirecionando para o pagamento!', key: 'mp_checkout' });
-                    window.location.href = response.data.data.checkoutUrl;
-                } else {
-                    throw new Error('Não foi possível obter o link de pagamento.');
-                }
-            } catch (error) {
-                message.error({ content: 'Erro ao iniciar o pagamento. Tente novamente.', key: 'mp_checkout' });
-                console.error("Erro no checkout MP para usuário logado:", error);
-            } finally {
-                setLoadingPlanId(null);
-            }
+            // Se o usuário já está logado (cenário de renovação),
+            // ele vai direto para a nova página de checkout.
+            navigate(`/checkout/${planId}`);
         } else {
+            // Se não está logado, ele vai para a página de cadastro.
+            // A página de cadastro, após o sucesso, cuidará do pagamento.
             navigate(`/assinar/${planId}`);
         }
+        
+        // O loading é desativado na próxima página, ou se o usuário voltar.
     };
 
     const handleBillingToggle = (checked) => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
     };
 
+    // Estado de carregamento enquanto verifica o perfil e a assinatura
     if (loadingProfiles || isCheckingSubscription) {
         return (
             <div id="planos" className="pricing-luxe-section-wrapper" style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
@@ -116,6 +111,7 @@ const PricingSection = () => {
         );
     }
 
+    // Se o usuário está logado e tem uma assinatura ATIVA, mostra o status
     if (isLoggedIn && userSubscription?.status === 'Ativa') {
         const isVitalicio = userSubscription.plan.tier.includes('vitalicio');
         const endDate = new Date(userSubscription.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -140,6 +136,7 @@ const PricingSection = () => {
         );
     }
 
+    // Renderiza a seção de preços para usuários deslogados ou com plano expirado
     return (
         <div id="planos" className="pricing-luxe-section-wrapper">
             <div className="pricing-luxe-bg-elements">
@@ -153,7 +150,7 @@ const PricingSection = () => {
                 </Title>
                 <Paragraph className="pricing-luxe-main-subtitle">
                     {isLoggedIn 
-                        ? 'Sua assinatura expirou. Renove agora para continuar no controle total!' 
+                        ? 'Sua assinatura expirou ou não está ativa. Renove agora para continuar no controle total!' 
                         : 'Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados.'
                     }
                 </Paragraph>
@@ -192,7 +189,6 @@ const PricingSection = () => {
                                         onClick={() => handlePlanSelect(plan.id)}
                                         loading={loadingPlanId === plan.id}
                                     >
-                                        {/* A MUDANÇA ESTÁ AQUI: O TEXTO DO BOTÃO AGORA DEPENDE DE `isLoggedIn` */}
                                         {isLoggedIn ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
                                     </Button>
                                 </div>

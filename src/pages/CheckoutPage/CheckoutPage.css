@@ -1,0 +1,48 @@
+/* src/pages/CheckoutPage/CheckoutPage.css */
+.checkout-page-layout {
+  min-height: 100vh;
+  background-color: #f4f7f9;
+}
+
+.checkout-page-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 120px 20px 50px;
+}
+
+.checkout-card-container {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-title {
+  text-align: center;
+  font-size: 24px !important;
+  margin-bottom: 20px !important;
+  color: #2c3e50;
+}
+
+.plan-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fafafa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border: 1px solid #f0f0f0;
+}
+
+.plan-name {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.plan-price {
+  font-weight: 700;
+  font-size: 18px;
+  color: #b24a0a;
+}
