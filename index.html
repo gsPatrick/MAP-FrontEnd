@@ -1,14 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./public/logo.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MAP - No Controle</title>
+    
+    <!-- MercadoPago SDK - DEVE ser carregado ANTES do React -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Script adicional para verificar se o MercadoPago foi carregado -->
+    <script>
+      window.addEventListener('load', function() {
+        if (window.MercadoPago) {
+          console.log('✅ MercadoPago SDK carregado com sucesso');
+        } else {
+          console.error('❌ MercadoPago SDK não foi carregado');
+        }
+      });
+    </script>
   </body>
 </html>

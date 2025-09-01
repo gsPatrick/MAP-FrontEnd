@@ -1,6 +1,6 @@
 // src/componentsLP/PricingSection/PricingSection.jsx
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag, Switch, message, Spin } from 'antd';
+import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
@@ -9,7 +9,6 @@ import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
-// Os dados dos planos agora vêm de um arquivo central para consistência
 const plansData = {
   monthly: [
     {
@@ -45,13 +44,8 @@ const plansData = {
 
 const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
-    const [loadingPlanId, setLoadingPlanId] = useState(null); // Para o loading do botão específico
     const navigate = useNavigate();
-    
-    // Verificação síncrona do token para determinar o estado inicial de login
     const isLoggedIn = !!localStorage.getItem('authToken');
-
-    // Contexto para obter detalhes do usuário e saber se a assinatura está ativa
     const { loadingProfiles } = useProfile();
     const [userSubscription, setUserSubscription] = useState(null);
     const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
@@ -60,16 +54,12 @@ const PricingSection = () => {
         const checkSubscription = async () => {
             if (isLoggedIn) {
                 try {
-                    // API para verificar a assinatura ativa do usuário logado
                     const response = await apiClient.get('/subscriptions/me/active');
                     if (response.data?.status === 'success' && response.data.data) {
                         setUserSubscription(response.data.data);
                     }
                 } catch (error) {
-                    // Se der erro 404 (sem assinatura ativa), é um estado normal.
-                    if (error.response?.status !== 404) {
-                        console.error("Não foi possível verificar a assinatura ativa.", error);
-                    }
+                    console.error("Não foi possível verificar a assinatura ativa.", error);
                 }
             }
             setIsCheckingSubscription(false);
@@ -80,29 +70,28 @@ const PricingSection = () => {
         }
     }, [isLoggedIn, loadingProfiles]);
 
-    // <<< FUNÇÃO handlePlanSelect CORRIGIDA E FINAL >>>
+    /**
+     * Lida com a seleção de um plano.
+     * A lógica garante que o usuário seja direcionado corretamente para o fluxo de
+     * cadastro ou para o checkout seguro.
+     */
     const handlePlanSelect = (planId) => {
-        setLoadingPlanId(planId); // Ativa o loading no botão clicado
-
-        // A decisão de para onde navegar é baseada unicamente no estado de login.
         if (isLoggedIn) {
-            // Se o usuário já está logado (cenário de renovação),
-            // ele vai direto para a nova página de checkout.
+            // Se o usuário está logado, o redirecionamos para a nossa página de checkout interna.
+            // Essa página (CheckoutPage.jsx) cuidará da chamada ao backend e do redirecionamento
+            // para o Mercado Pago, garantindo a experiência web.
             navigate(`/checkout/${planId}`);
         } else {
-            // Se não está logado, ele vai para a página de cadastro.
-            // A página de cadastro, após o sucesso, cuidará do pagamento.
+            // Se não estiver logado, ele vai para a página de cadastro primeiro,
+            // levando o ID do plano consigo.
             navigate(`/assinar/${planId}`);
         }
-        
-        // O loading é desativado na próxima página, ou se o usuário voltar.
     };
 
     const handleBillingToggle = (checked) => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
     };
 
-    // Estado de carregamento enquanto verifica o perfil e a assinatura
     if (loadingProfiles || isCheckingSubscription) {
         return (
             <div id="planos" className="pricing-luxe-section-wrapper" style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
@@ -111,7 +100,6 @@ const PricingSection = () => {
         );
     }
 
-    // Se o usuário está logado e tem uma assinatura ATIVA, mostra o status
     if (isLoggedIn && userSubscription?.status === 'Ativa') {
         const isVitalicio = userSubscription.plan.tier.includes('vitalicio');
         const endDate = new Date(userSubscription.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -136,7 +124,6 @@ const PricingSection = () => {
         );
     }
 
-    // Renderiza a seção de preços para usuários deslogados ou com plano expirado
     return (
         <div id="planos" className="pricing-luxe-section-wrapper">
             <div className="pricing-luxe-bg-elements">
@@ -150,7 +137,7 @@ const PricingSection = () => {
                 </Title>
                 <Paragraph className="pricing-luxe-main-subtitle">
                     {isLoggedIn 
-                        ? 'Sua assinatura expirou ou não está ativa. Renove agora para continuar no controle total!' 
+                        ? 'Sua assinatura expirou. Renove agora para continuar no controle total!' 
                         : 'Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados.'
                     }
                 </Paragraph>
@@ -187,7 +174,6 @@ const PricingSection = () => {
                                         block
                                         className="plan-luxe-cta-button"
                                         onClick={() => handlePlanSelect(plan.id)}
-                                        loading={loadingPlanId === plan.id}
                                     >
                                         {isLoggedIn ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
                                     </Button>

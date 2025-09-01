@@ -8,6 +8,7 @@ import ptBR from 'antd/locale/pt_BR';
 import PainelLayout from './PainelLayout/PainelLayout';
 import PlanosPage from './pages/Planos/Planos';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'; // Importa a rota protegida
+import PaymentStatusPage from './pages/PaymentStatusPage/PaymentStatusPage';
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -53,8 +54,12 @@ const AppRoutes = () => (
         <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
-             {/* <<< 2. ADICIONE A NOVA ROTA DE CHECKOUT AQUI >>> */}
         <Route path="/checkout/:planId" element={<CheckoutPage />} />
+             {/* <<< 2. ADICIONE A NOVA ROTA DE CHECKOUT AQUI >>> */}
+
+                <Route path="/payment-success" element={<PaymentStatusPage />} />
+        <Route path="/payment-failure" element={<PaymentStatusPage />} />
+        <Route path="/payment-pending" element={<PaymentStatusPage />} />
         {/* Rota de Admin (proteção específica) */}
         <Route path="/admin/dashboard" element={<AdminPage />} /> 
       </Route>
