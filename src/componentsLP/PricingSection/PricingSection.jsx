@@ -1,6 +1,6 @@
 // src/componentsLP/PricingSection/PricingSection.jsx
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin } from 'antd';
+import { Row, Col, Card, Typography, Button, List, Tag, Switch, message, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
@@ -9,35 +9,36 @@ import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
-const plansData = {
+// Definições ESTÁTICAS dos planos do frontend (usamos o name/tier para mapear os IDs do backend)
+const frontendPlansDefinitions = {
   monthly: [
     {
-      id: '1', name: 'Básico Mensal', icon: <UserOutlined />, price: '39', priceSuffix: ',90', period: '/mês',
+      internalId: 'basico_mensal', name: 'Básico Mensal', icon: <UserOutlined />, price: '39', priceSuffix: ',90', period: '/mês',
       description: 'O controle definitivo para suas finanças pessoais e sua rotina diária.',
       features: [ 'Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email' ],
-      buttonText: 'Assinar Agora', isFeatured: false,
+      buttonText: 'Assinar Agora', isFeatured: false, tier: 'basico', durationDays: 30
     },
     {
-      id: '3', name: 'Avançado Mensal', icon: <ShopOutlined />, price: '79', priceSuffix: ',90', period: '/mês',
+      internalId: 'avancado_mensal', name: 'Avançado Mensal', icon: <ShopOutlined />, price: '79', priceSuffix: ',90', period: '/mês',
       description: 'A solução completa que unifica sua vida pessoal e o comando do seu negócio.',
       features: [ 'Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp' ],
-      buttonText: 'Assinar Total Control', isFeatured: true,
+      buttonText: 'Assinar Total Control', isFeatured: true, tier: 'avancado', durationDays: 30
     },
   ],
   yearly: [
     {
-        id: '2', name: 'Básico Anual', icon: <UserOutlined />, price: '389', priceSuffix: ',90', period: '/ano',
+        internalId: 'basico_anual', name: 'Básico Anual', icon: <UserOutlined />, price: '389', priceSuffix: ',90', period: '/ano',
         originalPrice: 'R$ 478,80',
         description: 'Um ano inteiro de organização com um desconto exclusivo para seu compromisso.',
         features: [ 'Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email' ],
-        buttonText: 'Assinar Plano Anual', isFeatured: false,
+        buttonText: 'Assinar Plano Anual', isFeatured: false, tier: 'basico', durationDays: 365
       },
       {
-        id: '4', name: 'Avançado Anual', icon: <ShopOutlined />, price: '789', priceSuffix: ',90', period: '/ano',
+        internalId: 'avancado_anual', name: 'Avançado Anual', icon: <ShopOutlined />, price: '789', priceSuffix: ',90', period: '/ano',
         originalPrice: 'R$ 958,80',
         description: 'Potência máxima para sua vida e seu negócio, com a tranquilidade de um ano inteiro de controle.',
         features: [ 'Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp' ],
-        buttonText: 'Assinar Total Control Anual', isFeatured: true,
+        buttonText: 'Assinar Total Control Anual', isFeatured: true, tier: 'avancado', durationDays: 365
       },
   ]
 };
@@ -49,8 +50,28 @@ const PricingSection = () => {
     const { loadingProfiles } = useProfile();
     const [userSubscription, setUserSubscription] = useState(null);
     const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+    // <<< NOVOS ESTADOS PARA OS PLANOS DO BACKEND >>>
+    const [backendPlans, setBackendPlans] = useState([]);
+    const [isLoadingPlans, setIsLoadingPlans] = useState(true);
 
     useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await apiClient.get('/plans'); // Assumindo que você tem um endpoint /plans
+                if (response.data?.status === 'success' && Array.isArray(response.data.data)) {
+                    setBackendPlans(response.data.data);
+                } else {
+                    message.error('Não foi possível carregar os planos disponíveis. Tente novamente mais tarde.');
+                    console.error('Formato de resposta inesperado para /plans:', response.data);
+                }
+            } catch (error) {
+                message.error('Erro ao buscar planos do servidor.');
+                console.error("Erro ao buscar planos:", error);
+            } finally {
+                setIsLoadingPlans(false);
+            }
+        };
+
         const checkSubscription = async () => {
             if (isLoggedIn) {
                 try {
@@ -65,26 +86,39 @@ const PricingSection = () => {
             setIsCheckingSubscription(false);
         };
         
-        if (!loadingProfiles) {
-            checkSubscription();
-        }
-    }, [isLoggedIn, loadingProfiles]);
+        // Carrega planos e verifica assinatura em paralelo
+        Promise.all([fetchPlans(), checkSubscription()]);
 
-    /**
-     * Lida com a seleção de um plano.
-     * A lógica garante que o usuário seja direcionado corretamente para o fluxo de
-     * cadastro ou para o checkout seguro.
-     */
-    const handlePlanSelect = (planId) => {
+    }, [isLoggedIn]); // Recarrega se o status de login mudar
+
+    // Função para mapear os planos estáticos com os IDs dinâmicos do backend
+    const getMappedPlans = (cycle) => {
+        return frontendPlansDefinitions[cycle].map(frontendPlan => {
+            // Tenta encontrar o plano correspondente no array de planos do backend
+            const matchingBackendPlan = backendPlans.find(bp => 
+                bp.name === frontendPlan.name && bp.tier === frontendPlan.tier && bp.durationDays === frontendPlan.durationDays
+            );
+
+            // Retorna o plano do frontend com o ID do backend, se encontrado.
+            // Se não encontrado (plano ainda não sincronizado no backend), o id será null.
+            return {
+                ...frontendPlan,
+                id: matchingBackendPlan ? matchingBackendPlan.id : null,
+                price: matchingBackendPlan ? matchingBackendPlan.price.replace('.', ',') : frontendPlan.price, // Garante preço atualizado
+            };
+        });
+    };
+
+    const handlePlanSelect = (backendPlanId) => {
+        if (!backendPlanId) {
+            message.error('Plano não disponível ou não configurado corretamente. Por favor, tente novamente mais tarde.');
+            return;
+        }
+
         if (isLoggedIn) {
-            // Se o usuário está logado, o redirecionamos para a nossa página de checkout interna.
-            // Essa página (CheckoutPage.jsx) cuidará da chamada ao backend e do redirecionamento
-            // para o Mercado Pago, garantindo a experiência web.
-            navigate(`/checkout/${planId}`);
+            navigate(`/checkout/${backendPlanId}`);
         } else {
-            // Se não estiver logado, ele vai para a página de cadastro primeiro,
-            // levando o ID do plano consigo.
-            navigate(`/assinar/${planId}`);
+            navigate(`/assinar/${backendPlanId}`);
         }
     };
 
@@ -92,7 +126,8 @@ const PricingSection = () => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
     };
 
-    if (loadingProfiles || isCheckingSubscription) {
+    // Exibe Spin enquanto dados essenciais estão carregando
+    if (loadingProfiles || isCheckingSubscription || isLoadingPlans) {
         return (
             <div id="planos" className="pricing-luxe-section-wrapper" style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
                 <Spin size="large" />
@@ -124,6 +159,8 @@ const PricingSection = () => {
         );
     }
 
+    const currentPlansToDisplay = getMappedPlans(billingCycle);
+
     return (
         <div id="planos" className="pricing-luxe-section-wrapper">
             <div className="pricing-luxe-bg-elements">
@@ -148,8 +185,8 @@ const PricingSection = () => {
                 </div>
                 <Paragraph className="asaas-terms-notice">Os pagamentos são processados de forma segura pelo Mercado Pago.</Paragraph>
                 <Row gutter={[32, 48]} justify="center" align="stretch" className="pricing-luxe-cards-row">
-                    {plansData[billingCycle].map((plan) => (
-                        <Col xs={24} md={12} lg={10} key={plan.id}>
+                    {currentPlansToDisplay.map((plan) => (
+                        <Col xs={24} md={12} lg={10} key={plan.internalId}> {/* Usamos internalId como key */}
                             <Card className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
                                 {plan.isFeatured && (<div className="featured-luxe-banner"><StarFilled /> Mais Escolhido</div>)}
                                 <div className="card-luxe-content">
@@ -158,8 +195,8 @@ const PricingSection = () => {
                                     <Paragraph className="plan-luxe-description">{plan.description}</Paragraph>
                                     <div className="plan-luxe-price-container">
                                         <div className="price-tag">
-                                            <span className="price-currency">R$</span><span className="price-value">{plan.price}</span>
-                                            <span className="price-meta"><span className="price-suffix">{plan.priceSuffix}</span><span className="price-period">{plan.period}</span></span>
+                                            <span className="price-currency">R$</span><span className="price-value">{plan.price.split(',')[0]}</span>
+                                            <span className="price-meta"><span className="price-suffix">{plan.price.split(',')[1] ? `,${plan.price.split(',')[1]}` : ''}</span><span className="price-period">{plan.period}</span></span>
                                         </div>
                                         {plan.originalPrice ? <Text className="original-price-strike">De {plan.originalPrice}</Text> : <div className="original-price-strike"></div>}
                                     </div>
@@ -173,9 +210,10 @@ const PricingSection = () => {
                                         size="large"
                                         block
                                         className="plan-luxe-cta-button"
-                                        onClick={() => handlePlanSelect(plan.id)}
+                                        onClick={() => handlePlanSelect(plan.id)} // Passamos o ID do backend
+                                        disabled={plan.id === null} // Desabilita o botão se o plano não foi mapeado
                                     >
-                                        {isLoggedIn ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
+                                        {plan.id === null ? 'Indisponível' : (isLoggedIn ? 'Renovar Assinatura' : plan.buttonText)} <ArrowRightOutlined />
                                     </Button>
                                 </div>
                             </Card>
