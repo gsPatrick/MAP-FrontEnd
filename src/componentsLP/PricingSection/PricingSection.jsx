@@ -2,22 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // Importar useLocation
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 import './PricingSection.css';
 
 const { Title, Paragraph, Text } = Typography;
 
-// =========================================================================================
-// [DADOS CORRIGIDOS] Planos com os IDs corretos do seu banco de dados.
-// Básico Mensal: ID 7 | Básico Anual: ID 8
-// Avançado Mensal: ID 9 | Avançado Anual: ID 10
-// =========================================================================================
 const plansData = {
   monthly: [
     {
-      id: '7', // <-- CORRIGIDO
+      id: '7',
       name: 'Básico Mensal', 
       icon: <UserOutlined />, 
       price: '39', 
@@ -29,7 +24,7 @@ const plansData = {
       isFeatured: false,
     },
     {
-      id: '9', // <-- CORRIGIDO
+      id: '9',
       name: 'Avançado Mensal', 
       icon: <ShopOutlined />, 
       price: '79', 
@@ -43,7 +38,7 @@ const plansData = {
   ],
   yearly: [
     {
-        id: '8', // <-- CORRIGIDO
+        id: '8',
         name: 'Básico Anual', 
         icon: <UserOutlined />, 
         price: '389', 
@@ -56,7 +51,7 @@ const plansData = {
         isFeatured: false,
       },
       {
-        id: '10', // <-- CORRIGIDO
+        id: '10',
         name: 'Avançado Anual', 
         icon: <ShopOutlined />, 
         price: '789', 
@@ -74,6 +69,7 @@ const plansData = {
 const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
     const navigate = useNavigate();
+    const location = useLocation(); // Usar useLocation para pegar query params
     const isLoggedIn = !!localStorage.getItem('authToken');
     const { loadingProfiles } = useProfile();
     const [userSubscription, setUserSubscription] = useState(null);
@@ -99,13 +95,20 @@ const PricingSection = () => {
         }
     }, [isLoggedIn, loadingProfiles]);
 
+    // <<< INÍCIO DA MODIFICAÇÃO >>>
     const handlePlanSelect = (planId) => {
+        // Preserva os query params (como ?ref=CODIGO) durante a navegação
+        const queryParams = location.search; 
+
         if (isLoggedIn) {
-            navigate(`/checkout/${planId}`);
+            // Se logado, vai direto para o checkout
+            navigate(`/checkout/${planId}${queryParams}`);
         } else {
-            navigate(`/assinar/${planId}`);
+            // Se não logado, vai para a página de cadastro, levando o ID do plano e o ref code
+            navigate(`/assinar/${planId}${queryParams}`);
         }
     };
+    // <<< FIM DA MODIFICAÇÃO >>>
 
     const handleBillingToggle = (checked) => {
         setBillingCycle(checked ? 'yearly' : 'monthly');

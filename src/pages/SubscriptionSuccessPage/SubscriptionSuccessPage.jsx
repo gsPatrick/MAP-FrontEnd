@@ -1,107 +1,121 @@
 // src/pages/SubscriptionSuccessPage/SubscriptionSuccessPage.jsx
-import React, { useEffect, useState } from 'react';
-import { Layout, Card, Typography, Spin, Button, message, Result } from 'antd';
-import { WhatsAppOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import apiClient from '../../services/api';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Layout, Card, Typography, Button, Spin, message } from 'antd';
+import { CheckCircleOutlined, WhatsAppOutlined } from '@ant-design/icons';
+import { useParams, useNavigate } from 'react-router-dom';
 import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
-import './SubscriptionSuccessPage.css'; // Crie também um arquivo CSS para estilização
+import apiClient from '../../services/api';
+import './SubscriptionSuccessPage.css';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 const SubscriptionSuccessPage = () => {
-  const [loading, setLoading] = useState(true);
-  const [clientData, setClientData] = useState(null);
-  const [error, setError] = useState(null);
+    const { planId } = useParams();
+    const navigate = useNavigate();
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [countdown, setCountdown] = useState(5);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setError("Sessão não encontrada. Por favor, faça login para verificar sua assinatura.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await apiClient.get('/auth/client/me');
-        if (response.data?.status === 'success' && response.data.data?.client) {
-          setClientData(response.data.data.client);
+    useEffect(() => {
+        const userJson = localStorage.getItem('userData');
+        if (userJson) {
+            setUserData(JSON.parse(userJson));
         } else {
-          throw new Error("Não foi possível carregar os dados do seu perfil.");
+            message.error("Sua sessão não foi encontrada. Por favor, faça login para continuar.");
+            navigate('/login');
         }
-      } catch (err) {
-        setError(err.response?.data?.message || "Ocorreu um erro ao buscar seus dados.");
-      } finally {
         setLoading(false);
-      }
-    };
+    }, [navigate]);
 
-    fetchProfile();
-  }, []);
+    const handleCheckout = useCallback(async () => {
+        try {
+            const checkoutResponse = await apiClient.post('/mercado-pago/checkout', { planId: parseInt(planId, 10) });
+            
+            // <<< CORREÇÃO PRINCIPAL AQUI >>>
+            // Alterado de 'checkoutUrl' para 'init_point' para corresponder à resposta da API do Mercado Pago.
+            if (checkoutResponse.data?.data?.init_point) {
+                window.location.href = checkoutResponse.data.data.init_point;
+            } else {
+                throw new Error('Link de pagamento (init_point) não foi encontrado na resposta.');
+            }
+        } catch (error) {
+            message.error('Falha ao redirecionar para o pagamento. Por favor, contate o suporte.', 10);
+            console.error("Erro ao gerar checkout:", error);
+        }
+    }, [planId]);
 
-  const whatsAppNumber = process.env.REACT_APP_WHATSAPP_NUMBER || '5571982862912';
+    useEffect(() => {
+        if (!loading && userData) {
+            if (countdown === 0) {
+                handleCheckout();
+                return;
+            }
 
-  if (loading) {
+            const timer = setInterval(() => {
+                setCountdown((prevCountdown) => prevCountdown - 1);
+            }, 1000);
+
+            return () => clearInterval(timer);
+        }
+    }, [loading, userData, countdown, handleCheckout]);
+
+    const affiliateLink = userData ? `${window.location.origin}/#planos?ref=${userData.affiliateCode}` : '';
+
+    if (loading) {
+        return (
+            <Layout style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Spin size="large" />
+            </Layout>
+        );
+    }
+
     return (
-      <Layout style={{ minHeight: '100vh', justifyContent: 'center', alignItems: 'center' }}>
-        <Spin size="large" tip="Verificando sua assinatura..." />
-      </Layout>
+        <Layout className="success-page-layout">
+            <HeaderLP />
+            <Content className="success-page-content">
+                <Card className="success-card-container">
+                    <CheckCircleOutlined className="success-icon" />
+                    <Title level={2} className="success-title">Conta Criada com Sucesso!</Title>
+                    <Paragraph className="success-subtitle">
+                        Estamos preparando tudo para você.
+                    </Paragraph>
+
+                    {userData && userData.affiliateCode && (
+                        <div className="affiliate-code-box">
+                            <Paragraph className="affiliate-label">Seu Link de Afiliado:</Paragraph>
+                            <Title level={4} className="affiliate-code" copyable={{ text: affiliateLink }}>
+                                {userData.affiliateCode}
+                            </Title>
+                            <Paragraph className="affiliate-description">
+                                Compartilhe este link e ganhe comissões a cada novo assinante!
+                            </Paragraph>
+                        </div>
+                    )}
+                    
+                    <Paragraph className="redirect-countdown">
+                        Redirecionando para o pagamento em <strong>{countdown}...</strong>
+                    </Paragraph>
+
+                    <Paragraph className="whatsapp-prompt">
+                        Enquanto isso, que tal já me dar um "oi" no WhatsApp para começarmos?
+                    </Paragraph>
+                    <Button 
+                        type="primary" 
+                        icon={<WhatsAppOutlined />} 
+                        size="large" 
+                        className="whatsapp-button"
+                        href="https://wa.me/5571982862912"
+                        target="_blank"
+                    >
+                        Iniciar Conversa
+                    </Button>
+                </Card>
+            </Content>
+            <FooterLP />
+        </Layout>
     );
-  }
-
-  return (
-    <Layout className="success-page-layout">
-      <HeaderLP />
-      <Content className="success-page-content">
-        {error ? (
-          <Result
-            status="error"
-            title="Falha na Verificação"
-            subTitle={error}
-            extra={[
-              <Button type="primary" key="console" href="/login">
-                Ir para o Login
-              </Button>,
-            ]}
-          />
-        ) : (
-          <Card className="success-card-container">
-            <CheckCircleOutlined className="success-icon" />
-            <Title level={2} className="success-title">Assinatura Ativada!</Title>
-            <Paragraph className="success-subtitle">
-              Parabéns, {clientData?.name?.split(' ')[0] || 'Cliente'}! Sua jornada para o controle total começou.
-            </Paragraph>
-
-            <div className="affiliate-code-box">
-              <Paragraph className="affiliate-label">Seu Código de Afiliado:</Paragraph>
-              <Paragraph className="affiliate-code" copyable>{clientData?.affiliateCode || 'N/A'}</Paragraph>
-              <Paragraph className="affiliate-description">
-                Compartilhe este código com amigos e ganhe comissões a cada nova assinatura! 💰
-              </Paragraph>
-            </div>
-
-            <Button
-              type="primary"
-              icon={<WhatsAppOutlined />}
-              size="large"
-              block
-              className="whatsapp-button"
-              href={`https://wa.me/${whatsAppNumber}?text=Oi!%20Acabei%20de%20ativar%20meu%20plano.`}
-              target="_blank"
-            >
-              Iniciar Conversa no WhatsApp
-            </Button>
-            <Paragraph className="whatsapp-prompt">
-              Clique no botão acima para me dar um "oi" e começar a usar o sistema agora mesmo!
-            </Paragraph>
-          </Card>
-        )}
-      </Content>
-      <FooterLP />
-    </Layout>
-  );
 };
 
 export default SubscriptionSuccessPage;

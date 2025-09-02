@@ -7,15 +7,15 @@ import ptBR from 'antd/locale/pt_BR';
 
 import PainelLayout from './PainelLayout/PainelLayout';
 import PlanosPage from './pages/Planos/Planos';
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'; // Importa a rota protegida
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PaymentStatusPage from './pages/PaymentStatusPage/PaymentStatusPage';
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
 const PainelUsuario = lazy(() => import('./pages/PainelUsuario/PainelUsuario'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
-const Signup = lazy(() => import('./pages/Signup/Signup'));
-const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage'));
+const SignupPage = lazy(() => import('./pages/Signup/Signup')); // Renomeado para clareza
+const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage')); // <<< CORREÇÃO: Declaração única aqui
 const ChatbotPage = lazy(() => import('./pages/ChatbotPage/ChatbotPage'));
 const CartoesPage = lazy(() => import('./pages/CartoesPage/CartoesPage'));
 const TransacoesPage = lazy(() => import('./pages/TransacoesPage/TransacoesPage'));
@@ -33,7 +33,6 @@ const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/Servic
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
-// <<< 1. IMPORTE A NOVA PÁGINA DE CHECKOUT AQUI >>>
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 
 const AppLayoutSuspense = () => (
@@ -46,26 +45,27 @@ const AppLayoutSuspense = () => (
 const AppRoutes = () => (
     <Routes>
       <Route element={<AppLayoutSuspense />}>
-        {/* Rotas Públicas ou semi-públicas (não precisam de assinatura ativa) */}
+        {/* === ROTAS PÚBLICAS === */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/assinar/:planId" element={<Signup />} />
-        <Route path="/assinatura/sucesso" element={<SubscriptionSuccessPage />} />
         <Route path="/planos" element={<PlanosPage />} /> 
-        <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
+        
+        {/* === FLUXO DE CADASTRO E PAGAMENTO === */}
+        <Route path="/assinar/:planId" element={<SignupPage />} />
+        {/* <<< CORREÇÃO: Rota de sucesso agora aponta para o componente correto e usa o parâmetro :planId >>> */}
+        <Route path="/cadastro-sucesso/:planId" element={<SubscriptionSuccessPage />} /> 
         <Route path="/checkout/:planId" element={<CheckoutPage />} />
-             {/* <<< 2. ADICIONE A NOVA ROTA DE CHECKOUT AQUI >>> */}
-
-                <Route path="/payment-success" element={<PaymentStatusPage />} />
+        <Route path="/payment-success" element={<PaymentStatusPage />} />
         <Route path="/payment-failure" element={<PaymentStatusPage />} />
         <Route path="/payment-pending" element={<PaymentStatusPage />} />
-        {/* Rota de Admin (proteção específica) */}
+
+        {/* === ROTAS DE AGENDAMENTO PÚBLICO E ADMIN === */}
+        <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
         <Route path="/admin/dashboard" element={<AdminPage />} /> 
       </Route>
 
-      {/* <<< ESTRUTURA DE ROTA PROTEGIDA CORRIGIDA >>> */}
-      {/* O `ProtectedRoute` agora envolve o `PainelLayout` */}
+      {/* === ROTAS PROTEGIDAS DO PAINEL === */}
       <Route 
         element={
             <ProtectedRoute>
@@ -92,6 +92,7 @@ const AppRoutes = () => (
         </Route>
       </Route>
       
+      {/* Rota para páginas não encontradas */}
       <Route path="*" element={ <div><h1>404 - Página Não Encontrada</h1></div> } />
     </Routes>
 );

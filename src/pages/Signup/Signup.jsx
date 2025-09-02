@@ -1,22 +1,21 @@
 // src/pages/Signup/Signup.jsx
 import React, { useState, useEffect } from 'react';
-import { Layout, Form, Input, Button, Typography, message, Spin, Card } from 'antd';
+import { Layout, Form, Input, Button, Typography, message, Spin, Card, Alert } from 'antd';
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { MailOutlined, LockOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined, UserOutlined, PhoneOutlined, GiftOutlined } from '@ant-design/icons';
 import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import apiClient from '../../services/api';
-import CustomModal from '../../components/CustomModal/CustomModal'; // Importa o modal customizado
 import './SignupPage.css';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 const plansInfo = {
-  '1': { name: 'Básico Mensal', price: 'R$ 39,90' },
-  '2': { name: 'Básico Anual', price: 'R$ 389,90' },
-  '3': { name: 'Avançado Mensal', price: 'R$ 79,90' },
-  '4': { name: 'Avançado Anual', price: 'R$ 789,90' },
+  '7': { name: 'Básico Mensal' },
+  '8': { name: 'Básico Anual' },
+  '9': { name: 'Avançado Mensal' },
+  '10': { name: 'Avançado Anual' },
 };
 
 const SignupPage = () => {
@@ -25,28 +24,33 @@ const SignupPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState(null);
+  const [referrerInfo, setReferrerInfo] = useState(null);
 
-  // Estado para controlar o modal customizado
-  const [modalState, setModalState] = useState({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'error',
-    onOk: () => setModalState({ ...modalState, visible: false }),
-    okText: 'Entendi',
-    cancelText: null
-  });
+  const affiliateCode = new URLSearchParams(location.search).get('ref');
 
   useEffect(() => {
     if (plansInfo[planId]) {
       setPlan(plansInfo[planId]);
     } else {
       message.error("Plano inválido ou não encontrado. Redirecionando...");
-      navigate('/planos');
+      navigate('/#planos');
     }
-  }, [planId, navigate]);
 
-  const affiliateCode = new URLSearchParams(location.search).get('ref');
+    const fetchReferrerInfo = async () => {
+      if (affiliateCode) {
+        try {
+          const response = await apiClient.get(`/clients/affiliates/info/${affiliateCode}`);
+          if (response.data.status === 'success') {
+            setReferrerInfo(response.data.data);
+          }
+        } catch (error) {
+          console.warn(`Código de afiliado "${affiliateCode}" não encontrado.`);
+        }
+      }
+    };
+    fetchReferrerInfo();
+
+  }, [planId, navigate, affiliateCode]);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -55,32 +59,24 @@ const SignupPage = () => {
     try {
       const registerResponse = await apiClient.post('/auth/client/register', { ...values, affiliateCode });
       
-      const { token } = registerResponse.data.data;
+      // <<< INÍCIO DA CORREÇÃO >>>
+      // Extrai tanto o token quanto os dados do cliente da resposta da API.
+      const { token, client } = registerResponse.data.data;
+      
+      // Salva ambos no localStorage. A página de sucesso precisa do 'userData'.
       localStorage.setItem('authToken', token);
+      localStorage.setItem('userData', JSON.stringify(client));
+      // <<< FIM DA CORREÇÃO >>>
       
-      message.success({ content: 'Conta criada! Gerando link de pagamento...', key: 'signup_process' });
+      message.success({ content: 'Conta criada com sucesso!', key: 'signup_process' });
 
-      const checkoutResponse = await apiClient.post('/mercado-pago/checkout', { planId: parseInt(planId, 10) });
-      
-      if (checkoutResponse.data?.data?.checkoutUrl) {
-        window.location.href = checkoutResponse.data.data.checkoutUrl;
-      } else {
-        throw new Error('Não foi possível gerar o link de pagamento.');
-      }
+      // Redireciona para a página de sucesso com o ID do plano
+      navigate(`/cadastro-sucesso/${planId}`);
 
     } catch (error) {
-      message.destroy('signup_process'); // Remove a mensagem de loading
+      message.destroy('signup_process');
       const errorMessage = error.response?.data?.message || 'Ocorreu uma falha no cadastro. Por favor, tente novamente.';
-      
-      // Ativa o modal customizado com a mensagem de erro da API
-      setModalState({
-        visible: true,
-        title: 'Erro no Cadastro',
-        message: `${errorMessage}`,
-        type: 'error',
-        okText: 'Tentar Novamente',
-        onOk: () => setModalState({ ...modalState, visible: false }),
-      });
+      message.error(errorMessage, 5);
       console.error("Erro no fluxo de cadastro:", error);
     } finally {
       setLoading(false);
@@ -105,6 +101,17 @@ const SignupPage = () => {
             <Paragraph className="signup-subtitle">
               Você está a um passo de assinar o plano <span className="plan-highlight">{plan.name}</span>.
             </Paragraph>
+
+            {referrerInfo && (
+              <Alert
+                message={<span>Você foi indicado(a) por <strong>{referrerInfo.name}</strong>!</span>}
+                type="success"
+                icon={<GiftOutlined />}
+                showIcon
+                className="referrer-alert"
+              />
+            )}
+
             <Form name="signup_form" onFinish={onFinish} layout="vertical">
               <Form.Item name="name" label="Nome Completo" rules={[{ required: true, message: 'Por favor, insira seu nome!' }]}>
                 <Input prefix={<UserOutlined />} placeholder="Seu nome completo" size="large" />
@@ -120,7 +127,7 @@ const SignupPage = () => {
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" className="signup-form-button" size="large" block loading={loading}>
-                  {loading ? 'Processando...' : 'Finalizar Assinatura e Pagar'}
+                  {loading ? 'Processando...' : 'Criar Conta e Ir para Pagamento'}
                 </Button>
               </Form.Item>
               <Paragraph className="login-prompt">
@@ -131,17 +138,6 @@ const SignupPage = () => {
         </Content>
         <FooterLP />
       </Layout>
-
-      <CustomModal
-        visible={modalState.visible}
-        onClose={() => setModalState({ ...modalState, visible: false })}
-        onOk={modalState.onOk}
-        title={modalState.title}
-        message={modalState.message}
-        type={modalState.type}
-        okText={modalState.okText}
-        cancelText={modalState.cancelText}
-      />
     </>
   );
 };

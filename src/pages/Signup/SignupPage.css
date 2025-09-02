@@ -1,4 +1,4 @@
-/* src/pages/SignupPage/SignupPage.css */
+/* src/pages/Signup/SignupPage.css */
 .signup-page-layout {
   min-height: 100vh;
   display: flex;
@@ -33,12 +33,19 @@
 .signup-subtitle {
   font-size: 15px !important;
   color: #555 !important;
-  margin-bottom: 30px !important;
+  margin-bottom: 25px !important;
 }
 
 .plan-highlight {
   font-weight: 600;
   color: #b24a0a;
+}
+
+.referrer-alert {
+  text-align: left;
+  margin-bottom: 20px !important;
+  background-color: #f6ffed !important;
+  border-color: #b7eb8f !important;
 }
 
 .signup-form .ant-form-item-label > label {

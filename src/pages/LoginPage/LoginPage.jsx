@@ -22,34 +22,31 @@ const LoginPage = () => {
     return () => { document.body.classList.remove('login-page-active'); };
   }, []);
   
-  // <<< FUNÇÃO handleLoginSuccess CORRIGIDA PARA SEMPRE SALVAR A SESSÃO >>>
   const handleLoginSuccess = useCallback((loginData) => {
     const { token, client, financialAccounts, subscriptionStatus, user, role } = loginData;
 
-    // Garante que a sessão anterior seja completamente limpa
     localStorage.clear();
 
-    // Salva a nova sessão no localStorage
     localStorage.setItem('authToken', token);
-    localStorage.setItem('userRole', role); // 'client' ou 'admin'
+    localStorage.setItem('userRole', role);
     localStorage.setItem('userData', JSON.stringify(role === 'admin' ? user : client));
-    localStorage.setItem('subscriptionStatus', subscriptionStatus || 'active'); // Salva o status da assinatura
+    localStorage.setItem('subscriptionStatus', subscriptionStatus || 'active');
 
     let targetPath;
     
     if (role === 'admin') {
         targetPath = '/admin/dashboard';
         message.success(`Login de administrador bem-sucedido! Bem-vindo(a), ${user.name}!`);
-    } else { // Lógica para cliente
+    } else {
       if (financialAccounts && financialAccounts.length > 0) {
         const profile = financialAccounts.find(a => a.isDefault) || financialAccounts.find(a => a.accountType === 'PF') || financialAccounts[0];
         localStorage.setItem('selectedProfileId', profile.id.toString());
       }
       
-      // Decide para onde redirecionar com base no status da assinatura
-      if (subscriptionStatus === 'expired') {
-        message.warning('Sua assinatura expirou! Por favor, renove para ter acesso completo.');
-        targetPath = '/planos';
+      // <<< LÓGICA DE REDIRECIONAMENTO CORRIGIDA >>>
+      if (subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier') {
+        message.warning('Sua assinatura não está ativa! Por favor, renove para ter acesso completo.');
+        targetPath = '/#planos'; // Redireciona para a seção de planos na landing page
       } else {
         message.success(`Bem-vindo(a) de volta, ${client.name || client.email}!`);
         targetPath = '/painel';
@@ -64,7 +61,6 @@ const LoginPage = () => {
     const { email, password } = values;
 
     try {
-      // Tenta login de admin
       const adminResponse = await apiClient.post('/users/login', { email, password });
       const { token, user } = adminResponse.data.data;
       handleLoginSuccess({ token, user, role: 'admin' });
@@ -77,7 +73,6 @@ const LoginPage = () => {
     }
 
     try {
-      // Tenta login de cliente
       const clientResponse = await apiClient.post('/auth/client/login', { identifier: email, password });
       const { token, client, financialAccounts, subscriptionStatus } = clientResponse.data.data;
       handleLoginSuccess({ token, client, financialAccounts, subscriptionStatus, role: 'client' });
@@ -114,7 +109,7 @@ const LoginPage = () => {
               <Button type="primary" htmlType="submit" className="login-form-button" size="large" block loading={loading}>Entrar</Button>
             </Form.Item>
             <Paragraph className="login-register-prompt">
-              Ainda não tem uma conta? <Link to="/planos">Conheça nossos planos!</Link>
+              Ainda não tem uma conta? <Link to="/#planos">Conheça nossos planos!</Link>
             </Paragraph>
           </Form>
         </div>
