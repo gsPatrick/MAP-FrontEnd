@@ -7,6 +7,8 @@ import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import apiClient from '../../services/api';
 import './SignupPage.css';
+// <<< 1. IMPORTE A FUNÇÃO DE NORMALIZAÇÃO >>>
+import { normalizePhoneNumberToCanonical } from '../../utils/phoneUtils';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -57,25 +59,32 @@ const SignupPage = () => {
     message.loading({ content: 'Criando sua conta...', key: 'signup_process', duration: 15 });
 
     try {
-      const registerResponse = await apiClient.post('/auth/client/register', { ...values, affiliateCode });
+      // <<< 2. APLIQUE A FORMATAÇÃO ANTES DE ENVIAR >>>
+      const formattedPhone = normalizePhoneNumberToCanonical(values.phone);
+      if (!formattedPhone) {
+        throw new Error('O número de telefone fornecido é inválido.');
+      }
       
-      // <<< INÍCIO DA CORREÇÃO >>>
-      // Extrai tanto o token quanto os dados do cliente da resposta da API.
+      const submissionData = {
+        ...values,
+        phone: formattedPhone, // Substitui o número original pelo formatado
+      };
+
+      // Envia os dados já formatados para a API
+      const registerResponse = await apiClient.post('/auth/client/register', { ...submissionData, affiliateCode });
+      
       const { token, client } = registerResponse.data.data;
       
-      // Salva ambos no localStorage. A página de sucesso precisa do 'userData'.
       localStorage.setItem('authToken', token);
       localStorage.setItem('userData', JSON.stringify(client));
-      // <<< FIM DA CORREÇÃO >>>
       
       message.success({ content: 'Conta criada com sucesso!', key: 'signup_process' });
 
-      // Redireciona para a página de sucesso com o ID do plano
       navigate(`/cadastro-sucesso/${planId}`);
 
     } catch (error) {
       message.destroy('signup_process');
-      const errorMessage = error.response?.data?.message || 'Ocorreu uma falha no cadastro. Por favor, tente novamente.';
+      const errorMessage = error.response?.data?.message || error.message || 'Ocorreu uma falha no cadastro. Por favor, tente novamente.';
       message.error(errorMessage, 5);
       console.error("Erro no fluxo de cadastro:", error);
     } finally {
