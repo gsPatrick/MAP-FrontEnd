@@ -96,18 +96,18 @@ const PricingSection = () => {
     }, [isLoggedIn, loadingProfiles]);
 
     // <<< INÍCIO DA MODIFICAÇÃO >>>
-    const handlePlanSelect = (planId) => {
-        // Preserva os query params (como ?ref=CODIGO) durante a navegação
-        const queryParams = location.search; 
+const handlePlanSelect = (planId) => {
+    const queryParams = location.search; 
 
-        if (isLoggedIn) {
-            // Se logado, vai direto para o checkout
-            navigate(`/checkout/${planId}${queryParams}`);
-        } else {
-            // Se não logado, vai para a página de cadastro, levando o ID do plano e o ref code
-            navigate(`/assinar/${planId}${queryParams}`);
-        }
-    };
+    if (isLoggedIn) {
+        // Se já está logado (mesmo que expirado), vai direto para o checkout.
+        navigate(`/checkout/${planId}${queryParams}`);
+    } else {
+        // Se NÃO está logado, envia para a PÁGINA DE LOGIN,
+        // mas adiciona um parâmetro 'redirect' na URL para sabermos para onde ele queria ir.
+        navigate(`/login?redirect=/checkout/${planId}${queryParams}`);
+    }
+};
     // <<< FIM DA MODIFICAÇÃO >>>
 
     const handleBillingToggle = (checked) => {
