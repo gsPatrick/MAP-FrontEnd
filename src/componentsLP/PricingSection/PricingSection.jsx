@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin } from 'antd';
 import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom'; // Importar useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
 import './PricingSection.css';
@@ -69,13 +69,18 @@ const plansData = {
 const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
     const navigate = useNavigate();
-    const location = useLocation(); // Usar useLocation para pegar query params
-    const isLoggedIn = !!localStorage.getItem('authToken');
+    const location = useLocation();
     const { loadingProfiles } = useProfile();
-    const [userSubscription, setUserSubscription] = useState(null);
     const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+    const [userSubscription, setUserSubscription] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
+    const [subscriptionStatus, setSubscriptionStatus] = useState(localStorage.getItem('subscriptionStatus'));
 
     useEffect(() => {
+        // Atualiza o estado de login se o token mudar
+        setIsLoggedIn(!!localStorage.getItem('authToken'));
+        setSubscriptionStatus(localStorage.getItem('subscriptionStatus'));
+
         const checkSubscription = async () => {
             if (isLoggedIn) {
                 try {
@@ -95,20 +100,25 @@ const PricingSection = () => {
         }
     }, [isLoggedIn, loadingProfiles]);
 
-    // <<< INÍCIO DA MODIFICAÇÃO >>>
-const handlePlanSelect = (planId) => {
-    const queryParams = location.search; 
+    const handlePlanSelect = (planId) => {
+        const queryParams = location.search;
+        const subscriptionIsActive = subscriptionStatus === 'active';
 
-    if (isLoggedIn) {
-        // Se já está logado (mesmo que expirado), vai direto para o checkout.
-        navigate(`/checkout/${planId}${queryParams}`);
-    } else {
-        // Se NÃO está logado, envia para a PÁGINA DE LOGIN,
-        // mas adiciona um parâmetro 'redirect' na URL para sabermos para onde ele queria ir.
-        navigate(`/login?redirect=/checkout/${planId}${queryParams}`);
-    }
-};
-    // <<< FIM DA MODIFICAÇÃO >>>
+        if (isLoggedIn && subscriptionIsActive) {
+            // Se o usuário está logado E tem uma assinatura ativa, ele não deveria estar assinando de novo.
+            // Apenas o redireciona para o painel.
+            navigate('/painel');
+            return;
+        }
+
+        if (isLoggedIn && !subscriptionIsActive) {
+            // Se está logado mas o plano expirou, vai direto para o checkout para RENOVAR.
+            navigate(`/checkout/${planId}${queryParams}`);
+        } else {
+            // Se NÃO está logado, é um novo usuário. Vai para a página de CADASTRO.
+            navigate(`/assinar/${planId}${queryParams}`);
+        }
+    };
 
     const handleBillingToggle = (checked) => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
@@ -158,8 +168,8 @@ const handlePlanSelect = (planId) => {
                     Um Plano para Cada <span className="highlight-luxe-text">Nível de Ambição</span>.
                 </Title>
                 <Paragraph className="pricing-luxe-main-subtitle">
-                    {isLoggedIn 
-                        ? 'Sua assinatura expirou ou está pendente. Renove agora para garantir seu acesso!' 
+                    {isLoggedIn && subscriptionStatus === 'expired'
+                        ? 'Sua assinatura expirou. Renove agora para garantir seu acesso completo!' 
                         : 'Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados.'
                     }
                 </Paragraph>
@@ -197,7 +207,7 @@ const handlePlanSelect = (planId) => {
                                         className="plan-luxe-cta-button"
                                         onClick={() => handlePlanSelect(plan.id)}
                                     >
-                                        {isLoggedIn ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
+                                        {isLoggedIn && subscriptionStatus === 'expired' ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
                                     </Button>
                                 </div>
                             </Card>
