@@ -216,6 +216,19 @@
   color: #888;
 }
 
+.login-form-extra-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Alinha os links à direita */
+  gap: 8px; /* Adiciona um pequeno espaço vertical entre os links */
+  margin-bottom: 24px; /* Espaço antes do botão de "Entrar" */
+}
+
+/* Opcional: Remova a margem do Form.Item antigo se ele ainda existir */
+.login-form-options-simplified {
+  margin-bottom: 0 !important;
+}
+
 /* Responsividade para a página de login */
 @media (max-width: 480px) {
   .login-page-content {

@@ -13,10 +13,10 @@ const { Title, Paragraph } = Typography;
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook para ler os parâmetros da URL
+  const location = useLocation(); // Hook para ler os parâmetros da URL, como '?redirect=...'
   const [loading, setLoading] = useState(false);
 
-  // Efeito para a animação do card de login
+  // Efeito para a animação de entrada do card de login
   useEffect(() => {
     const loginCard = document.querySelector('.login-card-container');
     if (loginCard) loginCard.classList.add('visible');
@@ -24,7 +24,10 @@ const LoginPage = () => {
     return () => { document.body.classList.remove('login-page-active'); };
   }, []);
   
-  // Função centralizada para lidar com o sucesso do login e redirecionamento
+  /**
+   * Função centralizada para lidar com o sucesso do login.
+   * Ela salva os dados na sessão e executa a lógica de redirecionamento.
+   */
   const handleLoginSuccess = useCallback((loginData) => {
     const { token, client, financialAccounts, subscriptionStatus, user, role } = loginData;
 
@@ -37,16 +40,16 @@ const LoginPage = () => {
     localStorage.setItem('userData', JSON.stringify(role === 'admin' ? user : client));
     localStorage.setItem('subscriptionStatus', subscriptionStatus || 'active');
 
-    // Lê o parâmetro 'redirect' da URL para saber se o usuário veio de uma tentativa de compra
+    // Lê o parâmetro 'redirect' da URL. Ex: /login?redirect=/checkout/10
     const searchParams = new URLSearchParams(location.search);
     const redirectPath = searchParams.get('redirect');
 
     let targetPath;
 
-    // LÓGICA DE REDIRECIONAMENTO COM PRIORIDADES
+    // --- LÓGICA DE REDIRECIONAMENTO COM PRIORIDADES ---
     if (redirectPath) {
         // 1ª PRIORIDADE: Se o usuário foi forçado a logar para concluir uma ação (como pagar),
-        // ele é enviado diretamente para essa ação.
+        // ele é enviado diretamente para essa ação, ignorando outras regras.
         targetPath = redirectPath;
         message.success(`Login bem-sucedido! Redirecionando para o checkout...`);
 
@@ -68,7 +71,7 @@ const LoginPage = () => {
         }
     }
     
-    // Define o perfil financeiro padrão para o cliente
+    // Define o perfil financeiro padrão para o cliente, se houver
     if (financialAccounts && financialAccounts.length > 0) {
       const profile = financialAccounts.find(a => a.isDefault) || financialAccounts.find(a => a.accountType === 'PF') || financialAccounts[0];
       localStorage.setItem('selectedProfileId', profile.id.toString());
@@ -76,9 +79,12 @@ const LoginPage = () => {
     
     // Navega para o destino final definido pela lógica acima
     navigate(targetPath);
-  }, [navigate, location.search]); // Depende da navegação e dos parâmetros da URL
+  }, [navigate, location.search]); // Depende do hook de navegação e dos parâmetros da URL
 
-  // Função chamada quando o formulário é submetido com sucesso
+  /**
+   * Função chamada quando o formulário é submetido.
+   * Tenta o login de admin e, se falhar, tenta o de cliente.
+   */
   const onFinish = async (values) => {
     setLoading(true);
     const { email, password } = values;
@@ -94,6 +100,7 @@ const LoginPage = () => {
       // Se for 401 ou 404, simplesmente ignora e tenta o login de cliente.
       if (adminError.response?.status !== 401 && adminError.response?.status !== 404) {
         console.error("Erro inesperado na tentativa de login de admin:", adminError);
+        message.error("Ocorreu um erro no servidor. Tente novamente mais tarde.");
         setLoading(false);
         return; 
       }
@@ -112,7 +119,6 @@ const LoginPage = () => {
     }
   };
 
-  // Função chamada se a validação do formulário falhar
   const onFinishFailed = () => {
     message.error('Por favor, preencha todos os campos corretamente.');
   };
@@ -125,8 +131,8 @@ const LoginPage = () => {
           <Title level={2} className="login-title">Bem-vindo de Volta!</Title>
           <Paragraph className="login-subtitle">Acesse sua conta para continuar no controle.</Paragraph>
           <Form name="login_form" onFinish={onFinish} onFinishFailed={onFinishFailed} layout="vertical">
-            <Form.Item name="email" label="E-mail" rules={[{ required: true, message: 'Por favor, insira um e-mail válido!', type: 'email' }]}>
-              <Input prefix={<MailOutlined />} placeholder="seuemail@exemplo.com" size="large" />
+            <Form.Item name="email" label="E-mail ou Telefone" rules={[{ required: true, message: 'Por favor, insira seu e-mail ou telefone!' }]}>
+              <Input prefix={<MailOutlined />} placeholder="seuemail@exemplo.com ou 119... " size="large" />
             </Form.Item>
             <Form.Item name="password" label="Senha" rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}>
               <Input.Password prefix={<LockOutlined />} placeholder="Sua senha" size="large" />

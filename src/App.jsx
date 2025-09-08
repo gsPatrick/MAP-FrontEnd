@@ -34,6 +34,7 @@ const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
+const ActivateAccountPage = lazy(() => import('./pages/ActivateAccountPage/ActivateAccountPage')); // Importe o novo componente
 
 const AppLayoutSuspense = () => (
   <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
@@ -50,7 +51,8 @@ const AppRoutes = () => (
         <Route path="/login" element={<LoginPage />} />
         <Route path="/planos" element={<PlanosPage />} /> 
         <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
-        
+        <Route path="/ativar-conta" element={<ActivateAccountPage />} />
+
         {/* === FLUXO DE CADASTRO E PAGAMENTO === */}
         <Route path="/assinar/:planId" element={<SignupPage />} />
         {/* <<< CORREÇÃO: Rota de sucesso agora aponta para o componente correto e usa o parâmetro :planId >>> */}

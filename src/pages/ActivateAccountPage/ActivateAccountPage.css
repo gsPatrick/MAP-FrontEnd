@@ -1,0 +1,78 @@
+/* src/pages/ActivateAccountPage/ActivateAccountPage.css */
+.activate-page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f9;
+}
+
+.activate-page-content {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 50px;
+}
+
+.activate-card-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 35px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.activate-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: #2c3e50 !important;
+  margin-bottom: 24px !important;
+}
+
+.activate-steps {
+  margin-bottom: 30px !important;
+}
+
+.step-content {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.step-content .ant-typography {
+  color: #555;
+  margin-bottom: 20px !important;
+}
+
+.optional-fields-info {
+  font-size: 13px;
+  font-style: italic;
+  color: #888;
+  text-align: center;
+}
+
+.activate-form-button {
+  background: linear-gradient(45deg, #CC6633 0%, #E0BC63 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(204, 102, 51, 0.25) !important;
+  margin-top: 15px;
+}
+
+.success-step {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.login-prompt-activate {
+  margin-top: 25px !important;
+  font-size: 14px !important;
+  text-align: center;
+}
+
+.login-prompt-activate a {
+  color: #CC6633;
+  font-weight: 600;
+}
