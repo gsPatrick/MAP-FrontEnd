@@ -1,0 +1,75 @@
+/* src/pages/AffiliateLandingPage/AffiliateLandingPage.css */
+
+.affiliate-page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f9; /* Fundo suave e neutro */
+}
+
+.affiliate-page-content {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 50px;
+}
+
+.affiliate-card-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px 35px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  border-top: 5px solid var(--brand-cor-1-dourado); /* Detalhe de destaque */
+}
+
+.affiliate-avatar {
+  background-color: #fff0db;
+  color: var(--brand-cor-2-laranja-ferrugem);
+  margin-bottom: 24px;
+}
+
+.affiliate-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--brand-cor-4-preto) !important;
+  margin-bottom: 8px !important;
+}
+
+.affiliate-description {
+  font-size: 16px !important;
+  color: #555 !important;
+  line-height: 1.6;
+  margin-bottom: 8px !important;
+}
+
+.referrer-name {
+  color: var(--brand-cor-2-laranja-ferrugem);
+  font-weight: 700;
+}
+
+.affiliate-subtitle {
+  font-size: 15px !important;
+  color: #777 !important;
+  margin-bottom: 30px !important;
+}
+
+.affiliate-cta-button {
+  background: linear-gradient(45deg, var(--brand-cor-2-laranja-ferrugem) 0%, var(--brand-cor-1-dourado) 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(178, 74, 10, 0.3) !important;
+  height: 50px !important;
+  padding: 0 30px !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease;
+}
+
+.affiliate-cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(178, 74, 10, 0.4) !important;
+}
