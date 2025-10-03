@@ -255,6 +255,38 @@
 .withdraw-modal .ant-alert {
     margin-bottom: 20px;
 }
+
+/* --- NOVO ESTILO: Modal Trocar Plano --- */
+.plan-change-modal .plan-selection-card {
+    transition: all 0.3s ease;
+    border-color: #f0f0f0;
+}
+.plan-change-modal .plan-selection-card:hover {
+    border-color: var(--map-laranja);
+    box-shadow: 0 4px 12px rgba(204, 102, 51, 0.15);
+    background-color: rgba(204, 102, 51, 0.03);
+}
+.plan-change-modal .plan-selection-name {
+    color: var(--map-laranja-escuro) !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+.plan-change-modal .plan-selection-price {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+.plan-change-modal .plan-selection-features {
+    text-align: left;
+}
+.plan-change-modal .plan-selection-features .ant-list-item {
+    padding: 5px 0 !important;
+    border-bottom: none !important;
+}
+.plan-change-modal .plan-selection-features .feature-icon {
+    color: var(--map-laranja) !important;
+    margin-right: 8px;
+}
+/* --- FIM NOVO ESTILO: Modal Trocar Plano --- */
   
 /* Responsividade */
 @media (max-width: 991px) {

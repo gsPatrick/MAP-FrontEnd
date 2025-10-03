@@ -1,19 +1,19 @@
 // src/pages/MeuPerfilPage/MeuPerfilPage.jsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Layout, Card, Avatar, Typography, Button, Divider, Modal, Form, Input, Select,
   Statistic, Tag, Tooltip, List, Space, message, Row, Col,
   Result, Alert, Spin
-} from 'antd'; // Removido InputNumber, Adicionado Alert
+} from 'antd';
 import {
   UserOutlined, ShopOutlined, IdcardOutlined, CopyOutlined, GiftOutlined, CrownOutlined,
   PlusCircleOutlined, SolutionOutlined, WalletOutlined, GlobalOutlined,
-  DollarCircleOutlined, TeamOutlined, LoadingOutlined,
+  DollarCircleOutlined, TeamOutlined, LoadingOutlined, CheckCircleFilled, ArrowRightOutlined,
   KeyOutlined, PhoneOutlined // Adicionado PhoneOutlined para input (se necessário), IdcardOutlined para CPF
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
+import { useNavigate } from 'react-router-dom'; // Adicionar useNavigate
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
@@ -26,6 +26,32 @@ const { Option } = Select;
 
 dayjs.locale('pt-br');
 
+// --- SIMULAÇÃO DOS DADOS DE PLANOS (COPIADO DE PricingSection.jsx) ---
+const fullPlansData = {
+  monthly: [
+    {
+      id: '7', name: 'Básico Mensal', icon: <UserOutlined />, price: '39', priceSuffix: ',90', period: '/mês',
+      features: ['Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões'], buttonText: 'Assinar Agora', isFeatured: false,
+    },
+    {
+      id: '9', name: 'Avançado Mensal', icon: <ShopOutlined />, price: '79', priceSuffix: ',90', period: '/mês',
+      features: ['Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços'], buttonText: 'Assinar Total Control', isFeatured: true,
+    },
+  ],
+  yearly: [
+    {
+        id: '8', name: 'Básico Anual', icon: <UserOutlined />, price: '389', priceSuffix: ',90', period: '/ano',
+        features: ['Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões'], buttonText: 'Assinar Plano Anual', isFeatured: false,
+      },
+      {
+        id: '10', name: 'Avançado Anual', icon: <ShopOutlined />, price: '789', priceSuffix: ',90', period: '/ano',
+        features: ['Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços'], buttonText: 'Assinar Total Control Anual', isFeatured: true,
+      },
+  ]
+};
+// --- FIM SIMULAÇÃO DADOS DE PLANOS ---
+
+
 // Helper para formatar o nome do plano
 const formatPlanName = (accessLevel) => {
   if (!accessLevel || accessLevel === 'gratuito') return 'Gratuito';
@@ -35,6 +61,7 @@ const formatPlanName = (accessLevel) => {
 };
 
 const MeuPerfilPage = () => {
+  const navigate = useNavigate(); // Inicializar useNavigate
   const {
     userProfiles,
     selectedProfileId,
@@ -48,18 +75,15 @@ const MeuPerfilPage = () => {
   const [affiliateData, setAffiliateData] = useState(null);
   const [loadingAffiliateData, setLoadingAffiliateData] = useState(true);
 
+  // --- NOVO ESTADO: Modal de Troca de Plano ---
+  const [isPlanChangeModalVisible, setIsPlanChangeModalVisible] = useState(false);
+  
   // Estados para os modais
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  // MODIFICADO: Apenas um modal para o processo de saque via WhatsApp
   const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false); 
-  // REMOVIDO: isPixKeyModalVisible não será mais usado
-  // const [isPixKeyModalVisible, setIsPixKeyModalVisible] = useState(false);
   
   // Estados de formulário e carregamento
   const [profileForm] = Form.useForm();
-  // REMOVIDO: pixKeyForm não será mais usado
-  // const [pixKeyForm] = Form.useForm(); 
-  // MODIFICADO: Apenas um formulário de saque
   const [withdrawForm] = Form.useForm(); 
   const [creatingProfile, setCreatingProfile] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -129,46 +153,25 @@ const MeuPerfilPage = () => {
       .catch(() => message.error('Falha ao copiar.'));
   };
 
-  // MODIFICADO: Função para abrir o modal de saque (agora unificado para WhatsApp)
   const handleWithdrawClick = () => {
-    // Pré-preenche o formulário do modal de saque com dados existentes
     withdrawForm.setFieldsValue({
-        cpf: mainUserData?.cpf, // Supondo que o CPF venha em mainUserData
-        pixKey: affiliateData?.summary?.asaasPayoutPixKey, // Supondo que a chave PIX venha aqui
+        cpf: mainUserData?.cpf, 
+        pixKey: affiliateData?.summary?.asaasPayoutPixKey, 
     });
     setIsWithdrawModalVisible(true);
   };
 
-  // REMOVIDO: handleUpdatePixKey não será mais usado
-  // const handleUpdatePixKey = async (values) => {
-  //   setSubmitting(true);
-  //   try {
-  //     await apiClient.put('/affiliate/me/payout-info', { asaasPayoutPixKey: values.pixKey });
-  //     message.success("Chave PIX atualizada com sucesso!");
-  //     setAffiliateData(prev => ({ ...prev, summary: { ...prev.summary, asaasPayoutPixKey: values.pixKey } }));
-  //     setIsPixKeyModalVisible(false);
-  //     setIsWithdrawModalVisible(true);
-  //   } catch (error) {
-  //     message.error(error.response?.data?.message || "Falha ao atualizar a chave PIX.");
-  //   } finally {
-  //     setSubmitting(false);
-  //   }
-  // };
-
-  // MODIFICADO: Função para solicitar saque via WhatsApp
   const handleRequestWithdrawal = async (values) => {
     setSubmitting(true);
     try {
         const { cpf, pixKey } = values;
-        const targetNumber = "5521998597002"; // Número da dona do sistema
+        const targetNumber = "5521998597002"; 
         
-        // Dados do usuário logado para a mensagem
         const userName = mainUserData?.name || 'N/A';
         const userEmail = mainUserData?.email || 'N/A';
         const userPhone = mainUserData?.phone || 'N/A';
         const currentBalance = referralBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        // Mensagem formatada para o WhatsApp
         const whatsappMessage = `
 Olá, gostaria de solicitar um saque de comissões.
 
@@ -181,24 +184,14 @@ Olá, gostaria de solicitar um saque de comissões.
 - Saldo Total Disponível: ${currentBalance}
 
 Por favor, prossiga com o pagamento para a chave PIX informada.
-        `.trim(); // Remove espaços em branco no início/fim
+        `.trim(); 
 
         const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(whatsappMessage)}`;
         
-        // Abre o WhatsApp Web em uma nova aba
         window.open(whatsappUrl, '_blank');
         
         message.success("Solicitação de saque enviada via WhatsApp! Aguarde o contato.");
         setIsWithdrawModalVisible(false);
-
-        // REMOVIDO: A atualização local do saldo, pois o PIX é manual e o admin zera no backend
-        // setAffiliateData(prev => ({
-        //   ...prev,
-        //   summary: {
-        //     ...prev.summary,
-        //     balance: (parseFloat(prev.summary.balance) - values.amount).toFixed(2)
-        //   }
-        // }));
 
     } catch (error) {
         message.error("Falha ao gerar a solicitação de saque via WhatsApp.");
@@ -207,6 +200,56 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         setSubmitting(false);
     }
   };
+
+  // --- NOVO HANDLER: Troca de Plano ---
+  const handlePlanChangeSelect = (planId) => {
+      setIsPlanChangeModalVisible(false);
+      // Redireciona para o checkout, que cuidará da lógica de pagamento/assinatura
+      navigate(`/checkout/${planId}`);
+  };
+
+  const filterPlansForUser = (plans, currentLevel) => {
+    const isAdvanced = currentLevel?.includes('avancado') || currentLevel?.startsWith('vitalicio');
+    const isBasic = currentLevel?.includes('basico');
+    const isFree = currentLevel?.includes('gratuito') || !currentLevel;
+
+    // Concatena todos os planos em um array simples para facilitar o filtro
+    const allPlans = [...(plans.monthly || []), ...(plans.yearly || [])];
+
+    return allPlans.filter(plan => {
+      const planNameLower = plan.name.toLowerCase();
+      // O usuário nunca deve ter a opção de selecionar o plano gratuito (ID 1) para "Trocar Plano"
+      if (plan.id === '1' || planNameLower.includes('gratuito')) return false;
+
+      // Se o plano atual é Avançado ou Vitalício:
+      if (isAdvanced) {
+        // Pode selecionar Basic (downgrade) ou Advanced (troca de ciclo)
+        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
+      }
+
+      // Se o plano atual é Básico:
+      if (isBasic) {
+        // Pode selecionar Basic (troca de ciclo) ou Advanced (upgrade)
+        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
+      }
+      
+      // Se o plano atual é Gratuito ou Nulo:
+      if (isFree) {
+        // Deve ver todos os planos pagos (Básico e Avançado)
+        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
+      }
+
+      return false; 
+    });
+  };
+
+  const plansForModal = useMemo(() => {
+      const currentLevel = mainUserData?.accessLevel;
+      // Usar os dados simulados
+      return filterPlansForUser(fullPlansData, currentLevel);
+  }, [mainUserData]);
+  
+  // --- FIM DOS NOVOS HANDLERS ---
 
   if (loadingProfiles || loadingAffiliateData || (!mainUserData && isAuthenticated)) { 
     return (
@@ -312,7 +355,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
             <Card title={<Space><GiftOutlined className="card-title-icon" />Programa de Afiliados</Space>} className="perfil-card affiliate-dashboard-card animated-card" bordered={false} style={{animationDelay: '0.2s'}}>
                 <List>
                     <List.Item>
-                        {/* <<<< CORREÇÃO AQUI: Usando 'affiliateCode' e mostrando um spinner enquanto carrega >>>> */}
                         <Statistic 
                             title="Seu Código de Indicação" 
                             value={affiliateData?.summary?.affiliateCode || '...'} 
@@ -350,7 +392,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
                 className="referral-statistic"
                 loading={loadingAffiliateData}
               />
-              {/* MODIFICADO: Botão sempre abre o modal de saque via WhatsApp */}
               <Button type="default" block className="withdraw-benefits-btn" disabled={referralBalance < 50} onClick={handleWithdrawClick}>
                 Solicitar Saque de Comissões
               </Button>
@@ -373,6 +414,11 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
                   <Text className="current-plan-detail">Você está utilizando o plano gratuito.</Text>
                 )}
               </div>
+              {/* --- NOVO BOTÃO: Trocar Plano --- */}
+              <Button type="primary" block className="manage-plan-btn" onClick={() => setIsPlanChangeModalVisible(true)}>
+                Trocar Plano
+              </Button>
+              {/* --- FIM NOVO BOTÃO --- */}
             </Card>
           </Space>
         </Col>
@@ -408,38 +454,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
           </Form.Item>
         </Form>
       </Modal>
-
-      {/* REMOVIDO: Modal para Configurar Chave PIX (isPixKeyModalVisible) */}
-      {/*
-      <Modal
-        title={<Space><KeyOutlined /> Configurar Chave PIX para Saque</Space>}
-        open={isPixKeyModalVisible}
-        onCancel={() => setIsPixKeyModalVisible(false)}
-        footer={null}
-        className="withdraw-modal modal-style-map"
-      >
-        <Alert
-          message="Primeiro Passo"
-          description="Para solicitar saques, você precisa cadastrar sua chave PIX. Este será o destino de suas comissões."
-          type="info"
-          showIcon
-        />
-        <Form form={pixKeyForm} layout="vertical" onFinish={handleUpdatePixKey}>
-          <Form.Item
-            name="pixKey"
-            label="Sua Chave PIX"
-            rules={[{ required: true, message: 'Por favor, insira sua chave PIX!' }]}
-          >
-            <Input placeholder="Email, CPF, CNPJ ou Telefone" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={submitting} block className="submit-btn-form">
-              Salvar e Continuar para Saque
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-      */}
 
       {/* NOVO/MODIFICADO: Modal Unificado para Solicitar Saque via WhatsApp */}
       <Modal
@@ -477,8 +491,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
                 >
                     <Input placeholder="Email, CPF, CNPJ ou Telefone" prefix={<KeyOutlined />} />
                 </Form.Item>
-                {/* REMOVIDO: Campo de valor específico, o saque é do saldo TOTAL */}
-                {/* O valor total disponível será implicitamente enviado na mensagem */}
                 <Paragraph type="secondary" style={{textAlign: 'center', marginTop: '15px'}}>
                     *O valor total disponível de R$ {referralBalance.toFixed(2).replace('.', ',')} será considerado para o saque.*
                 </Paragraph>
@@ -490,6 +502,46 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
             </Form>
         </Spin>
       </Modal>
+
+      {/* --- NOVO MODAL: Trocar Plano --- */}
+      <Modal
+          title={<Space><CrownOutlined /> Escolher Novo Plano</Space>}
+          open={isPlanChangeModalVisible}
+          onCancel={() => setIsPlanChangeModalVisible(false)}
+          footer={null}
+          width={800}
+          className="plan-change-modal modal-style-map"
+          destroyOnClose
+      >
+          <Paragraph type="secondary" style={{marginBottom: '20px'}}>
+              Seu plano atual é **{formatPlanName(mainUserData?.accessLevel)}**. Escolha um novo plano abaixo. O pagamento será processado pelo Mercado Pago.
+          </Paragraph>
+          <Row gutter={[24, 24]} justify="center">
+              {plansForModal.length > 0 ? plansForModal.map(plan => (
+                  <Col xs={24} md={12} key={plan.id}>
+                      <Card className="plan-selection-card" hoverable onClick={() => handlePlanChangeSelect(plan.id)}>
+                           <Title level={4} className="plan-selection-name">{plan.name}</Title>
+                           <Paragraph className="plan-selection-price">
+                               <Text strong>R$ {plan.price}{plan.priceSuffix}</Text> {plan.period}
+                           </Paragraph>
+                           <List
+                               className="plan-selection-features"
+                               dataSource={plan.features.slice(0, 3)} // Exibe apenas 3 para brevidade
+                               renderItem={(item) => (<List.Item><CheckCircleFilled className="feature-icon" /> {item}</List.Item>)}
+                            />
+                            <Button type="primary" size="large" block style={{marginTop: '15px'}} icon={<ArrowRightOutlined />}>
+                                {plan.name.toLowerCase().includes('avançado') ? 'Fazer Upgrade' : 'Selecionar Plano'}
+                            </Button>
+                      </Card>
+                  </Col>
+              )) : (
+                  <Col span={24} style={{textAlign: 'center'}}>
+                      <Alert message="Não há planos disponíveis para troca neste momento." type="info" showIcon/>
+                  </Col>
+              )}
+          </Row>
+      </Modal>
+      {/* --- FIM NOVO MODAL --- */}
 
     </Content>
   );
