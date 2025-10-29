@@ -1,12 +1,25 @@
-admin-page-layout {
+/* src/pages/AdminPage/AdminPage.css */
+.admin-page-layout {
+    min-height: 100vh;
+}
+
+.admin-logo {
+    height: 32px;
+    margin: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+}
+
+.admin-page-content-wrapper {
+    padding: 24px;
     background: #f0f2f5;
 }
 
 .admin-page-content {
-    margin: 24px;
     padding: 24px;
     background: #fff;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
 }
 
 .admin-header {
@@ -14,13 +27,18 @@ admin-page-layout {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap; /* Para responsividade */
+    gap: 16px;
 }
 
 .admin-header h2 {
     margin-bottom: 0;
 }
 
-/* Garante que a tabela seja rolável em telas menores */
-.ant-table-wrapper {
-    overflow-x: auto;
+.admin-mobile-menu-button {
+    margin-bottom: 16px;
+}
+
+.admin-table-actions {
+    min-width: 120px;
 }

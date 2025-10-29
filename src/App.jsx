@@ -14,8 +14,8 @@ import PaymentStatusPage from './pages/PaymentStatusPage/PaymentStatusPage';
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
 const PainelUsuario = lazy(() => import('./pages/PainelUsuario/PainelUsuario'));
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
-const SignupPage = lazy(() => import('./pages/Signup/Signup')); // Renomeado para clareza
-const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage')); // <<< CORREÇÃO: Declaração única aqui
+const SignupPage = lazy(() => import('./pages/Signup/Signup'));
+const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage'));
 const ChatbotPage = lazy(() => import('./pages/ChatbotPage/ChatbotPage'));
 const CartoesPage = lazy(() => import('./pages/CartoesPage/CartoesPage'));
 const TransacoesPage = lazy(() => import('./pages/TransacoesPage/TransacoesPage'));
@@ -27,15 +27,23 @@ const MeuPerfilPage = lazy(() => import('./pages/MeuPerfilPage/MeuPerfilPage'));
 const CategoriasPage = lazy(() => import('./pages/CategoriasPage/CategoriasPage'));
 const ConfiguracoesPage = lazy(() => import('./pages/ConfiguracoesPage/ConfiguracoesPage'));
 const BusinessClientsPage = lazy(() => import('./pages/BusinessClientsPage/BusinessClientsPage'));
-const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage'));
 const PublicBookingPage = lazy(() => import('./pages/PublicBookingPage/PublicBookingPage'));
 const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/ServicesAndCrmPage'));
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
-const ActivateAccountPage = lazy(() => import('./pages/ActivateAccountPage/ActivateAccountPage')); // Importe o novo componente
-const AffiliateLandingPage = lazy(() => import('./pages/AffiliateLandingPage/AffiliateLandingPage')); // <<< ADICIONE ESTE IMPORT
+const ActivateAccountPage = lazy(() => import('./pages/ActivateAccountPage/ActivateAccountPage'));
+const AffiliateLandingPage = lazy(() => import('./pages/AffiliateLandingPage/AffiliateLandingPage'));
+
+// <<< INÍCIO DA CORREÇÃO: Imports para as novas páginas de Admin >>>
+const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage'));
+const UserManagementPage = lazy(() => import('./pages/AdminPage/pages/UserManagementPage'));
+const AffiliateManagementPage = lazy(() => import('./pages/AdminPage/pages/AffiliateManagementPage'));
+const DashboardOverview = lazy(() => import('./pages/AdminPage/pages/DashboardOverview')); // <<< LINHA QUE FALTAVA
+const PlanManagementPage = lazy(() => import('./pages/AdminPage/pages/PlanManagementPage')); // <<< ADICIONE ESTA LINHA
+const BroadcastPage = lazy(() => import('./pages/AdminPage/pages/BroadcastPage'));         // <<< ADICIONE ESTA LINHA
+// <<< FIM DA MODIFICAÇÃO >>>
 
 const AppLayoutSuspense = () => (
   <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>}>
@@ -57,7 +65,6 @@ const AppRoutes = () => (
 
         {/* === FLUXO DE CADASTRO E PAGAMENTO === */}
         <Route path="/assinar/:planId" element={<SignupPage />} />
-        {/* <<< CORREÇÃO: Rota de sucesso agora aponta para o componente correto e usa o parâmetro :planId >>> */}
         <Route path="/cadastro-sucesso/:planId" element={<SubscriptionSuccessPage />} /> 
         <Route path="/checkout/:planId" element={<CheckoutPage />} />
         <Route path="/payment-success" element={<PaymentStatusPage />} />
@@ -66,7 +73,15 @@ const AppRoutes = () => (
 
         {/* === ROTAS DE AGENDAMENTO PÚBLICO E ADMIN === */}
         <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
-        <Route path="/admin/dashboard" element={<AdminPage />} /> 
+        
+        {/* Rota de Admin com rotas filhas */}
+        <Route path="/admin/dashboard" element={<AdminPage />}>
+          <Route index element={<DashboardOverview />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="affiliates" element={<AffiliateManagementPage />} />
+                    <Route path="plans" element={<PlanManagementPage />} />
+          <Route path="broadcast" element={<BroadcastPage />} />
+        </Route>
       </Route>
 
       {/* === ROTAS PROTEGIDAS DO PAINEL === */}
