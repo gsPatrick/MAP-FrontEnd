@@ -1,7 +1,7 @@
 // src/pages/AdminPage/components/AffiliatesTab.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Tag, Button, Space, Modal, message, Popconfirm, Tooltip, Typography } from 'antd';
-import { DollarOutlined, HistoryOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Table, Tag, Button, Space, Modal, message, Popconfirm, Tooltip, Typography, Alert } from 'antd';
+import { DollarOutlined, HistoryOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 
 const { Text } = Typography;
@@ -105,10 +105,12 @@ const AffiliatesTab = () => {
     { title: 'Comissão', dataIndex: ['subscription', 'commissionEarned'], key: 'commission', render: (val) => val ? `R$ ${parseFloat(val).toFixed(2)}` : '-' },
   ];
 
+  console.log('AffiliatesTab rendering', { affiliates, loading });
+
   return (
     <div className="affiliates-tab-content">
       <div style={{ marginBottom: 16 }}>
-        <Typography.Alert
+        <Alert
           message="Nota: Os dados exibidos referem-se ao ciclo atual (desde o último pagamento/zeramento de saldo)."
           type="info"
           showIcon
