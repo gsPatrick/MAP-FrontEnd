@@ -28,7 +28,7 @@ const CategoriasPage = lazy(() => import('./pages/CategoriasPage/CategoriasPage'
 const ConfiguracoesPage = lazy(() => import('./pages/ConfiguracoesPage/ConfiguracoesPage'));
 const BusinessClientsPage = lazy(() => import('./pages/BusinessClientsPage/BusinessClientsPage'));
 const PublicBookingPage = lazy(() => import('./pages/PublicBookingPage/PublicBookingPage'));
-const ServicesAndCrmPage = lazy(() => import ('./pages/ServicesAndCrmPage/ServicesAndCrmPage'));
+const ServicesAndCrmPage = lazy(() => import('./pages/ServicesAndCrmPage/ServicesAndCrmPage'));
 const AgendaCRMPage = lazy(() => import('./pages/AgendaCRMPage/AgendaCRMPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
@@ -53,67 +53,67 @@ const AppLayoutSuspense = () => (
 
 // Componente que define todas as rotas da aplicação
 const AppRoutes = () => (
-    <Routes>
+  <Routes>
+    <Route element={<AppLayoutSuspense />}>
+      {/* === ROTAS PÚBLICAS === */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/planos" element={<PlanosPage />} />
+      <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
+      <Route path="/ativar-conta" element={<ActivateAccountPage />} />
+      <Route path="/indicacao/:affiliateCode" element={<AffiliateLandingPage />} />
+
+      {/* === FLUXO DE CADASTRO E PAGAMENTO === */}
+      <Route path="/assinar/:planId" element={<SignupPage />} />
+      <Route path="/cadastro-sucesso/:planId" element={<SubscriptionSuccessPage />} />
+      <Route path="/checkout/:planId" element={<CheckoutPage />} />
+      <Route path="/payment-success" element={<PaymentStatusPage />} />
+      <Route path="/payment-failure" element={<PaymentStatusPage />} />
+      <Route path="/payment-pending" element={<PaymentStatusPage />} />
+
+      {/* === ROTAS DE AGENDAMENTO PÚBLICO E ADMIN === */}
+      <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
+
+      {/* Rota de Admin com rotas filhas */}
+      <Route path="/admin/dashboard" element={<AdminPage />}>
+        <Route index element={<DashboardOverview />} />
+        <Route path="users" element={<UserManagementPage />} />
+        <Route path="affiliates" element={<AffiliateManagementPage />} />
+        <Route path="plans" element={<PlanManagementPage />} />
+        <Route path="broadcast" element={<BroadcastPage />} />
+      </Route>
+    </Route>
+
+    {/* === ROTAS PROTEGIDAS DO PAINEL === */}
+    <Route
+      element={
+        <ProtectedRoute>
+          <PainelLayout />
+        </ProtectedRoute>
+      }
+    >
       <Route element={<AppLayoutSuspense />}>
-        {/* === ROTAS PÚBLICAS === */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/planos" element={<PlanosPage />} /> 
-        <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
-        <Route path="/ativar-conta" element={<ActivateAccountPage />} />
-        <Route path="/indicacao/:affiliateCode" element={<AffiliateLandingPage />} />
-
-        {/* === FLUXO DE CADASTRO E PAGAMENTO === */}
-        <Route path="/assinar/:planId" element={<SignupPage />} />
-        <Route path="/cadastro-sucesso/:planId" element={<SubscriptionSuccessPage />} /> 
-        <Route path="/checkout/:planId" element={<CheckoutPage />} />
-        <Route path="/payment-success" element={<PaymentStatusPage />} />
-        <Route path="/payment-failure" element={<PaymentStatusPage />} />
-        <Route path="/payment-pending" element={<PaymentStatusPage />} />
-
-        {/* === ROTAS DE AGENDAMENTO PÚBLICO E ADMIN === */}
-        <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
-        
-        {/* Rota de Admin com rotas filhas */}
-        <Route path="/admin/dashboard" element={<AdminPage />}>
-          <Route index element={<DashboardOverview />} />
-          <Route path="users" element={<UserManagementPage />} />
-          <Route path="affiliates" element={<AffiliateManagementPage />} />
-                    <Route path="plans" element={<PlanManagementPage />} />
-          <Route path="broadcast" element={<BroadcastPage />} />
-        </Route>
+        <Route path="/painel" element={<PainelUsuario />} />
+        <Route path="/painel/chat" element={<ChatbotPage />} />
+        <Route path="/painel/cartoes" element={<CartoesPage />} />
+        <Route path="/painel/transacoes" element={<TransacoesPage />} />
+        <Route path="/painel/recorrencias" element={<RecorrenciasPage />} />
+        <Route path="/painel/hidratacao" element={<HidratacaoPage />} />
+        <Route path="/painel/agendamentos" element={<AgendamentosPage />} />
+        <Route path="/painel/produtos" element={<ProdutosEstoquePage />} />
+        <Route path="/painel/servicos" element={<ServicesAndCrmPage />} />
+        <Route path="/painel/meu-perfil" element={<MeuPerfilPage />} />
+        <Route path="/painel/categorias" element={<CategoriasPage />} />
+        <Route path="/painel/configuracoes" element={<ConfiguracoesPage />} />
+        <Route path="/painel/clientes" element={<BusinessClientsPage />} />
+        <Route path="/painel/agenda-crm" element={<AgendaCRMPage />} />
+        <Route path="/painel/checklist" element={<ChecklistPage />} />
       </Route>
+    </Route>
 
-      {/* === ROTAS PROTEGIDAS DO PAINEL === */}
-      <Route 
-        element={
-            <ProtectedRoute>
-                <PainelLayout />
-            </ProtectedRoute>
-        }
-      >
-        <Route element={<AppLayoutSuspense />}>
-            <Route path="/painel" element={<PainelUsuario />} />
-            <Route path="/painel/chat" element={<ChatbotPage />} />
-            <Route path="/painel/cartoes" element={<CartoesPage />} />
-            <Route path="/painel/transacoes" element={<TransacoesPage />} />
-            <Route path="/painel/recorrencias" element={<RecorrenciasPage />} />
-            <Route path="/painel/hidratacao" element={<HidratacaoPage />} />
-            <Route path="/painel/agendamentos" element={<AgendamentosPage />} />
-            <Route path="/painel/produtos" element={<ProdutosEstoquePage />} />
-            <Route path="/painel/servicos" element={<ServicesAndCrmPage />} />
-            <Route path="/painel/meu-perfil" element={<MeuPerfilPage />} />
-            <Route path="/painel/categorias" element={<CategoriasPage />} />
-            <Route path="/painel/configuracoes" element={<ConfiguracoesPage />} />
-            <Route path="/painel/clientes" element={<BusinessClientsPage />} />
-            <Route path="/painel/agenda-crm" element={<AgendaCRMPage />} />
-            <Route path="/painel/checklist" element={<ChecklistPage />} />
-        </Route>
-      </Route>
-      
-      {/* Rota para páginas não encontradas */}
-      <Route path="*" element={ <div><h1>404 - Página Não Encontrada</h1></div> } />
-    </Routes>
+    {/* Rota para páginas não encontradas */}
+    <Route path="*" element={<div><h1>404 - Página Não Encontrada</h1></div>} />
+  </Routes>
 );
 
 
