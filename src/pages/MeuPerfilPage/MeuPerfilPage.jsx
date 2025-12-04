@@ -237,10 +237,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
   };
 
   const filterPlansForUser = (plans, currentLevel) => {
-    const isAdvanced = currentLevel?.includes('avancado') || currentLevel?.startsWith('vitalicio');
-    const isBasic = currentLevel?.includes('basico');
-    const isFree = currentLevel?.includes('gratuito') || !currentLevel;
-
     // Concatena todos os planos em um array simples para facilitar o filtro
     const allPlans = [...(plans.monthly || []), ...(plans.yearly || [])];
 
@@ -249,25 +245,8 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
       // O usuário nunca deve ter a opção de selecionar o plano gratuito (ID 1) para "Trocar Plano"
       if (plan.id === '1' || planNameLower.includes('gratuito')) return false;
 
-      // Se o plano atual é Avançado ou Vitalício:
-      if (isAdvanced) {
-        // Pode selecionar Basic (downgrade) ou Advanced (troca de ciclo)
-        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
-      }
-
-      // Se o plano atual é Básico:
-      if (isBasic) {
-        // Pode selecionar Basic (troca de ciclo) ou Advanced (upgrade)
-        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
-      }
-
-      // Se o plano atual é Gratuito ou Nulo:
-      if (isFree) {
-        // Deve ver todos os planos pagos (Básico e Avançado)
-        return planNameLower.includes('básico') || planNameLower.includes('avançado') || planNameLower.includes('vitalício');
-      }
-
-      return false;
+      // Retorna todos os outros planos (Básico e Avançado, Mensal e Anual)
+      return true;
     });
   };
 

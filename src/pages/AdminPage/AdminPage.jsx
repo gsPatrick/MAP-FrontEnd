@@ -27,14 +27,14 @@ const AdminPage = () => {
       navigate('/admin/dashboard/users', { replace: true });
     }
   }, [location.pathname, navigate]);
-  
+
   const selectedKey = location.pathname.split('/')[3] || 'users';
 
   const menuItems = [
-    { key: 'users', icon: <TeamOutlined />, label: <Link to="users">Usuários</Link> },
-    { key: 'affiliates', icon: <DollarCircleOutlined />, label: <Link to="affiliates">Afiliados</Link> },
-    { key: 'plans', icon: <ReadOutlined />, label: <Link to="plans">Planos</Link> },
-    { key: 'broadcast', icon: <SendOutlined />, label: <Link to="broadcast">Transmissão</Link> },
+    { key: 'users', icon: <TeamOutlined />, label: <Link to="/admin/dashboard/users">Usuários</Link> },
+    { key: 'affiliates', icon: <DollarCircleOutlined />, label: <Link to="/admin/dashboard/affiliates">Afiliados</Link> },
+    { key: 'plans', icon: <ReadOutlined />, label: <Link to="/admin/dashboard/plans">Planos</Link> },
+    { key: 'broadcast', icon: <SendOutlined />, label: <Link to="/admin/dashboard/broadcast">Transmissão</Link> },
   ];
 
   const sidebarContent = (
