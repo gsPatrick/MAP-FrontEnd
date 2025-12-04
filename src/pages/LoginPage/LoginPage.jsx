@@ -22,9 +22,9 @@ const LoginPage = () => {
     document.body.classList.add('login-page-active');
     return () => { document.body.classList.remove('login-page-active'); };
   }, []);
-  
+
   const handleLoginSuccess = useCallback((loginData) => {
-    const { token, client, financialAccounts, subscriptionStatus, user, role } = loginData;
+    const { token, client, financialAccounts, subscriptionStatus, user, role, latestPendingPlanId } = loginData;
 
     localStorage.clear();
     localStorage.setItem('authToken', token);
@@ -37,34 +37,42 @@ const LoginPage = () => {
     let targetPath;
 
     if (redirectPath) {
-        targetPath = redirectPath;
-        message.success(`Login bem-sucedido! Redirecionando...`);
+      targetPath = redirectPath;
+      message.success(`Login bem-sucedido! Redirecionando...`);
     } else if (role === 'admin') {
-        targetPath = '/admin/dashboard';
-        message.success(`Login de administrador bem-sucedido! Bem-vindo(a), ${user.name}!`);
+      targetPath = '/admin/dashboard';
+      message.success(`Login de administrador bem-sucedido! Bem-vindo(a), ${user.name}!`);
     } else {
-        if (subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier') {
-            message.warning('Sua assinatura não está ativa! Por favor, renove para ter acesso completo.');
-            targetPath = '/#planos';
+      if (subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier') {
+        if (latestPendingPlanId) {
+          message.warning('Pagamento pendente identificado. Redirecionando para o pagamento...');
+          targetPath = `/checkout/${latestPendingPlanId}`;
         } else {
-            message.success(`Bem-vindo(a) de volta, ${client.name || client.email}!`);
-            targetPath = '/painel';
+          message.warning('Sua assinatura não está ativa! Por favor, renove para ter acesso completo.');
+          targetPath = '/#planos';
         }
+      } else if (client.status === 'Aguardando Pagamento') {
+        if (latestPendingPlanId) {
+          message.warning('Pagamento pendente identificado. Redirecionando para o pagamento...');
+          targetPath = `/checkout/${latestPendingPlanId}`;
+        } else {
+          message.warning('Sua conta está aguardando pagamento. Escolha um plano para ativar.');
+          targetPath = '/#planos';
+        }
+      } else {
+        message.success(`Bem-vindo(a) de volta, ${client.name || client.email}!`);
+        targetPath = '/painel';
+      }
     }
-    
+
     if (financialAccounts && financialAccounts.length > 0) {
       const profile = financialAccounts.find(a => a.isDefault) || financialAccounts.find(a => a.accountType === 'PF') || financialAccounts[0];
       localStorage.setItem('selectedProfileId', profile.id.toString());
     }
-    
+
     navigate(targetPath);
   }, [navigate, location.search]);
 
-  /**
-   * <<< FUNÇÃO onFinish CORRIGIDA >>>
-   * Função chamada quando o formulário é submetido.
-   * Envia o campo de login como 'identifier' para a API de cliente.
-   */
   const onFinish = async (values) => {
     setLoading(true);
     const { identifier, password } = values;
@@ -80,7 +88,7 @@ const LoginPage = () => {
         console.error("Erro inesperado na tentativa de login de admin:", adminError);
         message.error("Ocorreu um erro no servidor. Tente novamente mais tarde.");
         setLoading(false);
-        return; 
+        return;
       }
     }
 
@@ -88,8 +96,8 @@ const LoginPage = () => {
     try {
       // A API de cliente espera um 'identifier', que pode ser e-mail ou telefone.
       const clientResponse = await apiClient.post('/auth/client/login', { identifier, password });
-      const { token, client, financialAccounts, subscriptionStatus } = clientResponse.data.data;
-      handleLoginSuccess({ token, client, financialAccounts, subscriptionStatus, role: 'client' });
+      const { token, client, financialAccounts, subscriptionStatus, latestPendingPlanId } = clientResponse.data.data;
+      handleLoginSuccess({ token, client, financialAccounts, subscriptionStatus, latestPendingPlanId, role: 'client' });
     } catch (clientError) {
       const errorMessage = clientError.response?.data?.message || 'Falha no login. Verifique seus dados.';
       message.error(errorMessage);
@@ -110,8 +118,7 @@ const LoginPage = () => {
           <Title level={2} className="login-title">Bem-vindo de Volta!</Title>
           <Paragraph className="login-subtitle">Acesse sua conta para continuar no controle.</Paragraph>
           <Form name="login_form" onFinish={onFinish} onFinishFailed={onFinishFailed} layout="vertical">
-            
-            {/* <<< CORREÇÃO NO 'name' DO Form.Item >>> */}
+
             <Form.Item name="identifier" label="E-mail ou Telefone" rules={[{ required: true, message: 'Por favor, insira seu e-mail ou telefone!' }]}>
               <Input prefix={<MailOutlined />} placeholder="seuemail@exemplo.com ou 5571..." size="large" />
             </Form.Item>
