@@ -38,43 +38,60 @@ const AffiliatesTab = () => {
     }
   };
 
-  const showHistory = (affiliate) => {
-    setSelectedAffiliate(affiliate);
-    setHistoryModalVisible(true);
-  };
-  
   const affiliateColumns = [
-    { title: 'Nome do Afiliado', dataIndex: 'name', key: 'name' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { 
-      title: 'Saldo de Comissão', 
-      dataIndex: 'balance', 
-      key: 'balance',
-      render: (balance) => <Text strong style={{ color: '#389e0d' }}>{`R$ ${parseFloat(balance).toFixed(2)}`}</Text>,
-      sorter: (a, b) => a.balance - b.balance,
+    {
+      title: 'Nome do Afiliado',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => (
+        <Space>
+          <Text strong>{text}</Text>
+          {record.email && <Text type="secondary" style={{ fontSize: '12px' }}>({record.email})</Text>}
+        </Space>
+      ),
     },
-    { title: 'Total de Indicados', dataIndex: 'totalReferrals', key: 'totalReferrals', sorter: (a, b) => a.totalReferrals - b.totalReferrals },
-    { title: 'Ganhos Totais (Histórico)', dataIndex: 'totalEarned', key: 'totalEarned', render: (val) => `R$ ${parseFloat(val).toFixed(2)}` },
+    {
+      title: 'Total de Indicados (Ciclo Atual)',
+      dataIndex: 'referralsCount',
+      key: 'referralsCount',
+      align: 'center',
+    },
+    {
+      title: 'Ganhos Totais (Ciclo Atual)',
+      dataIndex: 'totalEarned',
+      key: 'totalEarned',
+      align: 'right',
+      render: (value) => (
+        <Text type="success" strong>
+          {parseFloat(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+        </Text>
+      ),
+    },
     {
       title: 'Ações',
       key: 'actions',
+      align: 'center',
       render: (_, record) => (
         <Space>
-          <Tooltip title="Ver histórico de indicações">
-            <Button icon={<HistoryOutlined />} onClick={() => showHistory(record)}>Histórico</Button>
+          <Tooltip title="Ver Histórico de Indicações">
+            <Button
+              icon={<HistoryOutlined />}
+              onClick={() => {
+                setSelectedAffiliate(record);
+                setHistoryModalVisible(true);
+              }}
+            />
           </Tooltip>
           <Popconfirm
-            title={`Confirmar pagamento para ${record.name}?`}
-            description="Esta ação irá zerar o saldo de comissão do afiliado."
+            title="Zerar Saldo e Reiniciar Ciclo?"
+            description="Isso marcará o saldo como pago e zerará o contador de indicados para o próximo ciclo."
             onConfirm={() => handleClearBalance(record.id)}
             okText="Sim, paguei"
-            cancelText="Não"
+            cancelText="Cancelar"
           >
-            <Tooltip title="Marcar comissões como pagas (zerar saldo)">
-              <Button icon={<CheckCircleOutlined />} type="primary" disabled={parseFloat(record.balance) === 0}>
-                Zerar Saldo
-              </Button>
-            </Tooltip>
+            <Button type="primary" danger icon={<DollarOutlined />}>
+              Zerar Saldo (Pagar)
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -82,51 +99,70 @@ const AffiliatesTab = () => {
   ];
 
   const historyColumns = [
-    { title: 'Indicado', dataIndex: ['referred', 'name'], key: 'referredName' },
-    { title: 'Email Indicado', dataIndex: 'email', key: 'referredEmail' },
-    { title: 'Data da Indicação', dataIndex: 'createdAt', key: 'joinDate', render: (date) => new Date(date).toLocaleDateString('pt-BR') },
-    { title: 'Plano Assinado', dataIndex: ['plan', 'name'], key: 'planName', render: (plan) => plan ? <Tag color="geekblue">{plan.replace(/_/g, ' ')}</Tag> : <Tag>N/A</Tag> },
-    { title: 'Comissão Gerada', dataIndex: 'commissionAmount', key: 'commission', render: (amount) => amount ? `R$ ${parseFloat(amount).toFixed(2)}` : 'N/A' },
+    { title: 'Data', dataIndex: 'joinDate', key: 'joinDate', render: (date) => new Date(date).toLocaleDateString('pt-BR') },
+    { title: 'Indicado', dataIndex: 'name', key: 'name' },
+    { title: 'Plano', dataIndex: ['subscription', 'planName'], key: 'planName', render: (plan) => plan ? <Tag color="blue">{plan}</Tag> : <Tag>N/A</Tag> },
+    { title: 'Comissão', dataIndex: ['subscription', 'commissionEarned'], key: 'commission', render: (val) => val ? `R$ ${parseFloat(val).toFixed(2)}` : '-' },
   ];
 
   return (
-    <>
+    <div className="affiliates-tab-content">
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Alert
+          message="Nota: Os dados exibidos referem-se ao ciclo atual (desde o último pagamento/zeramento de saldo)."
+          type="info"
+          showIcon
+        />
+      </div>
+
       <Table
         columns={affiliateColumns}
         dataSource={affiliates}
         rowKey="id"
         loading={loading}
-        scroll={{ x: 'max-content' }}
-        summary={pageData => (
+        pagination={{ pageSize: 10 }}
+        summary={pageData => {
+          let totalReferrals = 0;
+          let totalEarnings = 0;
+          pageData.forEach(({ referralsCount, totalEarned }) => {
+            totalReferrals += referralsCount || 0;
+            totalEarnings += parseFloat(totalEarned || 0);
+          });
+          return (
             <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={2}><Text strong>Totais</Text></Table.Summary.Cell>
-                <Table.Summary.Cell index={2}>
-                    <Text strong style={{ color: '#cf1322' }}>
-                        {`R$ ${pageData.reduce((sum, item) => sum + parseFloat(item.balance), 0).toFixed(2)}`}
-                    </Text>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={3}><Text strong>{pageData.reduce((sum, item) => sum + item.totalReferrals, 0)}</Text></Table.Summary.Cell>
+              <Table.Summary.Cell index={0}><Text strong>Total</Text></Table.Summary.Cell>
+              <Table.Summary.Cell index={1} align="center">
+                <Text strong>{totalReferrals}</Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={2} align="right">
+                <Text strong type="success">
+                  {totalEarnings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={3} />
             </Table.Summary.Row>
-        )}
+          );
+        }}
       />
+
       <Modal
-        title={`Histórico de Indicações de ${selectedAffiliate?.name}`}
+        title={`Histórico de Indicações - ${selectedAffiliate?.name || ''}`}
         open={historyModalVisible}
         onCancel={() => setHistoryModalVisible(false)}
         footer={null}
-        width={800}
+        width={700}
         destroyOnClose
       >
         {selectedAffiliate && (
-            <Table 
-                columns={historyColumns}
-                dataSource={selectedAffiliate.referrals}
-                rowKey="id"
-                pagination={false}
-            />
+          <Table
+            columns={historyColumns}
+            dataSource={selectedAffiliate.referrals}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+          />
         )}
       </Modal>
-    </>
+    </div>
   );
 };
 

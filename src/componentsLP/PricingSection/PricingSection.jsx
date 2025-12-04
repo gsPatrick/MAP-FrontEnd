@@ -1,7 +1,7 @@
 // src/componentsLP/PricingSection/PricingSection.jsx
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin } from 'antd';
-import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, List, Tag, Switch, Spin, Alert, Space } from 'antd';
+import { CheckCircleFilled, StarFilled, UserOutlined, ShopOutlined, ArrowRightOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
@@ -10,60 +10,60 @@ import './PricingSection.css';
 const { Title, Paragraph, Text } = Typography;
 
 const plansData = {
-  monthly: [
-    {
-      id: '7',
-      name: 'Básico Mensal', 
-      icon: <UserOutlined />, 
-      price: '39', 
-      priceSuffix: ',90', 
-      period: '/mês',
-      description: 'O controle definitivo para suas finanças pessoais e sua rotina diária.',
-      features: [ 'Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email' ],
-      buttonText: 'Assinar Agora', 
-      isFeatured: false,
-    },
-    {
-      id: '9',
-      name: 'Avançado Mensal', 
-      icon: <ShopOutlined />, 
-      price: '79', 
-      priceSuffix: ',90', 
-      period: '/mês',
-      description: 'A solução completa que unifica sua vida pessoal e o comando do seu negócio.',
-      features: [ 'Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp' ],
-      buttonText: 'Assinar Total Control', 
-      isFeatured: true,
-    },
-  ],
-  yearly: [
-    {
-        id: '8',
-        name: 'Básico Anual', 
-        icon: <UserOutlined />, 
-        price: '389', 
-        priceSuffix: ',90', 
-        period: '/ano',
-        originalPrice: 'De R$ 478,80',
-        description: 'Um ano inteiro de organização com um desconto exclusivo para seu compromisso.',
-        features: [ 'Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email' ],
-        buttonText: 'Assinar Plano Anual', 
-        isFeatured: false,
-      },
-      {
-        id: '10',
-        name: 'Avançado Anual', 
-        icon: <ShopOutlined />, 
-        price: '789', 
-        priceSuffix: ',90', 
-        period: '/ano',
-        originalPrice: 'De R$ 958,80',
-        description: 'Potência máxima para sua vida e seu negócio, com a tranquilidade de um ano inteiro de controle.',
-        features: [ 'Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp' ],
-        buttonText: 'Assinar Total Control Anual', 
-        isFeatured: true,
-      },
-  ]
+    monthly: [
+        {
+            id: '7',
+            name: 'Básico Mensal',
+            icon: <UserOutlined />,
+            price: '39',
+            priceSuffix: ',90',
+            period: '/mês',
+            description: 'O controle definitivo para suas finanças pessoais e sua rotina diária.',
+            features: ['Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email'],
+            buttonText: 'Assinar Agora',
+            isFeatured: false,
+        },
+        {
+            id: '9',
+            name: 'Avançado Mensal',
+            icon: <ShopOutlined />,
+            price: '79',
+            priceSuffix: ',90',
+            period: '/mês',
+            description: 'A solução completa que unifica sua vida pessoal e o comando do seu negócio.',
+            features: ['Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp'],
+            buttonText: 'Assinar Total Control',
+            isFeatured: true,
+        },
+    ],
+    yearly: [
+        {
+            id: '8',
+            name: 'Básico Anual',
+            icon: <UserOutlined />,
+            price: '389',
+            priceSuffix: ',90',
+            period: '/ano',
+            originalPrice: 'De R$ 478,80',
+            description: 'Um ano inteiro de organização com um desconto exclusivo para seu compromisso.',
+            features: ['Perfis Financeiros Pessoais Ilimitados', 'Sincronização com Google Agenda', 'Gestão de Contas e Cartões', 'Lembretes de Água e Motivacionais', 'Relatórios Financeiros Detalhados', 'Suporte via Email'],
+            buttonText: 'Assinar Plano Anual',
+            isFeatured: false,
+        },
+        {
+            id: '10',
+            name: 'Avançado Anual',
+            icon: <ShopOutlined />,
+            price: '789',
+            priceSuffix: ',90',
+            period: '/ano',
+            originalPrice: 'De R$ 958,80',
+            description: 'Potência máxima para sua vida e seu negócio, com a tranquilidade de um ano inteiro de controle.',
+            features: ['Todos os benefícios do Plano Básico', 'Perfis Empresariais (PJ/MEI)', 'Gestão de Clientes (CRM) e Serviços', 'Controle de Produtos e Estoque', 'Agenda Pública e Agendamentos Online', 'Suporte Prioritário via WhatsApp'],
+            buttonText: 'Assinar Total Control Anual',
+            isFeatured: true,
+        },
+    ]
 };
 
 const PricingSection = () => {
@@ -75,14 +75,25 @@ const PricingSection = () => {
     const [userSubscription, setUserSubscription] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
     const [subscriptionStatus, setSubscriptionStatus] = useState(localStorage.getItem('subscriptionStatus'));
+    const [userData, setUserData] = useState(null);
 
     useEffect(() => {
         // Atualiza o estado de login se o token mudar
-        setIsLoggedIn(!!localStorage.getItem('authToken'));
+        const token = localStorage.getItem('authToken');
+        setIsLoggedIn(!!token);
         setSubscriptionStatus(localStorage.getItem('subscriptionStatus'));
 
+        const storedUserData = localStorage.getItem('userData');
+        if (storedUserData) {
+            try {
+                setUserData(JSON.parse(storedUserData));
+            } catch (e) {
+                console.error("Erro ao parsear userData", e);
+            }
+        }
+
         const checkSubscription = async () => {
-            if (isLoggedIn) {
+            if (token) {
                 try {
                     const response = await apiClient.get('/subscriptions/me/active');
                     if (response.data?.status === 'success' && response.data.data) {
@@ -94,7 +105,7 @@ const PricingSection = () => {
             }
             setIsCheckingSubscription(false);
         };
-        
+
         if (!loadingProfiles) {
             checkSubscription();
         }
@@ -124,6 +135,15 @@ const PricingSection = () => {
         setBillingCycle(checked ? 'yearly' : 'monthly');
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        setIsLoggedIn(false);
+        setUserData(null);
+        setUserSubscription(null);
+        setSubscriptionStatus(null);
+        window.location.reload(); // Recarrega para limpar estados globais se houver
+    };
+
     if (loadingProfiles || isCheckingSubscription) {
         return (
             <div id="planos" className="pricing-luxe-section-wrapper" style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
@@ -147,9 +167,14 @@ const PricingSection = () => {
                         <Paragraph style={{ fontSize: '16px' }}>
                             {isVitalicio ? "Você possui acesso vitalício! 🎉" : `Seu acesso é válido até: ${endDate}`}
                         </Paragraph>
-                        <Button type="primary" size="large" onClick={() => navigate('/painel')} className="plan-luxe-cta-button" style={{ marginTop: '20px' }}>
-                            Acessar Painel <ArrowRightOutlined />
-                        </Button>
+                        <Space direction="vertical" style={{ width: '100%' }}>
+                            <Button type="primary" size="large" onClick={() => navigate('/painel')} className="plan-luxe-cta-button" block>
+                                Acessar Painel <ArrowRightOutlined />
+                            </Button>
+                            <Button type="text" danger onClick={handleLogout} block icon={<LogoutOutlined />}>
+                                Sair da conta ({userData?.name || userData?.email})
+                            </Button>
+                        </Space>
                     </Card>
                 </div>
             </div>
@@ -169,10 +194,33 @@ const PricingSection = () => {
                 </Title>
                 <Paragraph className="pricing-luxe-main-subtitle">
                     {isLoggedIn && subscriptionStatus === 'expired'
-                        ? 'Sua assinatura expirou. Renove agora para garantir seu acesso completo!' 
+                        ? 'Sua assinatura expirou. Renove agora para garantir seu acesso completo!'
                         : 'Escolha o caminho para o seu controle total. Planos flexíveis pensados para impulsionar seus resultados.'
                     }
                 </Paragraph>
+
+                {isLoggedIn && (
+                    <div style={{ maxWidth: '600px', margin: '0 auto 30px auto' }}>
+                        <Alert
+                            message={
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                    <span>
+                                        Logado como <strong>{userData?.name || userData?.email}</strong>.
+                                        {subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier' ? ' (Pagamento Pendente)' : ''}
+                                    </span>
+                                    <Button size="small" type="link" danger onClick={handleLogout} icon={<LogoutOutlined />}>
+                                        Não é você? Sair
+                                    </Button>
+                                </div>
+                            }
+                            type="info"
+                            showIcon
+                            icon={<UserOutlined />}
+                            style={{ borderRadius: '8px', border: '1px solid #91d5ff', backgroundColor: '#e6f7ff' }}
+                        />
+                    </div>
+                )}
+
                 <div className="billing-toggle-wrapper">
                     <span className={`billing-option ${billingCycle === 'monthly' ? 'active' : ''}`}>Cobrança Mensal</span>
                     <Switch onChange={handleBillingToggle} checked={billingCycle === 'yearly'} />
@@ -185,7 +233,7 @@ const PricingSection = () => {
                             <Card className={`pricing-luxe-card ${plan.isFeatured ? 'featured' : ''}`}>
                                 {plan.isFeatured && (<div className="featured-luxe-banner"><StarFilled /> Mais Escolhido</div>)}
                                 <div className="card-luxe-content">
-                                    <div className="plan-luxe-icon-header">{React.cloneElement(plan.icon, {className: 'plan-luxe-title-icon'})}</div>
+                                    <div className="plan-luxe-icon-header">{React.cloneElement(plan.icon, { className: 'plan-luxe-title-icon' })}</div>
                                     <Title level={3} className="plan-luxe-name">{plan.name}</Title>
                                     <Paragraph className="plan-luxe-description">{plan.description}</Paragraph>
                                     <div className="plan-luxe-price-container">
@@ -193,7 +241,7 @@ const PricingSection = () => {
                                             <span className="price-currency">R$</span><span className="price-value">{plan.price}</span>
                                             <span className="price-meta"><span className="price-suffix">{plan.priceSuffix}</span><span className="price-period">{plan.period}</span></span>
                                         </div>
-                                        {plan.originalPrice ? <Text className="original-price-strike">{plan.originalPrice}</Text> : <div className="original-price-strike" style={{height: '22px'}}></div>}
+                                        {plan.originalPrice ? <Text className="original-price-strike">{plan.originalPrice}</Text> : <div className="original-price-strike" style={{ height: '22px' }}></div>}
                                     </div>
                                     <List
                                         className="plan-luxe-features-list"
@@ -207,7 +255,7 @@ const PricingSection = () => {
                                         className="plan-luxe-cta-button"
                                         onClick={() => handlePlanSelect(plan.id)}
                                     >
-                                        {isLoggedIn && subscriptionStatus === 'expired' ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
+                                        {isLoggedIn && (subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier') ? 'Renovar Assinatura' : plan.buttonText} <ArrowRightOutlined />
                                     </Button>
                                 </div>
                             </Card>
