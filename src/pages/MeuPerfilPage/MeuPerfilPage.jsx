@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Layout, Typography, Button, Card, Avatar, List, Tag, Divider,
-  Result, Statistic, Spin, Modal, Form, Input, Select, Row, Col, message, Alert, Table
+  Result, Statistic, Spin, Modal, Form, Input, Select, Row, Col, message, Alert, Table, Space
 } from 'antd';
 import {
   UserOutlined, ShopOutlined, IdcardOutlined, PlusCircleOutlined,
