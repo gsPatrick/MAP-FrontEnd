@@ -43,6 +43,7 @@ const AffiliateManagementPage = lazy(() => import('./pages/AdminPage/pages/Affil
 const DashboardOverview = lazy(() => import('./pages/AdminPage/pages/DashboardOverview')); // <<< LINHA QUE FALTAVA
 const PlanManagementPage = lazy(() => import('./pages/AdminPage/pages/PlanManagementPage')); // <<< ADICIONE ESTA LINHA
 const BroadcastPage = lazy(() => import('./pages/AdminPage/pages/BroadcastPage'));         // <<< ADICIONE ESTA LINHA
+const AdminSettingsPage = lazy(() => import('./pages/AdminPage/pages/AdminSettingsPage')); // <<< Nova Página de Configurações
 // <<< FIM DA MODIFICAÇÃO >>>
 
 const AppLayoutSuspense = () => (
@@ -81,6 +82,7 @@ const AppRoutes = () => (
         <Route path="affiliates" element={<AffiliateManagementPage />} />
         <Route path="plans" element={<PlanManagementPage />} />
         <Route path="broadcast" element={<BroadcastPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} /> {/* <<< Nova Rota */}
       </Route>
     </Route>
 

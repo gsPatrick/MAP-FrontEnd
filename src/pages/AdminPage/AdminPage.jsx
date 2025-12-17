@@ -1,7 +1,7 @@
 // src/pages/AdminPage/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Drawer, Button } from 'antd';
-import { TeamOutlined, DollarCircleOutlined, MenuOutlined, ReadOutlined, SendOutlined } from '@ant-design/icons';
+import { TeamOutlined, DollarCircleOutlined, MenuOutlined, ReadOutlined, SendOutlined, RobotOutlined } from '@ant-design/icons';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 
@@ -35,6 +35,7 @@ const AdminPage = () => {
     { key: 'affiliates', icon: <DollarCircleOutlined />, label: <Link to="/admin/dashboard/affiliates">Afiliados</Link> },
     { key: 'plans', icon: <ReadOutlined />, label: <Link to="/admin/dashboard/plans">Planos</Link> },
     { key: 'broadcast', icon: <SendOutlined />, label: <Link to="/admin/dashboard/broadcast">Transmissão</Link> },
+    { key: 'settings', icon: <RobotOutlined />, label: <Link to="/admin/dashboard/settings">Configurações</Link> }, // <<< Novo Item
   ];
 
   const sidebarContent = (
