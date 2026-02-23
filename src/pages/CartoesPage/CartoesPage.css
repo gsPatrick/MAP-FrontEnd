@@ -241,7 +241,8 @@
 
 .cartoes-page-main-layout .panel-content-area.cartoes-content {
     background-color: #f9fafb;
-    padding: 20px;
+    padding: 32px 40px;
+    min-height: calc(100vh - 64px);
 }
 
 /* Coluna da Lista de Cartões */
@@ -260,8 +261,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
 }
 
@@ -298,8 +299,8 @@
 .cards-scrollable-list {
     overflow-y: auto;
     flex-grow: 1;
-    margin-right: -10px;
-    padding: 10px;
+    margin: 0 -10px;
+    padding: 4px 10px;
 }
 
 .cartao-gallery-item {
@@ -325,27 +326,34 @@
 
 .mini-card-container {
     width: 100%;
-    height: 120px;
+    aspect-ratio: 1.58 / 1;
     overflow: hidden;
     position: relative;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.cartao-gallery-item:hover .mini-card-container {
+    transform: scale(1.02);
 }
 
 .mini-card-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 12px 4px 0;
 }
 
 .mini-card-header {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 8px;
 }
 
 .mini-card-name {
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
     color: #333;
 }
 
@@ -643,32 +651,63 @@
     font-size: 14px;
 }
 
-.invoice-total {
+/* Invoice Styling Improvements */
+.invoice-panel {
+    border-radius: 24px;
+    overflow: hidden;
+    background: white;
+}
+
+.invoice-summary-banner {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid #edf2f7;
+}
+
+.banner-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.banner-item .ant-typography.label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #718096;
+}
+
+.banner-item .ant-typography.value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.premium-invoice-timeline .timeline-expense-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-top: 1px solid var(--map-cinza-claro, #f0f0f0);
-    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: background 0.2s ease;
 }
 
-.pay-invoice-btn.ant-btn-primary {
-    margin-top: 15px;
-    background-color: var(--map-laranja, #FA8C16) !important;
-    border-color: var(--map-laranja, #FA8C16) !important;
-    color: var(--map-branco, #ffffff) !important;
-    font-weight: 500;
+.premium-invoice-timeline .timeline-expense-content:hover {
+    background: #f7fafc;
 }
 
-.pay-invoice-btn.ant-btn-primary:hover,
-.pay-invoice-btn.ant-btn-primary:focus {
-    background-color: var(--map-dourado-escuro, #D48806) !important;
-    border-color: var(--map-dourado-escuro, #D48806) !important;
-}
-
-.invoice-chart-col .ant-typography {
-    text-align: center;
-    color: var(--header-text-primary, #303133);
+.parcel-tag {
+    font-size: 10px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: #edf2f7;
+    color: #4a5568;
+    border: none;
 }
 
 
@@ -748,82 +787,10 @@
         max-width: 100%;
     }
 
-    .list-card .ant-list-item-action {
-        /* Considerar empilhar ou reduzir em MD se necessário */
-    }
-}
 
-@media (max-width: 767px) {
-
-    .chart-card .ant-card-body,
-    .list-card .ant-card-body {
-        padding: 12px !important;
-    }
-
-    .dashboard-header-title {
-        margin-bottom: 20px;
-        padding-left: 10px;
-        border-left-width: 4px;
-    }
-
-    .dashboard-greeting {
-        font-size: 22px !important;
-    }
-
-    .quick-actions-card .ant-btn {
-        font-size: 12px;
-        height: 34px;
-    }
-
-    .list-card .ant-list-item-action {
-        /* Ajustes finos para mobile aqui se o flex padrão não for suficiente */
-    }
-}
-
-/* Estilos de responsividade limpos */
-text-align: center;
-}
-
-.chart-card,
-.list-card {
-    margin-bottom: 16px;
-}
-
-.panel-content-area.dashboard-overview {
-    padding: 12px;
-}
-
-.dashboard-greeting {
-    font-size: 20px !important;
-}
-
-.dashboard-welcome-text {
-    font-size: 13px;
-}
-
-.list-card .ant-list-item {
-    flex-wrap: wrap;
-}
-
-.list-card .ant-list-item-meta {
-    flex-basis: 100%;
-    margin-bottom: 8px;
-}
-
-.list-card .ant-list-item-action {
-    flex-basis: 100%;
-    justify-content: space-between;
-    margin-left: 0;
-}
-
-.upcoming-item-tag.ant-tag {
-    margin-right: 8px;
-    min-width: auto;
-    flex-grow: 1;
-}
-
-.list-item-action-btn.ant-btn-text {
-    min-width: auto;
-    flex-grow: 1;
-}
+@media (max-width: 575px) {
+    .financial-summary-row .summary-card { text-align: center; }
+    .chart-card, .list-card { margin-bottom: 16px; }
+    .panel-content-area.cartoes-content { padding: 16px; }
+    .dashboard-greeting { font-size: 20px !important; }
 }

@@ -28,14 +28,14 @@ const { Option } = Select;
 const { useModal } = Modal;
 const { useWatch } = Form;
 
-const VisualCard = ({ card, currentProfile, scale = 1 }) => {
+const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => {
   const color = card.dominantColor || '#6A0DAD';
   const lastFour = card.lastFourDigits || card.numeroCartao || '••••';
   const icon = card.flagIconUrl || card.iconeBandeira;
 
   return (
     <div
-      className="virtual-card-premium"
+      className={`virtual-card-premium ${showDetails ? 'with-details' : 'compact'}`}
       style={{
         '--card-gradient': color,
         transform: `scale(${scale})`,
@@ -47,22 +47,24 @@ const VisualCard = ({ card, currentProfile, scale = 1 }) => {
         <Avatar size={48 * scale} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
         <div className="card-chip-container" style={{ gap: 12 * scale }}>
           <div className="card-chip-sim" style={{ width: 40 * scale, height: 30 * scale }}></div>
-          <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />
+          {showDetails && <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />}
         </div>
       </div>
-      <div className="card-number-display" style={{ fontSize: 22 * scale }}>
+      <div className="card-number-display" style={{ fontSize: showDetails ? 22 * scale : 18 * scale }}>
         •••• •••• •••• {lastFour}
       </div>
-      <div className="card-footer-info">
-        <div className="card-holder">
-          <span className="label" style={{ fontSize: 9 * scale }}>PORTADOR</span>
-          <span className="value" style={{ fontSize: 14 * scale }}>{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
+      {showDetails && (
+        <div className="card-footer-info">
+          <div className="card-holder">
+            <span className="label" style={{ fontSize: 9 * scale }}>PORTADOR</span>
+            <span className="value" style={{ fontSize: 14 * scale }}>{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
+          </div>
+          <div className="card-expiry">
+            <span className="label" style={{ fontSize: 9 * scale }}>VALIDADE</span>
+            <span className="value" style={{ fontSize: 14 * scale }}>12/29</span>
+          </div>
         </div>
-        <div className="card-expiry">
-          <span className="label" style={{ fontSize: 9 * scale }}>VALIDADE</span>
-          <span className="value" style={{ fontSize: 14 * scale }}>12/29</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -384,7 +386,7 @@ const CartoesPage = () => {
                   onClick={() => handleCardSelect(card)}
                 >
                   <div className="mini-card-container">
-                    <VisualCard card={card} currentProfile={currentProfile} scale={0.5} />
+                    <VisualCard card={card} currentProfile={currentProfile} scale={0.65} showDetails={false} />
                   </div>
                   <div className="mini-card-info">
                     <div className="mini-card-header">
@@ -471,6 +473,22 @@ const CartoesPage = () => {
                 <Card title="Fatura" bordered={false} className="invoice-panel" extra={<Space><Text type="secondary">Período da Fatura:</Text>{availableInvoicePeriods.length > 0 ? (<Select value={`${selectedMonthYearForInvoice.year()}-${String(selectedMonthYearForInvoice.month() + 1).padStart(2, '0')}`} onChange={handleInvoicePeriodChange} style={{ width: '200px' }} popupClassName="custom-datepicker-popup">{availableInvoicePeriods.map(p => (<Option key={`${p.year}-${p.month}`} value={`${p.year}-${p.month}`}>{p.label}</Option>))}</Select>) : (<DatePicker picker="month" value={selectedMonthYearForInvoice} onChange={handleInvoicePeriodChange} format="MMMM/YYYY" allowClear={false} inputReadOnly style={{ width: '180px' }} popupClassName="custom-datepicker-popup" />)}</Space>}>
                   {invoiceExpenses.length > 0 || loadingInvoice ? (
                     <Spin spinning={loadingInvoice}>
+                      <div className="invoice-summary-banner">
+                        <div className="banner-item">
+                          <Text className="label">Total</Text>
+                          <Text className="value" type="danger">R$ {(selectedCardDetails?.totalAmount || 0).toFixed(2).replace('.', ',')}</Text>
+                        </div>
+                        <div className="banner-item">
+                          <Text className="label">Vencimento</Text>
+                          <Text className="value">{selectedCardDetails?.dueDate ? dayjs(selectedCardDetails.dueDate).format('DD/MM') : 'N/A'}</Text>
+                        </div>
+                        <div className="banner-item">
+                          <Text className="label">Status</Text>
+                          <Tag color={selectedCardDetails?.isPaid ? 'success' : 'warning'}>
+                            {selectedCardDetails?.isPaid ? 'PAGO' : 'ABERTO'}
+                          </Tag>
+                        </div>
+                      </div>
                       <Row gutter={[24, 24]}>
                         <Col xs={24} lg={14} className="invoice-list-col">
                           <div className="invoice-timeline-container">
