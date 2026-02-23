@@ -39,7 +39,7 @@ const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => 
       style={{
         '--card-gradient': color,
         transform: `scale(${scale})`,
-        margin: scale !== 1 ? `-${(1 - scale) * 50}%` : '0'
+        transformOrigin: 'center center'
       }}
     >
       <div className="card-glass-overlay"></div>
@@ -387,15 +387,12 @@ const CartoesPage = () => {
                 >
                   <div className="mini-card-container">
                     <VisualCard card={card} currentProfile={currentProfile} scale={0.65} showDetails={false} />
-                  </div>
-                  <div className="mini-card-info">
-                    <div className="mini-card-header">
-                      <Text strong className="mini-card-name">{card.name}</Text>
-                      {card.isDefault && <Tag color="gold" size="small">Padrão</Tag>}
+                    <div className="mini-card-overlay-actions" onClick={(e) => e.stopPropagation()}>
+                      <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight">
+                        <Button type="text" icon={<MoreOutlined style={{ color: 'white' }} />} shape="circle" size="small" className="cartao-actions-btn-overlay" />
+                      </Dropdown>
                     </div>
-                    <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight">
-                      <Button type="text" icon={<MoreOutlined />} shape="circle" size="small" className="cartao-actions-btn" onClick={(e) => e.stopPropagation()} />
-                    </Dropdown>
+                    {card.isDefault && <div className="mini-card-default-badge"><Tag color="gold" size="small">Padrão</Tag></div>}
                   </div>
                 </div>
               )) : <Empty description={`Nenhum cartão cadastrado para ${currentProfile?.name || 'este perfil'}.`} image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ marginTop: '30px' }} />}

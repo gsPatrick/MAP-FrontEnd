@@ -299,62 +299,69 @@
 .cards-scrollable-list {
     overflow-y: auto;
     flex-grow: 1;
-    margin: 0 -10px;
-    padding: 4px 10px;
+    margin: 0 -8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .cartao-gallery-item {
-    background: white;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 16px;
+    background: transparent;
+    padding: 0;
+    margin-bottom: 24px;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.cartao-gallery-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.cartao-gallery-item.selected {
-    border-color: var(--map-laranja);
-    background: #fffaf5;
+.cartao-gallery-item.selected .virtual-card-premium {
+    box-shadow: 0 0 0 4px var(--map-laranja-claro), 0 12px 30px rgba(0, 0, 0, 0.3);
+    transform: scale(0.7) translateY(-2px) !important;
+    /* Adjust scale specifically for selected state */
 }
 
 .mini-card-container {
     width: 100%;
     aspect-ratio: 1.58 / 1;
-    overflow: hidden;
+    overflow: visible;
+    /* Changed to visible to avoid clipping scaled elements */
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cartao-gallery-item .virtual-card-premium {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
 }
 
-.cartao-gallery-item:hover .mini-card-container {
-    transform: scale(1.02);
+.mini-card-overlay-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
 }
 
-.mini-card-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 4px 0;
+.cartao-gallery-item:hover .mini-card-overlay-actions {
+    opacity: 1;
 }
 
-.mini-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.cartao-actions-btn-overlay {
+    background: rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(4px);
+    border: none !important;
 }
 
-.mini-card-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #333;
+.mini-card-default-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 10;
 }
 
 .cartao-item-card {
@@ -788,9 +795,21 @@
     }
 
 
-@media (max-width: 575px) {
-    .financial-summary-row .summary-card { text-align: center; }
-    .chart-card, .list-card { margin-bottom: 16px; }
-    .panel-content-area.cartoes-content { padding: 16px; }
-    .dashboard-greeting { font-size: 20px !important; }
-}
+    @media (max-width: 575px) {
+        .financial-summary-row .summary-card {
+            text-align: center;
+        }
+
+        .chart-card,
+        .list-card {
+            margin-bottom: 16px;
+        }
+
+        .panel-content-area.cartoes-content {
+            padding: 16px;
+        }
+
+        .dashboard-greeting {
+            font-size: 20px !important;
+        }
+    }
