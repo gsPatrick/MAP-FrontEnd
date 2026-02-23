@@ -844,23 +844,6 @@ body.painel-active {
   .summary-card {
     grid-column: span 6;
   }
-
-  .quick-actions-card {
-    grid-column: span 12;
-  }
-
-  .chart-card {
-    grid-column: span 6;
-  }
-
-  /* Ajustes para o filtro de período em tablets */
-  .period-selector {
-    justify-content: flex-start;
-  }
-
-  .month-navigator {
-    margin-left: auto;
-  }
 }
 
 /* Layout para Desktops */
