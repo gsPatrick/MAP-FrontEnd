@@ -67,7 +67,7 @@ const PainelUsuario = () => {
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [upcomingItems, setUpcomingItems] = useState([]);
-
+  const [totalToPayPending, setTotalToPayPending] = useState(0); // Novo estado
   // --- ESTADOS DOS MODAIS ESPECÍFICOS ---
   const [isReceitaModalVisible, setIsReceitaModalVisible] = useState(false);
   const [isDespesaModalVisible, setIsDespesaModalVisible] = useState(false);
@@ -139,10 +139,10 @@ const PainelUsuario = () => {
             currentBalance: s.netBalance,
             incomeThisMonth: s.totalIncome,
             expensesThisMonth: s.totalExpenses,
-            totalCreditCard: s.totalCreditCard || 0,
             totalFutureDebt: s.futureForecast?.totalFutureDebt || 0,
             averageMonthlyExpenses: s.averageMonthlyExpenses || 0
           });
+          setTotalToPayPending(s.totalToPayPending || 0);
         }
 
         // Processa dados dos gráficos
@@ -313,38 +313,29 @@ const PainelUsuario = () => {
           <div className="summary-card balance animated-card">
             <div className="card-icon-wrapper"><FaPiggyBank className="card-icon" /></div>
             <div className="card-content">
-              <p className="card-title">Saldo do Período</p> {/* Título ajustado para refletir o filtro */}
+              <p className="card-title">Saldo do Período</p>
               <h3 className="card-value">{formatCurrency(financialSummary.currentBalance)}</h3>
             </div>
           </div>
           <div className="summary-card income animated-card" style={{ animationDelay: '0.1s' }}>
             <div className="card-icon-wrapper"><FaArrowUp className="card-icon" /></div>
             <div className="card-content">
-              <p className="card-title">Receitas no Período</p> {/* Título ajustado */}
+              <p className="card-title">A Receber (Total)</p>
               <h3 className="card-value">{formatCurrency(financialSummary.incomeThisMonth)}</h3>
             </div>
           </div>
           <div className="summary-card expenses animated-card" style={{ animationDelay: '0.2s' }}>
             <div className="card-icon-wrapper"><FaArrowDown className="card-icon" /></div>
             <div className="card-content">
-              <p className="card-title">Despesas no Período</p>
+              <p className="card-title">A Pagar (Total)</p>
               <h3 className="card-value">{formatCurrency(financialSummary.expensesThisMonth)}</h3>
-            </div>
-          </div>
-
-          {/* NOVOS CARDS - DASHBOARD INTELIGENTE */}
-          <div className="summary-card credit-card animated-card" style={{ animationDelay: '0.25s' }}>
-            <div className="card-icon-wrapper"><FaChartPie className="card-icon" /></div>
-            <div className="card-content">
-              <p className="card-title">Total Cartão (Período)</p>
-              <h3 className="card-value">{formatCurrency(financialSummary.totalCreditCard)}</h3>
             </div>
           </div>
 
           <div className="summary-card future-debt animated-card" style={{ animationDelay: '0.3s' }}>
             <div className="card-icon-wrapper"><FaRetweet className="card-icon" /></div>
             <div className="card-content">
-              <p className="card-title">Total Parcelado Futuro</p>
+              <p className="card-title">Parcelado Futuro</p>
               <h3 className="card-value">{formatCurrency(financialSummary.totalFutureDebt)}</h3>
             </div>
           </div>
@@ -356,6 +347,27 @@ const PainelUsuario = () => {
               <button className="action-button expense" onClick={() => { setEditingItem(null); setIsDespesaModalVisible(true); }}><FaPlus /> Nova Despesa</button>
               <button className="action-button neutral" onClick={handleNovoAgendamentoClick}><FaCalendarAlt /> Novo Compromisso</button>
               <button className="action-button recurrence" onClick={() => { setEditingItem(null); setIsRecorrenciaModalVisible(true); }}><FaRetweet /> Nova Recorrência</button>
+            </div>
+          </div>
+
+          {/* VIRTUAL CREDIT CARD - PREMIUM UI */}
+          <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s' }}>
+            <div className="virtual-card">
+              <div className="card-header">
+                <div className="card-chip"></div>
+                <div className="card-brand">VIP</div>
+              </div>
+              <div className="card-number">**** **** **** 8888</div>
+              <div className="card-footer">
+                <div className="card-holder">
+                  <span className="card-label">Card Holder</span>
+                  <span className="card-name">{userNameForHeader.toUpperCase()}</span>
+                </div>
+                <div className="card-balance-info">
+                  <span className="card-label">Total spent on period</span>
+                  <div className="card-balance-value">{formatCurrency(financialSummary.totalCreditCard)}</div>
+                </div>
+              </div>
             </div>
           </div>
 
