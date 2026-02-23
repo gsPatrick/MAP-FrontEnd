@@ -352,7 +352,7 @@ const PainelUsuario = () => {
           )}
 
           {/* --- COLUNA ESQUERDA: GRÁFICOS --- */}
-          <div className="chart-card-group" style={{ gridColumn: 'span 8', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="chart-card-group">
             <div className="card chart-card animated-card" style={{ animationDelay: '0.4s' }}>
               <h4 className="card-section-title"><FaArrowUp /> Receitas por Categoria</h4>
               {dashboardLoading ? <Skeleton active paragraph={{ rows: 6 }} /> : (
@@ -393,10 +393,10 @@ const PainelUsuario = () => {
           </div>
 
           {/* --- COLUNA DIREITA: VIRTUAL CARD & AÇÕES --- */}
-          <div className="sidebar-group" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="sidebar-group">
             {/* VIRTUAL CREDIT CARD - PREMIUM UI */}
-            <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s', width: '100%', padding: '0' }}>
-              {dashboardLoading ? <div className="card"><Skeleton active paragraph={{ rows: 4 }} /></div> : (
+            <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s' }}>
+              {dashboardLoading ? <div className="skeleton-card"><Skeleton active paragraph={{ rows: 4 }} /></div> : (
                 <div className="virtual-card" style={{ maxWidth: 'none' }}>
                   <div className="card-header">
                     <div className="card-chip"></div>
