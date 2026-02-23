@@ -405,11 +405,11 @@ const PainelUsuario = () => {
                   <div className="card-number">**** **** **** 8888</div>
                   <div className="card-footer">
                     <div className="card-holder">
-                      <span className="card-label">Card Holder</span>
+                      <span className="card-label">Titular do Cartão</span>
                       <span className="card-name">{userNameForHeader.toUpperCase()}</span>
                     </div>
                     <div className="card-balance-info">
-                      <span className="card-label">Total spent on period</span>
+                      <span className="card-label">Total gasto no período</span>
                       <div className="card-balance-value">{formatCurrency(financialSummary.totalCreditCard)}</div>
                     </div>
                   </div>

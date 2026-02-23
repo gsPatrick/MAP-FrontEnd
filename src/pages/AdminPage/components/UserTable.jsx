@@ -6,14 +6,21 @@ import apiClient from '../../../services/api';
 import ChangePlanModal from './ChangePlanModal';
 import EditUserModal from './EditUserModal';
 
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/pt-br';
+
+dayjs.extend(relativeTime);
+dayjs.locale('pt-br');
+
 const planNameMapping = {
-    gratuito: 'Gratuito',
-    basico_mensal: 'Básico Mensal',
-    basico_anual: 'Básico Anual',
-    avancado_mensal: 'Avançado Mensal',
-    avancado_anual: 'Avançado Anual',
-    vitalicio_basico: 'Vitalício Básico',
-    vitalicio_avancado: 'Vitalício Avançado',
+  gratuito: 'Gratuito',
+  basico_mensal: 'Básico Mensal',
+  basico_anual: 'Básico Anual',
+  avancado_mensal: 'Avançado Mensal',
+  avancado_anual: 'Avançado Anual',
+  vitalicio_basico: 'Vitalício Básico',
+  vitalicio_avancado: 'Vitalício Avançado',
 };
 
 const UserTable = ({ users, loading, onActionSuccess }) => {
@@ -54,7 +61,27 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status) => <Tag color={status === 'Ativo' ? 'green' : 'volcano'}>{status}</Tag>,
+      render: (status, record) => {
+        let color = status === 'Ativo' ? 'green' : 'volcano';
+        let label = status;
+
+        // Sobrescrita visual baseada na atividade
+        if (status === 'Ativo' && record.lastActiveAt) {
+          const diffDays = dayjs().diff(dayjs(record.lastActiveAt), 'day');
+          if (diffDays > 30) { color = 'default'; label = 'Parado'; }
+          else if (diffDays > 15) { color = 'warning'; label = 'Inativo'; }
+        }
+
+        return <Tag color={color}>{label}</Tag>;
+      },
+    },
+    {
+      title: 'Última Atividade',
+      dataIndex: 'lastActiveAt',
+      key: 'lastActiveAt',
+      width: 150,
+      render: (date) => (date ? dayjs(date).fromNow() : 'Nunca'),
+      sorter: (a, b) => new Date(a.lastActiveAt || 0) - new Date(b.lastActiveAt || 0),
     },
     {
       title: 'Ações',
@@ -94,7 +121,7 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
         scroll={{ x: 1200 }}
       />
       {isEditModalVisible && (
-        <EditUserModal 
+        <EditUserModal
           client={selectedUser}
           visible={isEditModalVisible}
           onClose={() => setIsEditModalVisible(false)}
