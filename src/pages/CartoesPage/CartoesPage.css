@@ -262,7 +262,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    padding-bottom: 16px;
+    padding: 0 8px 16px 8px;
     border-bottom: 1px solid var(--map-cinza-claro, #f0f0f0);
 }
 
@@ -299,11 +299,11 @@
 .cards-scrollable-list {
     overflow-y: auto;
     flex-grow: 1;
-    margin: 0 -8px;
-    padding: 8px;
+    margin: 0;
+    padding: 10px 8px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .cartao-gallery-item {
@@ -317,8 +317,7 @@
 
 .cartao-gallery-item.selected .virtual-card-premium {
     box-shadow: 0 0 0 4px var(--map-laranja-claro), 0 12px 30px rgba(0, 0, 0, 0.3);
-    transform: scale(0.7) translateY(-2px) !important;
-    /* Adjust scale specifically for selected state */
+    transform: scale(0.75) translateY(-4px) !important;
 }
 
 .mini-card-container {
@@ -795,21 +794,9 @@
     }
 
 
-    @media (max-width: 575px) {
-        .financial-summary-row .summary-card {
-            text-align: center;
-        }
-
-        .chart-card,
-        .list-card {
-            margin-bottom: 16px;
-        }
-
-        .panel-content-area.cartoes-content {
-            padding: 16px;
-        }
-
-        .dashboard-greeting {
-            font-size: 20px !important;
-        }
-    }
+@media (max-width: 575px) {
+    .financial-summary-row .summary-card { text-align: center; }
+    .chart-card, .list-card { margin-bottom: 16px; }
+    .panel-content-area.cartoes-content { padding: 16px; }
+    .dashboard-greeting { font-size: 20px !important; }
+}

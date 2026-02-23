@@ -47,14 +47,14 @@ const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => 
         <Avatar size={48 * scale} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
         <div className="card-chip-container" style={{ gap: 12 * scale }}>
           <div className="card-chip-sim" style={{ width: 40 * scale, height: 30 * scale }}></div>
-          {showDetails && <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />}
+          <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />
         </div>
       </div>
-      <div className="card-number-display" style={{ fontSize: showDetails ? 22 * scale : 18 * scale }}>
+      <div className="card-number-display" style={{ fontSize: showDetails ? 22 * scale : 18 * scale, opacity: showDetails ? 1 : 0.8 }}>
         •••• •••• •••• {lastFour}
       </div>
-      {showDetails && (
-        <div className="card-footer-info">
+      {(showDetails || true) && (
+        <div className="card-footer-info" style={{ opacity: showDetails ? 1 : 0 }}>
           <div className="card-holder">
             <span className="label" style={{ fontSize: 9 * scale }}>PORTADOR</span>
             <span className="value" style={{ fontSize: 14 * scale }}>{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
@@ -371,11 +371,11 @@ const CartoesPage = () => {
 
   return (
     <Content className="panel-content-area cartoes-content">
-      <Row gutter={[24, 24]}>
-        <Col xs={24} md={8} lg={7} className="cards-list-col">
+      <Row gutter={[32, 24]}>
+        <Col xs={24} md={8} lg={6} xl={5} className="cards-list-col">
           <div className="cards-list-header">
-            <Title level={4} style={{ margin: 0 }}>Meus Cartões ({currentProfile?.name || 'N/D'})</Title>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCard(null); cardForm.resetFields(); cardForm.setFieldsValue({ isActive: true, isDefault: cards.length === 0 }); setIsAddCardModalVisible(true); }} className="add-card-btn">Novo Cartão</Button>
+            <Title level={4} style={{ margin: 0 }}>Meus Cartões</Title>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCard(null); cardForm.resetFields(); cardForm.setFieldsValue({ isActive: true, isDefault: cards.length === 0 }); setIsAddCardModalVisible(true); }} className="add-card-btn">Novo</Button>
           </div>
           <div className="cards-scrollable-list">
             {loadingCards ? <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div> :
@@ -386,7 +386,7 @@ const CartoesPage = () => {
                   onClick={() => handleCardSelect(card)}
                 >
                   <div className="mini-card-container">
-                    <VisualCard card={card} currentProfile={currentProfile} scale={0.65} showDetails={false} />
+                    <VisualCard card={card} currentProfile={currentProfile} scale={0.7} showDetails={false} />
                     <div className="mini-card-overlay-actions" onClick={(e) => e.stopPropagation()}>
                       <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight">
                         <Button type="text" icon={<MoreOutlined style={{ color: 'white' }} />} shape="circle" size="small" className="cartao-actions-btn-overlay" />
@@ -395,11 +395,11 @@ const CartoesPage = () => {
                     {card.isDefault && <div className="mini-card-default-badge"><Tag color="gold" size="small">Padrão</Tag></div>}
                   </div>
                 </div>
-              )) : <Empty description={`Nenhum cartão cadastrado para ${currentProfile?.name || 'este perfil'}.`} image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ marginTop: '30px' }} />}
+              )) : <Empty description={`Nenhum cartão cadastrado.`} image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ marginTop: '30px' }} />}
           </div>
         </Col>
 
-        <Col xs={24} md={16} lg={17} className="card-details-col">
+        <Col xs={24} md={16} lg={18} xl={19} className="card-details-col">
           {!selectedCard ? (
             <Card className="select-card-prompt"><CreditCardOutlined style={{ fontSize: '48px', color: 'var(--map-cinza-texto)', marginBottom: '20px' }} /><Title level={4} style={{ color: 'var(--map-cinza-texto)' }}>Selecione um cartão</Title><Paragraph type="secondary">Escolha um cartão da lista ao lado para ver os detalhes e a fatura.</Paragraph></Card>
           ) : (
