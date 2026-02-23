@@ -166,6 +166,44 @@ body.painel-active {
 .income .card-value { color: var(--verde-escuro); }
 .expenses .card-value { color: var(--vermelho-escuro); }
 
+/* Novos Cartões de Resumo */
+.summary-card.credit-card { border-color: var(--azul); }
+.summary-card.future-debt { border-color: var(--laranja); }
+.credit-card .card-icon-wrapper { background-color: #E6F7FF; color: var(--azul); }
+.future-debt .card-icon-wrapper { background-color: var(--laranja-claro); color: var(--laranja-escuro); }
+
+/* --- DASHBOARD ALERTS --- */
+.dashboard-alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background-color: var(--vermelho-claro);
+  border-left: 6px solid var(--vermelho);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.1);
+}
+.dashboard-alert.warning {
+  background-color: #FFFBE6;
+  border-left-color: #FAAD14;
+}
+.alert-icon {
+  font-size: 1.5rem;
+  color: #FAAD14;
+}
+.alert-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #856404;
+  margin: 0;
+}
+.alert-description {
+  font-size: 0.9rem;
+  color: #856404;
+  margin: 4px 0 0 0;
+}
+
 /* --- CARD DE AÇÕES RÁPIDAS --- */
 .quick-actions-card {
   background-color: var(--fundo-card);

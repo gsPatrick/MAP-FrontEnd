@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  FaArrowUp, FaArrowDown, FaPlus, FaCalendarAlt, FaRetweet, 
+  FaArrowUp, FaArrowDown, FaPlus, FaCalendarAlt, FaRetweet,
   FaPiggyBank, FaChartPie, FaExclamationTriangle, FaTimes,
-  FaChevronLeft, FaChevronRight 
+  FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -23,7 +23,7 @@ import ModalPjClientAppointment from '../../modals/ModalPjClientAppointment/Moda
 import ModalPjServiceAppointment from '../../modals/ModalPjServiceAppointment/ModalPjServiceAppointment';
 
 // --- Importação do Ant Design básica ---
-import { Spin, message } from 'antd'; 
+import { Spin, message } from 'antd';
 
 import './PainelUsuario.css';
 
@@ -56,7 +56,14 @@ const PainelUsuario = () => {
 
   // --- Estados do Componente ---
   const [dashboardLoading, setDashboardLoading] = useState(true);
-  const [financialSummary, setFinancialSummary] = useState({ currentBalance: 0, incomeThisMonth: 0, expensesThisMonth: 0 });
+  const [financialSummary, setFinancialSummary] = useState({
+    currentBalance: 0,
+    incomeThisMonth: 0,
+    expensesThisMonth: 0,
+    totalCreditCard: 0,
+    totalFutureDebt: 0,
+    averageMonthlyExpenses: 0
+  });
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [upcomingItems, setUpcomingItems] = useState([]);
@@ -75,9 +82,9 @@ const PainelUsuario = () => {
   const [filterMode, setFilterMode] = useState('month'); // 'day', 'week', 'month'
   const [currentMonth, setCurrentMonth] = useState(dayjs()); // Data base para navegação do mês
 
-  const userNameForHeader = useMemo(() => 
+  const userNameForHeader = useMemo(() =>
     currentProfile?.ownerClientName || currentProfile?.name || "Usuário MAP"
-  , [currentProfile]);
+    , [currentProfile]);
 
   // --- Efeitos ---
   useEffect(() => {
@@ -88,7 +95,7 @@ const PainelUsuario = () => {
       }
     }
   }, [isAuthenticated, loadingProfiles, fetchUserProfiles]);
-  
+
   useEffect(() => {
     // <<<< CORREÇÃO AQUI: CENTRALIZANDO TODA A BUSCA DE DADOS NESTE useEffect >>>>
     const fetchAllData = async () => {
@@ -96,12 +103,12 @@ const PainelUsuario = () => {
         setDashboardLoading(false);
         return;
       }
-      
+
       setDashboardLoading(true);
 
       try {
         let startDate, endDate;
-        
+
         // Define o intervalo de datas com base no modo de filtro e no mês atual
         if (filterMode === 'day') {
           startDate = currentMonth.format('YYYY-MM-DD');
@@ -127,10 +134,14 @@ const PainelUsuario = () => {
 
         // Processa o resumo financeiro
         if (summaryRes.data?.status === 'success') {
+          const s = summaryRes.data.data;
           setFinancialSummary({
-            currentBalance: summaryRes.data.data.netBalance,
-            incomeThisMonth: summaryRes.data.data.totalIncome,
-            expensesThisMonth: summaryRes.data.data.totalExpenses,
+            currentBalance: s.netBalance,
+            incomeThisMonth: s.totalIncome,
+            expensesThisMonth: s.totalExpenses,
+            totalCreditCard: s.totalCreditCard || 0,
+            totalFutureDebt: s.futureForecast?.totalFutureDebt || 0,
+            averageMonthlyExpenses: s.averageMonthlyExpenses || 0
           });
         }
 
@@ -149,7 +160,7 @@ const PainelUsuario = () => {
           }, {});
           return Object.values(groupedData);
         };
-        
+
         setIncomeCategories(processChartData(incomeChartRes));
         setExpenseCategories(processChartData(expenseChartRes));
 
@@ -167,9 +178,9 @@ const PainelUsuario = () => {
         setDashboardLoading(false);
       }
     };
-    
+
     fetchAllData();
-    
+
   }, [isAuthenticated, currentProfile, filterMode, currentMonth]); // Dependências corretas
 
 
@@ -187,9 +198,9 @@ const PainelUsuario = () => {
 
   const handleSuccess = (modalSetter) => {
     // A busca de dados já é acionada pelo useEffect, então aqui apenas fechamos o modal
-    modalSetter(false); 
+    modalSetter(false);
   };
-  
+
   // --- Funções de Formatação ---
   const formatCurrency = (value) => {
     return (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -203,10 +214,10 @@ const PainelUsuario = () => {
     setFilterMode(mode);
     // O useEffect cuidará de buscar os dados com os novos estados
   };
-  
+
   // --- Funções de Navegação de Mês ---
   const handleNavigateMonth = (direction) => {
-    setCurrentMonth(prevMonth => 
+    setCurrentMonth(prevMonth =>
       direction === 'prev' ? prevMonth.subtract(1, 'month') : prevMonth.add(1, 'month')
     );
     setFilterMode('month'); // Navegar por mês sempre ativa o modo 'mês'
@@ -228,25 +239,25 @@ const PainelUsuario = () => {
     return (
       <div className="dashboard-state-container">
         <div className="state-card">
-            <FaExclamationTriangle className="state-icon" />
-            <h2 className="state-title">Acesso Negado</h2>
-            <p className="state-description">Você precisa estar logado para ver esta página.</p>
-            <button className="state-action-button" onClick={() => window.location.href = '/login'}>Ir para Login</button>
+          <FaExclamationTriangle className="state-icon" />
+          <h2 className="state-title">Acesso Negado</h2>
+          <p className="state-description">Você precisa estar logado para ver esta página.</p>
+          <button className="state-action-button" onClick={() => window.location.href = '/login'}>Ir para Login</button>
         </div>
       </div>
     );
   }
-  
+
   if (!currentProfile && isAuthenticated && !loadingProfiles) {
     return (
-        <div className="dashboard-state-container">
-            <div className="state-card">
-                <FaExclamationTriangle className="state-icon" />
-                <h2 className="state-title">Nenhum Perfil Selecionado</h2>
-                <p className="state-description">Por favor, selecione um perfil para continuar.</p>
-                <button className="state-action-button" onClick={() => window.location.href = '/painel/meu-perfil'}>Gerenciar Perfis</button>
-            </div>
+      <div className="dashboard-state-container">
+        <div className="state-card">
+          <FaExclamationTriangle className="state-icon" />
+          <h2 className="state-title">Nenhum Perfil Selecionado</h2>
+          <p className="state-description">Por favor, selecione um perfil para continuar.</p>
+          <button className="state-action-button" onClick={() => window.location.href = '/painel/meu-perfil'}>Gerenciar Perfis</button>
         </div>
+      </div>
     );
   }
 
@@ -261,31 +272,44 @@ const PainelUsuario = () => {
           <p className="header-welcome-text">Olá, {userNameForHeader.split(' ')[0]}! Acompanhe suas finanças e atividades.</p>
         </div>
 
+        {/* --- ALERTA DE GASTOS ACIMA DA MÉDIA --- */}
+        {financialSummary.expensesThisMonth > financialSummary.averageMonthlyExpenses && (
+          <div className="dashboard-alert warning animated-card">
+            <FaExclamationTriangle className="alert-icon" />
+            <div className="alert-content">
+              <p className="alert-title">Atenção: Gastos acima da média!</p>
+              <p className="alert-description">
+                Suas despesas deste período ({formatCurrency(financialSummary.expensesThisMonth)}) ultrapassaram sua média mensal de {formatCurrency(financialSummary.averageMonthlyExpenses)}.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* --- FILTRO DE PERÍODO SIMPLIFICADO (CONFORME IMAGEM) --- */}
         <div className="period-filter-container">
-            <div className="period-selector">
-                {/* Botões de filtro rápido */}
-                <button onClick={() => handleFilterButtonClick('day')} className={filterMode === 'day' ? 'active' : ''}>Hoje</button>
-                <button onClick={() => handleFilterButtonClick('week')} className={filterMode === 'week' ? 'active' : ''}>Semana</button>
-                <button onClick={() => handleFilterButtonClick('month')} className={filterMode === 'month' ? 'active' : ''}>Mês</button>
+          <div className="period-selector">
+            {/* Botões de filtro rápido */}
+            <button onClick={() => handleFilterButtonClick('day')} className={filterMode === 'day' ? 'active' : ''}>Hoje</button>
+            <button onClick={() => handleFilterButtonClick('week')} className={filterMode === 'week' ? 'active' : ''}>Semana</button>
+            <button onClick={() => handleFilterButtonClick('month')} className={filterMode === 'month' ? 'active' : ''}>Mês</button>
 
-                {/* Navegador de Mês */}
-                <div className="month-navigator">
-                    <button className="nav-arrow" onClick={() => handleNavigateMonth('prev')} title="Mês Anterior">
-                        <FaChevronLeft /> 
-                    </button>
-                    <span className="current-month">{currentMonth.format('MMMM')}</span> 
-                    <button className="nav-arrow" onClick={() => handleNavigateMonth('next')} title="Próximo Mês">
-                        <FaChevronRight />
-                    </button>
-                </div>
-                
-                {/* RangePicker REMOVIDO conforme solicitação */}
+            {/* Navegador de Mês */}
+            <div className="month-navigator">
+              <button className="nav-arrow" onClick={() => handleNavigateMonth('prev')} title="Mês Anterior">
+                <FaChevronLeft />
+              </button>
+              <span className="current-month">{currentMonth.format('MMMM')}</span>
+              <button className="nav-arrow" onClick={() => handleNavigateMonth('next')} title="Próximo Mês">
+                <FaChevronRight />
+              </button>
             </div>
+
+            {/* RangePicker REMOVIDO conforme solicitação */}
+          </div>
         </div>
 
         <section className="dashboard-grid">
-          
+
           <div className="summary-card balance animated-card">
             <div className="card-icon-wrapper"><FaPiggyBank className="card-icon" /></div>
             <div className="card-content">
@@ -293,22 +317,39 @@ const PainelUsuario = () => {
               <h3 className="card-value">{formatCurrency(financialSummary.currentBalance)}</h3>
             </div>
           </div>
-          <div className="summary-card income animated-card" style={{animationDelay: '0.1s'}}>
-              <div className="card-icon-wrapper"><FaArrowUp className="card-icon" /></div>
+          <div className="summary-card income animated-card" style={{ animationDelay: '0.1s' }}>
+            <div className="card-icon-wrapper"><FaArrowUp className="card-icon" /></div>
             <div className="card-content">
               <p className="card-title">Receitas no Período</p> {/* Título ajustado */}
               <h3 className="card-value">{formatCurrency(financialSummary.incomeThisMonth)}</h3>
             </div>
           </div>
-          <div className="summary-card expenses animated-card" style={{animationDelay: '0.2s'}}>
+          <div className="summary-card expenses animated-card" style={{ animationDelay: '0.2s' }}>
             <div className="card-icon-wrapper"><FaArrowDown className="card-icon" /></div>
             <div className="card-content">
-              <p className="card-title">Despesas no Período</p> {/* Título ajustado */}
+              <p className="card-title">Despesas no Período</p>
               <h3 className="card-value">{formatCurrency(financialSummary.expensesThisMonth)}</h3>
             </div>
           </div>
-          
-          <div className="quick-actions-card animated-card" style={{animationDelay: '0.3s'}}>
+
+          {/* NOVOS CARDS - DASHBOARD INTELIGENTE */}
+          <div className="summary-card credit-card animated-card" style={{ animationDelay: '0.25s' }}>
+            <div className="card-icon-wrapper"><FaChartPie className="card-icon" /></div>
+            <div className="card-content">
+              <p className="card-title">Total Cartão (Período)</p>
+              <h3 className="card-value">{formatCurrency(financialSummary.totalCreditCard)}</h3>
+            </div>
+          </div>
+
+          <div className="summary-card future-debt animated-card" style={{ animationDelay: '0.3s' }}>
+            <div className="card-icon-wrapper"><FaRetweet className="card-icon" /></div>
+            <div className="card-content">
+              <p className="card-title">Total Parcelado Futuro</p>
+              <h3 className="card-value">{formatCurrency(financialSummary.totalFutureDebt)}</h3>
+            </div>
+          </div>
+
+          <div className="quick-actions-card animated-card" style={{ animationDelay: '0.3s' }}>
             <h4 className="card-section-title">Ações Rápidas</h4>
             <div className="actions-grid">
               <button className="action-button income" onClick={() => { setEditingItem(null); setIsReceitaModalVisible(true); }}><FaPlus /> Nova Receita</button>
@@ -318,7 +359,7 @@ const PainelUsuario = () => {
             </div>
           </div>
 
-          <div className="card chart-card animated-card" style={{animationDelay: '0.4s'}}>
+          <div className="card chart-card animated-card" style={{ animationDelay: '0.4s' }}>
             <h4 className="card-section-title">Receitas por Categoria</h4>
             {incomeCategories.length > 0 ? (
               <ResponsiveContainer width="100%" height={320}>
@@ -335,7 +376,7 @@ const PainelUsuario = () => {
             ) : <div className="empty-state">Nenhum dado de receita para o período selecionado.</div>}
           </div>
 
-          <div className="card chart-card animated-card" style={{animationDelay: '0.5s'}}>
+          <div className="card chart-card animated-card" style={{ animationDelay: '0.5s' }}>
             <h4 className="card-section-title">Despesas por Categoria</h4>
             {expenseCategories.length > 0 ? (
               <ResponsiveContainer width="100%" height={320}>
@@ -352,7 +393,7 @@ const PainelUsuario = () => {
             ) : <div className="empty-state">Nenhuma despesa para o período selecionado.</div>}
           </div>
 
-          <div className="card list-card animated-card" style={{animationDelay: '0.6s'}}>
+          <div className="card list-card animated-card" style={{ animationDelay: '0.6s' }}>
             <h4 className="card-section-title">Próximos Vencimentos e Lembretes</h4>
             {upcomingItems.length > 0 ? (
               <ul className="upcoming-list">
@@ -382,56 +423,56 @@ const PainelUsuario = () => {
 
       {/* --- RENDERIZAÇÃO CONDICIONAL DE TODOS OS MODAIS --- */}
       <ModalNovaReceita
-          open={isReceitaModalVisible}
-          onCancel={() => setIsReceitaModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsReceitaModalVisible)}
-          currentProfile={currentProfile}
-          editingTransaction={editingItem}
+        open={isReceitaModalVisible}
+        onCancel={() => setIsReceitaModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsReceitaModalVisible)}
+        currentProfile={currentProfile}
+        editingTransaction={editingItem}
       />
       <ModalNovaDespesa
-          open={isDespesaModalVisible}
-          onCancel={() => setIsDespesaModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsDespesaModalVisible)}
-          currentProfile={currentProfile}
-          editingTransaction={editingItem}
+        open={isDespesaModalVisible}
+        onCancel={() => setIsDespesaModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsDespesaModalVisible)}
+        currentProfile={currentProfile}
+        editingTransaction={editingItem}
       />
       <ModalNovaRecorrencia
-          open={isRecorrenciaModalVisible}
-          onCancel={() => setIsRecorrenciaModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsRecorrenciaModalVisible)}
-          currentProfile={currentProfile}
-          editingRecorrencia={editingItem}
+        open={isRecorrenciaModalVisible}
+        onCancel={() => setIsRecorrenciaModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsRecorrenciaModalVisible)}
+        currentProfile={currentProfile}
+        editingRecorrencia={editingItem}
       />
       <ModalNovoCompromisso
-          open={isCompromissoModalVisible}
-          onCancel={() => setIsCompromissoModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsCompromissoModalVisible)}
-          currentProfile={currentProfile}
-          editingAppointment={editingItem}
+        open={isCompromissoModalVisible}
+        onCancel={() => setIsCompromissoModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsCompromissoModalVisible)}
+        currentProfile={currentProfile}
+        editingAppointment={editingItem}
       />
       <ModalNovoAgendamentoPJ
-          open={isPjChooserModalVisible}
-          onCancel={() => setIsPjChooserModalVisible(false)}
-          onSelectClientFlow={() => {
-              setIsPjChooserModalVisible(false);
-              setIsPjClientModalVisible(true);
-          }}
-          onSelectServiceFlow={() => {
-              setIsPjChooserModalVisible(false);
-              setIsPjServiceModalVisible(true);
-          }}
+        open={isPjChooserModalVisible}
+        onCancel={() => setIsPjChooserModalVisible(false)}
+        onSelectClientFlow={() => {
+          setIsPjChooserModalVisible(false);
+          setIsPjClientModalVisible(true);
+        }}
+        onSelectServiceFlow={() => {
+          setIsPjChooserModalVisible(false);
+          setIsPjServiceModalVisible(true);
+        }}
       />
       <ModalPjClientAppointment
-          open={isPjClientModalVisible}
-          onCancel={() => setIsPjClientModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsPjClientModalVisible)}
-          currentProfile={currentProfile}
+        open={isPjClientModalVisible}
+        onCancel={() => setIsPjClientModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsPjClientModalVisible)}
+        currentProfile={currentProfile}
       />
       <ModalPjServiceAppointment
-          open={isPjServiceModalVisible}
-          onCancel={() => setIsPjServiceModalVisible(false)}
-          onSuccess={() => handleSuccess(setIsPjServiceModalVisible)}
-          currentProfile={currentProfile}
+        open={isPjServiceModalVisible}
+        onCancel={() => setIsPjServiceModalVisible(false)}
+        onSuccess={() => handleSuccess(setIsPjServiceModalVisible)}
+        currentProfile={currentProfile}
       />
     </>
   );
