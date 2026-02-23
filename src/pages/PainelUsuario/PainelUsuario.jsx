@@ -23,7 +23,7 @@ import ModalPjClientAppointment from '../../modals/ModalPjClientAppointment/Moda
 import ModalPjServiceAppointment from '../../modals/ModalPjServiceAppointment/ModalPjServiceAppointment';
 
 // --- Importação do Ant Design básica ---
-import { Spin, message } from 'antd';
+import { Spin, message, Skeleton } from 'antd';
 
 import './PainelUsuario.css';
 
@@ -309,125 +309,152 @@ const PainelUsuario = () => {
         </div>
 
         <section className="dashboard-grid">
-
-          <div className="summary-card balance animated-card">
-            <div className="card-icon-wrapper"><FaPiggyBank className="card-icon" /></div>
-            <div className="card-content">
-              <p className="card-title">Saldo do Período</p>
-              <h3 className="card-value">{formatCurrency(financialSummary.currentBalance)}</h3>
-            </div>
-          </div>
-          <div className="summary-card income animated-card" style={{ animationDelay: '0.1s' }}>
-            <div className="card-icon-wrapper"><FaArrowUp className="card-icon" /></div>
-            <div className="card-content">
-              <p className="card-title">A Receber (Total)</p>
-              <h3 className="card-value">{formatCurrency(financialSummary.incomeThisMonth)}</h3>
-            </div>
-          </div>
-          <div className="summary-card expenses animated-card" style={{ animationDelay: '0.2s' }}>
-            <div className="card-icon-wrapper"><FaArrowDown className="card-icon" /></div>
-            <div className="card-content">
-              <p className="card-title">A Pagar (Total)</p>
-              <h3 className="card-value">{formatCurrency(financialSummary.expensesThisMonth)}</h3>
-            </div>
-          </div>
-
-          <div className="summary-card future-debt animated-card" style={{ animationDelay: '0.3s' }}>
-            <div className="card-icon-wrapper"><FaRetweet className="card-icon" /></div>
-            <div className="card-content">
-              <p className="card-title">Parcelado Futuro</p>
-              <h3 className="card-value">{formatCurrency(financialSummary.totalFutureDebt)}</h3>
-            </div>
-          </div>
-
-          <div className="quick-actions-card animated-card" style={{ animationDelay: '0.3s' }}>
-            <h4 className="card-section-title">Ações Rápidas</h4>
-            <div className="actions-grid">
-              <button className="action-button income" onClick={() => { setEditingItem(null); setIsReceitaModalVisible(true); }}><FaPlus /> Nova Receita</button>
-              <button className="action-button expense" onClick={() => { setEditingItem(null); setIsDespesaModalVisible(true); }}><FaPlus /> Nova Despesa</button>
-              <button className="action-button neutral" onClick={handleNovoAgendamentoClick}><FaCalendarAlt /> Novo Compromisso</button>
-              <button className="action-button recurrence" onClick={() => { setEditingItem(null); setIsRecorrenciaModalVisible(true); }}><FaRetweet /> Nova Recorrência</button>
-            </div>
-          </div>
-
-          {/* VIRTUAL CREDIT CARD - PREMIUM UI */}
-          <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s' }}>
-            <div className="virtual-card">
-              <div className="card-header">
-                <div className="card-chip"></div>
-                <div className="card-brand">VIP</div>
-              </div>
-              <div className="card-number">**** **** **** 8888</div>
-              <div className="card-footer">
-                <div className="card-holder">
-                  <span className="card-label">Card Holder</span>
-                  <span className="card-name">{userNameForHeader.toUpperCase()}</span>
-                </div>
-                <div className="card-balance-info">
-                  <span className="card-label">Total spent on period</span>
-                  <div className="card-balance-value">{formatCurrency(financialSummary.totalCreditCard)}</div>
+          {/* --- CARDS DE RESUMO (SUMMARY) --- */}
+          {dashboardLoading ? (
+            <>
+              <div className="summary-card animated-card"><Skeleton active avatar paragraph={{ rows: 1 }} /></div>
+              <div className="summary-card animated-card"><Skeleton active avatar paragraph={{ rows: 1 }} /></div>
+              <div className="summary-card animated-card"><Skeleton active avatar paragraph={{ rows: 1 }} /></div>
+              <div className="summary-card animated-card"><Skeleton active avatar paragraph={{ rows: 1 }} /></div>
+            </>
+          ) : (
+            <>
+              <div className="summary-card balance animated-card">
+                <div className="card-icon-wrapper"><FaPiggyBank className="card-icon" /></div>
+                <div className="card-content">
+                  <p className="card-title">Saldo do Período</p>
+                  <h3 className="card-value">{formatCurrency(financialSummary.currentBalance)}</h3>
                 </div>
               </div>
+              <div className="summary-card income animated-card" style={{ animationDelay: '0.1s' }}>
+                <div className="card-icon-wrapper"><FaArrowUp className="card-icon" /></div>
+                <div className="card-content">
+                  <p className="card-title">A Receber (Total)</p>
+                  <h3 className="card-value">{formatCurrency(financialSummary.incomeThisMonth)}</h3>
+                </div>
+              </div>
+              <div className="summary-card expenses animated-card" style={{ animationDelay: '0.2s' }}>
+                <div className="card-icon-wrapper"><FaArrowDown className="card-icon" /></div>
+                <div className="card-content">
+                  <p className="card-title">A Pagar (Total)</p>
+                  <h3 className="card-value">{formatCurrency(financialSummary.expensesThisMonth)}</h3>
+                </div>
+              </div>
+
+              <div className="summary-card future-debt animated-card" style={{ animationDelay: '0.3s' }}>
+                <div className="card-icon-wrapper"><FaRetweet className="card-icon" /></div>
+                <div className="card-content">
+                  <p className="card-title">Parcelado Futuro</p>
+                  <h3 className="card-value">{formatCurrency(financialSummary.totalFutureDebt)}</h3>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* --- COLUNA ESQUERDA: GRÁFICOS --- */}
+          <div className="chart-card-group" style={{ gridColumn: 'span 8', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="card chart-card animated-card" style={{ animationDelay: '0.4s' }}>
+              <h4 className="card-section-title"><FaArrowUp /> Receitas por Categoria</h4>
+              {dashboardLoading ? <Skeleton active paragraph={{ rows: 6 }} /> : (
+                incomeCategories.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <PieChart>
+                      <Tooltip formatter={(value) => formatCurrency(value)} />
+                      <Legend content={renderCustomLegend} verticalAlign="bottom" />
+                      <Pie data={incomeCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
+                        {incomeCategories.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <div className="empty-state">Nenhum dado de receita para o período selecionado.</div>
+              )}
+            </div>
+
+            <div className="card chart-card animated-card" style={{ animationDelay: '0.5s' }}>
+              <h4 className="card-section-title"><FaArrowDown /> Despesas por Categoria</h4>
+              {dashboardLoading ? <Skeleton active paragraph={{ rows: 6 }} /> : (
+                expenseCategories.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <PieChart>
+                      <Tooltip formatter={(value) => formatCurrency(value)} />
+                      <Legend content={renderCustomLegend} verticalAlign="bottom" />
+                      <Pie data={expenseCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
+                        {expenseCategories.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <div className="empty-state">Nenhuma despesa para o período selecionado.</div>
+              )}
             </div>
           </div>
 
-          <div className="card chart-card animated-card" style={{ animationDelay: '0.4s' }}>
-            <h4 className="card-section-title">Receitas por Categoria</h4>
-            {incomeCategories.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend content={renderCustomLegend} verticalAlign="bottom" />
-                  <Pie data={incomeCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
-                    {incomeCategories.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : <div className="empty-state">Nenhum dado de receita para o período selecionado.</div>}
-          </div>
+          {/* --- COLUNA DIREITA: VIRTUAL CARD & AÇÕES --- */}
+          <div className="sidebar-group" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* VIRTUAL CREDIT CARD - PREMIUM UI */}
+            <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s', width: '100%', padding: '0' }}>
+              {dashboardLoading ? <div className="card"><Skeleton active paragraph={{ rows: 4 }} /></div> : (
+                <div className="virtual-card" style={{ maxWidth: 'none' }}>
+                  <div className="card-header">
+                    <div className="card-chip"></div>
+                    <div className="card-brand">VIP</div>
+                  </div>
+                  <div className="card-number">**** **** **** 8888</div>
+                  <div className="card-footer">
+                    <div className="card-holder">
+                      <span className="card-label">Card Holder</span>
+                      <span className="card-name">{userNameForHeader.toUpperCase()}</span>
+                    </div>
+                    <div className="card-balance-info">
+                      <span className="card-label">Total spent on period</span>
+                      <div className="card-balance-value">{formatCurrency(financialSummary.totalCreditCard)}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <div className="card chart-card animated-card" style={{ animationDelay: '0.5s' }}>
-            <h4 className="card-section-title">Despesas por Categoria</h4>
-            {expenseCategories.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend content={renderCustomLegend} verticalAlign="bottom" />
-                  <Pie data={expenseCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
-                    {expenseCategories.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : <div className="empty-state">Nenhuma despesa para o período selecionado.</div>}
+            <div className="card quick-actions-card animated-card" style={{ animationDelay: '0.3s' }}>
+              <h4 className="card-section-title"><FaPlus /> Ações Rápidas</h4>
+              {dashboardLoading ? <Skeleton active paragraph={{ rows: 3 }} /> : (
+                <div className="actions-grid">
+                  <button className="action-button income" onClick={() => { setEditingItem(null); setIsReceitaModalVisible(true); }}><FaPlus /> Nova Receita</button>
+                  <button className="action-button expense" onClick={() => { setEditingItem(null); setIsDespesaModalVisible(true); }}><FaPlus /> Nova Despesa</button>
+                  <button className="action-button neutral" onClick={handleNovoAgendamentoClick}><FaCalendarAlt /> Novo Compromisso</button>
+                  <button className="action-button recurrence" onClick={() => { setEditingItem(null); setIsRecorrenciaModalVisible(true); }}><FaRetweet /> Nova Recorrência</button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="card list-card animated-card" style={{ animationDelay: '0.6s' }}>
-            <h4 className="card-section-title">Próximos Vencimentos e Lembretes</h4>
-            {upcomingItems.length > 0 ? (
-              <ul className="upcoming-list">
-                {upcomingItems.map(item => (
-                  <li key={item.id} className="upcoming-list-item">
-                    <div className={`item-avatar ${item.transactionType || item.itemType}`}>
-                      {item.itemType === 'transaction' ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
-                    </div>
-                    <div className="item-details">
-                      <p className="item-title">{item.title}</p>
-                      <p className="item-description">
-                        {`Vence ${dayjs(item.dueDate).fromNow()} (${dayjs(item.dueDate).format('DD/MM/YY')})`}
-                        {item.amount !== null && <span> | {formatCurrency(item.amount)}</span>}
-                      </p>
-                    </div>
-                    <span className={`item-tag ${item.transactionType || item.itemType}`}>
-                      {item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : 'LEMBRETE'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : <div className="empty-state">Nenhuma conta ou lembrete próximo.</div>}
+            <h4 className="card-section-title"><FaCalendarAlt /> Próximos Vencimentos e Lembretes</h4>
+            {dashboardLoading ? <Skeleton active paragraph={{ rows: 5 }} /> : (
+              upcomingItems.length > 0 ? (
+                <ul className="upcoming-list">
+                  {upcomingItems.map(item => (
+                    <li key={item.id} className="upcoming-list-item">
+                      <div className={`item-avatar ${item.transactionType || item.itemType}`}>
+                        {item.itemType === 'transaction' ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
+                      </div>
+                      <div className="item-details">
+                        <p className="item-title">{item.title}</p>
+                        <p className="item-description">
+                          {`Vence ${dayjs(item.dueDate).fromNow()} (${dayjs(item.dueDate).format('DD/MM/YY')})`}
+                          {item.amount !== null && <span> | {formatCurrency(item.amount)}</span>}
+                        </p>
+                      </div>
+                      <span className={`item-tag ${item.transactionType || item.itemType}`}>
+                        {item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : 'LEMBRETE'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <div className="empty-state">Nenhuma conta ou lembrete próximo.</div>
+            )}
           </div>
 
         </section>

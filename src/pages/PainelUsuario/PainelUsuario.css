@@ -100,27 +100,43 @@ body.painel-active {
   grid-column: span 12;
 }
 
-/* --- CARD GENÉRICO --- */
+/* --- CARD GENÉRICO (PREMIUM LOOK) --- */
 .card {
-  background-color: var(--fundo-card);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px var(--sombra);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px var(--sombra);
   padding: 24px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.15);
+  box-shadow: 0 12px 40px rgba(100, 116, 139, 0.2);
+  background-color: #ffffff;
 }
 
 .card-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--texto-primario);
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-section-title::after {
+  content: '';
+  flex-grow: 1;
+  height: 2px;
+  background: linear-gradient(to right, var(--laranja-claro), transparent);
 }
 
 /* --- ANIMAÇÃO DE ENTRADA --- */
@@ -142,29 +158,41 @@ body.painel-active {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px;
-  background-color: var(--fundo-card);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px var(--sombra);
-  transition: all 0.3s ease;
-  border-left: 5px solid transparent;
+  padding: 24px;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px var(--sombra);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 6px solid transparent;
 }
 
 .summary-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.15);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(100, 116, 139, 0.15);
+  background-color: #ffffff;
 }
 
 .summary-card.balance {
-  border-color: var(--laranja);
+  border-left-color: var(--laranja);
 }
 
 .summary-card.income {
-  border-color: var(--verde);
+  border-left-color: var(--verde);
 }
 
 .summary-card.expenses {
-  border-color: var(--vermelho);
+  border-left-color: var(--vermelho);
+}
+
+.summary-card.future-debt {
+  border-left-color: var(--laranja-escuro);
+}
+
+.summary-card.credit-card {
+  border-left-color: var(--azul);
 }
 
 .card-icon-wrapper {
