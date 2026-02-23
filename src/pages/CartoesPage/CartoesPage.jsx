@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
+  Layout, Typography, Button, Row, Col, Card, Avatar, Select, DatePicker,
+  List, Tag, Statistic, Progress, Empty, Tooltip, Modal, Form, Input,
   InputNumber, Checkbox, Dropdown, Menu, Space, message, Spin, Timeline, Alert
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, CreditCardOutlined,
   InfoCircleOutlined, MoreOutlined,
   ShoppingCartOutlined, PieChartOutlined, WalletOutlined,
-  ScanOutlined, HistoryOutlined, CheckCircleOutlined
+  ScanOutlined, HistoryOutlined, CheckCircleOutlined,
+  BankOutlined, ArrowRightOutlined, CalendarOutlined
 } from '@ant-design/icons';
 import { Pie } from '@ant-design/charts';
 import dayjs from 'dayjs';
@@ -59,14 +62,6 @@ const CardPreview = ({ form, currentProfile }) => {
   );
 };
 
-import {
-  ScanOutlined,
-  BankOutlined,
-  ArrowRightOutlined,
-  CalendarOutlined,
-  CheckCircleOutlined,
-  HistoryOutlined
-} from '@ant-design/icons';
 
 const CartoesPage = () => {
   const {
