@@ -28,38 +28,57 @@ const { Option } = Select;
 const { useModal } = Modal;
 const { useWatch } = Form;
 
-const CardPreview = ({ form, currentProfile }) => {
-  const name = useWatch('name', form);
-  const flag = useWatch('bandeira', form);
-  const color = useWatch('corDominante', form);
-  const icon = useWatch('iconeBandeira', form);
-  const lastFour = useWatch('numeroCartao', form);
+const VisualCard = ({ card, currentProfile, scale = 1 }) => {
+  const color = card.dominantColor || '#6A0DAD';
+  const lastFour = card.lastFourDigits || card.numeroCartao || '••••';
+  const icon = card.flagIconUrl || card.iconeBandeira;
 
   return (
-    <div className="virtual-card-premium" style={{ '--card-gradient': color || '#6A0DAD', transform: 'scale(0.8)', margin: '-20px' }}>
+    <div
+      className="virtual-card-premium"
+      style={{
+        '--card-gradient': color,
+        transform: `scale(${scale})`,
+        margin: scale !== 1 ? `-${(1 - scale) * 50}%` : '0'
+      }}
+    >
       <div className="card-glass-overlay"></div>
       <div className="card-content-top">
-        <Avatar size={48} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
-        <div className="card-chip-container">
-          <div className="card-chip-sim"></div>
-          <ScanOutlined className="nfc-icon" />
+        <Avatar size={48 * scale} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
+        <div className="card-chip-container" style={{ gap: 12 * scale }}>
+          <div className="card-chip-sim" style={{ width: 40 * scale, height: 30 * scale }}></div>
+          <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />
         </div>
       </div>
-      <div className="card-number-display">
-        •••• •••• •••• {lastFour || '••••'}
+      <div className="card-number-display" style={{ fontSize: 22 * scale }}>
+        •••• •••• •••• {lastFour}
       </div>
       <div className="card-footer-info">
         <div className="card-holder">
-          <span className="label">PORTADOR</span>
-          <span className="value">{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
+          <span className="label" style={{ fontSize: 9 * scale }}>PORTADOR</span>
+          <span className="value" style={{ fontSize: 14 * scale }}>{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
         </div>
         <div className="card-expiry">
-          <span className="label">VALIDADE</span>
-          <span className="value">12/29</span>
+          <span className="label" style={{ fontSize: 9 * scale }}>VALIDADE</span>
+          <span className="value" style={{ fontSize: 14 * scale }}>12/29</span>
         </div>
       </div>
     </div>
   );
+};
+
+const CardPreview = ({ form, currentProfile }) => {
+  const color = useWatch('corDominante', form);
+  const icon = useWatch('iconeBandeira', form);
+  const lastFour = useWatch('numeroCartao', form);
+
+  const previewCard = {
+    dominantColor: color,
+    lastFourDigits: lastFour,
+    flagIconUrl: icon
+  };
+
+  return <VisualCard card={previewCard} currentProfile={currentProfile} scale={0.8} />;
 };
 
 
@@ -359,18 +378,24 @@ const CartoesPage = () => {
           <div className="cards-scrollable-list">
             {loadingCards ? <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div> :
               cards.length > 0 ? cards.map(card => (
-                <Card
-                  key={card.id} hoverable className={`cartao-item-card ${selectedCard?.id === card.id ? 'selected' : ''}`}
-                  onClick={() => handleCardSelect(card)} style={{ '--card-accent-color': card.dominantColor || 'var(--map-laranja)' }}>
-                  <div className="cartao-item-content">
-                    <Avatar size={40} src={card.flagIconUrl} icon={<CreditCardOutlined />} className="cartao-bandeira-icon" />
-                    <div className="cartao-info">
-                      <Text strong className="cartao-nome">{card.name} {card.isDefault && <Tag color="gold" style={{ marginLeft: 5, fontSize: 10 }}>Padrão</Tag>}</Text>
-                      <Text type="secondary" className="cartao-final">Final •••• {card.lastFourDigits || '????'}</Text>
-                    </div>
-                    <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight"><Button type="text" icon={<MoreOutlined />} shape="circle" className="cartao-actions-btn" onClick={(e) => e.stopPropagation()} /></Dropdown>
+                <div
+                  key={card.id}
+                  className={`cartao-gallery-item ${selectedCard?.id === card.id ? 'selected' : ''}`}
+                  onClick={() => handleCardSelect(card)}
+                >
+                  <div className="mini-card-container">
+                    <VisualCard card={card} currentProfile={currentProfile} scale={0.5} />
                   </div>
-                </Card>
+                  <div className="mini-card-info">
+                    <div className="mini-card-header">
+                      <Text strong className="mini-card-name">{card.name}</Text>
+                      {card.isDefault && <Tag color="gold" size="small">Padrão</Tag>}
+                    </div>
+                    <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight">
+                      <Button type="text" icon={<MoreOutlined />} shape="circle" size="small" className="cartao-actions-btn" onClick={(e) => e.stopPropagation()} />
+                    </Dropdown>
+                  </div>
+                </div>
               )) : <Empty description={`Nenhum cartão cadastrado para ${currentProfile?.name || 'este perfil'}.`} image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ marginTop: '30px' }} />}
           </div>
         </Col>
@@ -381,32 +406,7 @@ const CartoesPage = () => {
           ) : (
             <Spin spinning={loadingInvoice || loadingCards}>
               <div className="selected-card-details-wrapper">
-                <div className="premium-card-header-view">
-                  <div className="virtual-card-wrapper">
-                    <div className="virtual-card-premium" style={{ '--card-gradient': selectedCard.dominantColor || '#6A0DAD' }}>
-                      <div className="card-glass-overlay"></div>
-                      <div className="card-content-top">
-                        <Avatar size={48} src={selectedCard.flagIconUrl} className="card-flag-img" />
-                        <div className="card-chip-container">
-                          <div className="card-chip-sim"></div>
-                          <ScanOutlined className="nfc-icon" />
-                        </div>
-                      </div>
-                      <div className="card-number-display">
-                        •••• •••• •••• {selectedCard.lastFourDigits || '••••'}
-                      </div>
-                      <div className="card-footer-info">
-                        <div className="card-holder">
-                          <span className="label">PORTADOR</span>
-                          <span className="value">{currentProfile?.name?.toUpperCase() || 'CLIENTE MAP'}</span>
-                        </div>
-                        <div className="card-expiry">
-                          <span className="label">VALIDADE</span>
-                          <span className="value">12/29</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="premium-card-header-view simplified">
 
                   <div className="card-quick-stats-glass">
                     <Row gutter={[24, 16]}>
