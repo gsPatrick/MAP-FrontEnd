@@ -1,0 +1,51 @@
+/* d:/daniatualagrvai/MAP-FrontEnd/src/components/Support/SupportFloatingButton.css */
+.support-floating-wrapper {
+    position: fixed;
+    top: 80px;
+    /* Abaixo do header */
+    right: 24px;
+    z-index: 1000;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.support-floating-btn {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--map-laranja, #b24a0a);
+    border-color: var(--map-laranja, #b24a0a);
+    box-shadow: 0 4px 12px rgba(178, 74, 10, 0.4);
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.support-floating-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    background-color: var(--map-alaranjado, #d45a0e);
+    border-color: var(--map-alaranjado, #d45a0e);
+    box-shadow: 0 6px 16px rgba(178, 74, 10, 0.6);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ajustes para mobile se necessário */
+@media (max-width: 768px) {
+    .support-floating-wrapper {
+        top: auto;
+        bottom: 24px;
+        /* Move para baixo no mobile para não atrapalhar outros elementos */
+        right: 16px;
+    }
+}

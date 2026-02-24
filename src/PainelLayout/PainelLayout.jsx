@@ -5,6 +5,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import HeaderPanel from '../componentsPanel/HeaderPanel/HeaderPanel';
 import SidebarPanel from '../componentsPanel/SidebarPanel/SidebarPanel';
 import { useProfile } from '../contexts/ProfileContext';
+import SupportFloatingButton from '../components/Support/SupportFloatingButton';
 
 const { Content } = Layout;
 const MOBILE_BREAKPOINT = 992;
@@ -40,7 +41,7 @@ const PainelLayout = () => {
   const handleToggleDrawer = () => {
     setDrawerVisible(!drawerVisible);
   };
-  
+
   const handleToggleCollapse = () => {
     setCollapsed(!collapsed);
   }
@@ -72,8 +73,8 @@ const PainelLayout = () => {
       ) : (
         sidebar // <<< USA A MESMA VARIÁVEL sidebar
       )}
-      <Layout 
-        className="site-layout" 
+      <Layout
+        className="site-layout"
         style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 220), transition: 'margin-left 0.2s' }}
       >
         <HeaderPanel
@@ -81,7 +82,8 @@ const PainelLayout = () => {
           isMobile={isMobile}
           onMenuClick={handleToggleDrawer}
         />
-        <Outlet /> 
+        <SupportFloatingButton />
+        <Outlet />
       </Layout>
     </Layout>
   );

@@ -45,6 +45,7 @@ const DashboardOverview = lazy(() => import('./pages/AdminPage/pages/DashboardOv
 const PlanManagementPage = lazy(() => import('./pages/AdminPage/pages/PlanManagementPage')); // <<< ADICIONE ESTA LINHA
 const BroadcastPage = lazy(() => import('./pages/AdminPage/pages/BroadcastPage'));         // <<< ADICIONE ESTA LINHA
 const AdminSettingsPage = lazy(() => import('./pages/AdminPage/pages/AdminSettingsPage')); // <<< Nova Página de Configurações
+const SupportManagementPage = lazy(() => import('./pages/AdminPage/pages/SupportManagementPage'));
 // <<< FIM DA MODIFICAÇÃO >>>
 
 const AppLayoutSuspense = () => (
@@ -83,6 +84,7 @@ const AppRoutes = () => (
         <Route path="affiliates" element={<AffiliateManagementPage />} />
         <Route path="plans" element={<PlanManagementPage />} />
         <Route path="broadcast" element={<BroadcastPage />} />
+        <Route path="support" element={<SupportManagementPage />} />
         <Route path="settings" element={<AdminSettingsPage />} /> {/* <<< Nova Rota */}
       </Route>
     </Route>
