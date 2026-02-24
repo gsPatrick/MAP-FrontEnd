@@ -53,8 +53,8 @@ const AffiliateLandingPage = () => {
   }, [affiliateCode, navigate]);
 
   const handleProceed = () => {
-    // Navega para a seção de planos, MANTENDO o código de afiliado na URL
-    navigate(`/#planos?ref=${affiliateCode}`);
+    // Navega para a página dedicada de planos, mantendo o contexto de indicação
+    navigate(`/planos?ref=${affiliateCode}`);
   };
 
   const renderContent = () => {
