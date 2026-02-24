@@ -1,8 +1,7 @@
 /* d:/daniatualagrvai/MAP-FrontEnd/src/components/Support/SupportFloatingButton.css */
 .support-floating-wrapper {
     position: fixed;
-    top: 80px;
-    /* Abaixo do header */
+    bottom: 24px;
     right: 24px;
     z-index: 1000;
     animation: fadeIn 0.5s ease-out;
