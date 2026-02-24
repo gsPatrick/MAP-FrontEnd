@@ -1,7 +1,7 @@
 // d:/daniatualagrvai/MAP-FrontEnd/src/components/Support/SupportFloatingButton.jsx
 import React, { useState } from 'react';
 import { Button, Tooltip } from 'antd';
-import { QuestionOutlined } from '@ant-design/icons';
+import { CustomerServiceOutlined } from '@ant-design/icons';
 import SupportTicketModal from './SupportTicketModal';
 import './SupportFloatingButton.css';
 
@@ -16,7 +16,7 @@ const SupportFloatingButton = () => {
                         type="primary"
                         shape="circle"
                         size="large"
-                        icon={<QuestionOutlined />}
+                        icon={<CustomerServiceOutlined />}
                         className="support-floating-btn"
                         onClick={() => setModalVisible(true)}
                     />
