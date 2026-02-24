@@ -6,7 +6,9 @@ import {
 import {
   UserOutlined, ShopOutlined, IdcardOutlined, PlusCircleOutlined,
   GlobalOutlined, SolutionOutlined, LoadingOutlined, DollarCircleOutlined,
-  KeyOutlined, WalletOutlined, CrownOutlined, ArrowRightOutlined, CheckCircleFilled
+  KeyOutlined, WalletOutlined, CrownOutlined, ArrowRightOutlined, CheckCircleFilled,
+  EditOutlined, EyeOutlined, PercentageOutlined, TrophyOutlined, LinkOutlined,
+  TeamOutlined, DollarOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
@@ -104,44 +106,55 @@ const MeuPerfilPage = () => {
   const [withdrawForm] = Form.useForm();
   const [creatingProfile, setCreatingProfile] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isSlugModalVisible, setIsSlugModalVisible] = useState(false);
+  const [slugLoading, setSlugLoading] = useState(false);
+  const [slugForm] = Form.useForm();
 
-  // Busca os dados principais do cliente e os dados do afiliado
   useEffect(() => {
     if (isAuthenticated && !loadingProfiles) {
-      // Busca dados do cliente (perfil, plano, etc)
-      apiClient.get('/auth/client/me')
-        .then(response => {
-          if (response.data?.status === 'success' && response.data?.data?.client) {
-            const clientData = response.data.data.client;
-            localStorage.setItem('userData', JSON.stringify(clientData));
-            setMainUserData(clientData);
-          }
-        })
-        .catch(err => console.error("Erro ao buscar dados do cliente:", err));
-
-      // Busca dados do dashboard de afiliado (saldo, indicações, etc)
-      setLoadingAffiliateData(true);
-      apiClient.get('/affiliate/dashboard')
-        .then(response => {
-          if (response.data?.status === 'success') {
-            setAffiliateData(response.data.data);
-          }
-        })
-        .catch(err => console.error("Erro ao buscar dados de afiliado:", err))
-        .finally(() => setLoadingAffiliateData(false));
-
-      // Busca histórico de indicações
-      setLoadingHistory(true);
-      apiClient.get('/affiliate/referrals')
-        .then(response => {
-          if (response.data && Array.isArray(response.data)) {
-            setAffiliateHistory(response.data);
-          }
-        })
-        .catch(err => console.error("Erro ao buscar histórico de indicações:", err))
-        .finally(() => setLoadingHistory(false));
+      fetchMainUserData();
+      fetchAffiliateData();
     }
   }, [isAuthenticated, loadingProfiles]);
+
+  const fetchMainUserData = async () => {
+    try {
+      const response = await apiClient.get('/auth/client/me');
+      if (response.data?.status === 'success' && response.data?.data?.client) {
+        const clientData = response.data.data.client;
+        localStorage.setItem('userData', JSON.stringify(clientData));
+        setMainUserData(clientData);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados do cliente:", err);
+    }
+  };
+
+  const fetchAffiliateData = async () => {
+    setLoadingAffiliateData(true);
+    setLoadingHistory(true);
+    try {
+      const [dashboardRes, referralsRes] = await Promise.all([
+        apiClient.get('/affiliate/dashboard'),
+        apiClient.get('/affiliate/referrals')
+      ]);
+
+      if (dashboardRes.data?.status === 'success') {
+        setAffiliateData(dashboardRes.data.data);
+      }
+
+      if (referralsRes.data?.status === 'success' && Array.isArray(referralsRes.data.data)) {
+        setAffiliateHistory(referralsRes.data.data);
+      } else if (Array.isArray(referralsRes.data)) {
+        setAffiliateHistory(referralsRes.data);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados de afiliado:", err);
+    } finally {
+      setLoadingAffiliateData(false);
+      setLoadingHistory(false);
+    }
+  };
 
   const hasPJProfile = useMemo(() => {
     return userProfiles.some(p => p.type === 'PJ' || p.type === 'MEI');
@@ -175,10 +188,26 @@ const MeuPerfilPage = () => {
   };
 
   const copyReferralCode = () => {
-    if (!affiliateData?.summary?.affiliateCode) return;
-    navigator.clipboard.writeText(affiliateData.summary.affiliateCode)
-      .then(() => message.success("Código copiado!"))
+    const identifier = affiliateData?.summary?.affiliateSlug || affiliateData?.summary?.affiliateCode;
+    if (!identifier) return;
+    const link = `https://www.map-nocontrole.com.br/indicacao/${identifier}`;
+    navigator.clipboard.writeText(link)
+      .then(() => message.success("Link copiado!"))
       .catch(() => message.error('Falha ao copiar.'));
+  };
+
+  const handleUpdateSlug = async (values) => {
+    try {
+      setSlugLoading(true);
+      await apiClient.put('/affiliate/update-slug', { slug: values.slug });
+      message.success('Seu link personalizado foi atualizado!');
+      setIsSlugModalVisible(false);
+      fetchAffiliateData();
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Erro ao atualizar o link.');
+    } finally {
+      setSlugLoading(false);
+    }
   };
 
   const handleWithdrawClick = () => {
@@ -358,34 +387,81 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
               )}
             </Card>
 
-            {/* Card de Saldo de Comissões */}
+            {/* Card de Programa de Afiliados */}
             <Card title={<Space><WalletOutlined className="card-title-icon" />Programa de Afiliados</Space>} className="perfil-card benefits-card animated-card" bordered={false} style={{ animationDelay: '0.3s' }}>
-              <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={12}>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <Text strong>Seu Link de Convite Personalizado:</Text>
+                  <Button size="small" type="link" icon={<EditOutlined />} onClick={() => {
+                    slugForm.setFieldsValue({ slug: affiliateData?.summary?.affiliateSlug });
+                    setIsSlugModalVisible(true);
+                  }}>
+                    Personalizar Link
+                  </Button>
+                </div>
+                <Input.Group compact>
+                  <Input
+                    style={{ width: 'calc(100% - 100px)', fontWeight: 'bold' }}
+                    value={`map.com.br/p/${affiliateData?.summary?.affiliateSlug || affiliateData?.summary?.affiliateCode}`}
+                    readOnly
+                  />
+                  <Button type="primary" icon={<LinkOutlined />} onClick={copyReferralCode}>Copiar</Button>
+                </Input.Group>
+              </div>
+
+              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                <Col xs={12} sm={6}>
                   <Statistic
-                    title="Total de Indicados (Ciclo Atual)"
-                    value={affiliateData?.summary?.referralsCount || 0}
-                    prefix={<UserOutlined />}
+                    title="Cliques"
+                    value={affiliateData?.metrics?.totalClicks || 0}
+                    prefix={<EyeOutlined />}
                   />
                 </Col>
-                <Col span={12}>
+                <Col xs={12} sm={6}>
                   <Statistic
-                    title="Ganhos Totais (Ciclo Atual)"
-                    value={referralBalance}
-                    precision={2}
-                    prefix="R$"
-                    valueStyle={{ color: 'var(--map-dourado)', fontWeight: 600 }}
+                    title="Indicados"
+                    value={affiliateData?.metrics?.totalReferrals || 0}
+                    prefix={<TeamOutlined />}
+                  />
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Statistic
+                    title="Ativos"
+                    value={affiliateData?.metrics?.activeReferrals || 0}
+                    prefix={<TrophyOutlined style={{ color: '#faad14' }} />}
+                  />
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Statistic
+                    title="Taxa Conv."
+                    value={affiliateData?.metrics?.conversionRate || 0}
+                    suffix="%"
+                    prefix={<PercentageOutlined />}
+                    valueStyle={{ color: (affiliateData?.metrics?.conversionRate || 0) > 5 ? '#3f8600' : '#cf1322', fontSize: '16px' }}
                   />
                 </Col>
               </Row>
 
-              <div style={{ marginBottom: 24 }}>
-                <Text strong>Seu Link de Afiliado:</Text>
-                <Input.Group compact style={{ marginTop: 8 }}>
-                  <Input style={{ width: 'calc(100% - 100px)' }} value={affiliateData?.summary?.affiliateLink} readOnly />
-                  <Button type="primary" onClick={copyReferralCode}>Copiar</Button>
-                </Input.Group>
-              </div>
+              <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col span={12}>
+                  <Statistic
+                    title="Saldo Atual"
+                    value={referralBalance}
+                    precision={2}
+                    prefix="R$"
+                    valueStyle={{ color: 'var(--map-laranja)', fontWeight: 600 }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Statistic
+                    title="Receita Gerada"
+                    value={affiliateData?.metrics?.totalRevenueGenerated || 0}
+                    precision={2}
+                    prefix="R$"
+                    valueStyle={{ fontSize: '16px' }}
+                  />
+                </Col>
+              </Row>
 
               <Divider orientation="left">Histórico de Indicações (Ciclo Atual)</Divider>
               <AffiliateHistoryTable history={affiliateHistory} loading={loadingHistory} />
@@ -542,6 +618,43 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         </Row>
       </Modal>
       {/* --- FIM NOVO MODAL --- */}
+
+      {/* Modal de Personalização de Slug */}
+      <Modal
+        title="Personalizar seu Link de Afiliado"
+        open={isSlugModalVisible}
+        onCancel={() => setIsSlugModalVisible(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form form={slugForm} layout="vertical" onFinish={handleUpdateSlug}>
+          <Form.Item
+            name="slug"
+            label="Final do seu Link"
+            rules={[
+              { required: true, message: 'Digite o final do seu link!' },
+              { pattern: /^[a-z0-9-]+$/, message: 'Use apenas letras minúsculas, números e hifens.' }
+            ]}
+          >
+            <Input
+              prefix="map.com.br/p/"
+              placeholder="seu-nome"
+              maxLength={30}
+            />
+          </Form.Item>
+          <Paragraph type="secondary" style={{ fontSize: '12px' }}>
+            Isso facilitará a lembrança do seu link: <strong>map.com.br/p/seu-nome</strong>
+          </Paragraph>
+          <div style={{ textAlign: 'right', marginTop: 16 }}>
+            <Button onClick={() => setIsSlugModalVisible(false)} style={{ marginRight: 8 }}>
+              Cancelar
+            </Button>
+            <Button type="primary" htmlType="submit" loading={slugLoading}>
+              Salvar Alterações
+            </Button>
+          </div>
+        </Form>
+      </Modal>
 
     </Content>
   );

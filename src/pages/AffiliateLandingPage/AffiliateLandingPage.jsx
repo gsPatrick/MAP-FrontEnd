@@ -31,6 +31,13 @@ const AffiliateLandingPage = () => {
         const response = await apiClient.get(`/clients/affiliates/info/${affiliateCode}`);
         if (response.data.status === 'success') {
           setReferrerInfo(response.data.data);
+          // Persiste o código para uso posterior no checkout
+          localStorage.setItem('mapReferralCode', affiliateCode);
+
+          // Registra o clique na API (Silenciosamente)
+          apiClient.post(`/affiliates/click/${affiliateCode}`).catch(err => {
+            console.warn("Erro ao registrar clique:", err);
+          });
         } else {
           setError('Não foi possível encontrar quem te indicou. O código pode ser inválido.');
         }

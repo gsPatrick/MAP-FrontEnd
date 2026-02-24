@@ -2,20 +2,22 @@
 
 .card-preview-section {
     background: #f8f9fa;
-    border-radius: 16px;
-    padding: 24px;
-    height: 100%;
+    border-radius: 20px;
+    padding: 32px;
+    min-height: 520px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid #e9ecef;
+    border: 1px solid #edf2f7;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .virtual-card-preview-wrapper {
     width: 100%;
-    max-width: 320px;
-    margin: 20px 0;
+    max-width: 340px;
+    margin: 30px 0;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15));
 }
 
 .virtual-card-preview-wrapper.scale-preview {
@@ -23,13 +25,16 @@
 }
 
 .card-preview-tip {
-    margin-top: 20px;
-    border-radius: 8px;
+    margin-top: 24px;
+    border-radius: 12px;
     font-size: 13px;
+    background-color: #fffaf0;
+    border: 1px solid #ffe7ba;
+    padding: 12px 16px;
 }
 
 .add-card-modal .ant-modal-body {
-    padding: 24px;
+    padding: 32px 40px;
 }
 
 .form-action-buttons {
@@ -105,10 +110,11 @@
 .card-chip-sim {
     width: 40px;
     height: 30px;
-    background: linear-gradient(135deg, #e0bc63, #b8860b);
+    background: linear-gradient(135deg, #ffd700, #b8860b);
     border-radius: 6px;
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
 }
 
 .card-chip-sim::after {

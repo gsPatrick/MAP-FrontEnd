@@ -50,7 +50,7 @@ const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => 
           <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />
         </div>
       </div>
-      <div className="card-number-display" style={{ fontSize: showDetails ? 22 * scale : 18 * scale, opacity: showDetails ? 1 : 0.8 }}>
+      <div className="card-number-display" style={{ fontSize: showDetails ? 22 * scale : 18 * scale, opacity: showDetails ? 1 : 0.8, letterSpacing: 2 * scale }}>
         •••• •••• •••• {lastFour}
       </div>
       {(showDetails || true) && (
@@ -80,7 +80,7 @@ const CardPreview = ({ form, currentProfile }) => {
     flagIconUrl: icon
   };
 
-  return <VisualCard card={previewCard} currentProfile={currentProfile} scale={0.8} />;
+  return <VisualCard card={previewCard} currentProfile={currentProfile} scale={0.88} />;
 };
 
 
@@ -571,8 +571,8 @@ const CartoesPage = () => {
         </Col>
       </Row>
 
-      <Modal title={editingCard ? "Editar Cartão" : "Adicionar Novo Cartão"} open={isAddCardModalVisible} onCancel={() => { setIsAddCardModalVisible(false); setEditingCard(null); cardForm.resetFields(); }} footer={null} destroyOnClose className="add-card-modal modal-style-map" width={800}>
-        <Row gutter={24}>
+      <Modal title={editingCard ? "Editar Cartão" : "Adicionar Novo Cartão"} open={isAddCardModalVisible} onCancel={() => { setIsAddCardModalVisible(false); setEditingCard(null); cardForm.resetFields(); }} footer={null} destroyOnClose className="add-card-modal modal-style-map" width={850}>
+        <Row gutter={[32, 24]} align="middle">
           <Col xs={24} md={10}>
             <div className="card-preview-section">
               <Text strong style={{ display: 'block', marginBottom: '16px' }}>Pré-visualização do Cartão</Text>

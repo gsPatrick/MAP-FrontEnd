@@ -1,0 +1,50 @@
+/* src/pages/AffiliateDashboardPage/AffiliateDashboardPage.css */
+
+.affiliate-dashboard-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.affiliate-main-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.affiliate-link-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.link-copy-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #d9d9d9;
+    padding: 8px 16px;
+    border-radius: 8px;
+    gap: 12px;
+}
+
+.metric-box {
+    background: #f0f5ff;
+    border: 1px solid #adc6ff;
+    border-radius: 12px;
+}
+
+.balance-card {
+    border-radius: 16px;
+    height: 100%;
+}
+
+.pix-info {
+    font-size: 13px;
+}
+
+@media (max-width: 576px) {
+    .link-copy-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

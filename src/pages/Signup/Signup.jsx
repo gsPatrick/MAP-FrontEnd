@@ -28,7 +28,8 @@ const SignupPage = () => {
   const [plan, setPlan] = useState(null);
   const [referrerInfo, setReferrerInfo] = useState(null);
 
-  const affiliateCode = new URLSearchParams(location.search).get('ref');
+  // Pega o código da URL ou do localStorage (persistência universal)
+  const affiliateCode = new URLSearchParams(location.search).get('ref') || localStorage.getItem('mapReferralCode');
 
   useEffect(() => {
     if (plansInfo[planId]) {
@@ -64,7 +65,7 @@ const SignupPage = () => {
       if (!formattedPhone) {
         throw new Error('O número de telefone fornecido é inválido.');
       }
-      
+
       const submissionData = {
         ...values,
         phone: formattedPhone, // Substitui o número original pelo formatado
@@ -72,12 +73,12 @@ const SignupPage = () => {
 
       // Envia os dados já formatados para a API
       const registerResponse = await apiClient.post('/auth/client/register', { ...submissionData, affiliateCode });
-      
+
       const { token, client } = registerResponse.data.data;
-      
+
       localStorage.setItem('authToken', token);
       localStorage.setItem('userData', JSON.stringify(client));
-      
+
       message.success({ content: 'Conta criada com sucesso!', key: 'signup_process' });
 
       navigate(`/cadastro-sucesso/${planId}`);

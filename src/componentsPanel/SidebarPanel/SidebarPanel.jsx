@@ -6,7 +6,7 @@ import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
   UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined,
-  CheckSquareOutlined 
+  CheckSquareOutlined
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -35,18 +35,19 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
       key: '/painel/servicos', icon: <ShoppingCartOutlined />, label: <Link to="/painel/servicos">Serviços</Link>,
     },
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {
-        key: '/painel/clientes', icon: <TeamOutlined />, label: <Link to="/painel/clientes">Clientes de Negócio</Link>,
+      key: '/painel/clientes', icon: <TeamOutlined />, label: <Link to="/painel/clientes">Clientes de Negócio</Link>,
     },
     // <<<< INÍCIO DA MUDANÇA >>>>
     // A condição (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && foi removida desta linha.
     // Agora o item do menu aparecerá para todos os tipos de perfil.
     {
-        key: '/painel/checklist', icon: <CheckSquareOutlined />, label: <Link to="/painel/checklist">Checklist Diário</Link>,
+      key: '/painel/checklist', icon: <CheckSquareOutlined />, label: <Link to="/painel/checklist">Checklist Diário</Link>,
     },
     // <<<< FIM DA MUDANÇA >>>>
     { key: '/painel/agendamentos', icon: <CalendarOutlined />, label: <Link to="/painel/agendamentos">Agendamentos</Link> },
     { key: '/painel/chat', icon: <MessageOutlined />, label: <Link to="/painel/chat">Chat com Assistente</Link> },
     { key: '/painel/hidratacao', icon: <CreditCardOutlined />, label: <Link to="/painel/hidratacao">Hidratação</Link> },
+    { key: '/painel/afiliados', icon: <CrownOutlined />, label: <Link to="/painel/afiliados">Indicações</Link> },
     { type: 'divider' },
     { key: '/painel/meu-perfil', icon: <UserOutlined />, label: <Link to="/painel/meu-perfil">Meu Perfil</Link> },
     { key: '/painel/configuracoes', icon: <SettingOutlined />, label: <Link to="/painel/configuracoes">Configurações</Link> },
@@ -58,8 +59,8 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
   const sortedMenuItems = [...menuItems].sort((a, b) => (b?.key?.length || 0) - (a?.key?.length || 0));
   for (const item of sortedMenuItems) {
     if (item && item.key && location.pathname.startsWith(item.key)) {
-       selectedKey = item.key;
-       break;
+      selectedKey = item.key;
+      break;
     }
   }
 
@@ -83,11 +84,11 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
 
   if (isMobile) {
     return (
-      <div style={{ 
-          height: '100%',
-          display: 'flex', 
-          flexDirection: 'column', 
-          backgroundColor: '#001529' 
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#001529'
       }}>
         {sidebarContent}
       </div>

@@ -35,6 +35,7 @@ const ChecklistPage = lazy(() => import('./pages/ChecklistPage/ChecklistPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 const ActivateAccountPage = lazy(() => import('./pages/ActivateAccountPage/ActivateAccountPage'));
 const AffiliateLandingPage = lazy(() => import('./pages/AffiliateLandingPage/AffiliateLandingPage'));
+const AffiliateDashboardPage = lazy(() => import('./pages/AffiliateDashboardPage/AffiliateDashboardPage'));
 
 // <<< INÍCIO DA CORREÇÃO: Imports para as novas páginas de Admin >>>
 const AdminPage = lazy(() => import('./pages/AdminPage/AdminPage'));
@@ -110,6 +111,7 @@ const AppRoutes = () => (
         <Route path="/painel/clientes" element={<BusinessClientsPage />} />
         <Route path="/painel/agenda-crm" element={<AgendaCRMPage />} />
         <Route path="/painel/checklist" element={<ChecklistPage />} />
+        <Route path="/painel/afiliados" element={<AffiliateDashboardPage />} />
       </Route>
     </Route>
 
