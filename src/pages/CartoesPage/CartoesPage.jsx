@@ -40,7 +40,7 @@ const CardPreview = ({ form, currentProfile }) => {
     flagIconUrl: icon
   };
 
-  return <VisualCard card={previewCard} currentProfile={currentProfile} scale={0.88} />;
+  return <VisualCard card={previewCard} currentProfile={currentProfile} scale={0.9} />;
 };
 
 
@@ -330,11 +330,11 @@ const CartoesPage = () => {
   }
 
   return (
-    <Content className="panel-content-area cartoes-content">
-      <Row gutter={[32, 24]}>
-        <Col xs={24} md={8} lg={6} xl={5} className="cards-list-col">
+    <Content className="cartoes-content">
+      <Row gutter={[0, 0]} className="cartoes-page-row">
+        <Col xs={24} lg={8} className="cards-list-col">
           <div className="cards-list-header">
-            <Title level={4} style={{ margin: 0 }}>Meus Cartões</Title>
+            <Typography.Title level={4}>Meus Cartões</Typography.Title>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCard(null); cardForm.resetFields(); cardForm.setFieldsValue({ isActive: true, isDefault: cards.length === 0 }); setIsAddCardModalVisible(true); }} className="add-card-btn">Novo</Button>
           </div>
           <div className="cards-scrollable-list">
@@ -346,7 +346,7 @@ const CartoesPage = () => {
                   onClick={() => handleCardSelect(card)}
                 >
                   <div className="mini-card-container">
-                    <VisualCard card={card} currentProfile={currentProfile} scale={0.7} showDetails={false} />
+                    <VisualCard card={card} currentProfile={currentProfile} scale={0.85} showDetails={false} />
                     <div className="mini-card-overlay-actions" onClick={(e) => e.stopPropagation()}>
                       <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']} placement="bottomRight">
                         <Button type="text" icon={<MoreOutlined style={{ color: 'white' }} />} shape="circle" size="small" className="cartao-actions-btn-overlay" />
@@ -359,14 +359,16 @@ const CartoesPage = () => {
           </div>
         </Col>
 
-        <Col xs={24} md={16} lg={18} xl={19} className="card-details-col">
+        <Col xs={24} lg={16} className="card-details-col">
           {!selectedCard ? (
             <Card className="select-card-prompt"><CreditCardOutlined style={{ fontSize: '48px', color: 'var(--map-cinza-texto)', marginBottom: '20px' }} /><Title level={4} style={{ color: 'var(--map-cinza-texto)' }}>Selecione um cartão</Title><Paragraph type="secondary">Escolha um cartão da lista ao lado para ver os detalhes e a fatura.</Paragraph></Card>
           ) : (
             <Spin spinning={loadingInvoice || loadingCards}>
               <div className="selected-card-details-wrapper">
+                <div className="premium-card-visual-view">
+                  <VisualCard card={selectedCard} currentProfile={currentProfile} scale={1} />
+                </div>
                 <div className="premium-card-header-view simplified">
-
                   <div className="card-quick-stats-glass">
                     <Row gutter={[24, 16]}>
                       <Col span={8}>
