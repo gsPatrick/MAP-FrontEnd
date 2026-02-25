@@ -371,154 +371,33 @@ body.painel-active {
   }
 }
 
-.virtual-card {
-  width: 100%;
-  max-width: 400px;
-  min-height: 260px;
-  background: linear-gradient(135deg, var(--card-gradient, #1e1e2f) 0%, color-mix(in srgb, var(--card-gradient, #1e1e2f) 70%, black) 100%);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-  color: white;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-card-wrapper {
+  background: white;
+  border-radius: 24px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
 }
 
-.virtual-card:hover {
-  transform: translateY(-8px) rotateX(5deg);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+.dashboard-card-stats {
+  padding: 24px;
+  background: #fff;
 }
 
-.virtual-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(250, 140, 22, 0.15) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-.card-chip {
-  width: 45px;
-  height: 35px;
-  background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
-  border-radius: 6px;
-  position: relative;
-}
-
-.card-chip::after {
-  content: '';
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  right: 5px;
-  bottom: 5px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-}
-
-.card-brand {
-  font-size: 1.5rem;
-  font-weight: 800;
-  font-style: italic;
-  opacity: 0.9;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-number {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 1.25rem;
-  letter-spacing: 3px;
-  margin: 20px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.card-holder {
-  display: flex;
-  flex-direction: column;
-}
-
-.card-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.7;
-  margin-bottom: 2px;
-}
-
-.card-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-.card-balance-info {
-  text-align: right;
-}
-
-.card-balance-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-/* --- Glass Overlay for Dashboard Card --- */
-.card-glass-overlay-dashboard {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.virtual-card>* {
-  position: relative;
-  z-index: 1;
-}
-
-/* --- Chip Area --- */
-.card-chip-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.card-nfc-icon {
-  font-size: 1.2rem;
-  opacity: 0.8;
-}
-
-/* --- Card Limit Bar --- */
 .card-limit-bar {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 0;
 }
 
 .card-limit-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .card-limit-item {
@@ -527,31 +406,31 @@ body.painel-active {
 }
 
 .card-limit-label {
-  font-size: 0.6rem;
+  font-size: 11px;
+  color: #8c8c8c;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.7;
-  margin-bottom: 2px;
+  letter-spacing: 0.5px;
 }
 
 .card-limit-value {
-  font-size: 0.85rem;
+  font-size: 15px;
   font-weight: 700;
+  color: #1a1a1a;
 }
 
 .card-limit-progress-track {
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .card-limit-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #52c41a, #faad14, #ff4d4f);
-  border-radius: 3px;
-  transition: width 0.6s ease;
+  background: linear-gradient(90deg, #ff6b6b, #ff8787);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .custom-legend-wrapper {
