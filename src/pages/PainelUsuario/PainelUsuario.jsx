@@ -187,8 +187,8 @@ const PainelUsuario = () => {
           const creditCardsRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } });
           console.log('[DASHBOARD] Credit Cards API Response:', JSON.stringify(creditCardsRes.data));
           const allCards = creditCardsRes.data?.data || creditCardsRes.data?.cards || (Array.isArray(creditCardsRes.data) ? creditCardsRes.data : []);
-          console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found');
-          if (allCards.length > 0) {
+          console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found', JSON.stringify(allCards));
+          if (allCards && allCards.length > 0) {
             const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
             console.log('[DASHBOARD] Using card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
             // Buscar limite disponível do cartão
