@@ -374,8 +374,8 @@ body.painel-active {
 .virtual-card {
   width: 100%;
   max-width: 400px;
-  height: 220px;
-  background: linear-gradient(135deg, #1e1e2f 0%, #3a3a5a 100%);
+  min-height: 260px;
+  background: linear-gradient(135deg, var(--card-gradient, #1e1e2f) 0%, color-mix(in srgb, var(--card-gradient, #1e1e2f) 70%, black) 100%);
   border-radius: 20px;
   padding: 24px;
   position: relative;
@@ -476,6 +476,82 @@ body.painel-active {
 .card-balance-value {
   font-size: 1.4rem;
   font-weight: 700;
+}
+
+/* --- Glass Overlay for Dashboard Card --- */
+.card-glass-overlay-dashboard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.virtual-card>* {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Chip Area --- */
+.card-chip-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-nfc-icon {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* --- Card Limit Bar --- */
+.card-limit-bar {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.card-limit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.card-limit-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-limit-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.card-limit-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.card-limit-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.card-limit-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #52c41a, #faad14, #ff4d4f);
+  border-radius: 3px;
+  transition: width 0.6s ease;
 }
 
 .custom-legend-wrapper {
@@ -843,6 +919,28 @@ body.painel-active {
 @media (min-width: 768px) {
   .summary-card {
     grid-column: span 6;
+  }
+
+  .chart-card-group {
+    grid-column: span 12;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sidebar-group {
+    grid-column: span 12;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .virtual-card-container {
+    grid-column: span 12;
+  }
+
+  .list-card {
+    grid-column: span 12;
   }
 }
 

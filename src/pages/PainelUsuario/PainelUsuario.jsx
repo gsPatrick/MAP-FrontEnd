@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FaArrowUp, FaArrowDown, FaPlus, FaCalendarAlt, FaRetweet,
   FaPiggyBank, FaChartPie, FaExclamationTriangle, FaTimes,
-  FaChevronLeft, FaChevronRight
+  FaChevronLeft, FaChevronRight, FaCreditCard
 } from 'react-icons/fa';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -67,7 +67,8 @@ const PainelUsuario = () => {
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [upcomingItems, setUpcomingItems] = useState([]);
-  const [totalToPayPending, setTotalToPayPending] = useState(0); // Novo estado
+  const [totalToPayPending, setTotalToPayPending] = useState(0);
+  const [dashboardCard, setDashboardCard] = useState(null); // Cartão principal para o widget
   // --- ESTADOS DOS MODAIS ESPECÍFICOS ---
   const [isReceitaModalVisible, setIsReceitaModalVisible] = useState(false);
   const [isDespesaModalVisible, setIsDespesaModalVisible] = useState(false);
@@ -124,12 +125,13 @@ const PainelUsuario = () => {
         const summaryParams = { dateStart: startDate, dateEnd: endDate };
         const chartParams = { ...summaryParams, limit: 1000 };
 
-        const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
+        const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes, creditCardsRes] = await Promise.all([
           apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
+          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }),
+          apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } }).catch(() => ({ data: { data: [] } }))
         ]);
 
         // Processa o resumo financeiro
@@ -170,6 +172,25 @@ const PainelUsuario = () => {
         if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
         combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
         setUpcomingItems(combinedUpcoming.slice(0, 5));
+
+        // Processa o cartão de crédito principal para o widget
+        const allCards = creditCardsRes.data?.data || [];
+        if (allCards.length > 0) {
+          const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
+          // Buscar limite disponível do cartão
+          try {
+            const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
+            if (limitRes.data?.status === 'success') {
+              setDashboardCard({ ...defaultCard, ...limitRes.data.data });
+            } else {
+              setDashboardCard(defaultCard);
+            }
+          } catch {
+            setDashboardCard(defaultCard);
+          }
+        } else {
+          setDashboardCard(null);
+        }
 
       } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
@@ -356,38 +377,34 @@ const PainelUsuario = () => {
             <div className="card chart-card animated-card" style={{ animationDelay: '0.4s' }}>
               <h4 className="card-section-title"><FaArrowUp /> Receitas por Categoria</h4>
               {dashboardLoading ? <Skeleton active paragraph={{ rows: 6 }} /> : (
-                incomeCategories.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <PieChart>
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
-                      <Legend content={renderCustomLegend} verticalAlign="bottom" />
-                      <Pie data={incomeCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
-                        {incomeCategories.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : <div className="empty-state">Nenhum dado de receita para o período selecionado.</div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <PieChart>
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Legend content={renderCustomLegend} verticalAlign="bottom" />
+                    <Pie data={incomeCategories.length > 0 ? incomeCategories : [{ name: 'Sem dados', value: 1 }]} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={incomeCategories.length > 0 ? 5 : 0}>
+                      {(incomeCategories.length > 0 ? incomeCategories : [{ name: 'Sem dados', value: 1 }]).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={incomeCategories.length > 0 ? PIE_COLORS[index % PIE_COLORS.length] : '#e0e0e0'} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
               )}
             </div>
 
             <div className="card chart-card animated-card" style={{ animationDelay: '0.5s' }}>
               <h4 className="card-section-title"><FaArrowDown /> Despesas por Categoria</h4>
               {dashboardLoading ? <Skeleton active paragraph={{ rows: 6 }} /> : (
-                expenseCategories.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <PieChart>
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
-                      <Legend content={renderCustomLegend} verticalAlign="bottom" />
-                      <Pie data={expenseCategories} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={5}>
-                        {expenseCategories.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : <div className="empty-state">Nenhuma despesa para o período selecionado.</div>
+                <ResponsiveContainer width="100%" height={320}>
+                  <PieChart>
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Legend content={renderCustomLegend} verticalAlign="bottom" />
+                    <Pie data={expenseCategories.length > 0 ? expenseCategories : [{ name: 'Sem dados', value: 1 }]} dataKey="value" nameKey="name" cx="50%" cy="45%" innerRadius={80} outerRadius={110} fill="#8884d8" paddingAngle={expenseCategories.length > 0 ? 5 : 0}>
+                      {(expenseCategories.length > 0 ? expenseCategories : [{ name: 'Sem dados', value: 1 }]).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={expenseCategories.length > 0 ? PIE_COLORS[index % PIE_COLORS.length] : '#e0e0e0'} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
               )}
             </div>
           </div>
@@ -397,20 +414,40 @@ const PainelUsuario = () => {
             {/* VIRTUAL CREDIT CARD - PREMIUM UI */}
             <div className="virtual-card-container animated-card" style={{ animationDelay: '0.4s' }}>
               {dashboardLoading ? <div className="skeleton-card"><Skeleton active paragraph={{ rows: 4 }} /></div> : (
-                <div className="virtual-card" style={{ maxWidth: 'none' }}>
+                <div className="virtual-card" style={{ maxWidth: 'none', '--card-gradient': dashboardCard?.dominantColor || '#1e1e2f' }}>
+                  <div className="card-glass-overlay-dashboard"></div>
                   <div className="card-header">
-                    <div className="card-chip"></div>
-                    <div className="card-brand">VIP</div>
+                    <div className="card-chip-area">
+                      <div className="card-chip"></div>
+                      <FaCreditCard className="card-nfc-icon" />
+                    </div>
+                    <div className="card-brand">{dashboardCard?.flag || 'VIP'}</div>
                   </div>
-                  <div className="card-number">**** **** **** 8888</div>
+                  <div className="card-number">•••• •••• •••• {dashboardCard?.lastFourDigits || '8888'}</div>
                   <div className="card-footer">
                     <div className="card-holder">
-                      <span className="card-label">Titular do Cartão</span>
-                      <span className="card-name">{userNameForHeader.toUpperCase()}</span>
+                      <span className="card-label">PORTADOR</span>
+                      <span className="card-name">{(currentProfile?.ownerClientName || currentProfile?.name || userNameForHeader).toUpperCase()}</span>
                     </div>
                     <div className="card-balance-info">
-                      <span className="card-label">Total gasto no período</span>
-                      <div className="card-balance-value">{formatCurrency(financialSummary.totalCreditCard)}</div>
+                      <span className="card-label">VALIDADE</span>
+                      <div className="card-balance-value" style={{ fontSize: '1rem' }}>12/29</div>
+                    </div>
+                  </div>
+                  {/* Barra de limite */}
+                  <div className="card-limit-bar">
+                    <div className="card-limit-row">
+                      <div className="card-limit-item">
+                        <span className="card-limit-label">Limite Total</span>
+                        <span className="card-limit-value">{formatCurrency(dashboardCard?.totalLimit || dashboardCard?.limit || 0)}</span>
+                      </div>
+                      <div className="card-limit-item" style={{ textAlign: 'right' }}>
+                        <span className="card-limit-label">Usado</span>
+                        <span className="card-limit-value" style={{ color: '#ff6b6b' }}>{formatCurrency(dashboardCard ? (parseFloat(dashboardCard.totalLimit || dashboardCard.limit || 0) - parseFloat(dashboardCard.availableLimit || dashboardCard.totalLimit || dashboardCard.limit || 0)) : 0)}</span>
+                      </div>
+                    </div>
+                    <div className="card-limit-progress-track">
+                      <div className="card-limit-progress-fill" style={{ width: `${dashboardCard && (dashboardCard.totalLimit || dashboardCard.limit) > 0 ? Math.min(100, ((parseFloat(dashboardCard.totalLimit || dashboardCard.limit || 0) - parseFloat(dashboardCard.availableLimit || dashboardCard.totalLimit || dashboardCard.limit || 0)) / parseFloat(dashboardCard.totalLimit || dashboardCard.limit || 1)) * 100) : 0}%` }}></div>
                     </div>
                   </div>
                 </div>
