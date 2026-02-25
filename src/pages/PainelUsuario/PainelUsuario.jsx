@@ -190,19 +190,20 @@ const PainelUsuario = () => {
           console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found', JSON.stringify(allCards));
           if (allCards && allCards.length > 0) {
             const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
-            console.log('[DASHBOARD] Using card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
-            // Buscar limite disponível do cartão
-            try {
-              const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
-              console.log('[DASHBOARD] Limit API Response:', JSON.stringify(limitRes.data));
-              if (limitRes.data?.status === 'success') {
-                setDashboardCard({ ...defaultCard, ...limitRes.data.data });
-              } else {
-                setDashboardCard(defaultCard);
-              }
-            } catch (limitErr) {
-              console.warn('[DASHBOARD] Erro ao buscar limite do cartão, usando dados básicos:', limitErr.message);
-              setDashboardCard(defaultCard);
+            console.log('[DASHBOARD] Setting card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
+
+            // Define o cartão imediatamente
+            setDashboardCard(defaultCard);
+
+            // Busca limite em background se id existir
+            if (defaultCard.id) {
+              apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`)
+                .then(limitRes => {
+                  if (limitRes.data?.status === 'success') {
+                    setDashboardCard(prev => ({ ...prev, ...limitRes.data.data }));
+                  }
+                })
+                .catch(err => console.warn('[DASHBOARD] Erro silencioso ao buscar limite:', err.message));
             }
           } else {
             console.log('[DASHBOARD] Nenhum cartão de crédito encontrado.');
