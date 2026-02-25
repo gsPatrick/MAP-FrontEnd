@@ -125,13 +125,12 @@ const PainelUsuario = () => {
         const summaryParams = { dateStart: startDate, dateEnd: endDate };
         const chartParams = { ...summaryParams, limit: 1000 };
 
-        const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes, creditCardsRes] = await Promise.all([
+        const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
           apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
           apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } }).catch(() => ({ data: { data: [] } }))
+          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
         ]);
 
         // Processa o resumo financeiro
@@ -173,24 +172,37 @@ const PainelUsuario = () => {
         combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
         setUpcomingItems(combinedUpcoming.slice(0, 5));
 
-        // Processa o cartão de crédito principal para o widget
-        const allCards = creditCardsRes.data?.data || [];
-        if (allCards.length > 0) {
-          const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
-          // Buscar limite disponível do cartão
-          try {
-            const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
-            if (limitRes.data?.status === 'success') {
-              setDashboardCard({ ...defaultCard, ...limitRes.data.data });
-            } else {
+        // Processa o cartão de crédito principal para o widget (fetch separado para não afetar o carregamento principal)
+        try {
+          const creditCardsRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } });
+          console.log('[DASHBOARD] Credit Cards API Response:', JSON.stringify(creditCardsRes.data));
+          const allCards = creditCardsRes.data?.data || creditCardsRes.data?.cards || (Array.isArray(creditCardsRes.data) ? creditCardsRes.data : []);
+          console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found');
+          if (allCards.length > 0) {
+            const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
+            console.log('[DASHBOARD] Using card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
+            // Buscar limite disponível do cartão
+            try {
+              const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
+              console.log('[DASHBOARD] Limit API Response:', JSON.stringify(limitRes.data));
+              if (limitRes.data?.status === 'success') {
+                setDashboardCard({ ...defaultCard, ...limitRes.data.data });
+              } else {
+                setDashboardCard(defaultCard);
+              }
+            } catch (limitErr) {
+              console.warn('[DASHBOARD] Erro ao buscar limite do cartão, usando dados básicos:', limitErr.message);
               setDashboardCard(defaultCard);
             }
-          } catch {
-            setDashboardCard(defaultCard);
+          } else {
+            console.log('[DASHBOARD] Nenhum cartão de crédito encontrado.');
+            setDashboardCard(null);
           }
-        } else {
+        } catch (cardErr) {
+          console.error('[DASHBOARD] Erro ao buscar cartões de crédito:', cardErr.message, cardErr.response?.status, cardErr.response?.data);
           setDashboardCard(null);
         }
+
 
       } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
