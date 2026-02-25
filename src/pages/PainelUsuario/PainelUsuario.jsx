@@ -126,30 +126,9 @@ const PainelUsuario = () => {
         const summaryParams = { dateStart: startDate, dateEnd: endDate };
         const chartParams = { ...summaryParams, limit: 1000 };
 
-        const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
-          apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
-        ]);
-
-        // Processa o resumo financeiro
-        if (summaryRes.data?.status === 'success') {
-          const s = summaryRes.data.data;
-          setFinancialSummary({
-            currentBalance: s.netBalance,
-            incomeThisMonth: s.totalIncome,
-            expensesThisMonth: s.totalExpenses,
-            totalFutureDebt: s.futureForecast?.totalFutureDebt || 0,
-            averageMonthlyExpenses: s.averageMonthlyExpenses || 0
-          });
-          setTotalToPayPending(s.totalToPayPending || 0);
-        }
-
-        // Processa dados dos gráficos
+        // Helper para processar dados de gráficos
         const processChartData = (response) => {
-          const transactions = response.data.transactions || [];
+          const transactions = response.data?.transactions || [];
           if (!Array.isArray(transactions)) return [];
           const groupedData = transactions.reduce((acc, transaction) => {
             const categoryName = transaction.category?.name || 'Sem Categoria';
@@ -163,15 +142,45 @@ const PainelUsuario = () => {
           return Object.values(groupedData);
         };
 
-        setIncomeCategories(processChartData(incomeChartRes));
-        setExpenseCategories(processChartData(expenseChartRes));
+        // Busca dados financeiros (Summary, Gráficos, Próximos Itens)
+        try {
+          const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
+            apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
+          ]);
 
-        // Processa itens futuros
-        let combinedUpcoming = [];
-        if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
-        if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
-        combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
-        setUpcomingItems(combinedUpcoming.slice(0, 5));
+          // Processa o resumo financeiro
+          if (summaryRes.data?.status === 'success') {
+            const s = summaryRes.data.data;
+            setFinancialSummary({
+              currentBalance: s.netBalance,
+              incomeThisMonth: s.totalIncome,
+              expensesThisMonth: s.totalExpenses,
+              totalFutureDebt: s.futureForecast?.totalFutureDebt || 0,
+              averageMonthlyExpenses: s.averageMonthlyExpenses || 0
+            });
+            setTotalToPayPending(s.totalToPayPending || 0);
+          }
+
+          // Processa dados dos gráficos
+          setIncomeCategories(processChartData(incomeChartRes));
+          setExpenseCategories(processChartData(expenseChartRes));
+
+          // Processa itens futuros
+          let combinedUpcoming = [];
+          if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
+          if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
+          combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
+          setUpcomingItems(combinedUpcoming.slice(0, 5));
+        } catch (summaryErr) {
+          console.error("[DASHBOARD] Erro ao carregar dados financeiros principais:", summaryErr);
+          // Não lançamos erro aqui para permitir que o cartão tente carregar
+        }
+
+
 
         // Processa o cartão de crédito principal para o widget (fetch separado para não afetar o carregamento principal)
         try {
@@ -430,9 +439,9 @@ const PainelUsuario = () => {
                 <div className="dashboard-card-wrapper">
                   <VisualCard
                     card={dashboardCard || {
-                      dominantColor: '#1e1e2f',
-                      lastFourDigits: '8888',
-                      flag: 'VIP'
+                      dominantColor: '#820ad1', // Nubank Purple
+                      lastFourDigits: '••••',
+                      flag: 'MASTER'
                     }}
                     currentProfile={currentProfile}
                     showDetails={true}
