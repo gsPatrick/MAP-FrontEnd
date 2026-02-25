@@ -105,19 +105,17 @@ const PainelUsuario = () => {
         return;
       }
 
-      setDashboardLoading(true);
-
+      // === BLOCO 1: Dados financeiros principais ===
       try {
         let startDate, endDate;
 
-        // Define o intervalo de datas com base no modo de filtro e no mês atual
         if (filterMode === 'day') {
           startDate = currentMonth.format('YYYY-MM-DD');
           endDate = startDate;
         } else if (filterMode === 'week') {
           startDate = currentMonth.startOf('week').format('YYYY-MM-DD');
           endDate = currentMonth.endOf('week').format('YYYY-MM-DD');
-        } else { // Padrão é 'month'
+        } else {
           startDate = currentMonth.startOf('month').format('YYYY-MM-DD');
           endDate = currentMonth.endOf('month').format('YYYY-MM-DD');
         }
@@ -126,14 +124,13 @@ const PainelUsuario = () => {
         const chartParams = { ...summaryParams, limit: 1000 };
 
         const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
-          apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
-          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
+          apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }).catch(e => { console.error('[DASHBOARD] Summary error:', e.message); return { data: {} }; }),
+          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }).catch(e => { console.error('[DASHBOARD] Income chart error:', e.message); return { data: { transactions: [] } }; }),
+          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }).catch(e => { console.error('[DASHBOARD] Expense chart error:', e.message); return { data: { transactions: [] } }; }),
+          apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }).catch(e => { console.error('[DASHBOARD] Upcoming trans error:', e.message); return { data: { status: 'success', transactions: [] } }; }),
+          apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }).catch(e => { console.error('[DASHBOARD] Appointments error:', e.message); return { data: { status: 'success', data: [] } }; })
         ]);
 
-        // Processa o resumo financeiro
         if (summaryRes.data?.status === 'success') {
           const s = summaryRes.data.data;
           setFinancialSummary({
@@ -146,7 +143,6 @@ const PainelUsuario = () => {
           setTotalToPayPending(s.totalToPayPending || 0);
         }
 
-        // Processa dados dos gráficos
         const processChartData = (response) => {
           const transactions = response.data.transactions || [];
           if (!Array.isArray(transactions)) return [];
@@ -165,51 +161,45 @@ const PainelUsuario = () => {
         setIncomeCategories(processChartData(incomeChartRes));
         setExpenseCategories(processChartData(expenseChartRes));
 
-        // Processa itens futuros
         let combinedUpcoming = [];
-        if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
-        if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
+        if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...(upcomingTransactionsRes.data.transactions || []).map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
+        if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...(upcomingAppointmentsRes.data.data || []).map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
         combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
         setUpcomingItems(combinedUpcoming.slice(0, 5));
 
-        // Processa o cartão de crédito principal para o widget (fetch separado para não afetar o carregamento principal)
-        try {
-          const creditCardsRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } });
-          console.log('[DASHBOARD] Credit Cards API Response:', JSON.stringify(creditCardsRes.data));
-          const allCards = creditCardsRes.data?.data || creditCardsRes.data?.cards || (Array.isArray(creditCardsRes.data) ? creditCardsRes.data : []);
-          console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found');
-          if (allCards.length > 0) {
-            const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
-            console.log('[DASHBOARD] Using card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
-            // Buscar limite disponível do cartão
-            try {
-              const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
-              console.log('[DASHBOARD] Limit API Response:', JSON.stringify(limitRes.data));
-              if (limitRes.data?.status === 'success') {
-                setDashboardCard({ ...defaultCard, ...limitRes.data.data });
-              } else {
-                setDashboardCard(defaultCard);
-              }
-            } catch (limitErr) {
-              console.warn('[DASHBOARD] Erro ao buscar limite do cartão, usando dados básicos:', limitErr.message);
+      } catch (error) {
+        console.error("Erro ao buscar dados financeiros do dashboard:", error);
+      }
+
+      // === BLOCO 2: Cartão de crédito (INDEPENDENTE - sempre executa) ===
+      try {
+        const creditCardsRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards`, { params: { isActive: true, includeSummary: true } });
+        console.log('[DASHBOARD] Credit Cards API Response:', JSON.stringify(creditCardsRes.data));
+        const allCards = creditCardsRes.data?.data || creditCardsRes.data?.cards || (Array.isArray(creditCardsRes.data) ? creditCardsRes.data : []);
+        console.log('[DASHBOARD] Parsed cards:', allCards.length, 'cards found');
+        if (allCards.length > 0) {
+          const defaultCard = allCards.find(c => c.isDefault) || allCards[0];
+          console.log('[DASHBOARD] Using card:', defaultCard.name, 'Color:', defaultCard.dominantColor, 'Last4:', defaultCard.lastFourDigits);
+          try {
+            const limitRes = await apiClient.get(`/financial-accounts/${currentProfile.id}/credit-cards/${defaultCard.id}/available-limit`);
+            if (limitRes.data?.status === 'success') {
+              setDashboardCard({ ...defaultCard, ...limitRes.data.data });
+            } else {
               setDashboardCard(defaultCard);
             }
-          } else {
-            console.log('[DASHBOARD] Nenhum cartão de crédito encontrado.');
-            setDashboardCard(null);
+          } catch (limitErr) {
+            console.warn('[DASHBOARD] Erro ao buscar limite, usando dados básicos:', limitErr.message);
+            setDashboardCard(defaultCard);
           }
-        } catch (cardErr) {
-          console.error('[DASHBOARD] Erro ao buscar cartões de crédito:', cardErr.message, cardErr.response?.status, cardErr.response?.data);
+        } else {
           setDashboardCard(null);
         }
-
-
-      } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-        message.error("Não foi possível carregar os dados do painel.");
-      } finally {
-        setDashboardLoading(false);
+      } catch (cardErr) {
+        console.error('[DASHBOARD] Erro ao buscar cartões:', cardErr.message, cardErr.response?.status, cardErr.response?.data);
+        setDashboardCard(null);
       }
+
+      setDashboardLoading(false);
     };
 
     fetchAllData();
