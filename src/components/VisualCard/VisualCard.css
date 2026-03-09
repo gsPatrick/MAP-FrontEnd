@@ -1,6 +1,6 @@
 .virtual-card-premium {
     --card-h: var(--card-height, 220px);
-    /* Increased to 220px for better visibility */
+    /* Unified height for mobile and desktop */
     height: var(--card-h);
     width: calc(var(--card-h) * 1.58);
     margin: 0 auto;
@@ -123,7 +123,6 @@
 .card-holder .value,
 .card-expiry .value {
     font-size: calc(var(--card-h) * 0.08);
-    /* Slightly larger for better readability */
     font-weight: 800;
     letter-spacing: 0.8px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -134,9 +133,13 @@
     width: 100%;
 }
 
+/* Base height unified for all screens to prevent text cutting */
 @media (max-width: 480px) {
     .virtual-card-premium {
-        --card-h: 200px;
-        /* Increased from 180px to 200px on mobile */
+        --card-h: 220px;
+        max-width: calc(100vw - 40px);
+        /* Ensure it doesn't cause overflow on very small devices */
+        height: auto;
+        aspect-ratio: 1.58 / 1;
     }
 }
