@@ -441,20 +441,25 @@ const CartoesPage = () => {
                 <Card title="Fatura" bordered={false} className="invoice-panel" extra={<Space><Text type="secondary">Período da Fatura:</Text>{availableInvoicePeriods.length > 0 ? (<Select value={`${selectedMonthYearForInvoice.year()}-${String(selectedMonthYearForInvoice.month() + 1).padStart(2, '0')}`} onChange={handleInvoicePeriodChange} style={{ width: '200px' }} popupClassName="custom-datepicker-popup">{availableInvoicePeriods.map(p => (<Option key={`${p.year}-${p.month}`} value={`${p.year}-${p.month}`}>{p.label}</Option>))}</Select>) : (<DatePicker picker="month" value={selectedMonthYearForInvoice} onChange={handleInvoicePeriodChange} format="MMMM/YYYY" allowClear={false} inputReadOnly style={{ width: '180px' }} popupClassName="custom-datepicker-popup" />)}</Space>}>
                   {invoiceExpenses.length > 0 || loadingInvoice ? (
                     <Spin spinning={loadingInvoice}>
-                      <div className="invoice-summary-banner">
+                      <div className="invoice-summary-banner animated-details">
                         <div className="banner-item">
-                          <Text className="label">Total</Text>
-                          <Text className="value" type="danger">R$ {(selectedCardDetails?.totalAmount || 0).toFixed(2).replace('.', ',')}</Text>
+                          <ShoppingCartOutlined className="banner-icon" />
+                          <Text className="label">Total da Fatura</Text>
+                          <Text className="value">R$ {(selectedCardDetails?.totalAmount || 0).toFixed(2).replace('.', ',')}</Text>
                         </div>
                         <div className="banner-item">
+                          <CalendarOutlined className="banner-icon" />
                           <Text className="label">Vencimento</Text>
                           <Text className="value">{selectedCardDetails?.dueDate ? dayjs(selectedCardDetails.dueDate).format('DD/MM') : 'N/A'}</Text>
                         </div>
                         <div className="banner-item">
+                          <CheckCircleOutlined className="banner-icon" />
                           <Text className="label">Status</Text>
-                          <Tag color={selectedCardDetails?.isPaid ? 'success' : 'warning'}>
-                            {selectedCardDetails?.isPaid ? 'PAGO' : 'ABERTO'}
-                          </Tag>
+                          <div className="value">
+                            <Tag color={selectedCardDetails?.isPaid ? 'success' : 'warning'} className="status-tag-premium">
+                              {selectedCardDetails?.isPaid ? 'PAGO' : 'ABERTO'}
+                            </Tag>
+                          </div>
                         </div>
                       </div>
                       <Row gutter={[24, 24]}>

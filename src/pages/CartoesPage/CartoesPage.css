@@ -33,6 +33,8 @@
 /* Sidebar: Card List */
 .cards-list-col {
     padding: 0 !important;
+    --card-height: 190px;
+    /* Mini cards height - safe for names */
 }
 
 .cards-list-header {
@@ -218,20 +220,15 @@
 
 .invoice-summary-banner {
     display: flex;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 24px;
     padding: 24px;
-    color: white;
+    color: #1e293b;
     margin-bottom: 32px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
-}
-
-.banner-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .banner-item:not(:last-child)::after {
@@ -241,22 +238,38 @@
     top: 20%;
     height: 60%;
     width: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .banner-item .label {
     font-size: 9px;
     font-weight: 700;
-    opacity: 0.6;
+    opacity: 0.5;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     margin-bottom: 4px;
+    color: #64748b;
 }
 
 .banner-item .value {
     font-size: 1.25rem;
     font-weight: 800;
-    color: white !important;
+    color: #0f172a !important;
+}
+
+.banner-icon {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    color: var(--map-laranja, #FA8C16);
+    opacity: 0.8;
+}
+
+.status-tag-premium {
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    padding: 2px 12px !important;
+    margin: 0 !important;
 }
 
 /* Timeline/Expenses List */
