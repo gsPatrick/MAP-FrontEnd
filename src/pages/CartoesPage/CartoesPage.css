@@ -1,186 +1,201 @@
 /* src/pages/CartoesPage/CartoesPage.css */
 
-/* Variables and Global Styles for the Page */
 .cartoes-content {
-    background-color: #f4f7fa;
+    background-color: #f6f8fb;
     padding: 24px !important;
     min-height: calc(100vh - 64px);
+    overflow-x: hidden;
+}
+
+/* Animations */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animated-details {
+    animation: fadeInSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) both;
 }
 
 /* Main Grid Layout */
 .cartoes-page-row {
     margin: 0 !important;
+    width: 100%;
 }
 
-/* Horizontal card list for mobile, vertical sidebar for desktop */
+/* Sidebar Column */
 .cards-list-col {
-    background: transparent;
     padding: 0 !important;
-    margin-bottom: 24px;
+    --card-height: 140px;
+    /* Small fixed height for sidebar cards */
 }
 
 .cards-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 0 4px;
+    margin-bottom: 24px;
+    padding: 0 8px;
 }
 
 .cards-list-header h4 {
     margin: 0 !important;
-    font-weight: 700;
-    color: #1a202c;
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 20px;
 }
 
-/* Add Card Button */
 .add-card-btn {
     border-radius: 12px !important;
-    height: 40px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     background: var(--map-laranja) !important;
     border: none !important;
     box-shadow: 0 4px 12px rgba(250, 140, 22, 0.2);
-    transition: all 0.3s ease !important;
 }
 
-.add-card-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(250, 140, 22, 0.3);
-}
-
-/* Scrollable Container */
+/* Card List */
 .cards-scrollable-list {
     display: flex;
     gap: 16px;
     overflow-x: auto;
-    padding: 8px 4px 20px 4px;
-    scroll-snap-type: x mandatory;
+    padding: 8px 8px 24px 8px;
     scrollbar-width: none;
-    /* Firefox */
 }
 
 .cards-scrollable-list::-webkit-scrollbar {
     display: none;
-    /* Chrome/Safari */
 }
 
-/* Individual Card Item */
 .cartao-gallery-item {
-    flex: 0 0 280px;
-    scroll-snap-align: center;
+    flex: 0 0 auto;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-}
-
-.mini-card-container {
-    padding: 10px;
+    transition: all 0.3s ease;
 }
 
 .cartao-gallery-item .virtual-card-premium {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     border-radius: 16px;
-    transform: scale(0.95);
+    transform: scale(0.94);
     transition: all 0.3s ease;
 }
 
 .cartao-gallery-item.selected .virtual-card-premium {
-    transform: scale(1.02);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-    border: 2px solid white;
+    transform: scale(1);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border: 3px solid var(--map-laranja);
 }
 
 .cartao-gallery-item.selected::after {
     content: '';
     position: absolute;
-    bottom: -8px;
+    bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
+    width: 48px;
+    height: 5px;
     background: var(--map-laranja);
     border-radius: 10px;
 }
 
-/* Details Section */
+/* Details Column */
 .card-details-col {
     padding: 0 !important;
+}
+
+.selected-card-details-wrapper {
+    background: white;
+    border-radius: 28px;
+    padding: 40px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    min-height: 100%;
+}
+
+/* FIX: This was causing the giant card */
+.premium-card-header-view {
+    margin: 0 auto 48px auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    --card-height: 200px;
+    /* FIXED HEIGHT FOR MAIN CARD */
 }
 
 .premium-card-visual-view {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-bottom: 32px;
-    perspective: 1000px;
 }
 
+.premium-card-header-view .card-quick-stats-glass {
+    width: 100%;
+    max-width: 500px;
+    /* Keep stats aligned with card width */
+}
+
+/* Ensure the VisualCard inner content doesn't break aspect ratio */
 .premium-card-visual-view .virtual-card-premium {
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    width: 100% !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
 }
 
-.selected-card-details-wrapper {
-    background: white;
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    border: 1px solid #edf2f7;
-}
-
-@media (max-width: 767px) {
-    .premium-card-visual-view {
-        margin-bottom: -10px;
-        /* Overlap slightly with stats for better fit */
-        transform: scale(0.85);
-    }
-}
-
-/* Premium Header View */
-.premium-card-header-view {
-    margin-bottom: 24px;
-}
-
-/* Glass Stats Section */
+/* Stats Section */
 .card-quick-stats-glass {
     background: #f8fafc;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 24px;
+    padding: 32px;
     border: 1px solid #eef2f7;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
 }
 
 .card-quick-stats-glass .ant-statistic-title {
     font-size: 13px;
+    font-weight: 700;
     color: #64748b;
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .card-quick-stats-glass .ant-statistic-content {
     font-weight: 800;
     color: #1e293b;
+    font-size: 24px;
 }
 
 .limit-bar-container {
-    margin-top: 20px;
+    margin-top: 24px;
     background: white;
-    padding: 16px;
-    border-radius: 12px;
+    padding: 20px;
+    border-radius: 16px;
 }
 
 .limit-label {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #334155;
+    margin-bottom: 12px;
 }
 
 /* Actions */
 .add-expense-premium-btn {
     width: 100%;
-    margin-top: 16px;
-    height: 44px !important;
+    margin-top: 20px;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-weight: 800 !important;
+    font-size: 15px !important;
 }
 
 /* Invoice Panel */
@@ -189,223 +204,107 @@
     background: transparent !important;
 }
 
-.invoice-panel .ant-card-head {
-    padding: 0;
-    border: none;
-    margin-bottom: 16px;
-}
-
-.invoice-panel .ant-card-body {
-    padding: 0;
-}
-
 .invoice-summary-banner {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: #1e293b;
-    border-radius: 16px;
-    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    background: #0f172a;
+    border-radius: 20px;
+    padding: 24px;
     color: white;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
 }
 
 .banner-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1;
+}
+
+.banner-item:not(:last-child) {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.banner-item:last-child {
-    border: none;
-}
-
 .banner-item .label {
-    font-size: 11px;
-    font-weight: 600;
-    opacity: 0.7;
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.6;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .banner-item .value {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
-    color: white !important;
 }
 
-/* Timeline */
-.premium-invoice-timeline .ant-timeline-item-tail {
-    border-left: 2px dashed #e2e8f0;
-}
-
-.premium-invoice-timeline .timeline-expense-content {
-    background: #f8fafc;
-    padding: 14px 18px;
-    border-radius: 16px;
-    border: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    transition: all 0.2s ease;
-}
-
-.premium-invoice-timeline .timeline-expense-content:hover {
-    background: white;
-    border-color: var(--map-laranja);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateX(4px);
-}
-
-.timeline-expense-main {
-    display: flex;
-    flex-direction: column;
-}
-
-.timeline-expense-main .ant-typography {
-    font-size: 14px;
-    color: #0f172a;
-}
-
-.timeline-expense-value {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.invoice-total {
-    background: #f1f5f9;
-    padding: 16px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    margin-bottom: 16px;
-}
-
-/* Prompt Select Card */
-.select-card-prompt {
-    height: 100%;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: white;
-    border: 2px dashed #e2e8f0;
-    border-radius: 24px;
-}
-
-/* Modals */
-.modal-style-map .ant-modal-content {
-    border-radius: 24px !important;
-    padding: 24px !important;
-}
-
-.card-preview-section {
-    background: #f8fafc;
-    border-radius: 20px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.virtual-card-preview-wrapper.scale-preview {
-    margin-bottom: 24px;
-}
-
-/* Desktop Styles (Media Query Override) */
+/* Desktop Overrides */
 @media (min-width: 992px) {
-    .cartoes-content {
-        padding: 32px !important;
-    }
-
     .cartoes-page-row {
-        gap: 32px;
         flex-wrap: nowrap !important;
     }
 
-    /* Keep list vertical on desktop */
     .cards-list-col {
-        flex: 0 0 320px !important;
+        flex: 0 0 340px !important;
         background: white;
         border-radius: 24px;
         padding: 24px !important;
-        height: calc(100vh - 64px - 64px);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        margin-right: 24px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
+        height: min-content;
+        position: sticky;
+        top: 24px;
     }
 
     .cards-scrollable-list {
         flex-direction: column;
-        overflow-x: hidden;
         overflow-y: auto;
         padding: 0;
+        max-height: calc(100vh - 200px);
+        gap: 8px;
     }
 
     .cartao-gallery-item {
+        width: 100%;
         flex: 0 0 auto;
-        margin-bottom: 16px;
-        scroll-snap-align: none;
+        margin-bottom: 8px;
     }
 
     .cartao-gallery-item.selected::after {
         display: none;
     }
 
-    .cartao-gallery-item.selected .virtual-card-premium {
-        transform: scale(1.05);
-        border: 3px solid var(--map-laranja);
-    }
-
     .card-details-col {
-        flex: 1 !important;
-        height: calc(100vh - 64px - 64px);
-        overflow-y: auto;
-        padding-right: 8px !important;
-        /* Spacing for scrollbar */
-    }
-
-    /* Scrollbar for details */
-    .card-details-col::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .card-details-col::-webkit-scrollbar-thumb {
-        background: #e2e8f0;
-        border-radius: 10px;
+        flex: 1;
+        min-width: 0;
     }
 }
 
-/* Mobile Specific Fixes */
+/* Mobile Adjustments */
 @media (max-width: 576px) {
     .cartoes-content {
         padding: 16px !important;
     }
 
     .selected-card-details-wrapper {
-        padding: 16px;
-        border-radius: 20px;
+        padding: 24px 16px;
     }
 
     .invoice-summary-banner {
-        padding: 12px;
+        flex-direction: column;
+        gap: 16px;
     }
 
-    .banner-item .value {
-        font-size: 13px;
+    .banner-item:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 12px;
     }
 
-    .card-quick-stats-glass {
-        padding: 16px;
-    }
-
-    .cartao-gallery-item {
-        flex: 0 0 240px;
+    .premium-card-header-view {
+        --card-height: 160px;
+        /* Small fixed height for mobile screens */
+        margin-bottom: 32px;
     }
 }

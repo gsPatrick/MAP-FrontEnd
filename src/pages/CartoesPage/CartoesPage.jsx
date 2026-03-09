@@ -331,7 +331,7 @@ const CartoesPage = () => {
 
   return (
     <Content className="cartoes-content">
-      <Row gutter={[0, 0]} className="cartoes-page-row">
+      <Row gutter={[24, 24]} className="cartoes-page-row">
         <Col xs={24} lg={8} className="cards-list-col">
           <div className="cards-list-header">
             <Typography.Title level={4}>Meus Cartões</Typography.Title>
@@ -361,17 +361,25 @@ const CartoesPage = () => {
 
         <Col xs={24} lg={16} className="card-details-col">
           {!selectedCard ? (
-            <Card className="select-card-prompt"><CreditCardOutlined style={{ fontSize: '48px', color: 'var(--map-cinza-texto)', marginBottom: '20px' }} /><Title level={4} style={{ color: 'var(--map-cinza-texto)' }}>Selecione um cartão</Title><Paragraph type="secondary">Escolha um cartão da lista ao lado para ver os detalhes e a fatura.</Paragraph></Card>
+            <div className="select-card-prompt-container animated-details">
+              <Card className="select-card-prompt">
+                <CreditCardOutlined style={{ fontSize: '64px', color: '#bfbfbf', marginBottom: '24px' }} />
+                <Title level={3} style={{ color: '#595959' }}>Selecione um cartão</Title>
+                <Paragraph type="secondary" style={{ fontSize: '16px' }}>
+                  Escolha um cartão da lista ao lado para ver os detalhes e gerenciar sua fatura.
+                </Paragraph>
+              </Card>
+            </div>
           ) : (
-            <Spin spinning={loadingInvoice || loadingCards}>
-              <div className="selected-card-details-wrapper">
-                <div className="premium-card-visual-view">
-                  <VisualCard card={selectedCard} currentProfile={currentProfile} scale={1} />
-                </div>
+            <div className="selected-card-details-wrapper animated-details" key={selectedCard.id}>
+              <Spin spinning={loadingInvoice || loadingCards}>
                 <div className="premium-card-header-view simplified">
+                  <div className="premium-card-visual-view">
+                    <VisualCard card={selectedCard} currentProfile={currentProfile} scale={1} />
+                  </div>
                   <div className="card-quick-stats-glass">
-                    <Row gutter={[24, 16]}>
-                      <Col span={8}>
+                    <Row gutter={[16, 16]} justify="center">
+                      <Col xs={12} sm={8}>
                         <Statistic
                           title="Limite Total"
                           value={limiteTotalCard}
@@ -379,7 +387,7 @@ const CartoesPage = () => {
                           precision={2}
                         />
                       </Col>
-                      <Col span={8}>
+                      <Col xs={12} sm={8}>
                         <Statistic
                           title="Disponível"
                           value={limiteDisponivel}
@@ -388,7 +396,7 @@ const CartoesPage = () => {
                           valueStyle={{ color: '#52c41a' }}
                         />
                       </Col>
-                      <Col span={8}>
+                      <Col xs={12} sm={8}>
                         <Statistic
                           title="Fatura Atual"
                           value={selectedCardDetails?.totalAmount || 0}
@@ -527,8 +535,8 @@ const CartoesPage = () => {
                     />
                   )}
                 </Card>
-              </div>
-            </Spin>
+              </Spin>
+            </div>
           )}
         </Col>
       </Row>

@@ -115,7 +115,7 @@ const AffiliateDashboardPage = () => {
                             </div>
                             <div className="link-copy-box">
                                 <Text code ellipsis style={{ flex: 1, color: '#b24a0a', fontWeight: 'bold' }}>
-                                    {`map.com.br/p/${summary?.affiliateSlug || summary?.affiliateCode}`}
+                                    {`map.com.br/p/${summary?.affiliateSlug || summary?.affiliateCode || summary?.name?.toLowerCase().replace(/\s+/g, '-') || 'parceiro'}`}
                                 </Text>
                                 <Button type="primary" icon={<LinkOutlined />} onClick={copyAffiliateLink}>
                                     Copiar
