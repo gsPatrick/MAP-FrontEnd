@@ -333,9 +333,11 @@ const PainelUsuario = () => {
         <div className="period-filter-container">
           <div className="period-selector">
             {/* Botões de filtro rápido */}
-            <button onClick={() => handleFilterButtonClick('day')} className={filterMode === 'day' ? 'active' : ''}>Hoje</button>
-            <button onClick={() => handleFilterButtonClick('week')} className={filterMode === 'week' ? 'active' : ''}>Semana</button>
-            <button onClick={() => handleFilterButtonClick('month')} className={filterMode === 'month' ? 'active' : ''}>Mês</button>
+            <div className="quick-filters">
+              <button onClick={() => handleFilterButtonClick('day')} className={filterMode === 'day' ? 'active' : ''}>Hoje</button>
+              <button onClick={() => handleFilterButtonClick('week')} className={filterMode === 'week' ? 'active' : ''}>Semana</button>
+              <button onClick={() => handleFilterButtonClick('month')} className={filterMode === 'month' ? 'active' : ''}>Mês</button>
+            </div>
 
             {/* Navegador de Mês */}
             <div className="month-navigator">
