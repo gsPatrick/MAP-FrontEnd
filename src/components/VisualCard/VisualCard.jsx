@@ -21,7 +21,10 @@ const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => 
         >
             <div className="card-glass-overlay"></div>
             <div className="card-content-top">
-                <Avatar size={48 * scale} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
+                <div className="card-brand-section">
+                    <Avatar size={48 * scale} src={icon} icon={<CreditCardOutlined />} className="card-flag-img" />
+                    {card.name && <span className="card-type-name" style={{ fontSize: 12 * scale }}>{card.name}</span>}
+                </div>
                 <div className="card-chip-container" style={{ gap: 12 * scale }}>
                     <div className="card-chip-sim" style={{ width: 40 * scale, height: 30 * scale }}></div>
                     <ScanOutlined className="nfc-icon" style={{ fontSize: 24 * scale }} />
@@ -34,11 +37,11 @@ const VisualCard = ({ card, currentProfile, scale = 1, showDetails = true }) => 
                 <div className="card-footer-info" style={{ opacity: showDetails ? 1 : 0 }}>
                     <div className="card-holder">
                         <span className="label" style={{ fontSize: 9 * scale }}>PORTADOR</span>
-                        <span className="value" style={{ fontSize: 14 * scale }}>{(currentProfile?.ownerClientName || currentProfile?.name || 'CLIENTE MAP').toUpperCase()}</span>
+                        <span className="value" style={{ fontSize: 13 * scale }}>{(currentProfile?.ownerClientName || currentProfile?.name || 'CLIENTE MAP').toUpperCase()}</span>
                     </div>
                     <div className="card-expiry">
                         <span className="label" style={{ fontSize: 9 * scale }}>VALIDADE</span>
-                        <span className="value" style={{ fontSize: 14 * scale }}>12/29</span>
+                        <span className="value" style={{ fontSize: 13 * scale }}>12/29</span>
                     </div>
                 </div>
             )}

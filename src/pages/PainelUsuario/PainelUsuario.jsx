@@ -444,7 +444,8 @@ const PainelUsuario = () => {
                     card={dashboardCard || {
                       dominantColor: '#820ad1', // Nubank Purple
                       lastFourDigits: '••••',
-                      flag: 'MASTER'
+                      flag: 'MASTER',
+                      name: 'Cartão Principal'
                     }}
                     currentProfile={currentProfile}
                     showDetails={true}
