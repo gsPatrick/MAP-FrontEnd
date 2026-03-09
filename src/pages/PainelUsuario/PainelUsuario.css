@@ -74,6 +74,19 @@ body.painel-active {
   padding-left: 1.5rem;
 }
 
+@media (max-width: 767px) {
+  .dashboard-header {
+    border-left: none;
+    border-top: 5px solid var(--laranja);
+    padding-left: 0;
+    padding-top: 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
 .header-greeting {
   font-size: 2rem;
   font-weight: 700;
@@ -180,6 +193,15 @@ body.painel-active {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-left: 6px solid transparent;
+}
+
+@media (max-width: 767px) {
+  .summary-card {
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .summary-card:hover {
@@ -706,6 +728,13 @@ body.painel-active {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .period-filter-container {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 .period-selector {
