@@ -812,100 +812,98 @@ body.painel-active {
     line-height: 1.4;
   }
 
-  /* --- ESTILOS PARA O FILTRO DE PERÍODO EM MOBILE --- */
-  .period-filter-container {
-    padding: 12px;
-    justify-content: center;
-  }
-
-  .period-selector {
+  /* --- SOLUÇÃO DEFINITIVA PARA VERTICAL STACKING NO MOBILE --- */
+  .dashboard-grid {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    gap: 16px;
   }
 
-  .period-selector button {
-    width: 100%;
-    padding: 10px 15px;
-    font-size: 0.95rem;
-  }
-
-  .month-navigator {
-    margin-left: 0;
-    justify-content: center;
-    width: 100%;
-    order: -1;
-    margin-bottom: 8px;
-  }
-
-  .period-selector {
+  .summary-card {
+    grid-column: span 12 !important;
     width: 100%;
   }
 
   .period-selector .quick-filters {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     width: 100%;
     gap: 8px;
   }
 
-  .period-selector button {
-    padding: 8px 4px;
-    font-size: 0.85rem;
+  .actions-grid {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-  }
-}
-
-/* Layout para Tablets */
-@media (min-width: 768px) {
-  .summary-card {
-    grid-column: span 6;
+    gap: 12px;
   }
 
+  .action-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    flex-direction: row;
+    /* Volta a ser horizontal dentro do botão */
+    justify-content: center;
+  }
+
+  .sidebar-group,
   .chart-card-group {
-    grid-column: span 12;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
   }
 
-  .sidebar-group {
-    grid-column: span 12;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  /* Layout para Tablets */
+  @media (min-width: 768px) {
+    .summary-card {
+      grid-column: span 6;
+    }
+
+    .chart-card-group {
+      grid-column: span 12;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sidebar-group {
+      grid-column: span 12;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .virtual-card-container {
+      grid-column: span 12;
+    }
+
+    .list-card {
+      grid-column: span 12;
+    }
   }
 
-  .virtual-card-container {
-    grid-column: span 12;
-  }
+  /* Layout para Desktops */
+  @media (min-width: 1200px) {
+    .summary-card {
+      grid-column: span 3;
+    }
 
-  .list-card {
-    grid-column: span 12;
-  }
-}
+    .sidebar-group {
+      grid-column: span 4;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-/* Layout para Desktops */
-@media (min-width: 1200px) {
-  .summary-card {
-    grid-column: span 3;
-  }
+    .chart-card-group {
+      grid-column: span 8;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-  .sidebar-group {
-    grid-column: span 4;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    .list-card {
+      grid-column: span 12;
+    }
   }
-
-  .chart-card-group {
-    grid-column: span 8;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .list-card {
-    grid-column: span 12;
-  }
-}
