@@ -445,9 +445,10 @@ body.painel-active {
 .dashboard-card-wrapper {
   background: white;
   border-radius: 24px;
-  overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
+  overflow: visible;
+  /* Allow card effects to show */
 }
 
 .dashboard-card-stats {

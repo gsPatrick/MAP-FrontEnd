@@ -136,7 +136,7 @@
 
 @media (max-width: 480px) {
     .virtual-card-premium {
-        --card-h: 180px;
-        /* Scaling down on very small screens to fit container but keep proportions */
+        --card-h: 200px;
+        /* Increased from 180px to 200px on mobile */
     }
 }
