@@ -1,7 +1,7 @@
 /* src/pages/CartoesPage/CartoesPage.css */
 
 .cartoes-content {
-    background-color: #f6f8fb;
+    background-color: #f8fafc;
     padding: 24px !important;
     min-height: calc(100vh - 64px);
     overflow-x: hidden;
@@ -21,20 +21,18 @@
 }
 
 .animated-details {
-    animation: fadeInSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+    animation: fadeInSlideUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) both;
 }
 
-/* Main Grid Layout */
+/* Main Layout Grid */
 .cartoes-page-row {
     margin: 0 !important;
     width: 100%;
 }
 
-/* Sidebar Column */
+/* Sidebar: Card List */
 .cards-list-col {
     padding: 0 !important;
-    --card-height: 140px;
-    /* Small fixed height for sidebar cards */
 }
 
 .cards-list-header {
@@ -42,31 +40,34 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    padding: 0 8px;
+    padding: 0 4px;
 }
 
 .cards-list-header h4 {
     margin: 0 !important;
     font-weight: 800;
-    color: #0f172a;
-    font-size: 20px;
+    color: #1e293b;
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
 }
 
 .add-card-btn {
     border-radius: 12px !important;
     font-weight: 700 !important;
-    background: var(--map-laranja) !important;
+    background: var(--map-laranja, #FA8C16) !important;
     border: none !important;
-    box-shadow: 0 4px 12px rgba(250, 140, 22, 0.2);
+    box-shadow: 0 4px 14px rgba(250, 140, 22, 0.25);
+    height: 40px !important;
 }
 
-/* Card List */
+/* Card Selection List */
 .cards-scrollable-list {
     display: flex;
     gap: 16px;
     overflow-x: auto;
-    padding: 8px 8px 24px 8px;
+    padding: 10px 4px 30px 4px;
     scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .cards-scrollable-list::-webkit-scrollbar {
@@ -76,143 +77,153 @@
 .cartao-gallery-item {
     flex: 0 0 auto;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
 }
 
 .cartao-gallery-item .virtual-card-premium {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    transform: scale(0.94);
-    transition: all 0.3s ease;
+    transform: scale(0.9);
+    opacity: 0.7;
+    filter: grayscale(0.2);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
 }
 
 .cartao-gallery-item.selected .virtual-card-premium {
     transform: scale(1);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    border: 3px solid var(--map-laranja);
+    opacity: 1;
+    filter: grayscale(0);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .cartao-gallery-item.selected::after {
     content: '';
     position: absolute;
-    bottom: -15px;
+    bottom: -12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 48px;
-    height: 5px;
-    background: var(--map-laranja);
-    border-radius: 10px;
+    width: 40px;
+    height: 4px;
+    background: var(--map-laranja, #FA8C16);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
 }
 
-/* Details Column */
+/* Details Section */
 .card-details-col {
     padding: 0 !important;
 }
 
-.selected-card-details-wrapper {
-    background: white;
-    border-radius: 28px;
-    padding: 40px;
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
-    border: 1px solid #f1f5f9;
-    min-height: 100%;
-}
-
-/* FIX: This was causing the giant card */
-.premium-card-header-view {
-    margin: 0 auto 48px auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    --card-height: 200px;
-    /* FIXED HEIGHT FOR MAIN CARD */
-}
-
-.premium-card-visual-view {
+.select-card-prompt-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 32px;
+    min-height: 400px;
 }
 
-.premium-card-header-view .card-quick-stats-glass {
-    width: 100%;
-    max-width: 500px;
-    /* Keep stats aligned with card width */
+.select-card-prompt {
+    text-align: center;
+    max-width: 400px;
+    background: white !important;
+    border-radius: 32px !important;
+    border: 1px dashed #cbd5e1 !important;
+    padding: 40px !important;
 }
 
-/* Ensure the VisualCard inner content doesn't break aspect ratio */
-.premium-card-visual-view .virtual-card-premium {
-    width: 100% !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
-}
-
-/* Stats Section */
-.card-quick-stats-glass {
-    background: #f8fafc;
-    border-radius: 24px;
+.selected-card-details-wrapper {
+    background: white;
+    border-radius: 32px;
     padding: 32px;
-    border: 1px solid #eef2f7;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+}
+
+/* Hero Section: Card + Stats */
+.premium-card-header-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 40px;
 }
 
+.premium-card-visual-view {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.card-quick-stats-glass {
+    width: 100%;
+    max-width: 600px;
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid #eef2f7;
+}
+
 .card-quick-stats-glass .ant-statistic-title {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
-    color: #64748b;
-    margin-bottom: 8px;
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
 }
 
 .card-quick-stats-glass .ant-statistic-content {
     font-weight: 800;
-    color: #1e293b;
-    font-size: 24px;
+    color: #0f172a;
+    font-size: 1.5rem;
 }
 
 .limit-bar-container {
     margin-top: 24px;
     background: white;
-    padding: 20px;
+    padding: 16px;
     border-radius: 16px;
+    border: 1px solid #f1f5f9;
 }
 
 .limit-label {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    font-weight: 800;
-    color: #334155;
-    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 8px;
 }
 
-/* Actions */
 .add-expense-premium-btn {
     width: 100%;
     margin-top: 20px;
     height: 48px !important;
     border-radius: 14px !important;
     font-weight: 800 !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
+    background: #0f172a !important;
+    border: none !important;
 }
 
-/* Invoice Panel */
-.invoice-panel {
-    border: none !important;
-    background: transparent !important;
+/* Invoice Section */
+.invoice-panel .ant-card-head {
+    border-bottom: none;
+    padding: 0 16px;
+}
+
+.invoice-panel .ant-card-head-title {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #1e293b;
 }
 
 .invoice-summary-banner {
     display: flex;
-    justify-content: space-around;
-    background: #0f172a;
-    border-radius: 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 24px;
     padding: 24px;
     color: white;
     margin-bottom: 32px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
 }
 
 .banner-item {
@@ -220,55 +231,171 @@
     flex-direction: column;
     align-items: center;
     flex: 1;
+    position: relative;
 }
 
-.banner-item:not(:last-child) {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+.banner-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .banner-item .label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     opacity: 0.6;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
 }
 
 .banner-item .value {
-    font-size: 16px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: white !important;
+}
+
+/* Timeline/Expenses List */
+.invoice-timeline-container {
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 24px;
+    height: 100%;
+}
+
+.premium-invoice-timeline .ant-timeline-item-label {
     font-weight: 700;
 }
 
-/* Desktop Overrides */
+.timeline-expense-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.timeline-expense-main {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-expense-value {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.parcel-tag {
+    font-size: 9px;
+    font-weight: 700;
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    margin: 0;
+}
+
+.invoice-total {
+    margin: 24px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f1f5f9;
+}
+
+.pay-invoice-btn {
+    height: 52px !important;
+    border-radius: 16px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 20px rgba(250, 140, 22, 0.2);
+}
+
+.pay-invoice-btn:disabled {
+    box-shadow: none;
+}
+
+/* Modal Styling */
+.modal-style-map .ant-modal-content {
+    border-radius: 32px;
+    padding: 32px;
+}
+
+.modal-style-map .ant-modal-title {
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.card-preview-section {
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.virtual-card-preview-wrapper {
+    margin: 20px 0 40px 0;
+}
+
+.card-preview-tip {
+    border-radius: 16px;
+}
+
+/* Responsiveness: Desktop (min-width: 992px) */
 @media (min-width: 992px) {
     .cartoes-page-row {
         flex-wrap: nowrap !important;
     }
 
     .cards-list-col {
-        flex: 0 0 340px !important;
+        flex: 0 0 380px !important;
         background: white;
-        border-radius: 24px;
-        padding: 24px !important;
+        border-radius: 32px;
+        padding: 32px !important;
         margin-right: 24px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
-        height: min-content;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.03);
+        height: calc(100vh - 120px);
         position: sticky;
         top: 24px;
+        display: flex;
+        flex-direction: column;
     }
 
     .cards-scrollable-list {
         flex-direction: column;
         overflow-y: auto;
-        padding: 0;
-        max-height: calc(100vh - 200px);
-        gap: 8px;
+        padding: 4px;
+        gap: 0;
+        /* Let scale work */
+        flex-grow: 1;
     }
 
     .cartao-gallery-item {
         width: 100%;
-        flex: 0 0 auto;
-        margin-bottom: 8px;
+        margin-bottom: -15px;
+        /* Creative stack effect */
+    }
+
+    .cartao-gallery-item:hover {
+        z-index: 10;
+        margin-bottom: 0px;
+    }
+
+    .cartao-gallery-item.selected {
+        z-index: 5;
+        margin-bottom: 10px;
     }
 
     .cartao-gallery-item.selected::after {
@@ -281,30 +408,47 @@
     }
 }
 
-/* Mobile Adjustments */
-@media (max-width: 576px) {
+/* Responsiveness: Mobile (max-width: 768px) */
+@media (max-width: 768px) {
     .cartoes-content {
         padding: 16px !important;
     }
 
     .selected-card-details-wrapper {
-        padding: 24px 16px;
+        padding: 24px;
+        border-radius: 28px;
+    }
+
+    .premium-card-header-view {
+        margin-bottom: 32px;
+    }
+
+    .card-quick-stats-glass {
+        padding: 16px;
     }
 
     .invoice-summary-banner {
         flex-direction: column;
         gap: 16px;
+        padding: 20px;
     }
 
-    .banner-item:not(:last-child) {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 12px;
+    .banner-item:not(:last-child)::after {
+        width: 100%;
+        height: 1px;
+        top: auto;
+        bottom: -8px;
+        left: 0;
+        right: 0;
     }
 
-    .premium-card-header-view {
-        --card-height: 160px;
-        /* Small fixed height for mobile screens */
-        margin-bottom: 32px;
+    .invoice-chart-col {
+        margin-top: 32px;
+    }
+
+    .invoice-total {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
     }
 }

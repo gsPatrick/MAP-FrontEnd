@@ -373,12 +373,12 @@ const CartoesPage = () => {
           ) : (
             <div className="selected-card-details-wrapper animated-details" key={selectedCard.id}>
               <Spin spinning={loadingInvoice || loadingCards}>
-                <div className="premium-card-header-view simplified">
+                <div className="premium-card-header-view animated-details">
                   <div className="premium-card-visual-view">
-                    <VisualCard card={selectedCard} currentProfile={currentProfile} scale={1} />
+                    <VisualCard card={selectedCard} currentProfile={currentProfile} scale={1.1} />
                   </div>
                   <div className="card-quick-stats-glass">
-                    <Row gutter={[16, 16]} justify="center">
+                    <Row gutter={[24, 24]}>
                       <Col xs={12} sm={8}>
                         <Statistic
                           title="Limite Total"
@@ -393,32 +393,33 @@ const CartoesPage = () => {
                           value={limiteDisponivel}
                           prefix="R$"
                           precision={2}
-                          valueStyle={{ color: '#52c41a' }}
+                          valueStyle={{ color: '#10b981' }}
                         />
                       </Col>
                       <Col xs={12} sm={8}>
                         <Statistic
-                          title="Fatura Atual"
+                          title="Fatura Aberta"
                           value={selectedCardDetails?.totalAmount || 0}
                           prefix="R$"
                           precision={2}
-                          valueStyle={{ color: '#ff4d4f' }}
+                          valueStyle={{ color: '#f43f5e' }}
                         />
                       </Col>
                     </Row>
                     <div className="limit-bar-container">
                       <div className="limit-label">
-                        <span>Uso de Limite</span>
+                        <span>Consumo de Limite</span>
                         <span>{percentualUsado.toFixed(1)}%</span>
                       </div>
                       <Progress
                         percent={percentualUsado}
                         showInfo={false}
                         strokeColor={{
-                          '0%': '#ff4d4f',
-                          '100%': '#52c41a',
+                          '0%': '#10b981',
+                          '100%': '#f43f5e',
                         }}
-                        trailColor="rgba(0,0,0,0.05)"
+                        trailColor="#f1f5f9"
+                        strokeWidth={10}
                       />
                     </div>
                     <Button
@@ -432,7 +433,7 @@ const CartoesPage = () => {
                         setIsAddExpenseToCardModalVisible(true);
                       }}
                     >
-                      Nova Despesa
+                      Registrar Despesa
                     </Button>
                   </div>
                 </div>
