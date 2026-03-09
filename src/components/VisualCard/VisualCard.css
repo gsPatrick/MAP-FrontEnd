@@ -1,14 +1,14 @@
 .virtual-card-premium {
-    --card-h: var(--card-height, 190px);
-    /* Increased height to 190px */
+    --card-h: var(--card-height, 220px);
+    /* Increased to 220px for better visibility */
     height: var(--card-h);
     width: calc(var(--card-h) * 1.58);
     margin: 0 auto;
     background: linear-gradient(135deg, var(--card-gradient, #6A0DAD) 0%, #1a1a1a 100%);
-    border-radius: 18px;
-    padding: calc(var(--card-h) * 0.12);
+    border-radius: 20px;
+    padding: calc(var(--card-h) * 0.1);
     position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -16,7 +16,7 @@
     color: white;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     user-select: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .virtual-card-premium::before {
@@ -26,7 +26,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
     pointer-events: none;
     transform: rotate(30deg);
 }
@@ -37,7 +37,7 @@
     left: 0;
     right: 0;
     height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 50%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 50%);
     pointer-events: none;
     z-index: 2;
 }
@@ -45,21 +45,22 @@
 .card-content-top {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     z-index: 3;
 }
 
 .card-brand-section {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .card-type-name {
-    font-weight: 600;
-    opacity: 0.9;
-    letter-spacing: 0.5px;
+    font-weight: 700;
+    opacity: 0.95;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .card-chip-container {
@@ -68,20 +69,20 @@
 }
 
 .card-chip-sim {
-    width: calc(var(--card-h) * 0.22);
-    height: calc(var(--card-h) * 0.17);
+    width: calc(var(--card-h) * 0.2);
+    height: calc(var(--card-h) * 0.15);
     background: linear-gradient(135deg, #f1c40f, #d4ac0d);
-    border-radius: 6px;
+    border-radius: 4px;
     position: relative;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 
 .card-number-display {
     font-family: 'OCR A Std', 'Courier New', monospace;
     font-size: calc(var(--card-h) * 0.11);
-    letter-spacing: calc(var(--card-h) * 0.015);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    margin: calc(var(--card-h) * 0.04) 0;
+    letter-spacing: calc(var(--card-h) * 0.02);
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+    margin: calc(var(--card-h) * 0.02) 0;
     z-index: 3;
     text-align: center;
 }
@@ -90,11 +91,10 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 12px;
+    gap: 16px;
     z-index: 3;
     width: 100%;
-    padding-bottom: 4px;
-    /* Move up slightly to avoid clipping */
+    padding-bottom: 8px;
 }
 
 .card-holder {
@@ -113,22 +113,30 @@
 
 .card-holder .label,
 .card-expiry .label {
-    font-size: calc(var(--card-h) * 0.045);
+    font-size: calc(var(--card-h) * 0.04);
     font-weight: 700;
-    opacity: 0.8;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
+    opacity: 0.85;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
 }
 
 .card-holder .value,
 .card-expiry .value {
-    font-size: calc(var(--card-h) * 0.075);
+    font-size: calc(var(--card-h) * 0.08);
+    /* Slightly larger for better readability */
     font-weight: 800;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
     width: 100%;
+}
+
+@media (max-width: 480px) {
+    .virtual-card-premium {
+        --card-h: 180px;
+        /* Scaling down on very small screens to fit container but keep proportions */
+    }
 }
