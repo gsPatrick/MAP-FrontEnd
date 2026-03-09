@@ -1,17 +1,31 @@
 /* src/pages/CartoesPage/CartoesPage.css */
 
+:root {
+    --bank-primary: #0f172a;
+    --bank-secondary: #64748b;
+    --bank-accent: #fa8c16;
+    --bank-success: #10b981;
+    --bank-danger: #f43f5e;
+    --bank-bg: #f8fafc;
+    --bank-card-bg: #ffffff;
+    --bank-border: #e2e8f0;
+    --bank-radius-lg: 24px;
+    --bank-radius-md: 16px;
+    --bank-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
 .cartoes-content {
-    background-color: #f8fafc;
+    background-color: var(--bank-bg);
     padding: 24px !important;
     min-height: calc(100vh - 64px);
     overflow-x: hidden;
 }
 
-/* Animations */
-@keyframes fadeInSlideUp {
+/* Base Animations */
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
 
     to {
@@ -21,20 +35,12 @@
 }
 
 .animated-details {
-    animation: fadeInSlideUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+    animation: slideIn 0.4s ease-out both;
 }
 
-/* Main Layout Grid */
-.cartoes-page-row {
-    margin: 0 !important;
-    width: 100%;
-}
-
-/* Sidebar: Card List */
+/* Sidebar: Accounts/Cards List */
 .cards-list-col {
     padding: 0 !important;
-    --card-height: 190px;
-    /* Mini cards height - safe for names */
 }
 
 .cards-list-header {
@@ -48,420 +54,346 @@
 .cards-list-header h4 {
     margin: 0 !important;
     font-weight: 800;
-    color: #1e293b;
-    font-size: 1.25rem;
-    letter-spacing: -0.5px;
+    color: var(--bank-primary);
+    font-size: 1.1rem;
 }
 
 .add-card-btn {
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     font-weight: 700 !important;
-    background: var(--map-laranja, #FA8C16) !important;
+    background: var(--bank-accent) !important;
     border: none !important;
-    box-shadow: 0 4px 14px rgba(250, 140, 22, 0.25);
-    height: 40px !important;
+    height: 36px !important;
 }
 
-/* Card Selection List */
 .cards-scrollable-list {
     display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    padding: 10px 4px 30px 4px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px;
 }
 
-.cards-scrollable-list::-webkit-scrollbar {
-    display: none;
-}
-
+/* Compact Sidebar Card Item */
 .cartao-gallery-item {
-    flex: 0 0 auto;
+    background: var(--bank-card-bg);
+    border-radius: var(--bank-radius-md);
+    padding: 16px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.2s ease;
+    border: 1px solid var(--bank-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
     position: relative;
+    overflow: hidden;
 }
 
-.cartao-gallery-item .virtual-card-premium {
-    transform: scale(0.9);
-    opacity: 0.7;
-    filter: grayscale(0.2);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+.cartao-gallery-item:hover {
+    border-color: var(--bank-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--bank-shadow);
 }
 
-.cartao-gallery-item.selected .virtual-card-premium {
-    transform: scale(1);
-    opacity: 1;
-    filter: grayscale(0);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+.cartao-gallery-item.selected {
+    border-color: var(--bank-accent);
+    background: #fffaf5;
+    box-shadow: 0 4px 12px rgba(250, 140, 22, 0.08);
 }
 
-.cartao-gallery-item.selected::after {
+.cartao-gallery-item.selected::before {
     content: '';
     position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
-    background: var(--map-laranja, #FA8C16);
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--bank-accent);
 }
 
-/* Details Section */
+.sidebar-card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    background: #f1f5f9;
+    color: var(--bank-secondary);
+}
+
+.cartao-gallery-item.selected .sidebar-card-icon {
+    background: var(--bank-accent);
+    color: white;
+}
+
+.sidebar-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar-card-name {
+    display: block;
+    font-weight: 700;
+    color: var(--bank-primary);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-card-digits {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--bank-secondary);
+    font-family: monospace;
+}
+
+/* Detail View */
 .card-details-col {
     padding: 0 !important;
 }
 
-.select-card-prompt-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-}
-
-.select-card-prompt {
-    text-align: center;
-    max-width: 400px;
-    background: white !important;
-    border-radius: 32px !important;
-    border: 1px dashed #cbd5e1 !important;
-    padding: 40px !important;
-}
-
 .selected-card-details-wrapper {
-    background: white;
-    border-radius: 32px;
-    padding: 32px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-    border: 1px solid #f1f5f9;
+    background: var(--bank-card-bg);
+    border-radius: var(--bank-radius-lg);
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--bank-border);
+    min-height: calc(100vh - 120px);
 }
 
-/* Hero Section: Card + Stats */
-.premium-card-header-view {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 40px;
+/* Banking Invoice Header */
+.invoice-banking-header {
+    padding: 40px;
+    background: #fff;
+    border-bottom: 1px solid var(--bank-border);
 }
 
-.premium-card-visual-view {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 32px;
-}
-
-.card-quick-stats-glass {
-    width: 100%;
-    max-width: 600px;
-    background: #f8fafc;
-    border-radius: 24px;
-    padding: 24px;
-    border: 1px solid #eef2f7;
-}
-
-.card-quick-stats-glass .ant-statistic-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-}
-
-.card-quick-stats-glass .ant-statistic-content {
-    font-weight: 800;
-    color: #0f172a;
-    font-size: 1.5rem;
-}
-
-.limit-bar-container {
-    margin-top: 24px;
-    background: white;
-    padding: 16px;
-    border-radius: 16px;
-    border: 1px solid #f1f5f9;
-}
-
-.limit-label {
+.invoice-header-top {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
-    font-weight: 700;
-    color: #64748b;
-    margin-bottom: 8px;
+    align-items: flex-start;
+    margin-bottom: 24px;
 }
 
-.add-expense-premium-btn {
-    width: 100%;
-    margin-top: 20px;
-    height: 48px !important;
-    border-radius: 14px !important;
-    font-weight: 800 !important;
-    font-size: 14px !important;
-    background: #0f172a !important;
-    border: none !important;
-}
-
-/* Invoice Section */
-.invoice-panel .ant-card-head {
-    border-bottom: none;
-    padding: 0 16px;
-}
-
-.invoice-panel .ant-card-head-title {
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: #1e293b;
-}
-
-.invoice-summary-banner {
-    display: flex;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 24px;
-    padding: 24px;
-    color: #1e293b;
-    margin-bottom: 32px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-.banner-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 20%;
-    height: 60%;
-    width: 1px;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.banner-item .label {
-    font-size: 9px;
-    font-weight: 700;
-    opacity: 0.5;
+.invoice-amount-section .label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--bank-secondary);
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px;
     margin-bottom: 4px;
-    color: #64748b;
 }
 
-.banner-item .value {
-    font-size: 1.25rem;
+.invoice-amount-section .amount {
+    display: block;
+    font-size: 2.5rem;
     font-weight: 800;
-    color: #0f172a !important;
+    color: var(--bank-primary);
+    letter-spacing: -1px;
 }
 
-.banner-icon {
-    font-size: 1.5rem;
-    margin-bottom: 12px;
-    color: var(--map-laranja, #FA8C16);
-    opacity: 0.8;
+.invoice-dates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 24px;
+    padding: 24px;
+    background: #f8fafc;
+    border-radius: var(--bank-radius-md);
+    margin-top: 24px;
 }
 
-.status-tag-premium {
-    border-radius: 8px !important;
+.date-item .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--bank-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.date-item .value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bank-primary);
+}
+
+.header-status-badge {
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
     font-weight: 700 !important;
     border: none !important;
-    padding: 2px 12px !important;
-    margin: 0 !important;
+    font-size: 0.85rem !important;
 }
 
-/* Timeline/Expenses List */
-.invoice-timeline-container {
-    background: #f8fafc;
-    border-radius: 24px;
-    padding: 24px;
-    height: 100%;
+/* Banking Limit Bar */
+.banking-limit-section {
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--bank-border);
 }
 
-.premium-invoice-timeline .ant-timeline-item-label {
+.banking-limit-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
     font-weight: 700;
 }
 
-.timeline-expense-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 0;
+.banking-limit-info .available {
+    color: var(--bank-success);
 }
 
-.timeline-expense-main {
-    display: flex;
-    flex-direction: column;
+.banking-limit-info .used {
+    color: var(--bank-secondary);
 }
 
-.timeline-expense-value {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+/* Transaction List (Banking Style) */
+.banking-transactions-section {
+    padding: 40px;
 }
 
-.parcel-tag {
-    font-size: 9px;
-    font-weight: 700;
-    background: #f1f5f9;
-    border: none;
-    color: #64748b;
-    margin: 0;
-}
-
-.invoice-total {
-    margin: 24px 0;
-    padding: 20px;
-    background: white;
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #f1f5f9;
-}
-
-.pay-invoice-btn {
-    height: 52px !important;
-    border-radius: 16px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.5px;
-    box-shadow: 0 6px 20px rgba(250, 140, 22, 0.2);
-}
-
-.pay-invoice-btn:disabled {
-    box-shadow: none;
-}
-
-/* Modal Styling */
-.modal-style-map .ant-modal-content {
-    border-radius: 32px;
-    padding: 32px;
-}
-
-.modal-style-map .ant-modal-title {
+.banking-section-title {
+    font-size: 1.1rem;
     font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: -0.5px;
-}
-
-.card-preview-section {
-    background: #f8fafc;
-    border-radius: 24px;
-    padding: 32px;
+    color: var(--bank-primary);
+    margin-bottom: 24px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    height: 100%;
+    gap: 8px;
 }
 
-.virtual-card-preview-wrapper {
-    margin: 20px 0 40px 0;
+.banking-transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--bank-border);
 }
 
-.card-preview-tip {
-    border-radius: 16px;
+.transaction-icon {
+    width: 44px;
+    height: 44px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--bank-secondary);
+    flex-shrink: 0;
 }
 
-/* Responsiveness: Desktop (min-width: 992px) */
+.transaction-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.transaction-desc {
+    display: block;
+    font-weight: 700;
+    color: var(--bank-primary);
+    font-size: 0.95rem;
+}
+
+.transaction-meta {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--bank-secondary);
+}
+
+.transaction-value {
+    text-align: right;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.transaction-value.out {
+    color: var(--bank-primary);
+}
+
+.transaction-value.in {
+    color: var(--bank-success);
+}
+
+.transaction-parcel {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--bank-accent);
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* Actions Bar */
+.banking-actions-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.banking-btn {
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive Desktop */
 @media (min-width: 992px) {
     .cartoes-page-row {
         flex-wrap: nowrap !important;
     }
 
     .cards-list-col {
-        flex: 0 0 380px !important;
-        background: white;
-        border-radius: 32px;
-        padding: 32px !important;
+        flex: 0 0 320px !important;
         margin-right: 24px;
-        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.03);
-        height: calc(100vh - 120px);
         position: sticky;
         top: 24px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cards-scrollable-list {
-        flex-direction: column;
-        overflow-y: auto;
-        padding: 4px;
-        gap: 0;
-        /* Let scale work */
-        flex-grow: 1;
-    }
-
-    .cartao-gallery-item {
-        width: 100%;
-        margin-bottom: -15px;
-        /* Creative stack effect */
-    }
-
-    .cartao-gallery-item:hover {
-        z-index: 10;
-        margin-bottom: 0px;
-    }
-
-    .cartao-gallery-item.selected {
-        z-index: 5;
-        margin-bottom: 10px;
-    }
-
-    .cartao-gallery-item.selected::after {
-        display: none;
     }
 
     .card-details-col {
         flex: 1;
-        min-width: 0;
     }
 }
 
-/* Responsiveness: Mobile (max-width: 768px) */
+/* Responsive Mobile */
 @media (max-width: 768px) {
     .cartoes-content {
         padding: 16px !important;
     }
 
-    .selected-card-details-wrapper {
+    .invoice-banking-header,
+    .banking-limit-section,
+    .banking-transactions-section {
         padding: 24px;
-        border-radius: 28px;
     }
 
-    .premium-card-header-view {
-        margin-bottom: 32px;
+    .invoice-amount-section .amount {
+        font-size: 1.8rem;
     }
 
-    .card-quick-stats-glass {
-        padding: 16px;
+    .cards-scrollable-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        scrollbar-width: none;
     }
 
-    .invoice-summary-banner {
+    .cards-scrollable-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cartao-gallery-item {
+        flex: 0 0 240px;
+    }
+
+    .banking-actions-bar {
         flex-direction: column;
-        gap: 16px;
-        padding: 20px;
-    }
-
-    .banner-item:not(:last-child)::after {
-        width: 100%;
-        height: 1px;
-        top: auto;
-        bottom: -8px;
-        left: 0;
-        right: 0;
-    }
-
-    .invoice-chart-col {
-        margin-top: 32px;
-    }
-
-    .invoice-total {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
     }
 }
