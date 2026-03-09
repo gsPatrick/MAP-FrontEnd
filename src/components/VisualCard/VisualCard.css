@@ -71,7 +71,17 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    gap: 12px;
     z-index: 3;
+    width: 100%;
+}
+
+.card-holder {
+    flex: 1;
+    min-width: 0;
+    /* Permite que o flex-item encolha para truncar texto */
+    display: flex;
+    flex-direction: column;
 }
 
 .card-holder .label,
