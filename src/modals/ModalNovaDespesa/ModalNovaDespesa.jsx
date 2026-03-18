@@ -46,13 +46,13 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
           transactionDate: dayjs(editingTransaction.transactionDate),
           financialCategoryId: editingTransaction.financialCategoryId,
           notes: editingTransaction.notes,
-          paymentMethod: editingTransaction.creditCardId ? 'cartao_credito' : 'outros',
+          paymentMethod: editingTransaction.paymentMethod || 'Pix',
           creditCardId: editingTransaction.creditCardId
         });
-        setShowCreditCardSelect(!!editingTransaction.creditCardId);
+        setShowCreditCardSelect(editingTransaction.paymentMethod === 'Cartão de Crédito');
       } else {
         form.resetFields();
-        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'outros' });
+        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix' });
         setIsParcelada(false);
         setShowCreditCardSelect(false);
       }
@@ -67,7 +67,7 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
       transactionDate: values.transactionDate.format('YYYY-MM-DD'),
     };
     
-    const isParcelledPurchase = values.paymentMethod === 'cartao_credito' && values.isParcelada;
+    const isParcelledPurchase = values.paymentMethod === 'Cartão de Crédito' && values.isParcelada;
     
     try {
         let endpoint, method;
@@ -86,6 +86,7 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
                 numberOfParcels: values.numeroParcelas,
                 transactionDate: values.transactionDate.format('YYYY-MM-DD'),
                 financialCategoryId: values.financialCategoryId,
+                paymentMethod: 'Cartão de Crédito',
                 creditCardId: values.creditCardId,
                 notes: values.notes,
             };
@@ -122,7 +123,7 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
       className="modal-nova-transacao"
     >
       <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={(changedValues) => {
-          if (changedValues.paymentMethod !== undefined) setShowCreditCardSelect(changedValues.paymentMethod === 'cartao_credito');
+          if (changedValues.paymentMethod !== undefined) setShowCreditCardSelect(changedValues.paymentMethod === 'Cartão de Crédito');
           if (changedValues.isParcelada !== undefined) setIsParcelada(changedValues.isParcelada);
       }}>
         <Form.Item name="description" label="Descrição" rules={[{ required: true, message: 'Insira a descrição!' }]}>
@@ -139,10 +140,13 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
             {categories.map(cat => <Option key={cat.id} value={cat.id}>{cat.name}</Option>)}
           </Select>
         </Form.Item>
-        <Form.Item name="paymentMethod" label="Forma de Pagamento">
-            <Select onChange={(value) => setShowCreditCardSelect(value === 'cartao_credito')}>
-                <Option value="outros">Outros (Dinheiro, Débito, PIX)</Option>
-                <Option value="cartao_credito">Cartão de Crédito</Option>
+        <Form.Item name="paymentMethod" label="Forma de Pagamento" rules={[{ required: true, message: 'Selecione a forma de pagamento!' }]}>
+            <Select onChange={(value) => setShowCreditCardSelect(value === 'Cartão de Crédito')}>
+                <Option value="Pix">Pix</Option>
+                <Option value="Dinheiro">Dinheiro</Option>
+                <Option value="Cartão de Crédito">Cartão de Crédito</Option>
+                <Option value="Cartão de Débito">Cartão de Débito</Option>
+                <Option value="Transferência">Transferência</Option>
             </Select>
         </Form.Item>
 

@@ -129,6 +129,23 @@
 .tag { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #fff; display: inline-block; width: fit-content; }
 .tag.entrada { background-color: var(--verde); }
 .tag.saída { background-color: var(--vermelho); }
+ 
+.recurrence-method-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--texto-primario);
+}
+ 
+.method-icon {
+    font-size: 1rem;
+}
+.method-icon.pix { color: #32BCAD; }
+.method-icon.card { color: #1677ff; }
+.method-icon.cash { color: #52c41a; }
+.method-icon.transfer { color: #fa8c16; }
+.method-icon.default { color: #8c8c8c; }
 
 
 .card-footer {

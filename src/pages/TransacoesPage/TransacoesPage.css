@@ -180,6 +180,24 @@ body {
 }
 .card-category.income { color: var(--verde-escuro, #389E0D); }
 .card-category.expense { color: var(--vermelho-escuro, #CF1322); }
+ 
+.card-payment-method {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--fundo-app);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+ 
+.method-icon {
+    font-size: 0.9rem;
+}
+.method-icon.pix { color: #32BCAD; }
+.method-icon.card { color: #1677ff; }
+.method-icon.cash { color: #52c41a; }
+.method-icon.transfer { color: #fa8c16; }
+.method-icon.default { color: #8c8c8c; }
 
 .card-status-wrapper {
     margin-top: 0.5rem; /* Mais espaço acima da tag */

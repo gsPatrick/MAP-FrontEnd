@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { FaPlus, FaPen, FaTrash, FaTag, FaEllipsisV, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaPen, FaTrash, FaTag, FaEllipsisV, FaSearch, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt } from 'react-icons/fa';
+import { SiPix } from 'react-icons/si';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -40,6 +41,17 @@ const TransactionCard = ({ transaction, onEdit, onDelete }) => {
     }
     
     const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    const getPaymentIcon = (method) => {
+        switch (method) {
+            case 'Pix': return <SiPix className="method-icon pix" title="Pix" />;
+            case 'Cartão de Crédito': return <FaCreditCard className="method-icon card" title="Cartão de Crédito" />;
+            case 'Cartão de Débito': return <FaCreditCard className="method-icon card" title="Cartão de Débito" />;
+            case 'Dinheiro': return <FaMoneyBillWave className="method-icon cash" title="Dinheiro" />;
+            case 'Transferência': return <FaExchangeAlt className="method-icon transfer" title="Transferência" />;
+            default: return <FaWallet className="method-icon default" title="Carteira" />;
+        }
+    };
 
     return (
         <div className="transaction-card">
@@ -53,6 +65,9 @@ const TransactionCard = ({ transaction, onEdit, onDelete }) => {
             <div className="card-metadata">
                 <span className={`card-category ${isIncome ? 'income' : 'expense'}`}>
                     <FaTag /> {transaction.category?.name || 'Sem Categoria'}
+                </span>
+                <span className="card-payment-method">
+                    {getPaymentIcon(transaction.paymentMethod)} {transaction.paymentMethod}
                 </span>
                 <span className="card-date">{dayjs(transaction.transactionDate).format('DD/MM/YYYY')}</span>
                 <div className="card-menu-container" ref={menuRef}>

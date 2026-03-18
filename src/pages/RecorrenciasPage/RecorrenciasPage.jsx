@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaPlus, FaPen, FaTrash, FaRetweet, FaBell, FaCheckCircle, FaEllipsisV } from 'react-icons/fa';
+import { FaPlus, FaPen, FaTrash, FaRetweet, FaBell, FaCheckCircle, FaEllipsisV, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt } from 'react-icons/fa';
+import { SiPix } from 'react-icons/si';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -25,6 +26,17 @@ const formatCurrency = (value) => (parseFloat(value) || 0).toLocaleString('pt-BR
 const RecurrenceCard = ({ recurrence, onEdit, onDelete }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const getPaymentIcon = (method) => {
+        switch (method) {
+            case 'Pix': return <SiPix className="method-icon pix" title="Pix" />;
+            case 'Cartão de Crédito': return <FaCreditCard className="method-icon card" title="Cartão de Crédito" />;
+            case 'Cartão de Débito': return <FaCreditCard className="method-icon card" title="Cartão de Débito" />;
+            case 'Dinheiro': return <FaMoneyBillWave className="method-icon cash" title="Dinheiro" />;
+            case 'Transferência': return <FaExchangeAlt className="method-icon transfer" title="Transferência" />;
+            default: return <FaWallet className="method-icon default" title="Carteira" />;
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -54,6 +66,12 @@ const RecurrenceCard = ({ recurrence, onEdit, onDelete }) => {
                 <div className="recurrence-meta-item">
                     <span className="meta-label">Próxima Data:</span>
                     <span>{recurrence.nextDueDate ? dayjs(recurrence.nextDueDate).format('DD/MM/YYYY') : 'N/A'}</span>
+                </div>
+                <div className="recurrence-meta-item">
+                    <span className="meta-label">Método:</span>
+                    <span className="recurrence-method-info">
+                        {getPaymentIcon(recurrence.paymentMethod)} {recurrence.paymentMethod || 'N/A'}
+                    </span>
                 </div>
             </div>
             <footer className="card-footer">

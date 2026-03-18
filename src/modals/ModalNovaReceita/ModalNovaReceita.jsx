@@ -38,10 +38,11 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
           transactionDate: dayjs(editingTransaction.transactionDate),
           financialCategoryId: editingTransaction.financialCategoryId,
           notes: editingTransaction.notes,
+          paymentMethod: editingTransaction.paymentMethod || 'Pix',
         });
       } else {
         form.resetFields();
-        form.setFieldsValue({ transactionDate: dayjs() });
+        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix' });
       }
     }
   }, [open, editingTransaction, form, fetchCategories]);
@@ -100,6 +101,14 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
         <Form.Item name="financialCategoryId" label="Categoria" rules={[{ required: true, message: 'Selecione uma categoria!' }]}>
           <Select placeholder="Selecione a categoria da receita" loading={loadingCategories} showSearch optionFilterProp="children">
             {categories.map(cat => <Option key={cat.id} value={cat.id}>{cat.name}</Option>)}
+          </Select>
+        </Form.Item>
+        <Form.Item name="paymentMethod" label="Forma de Recebimento" rules={[{ required: true, message: 'Selecione a forma de recebimento!' }]}>
+          <Select placeholder="Como recebeu este valor?">
+            <Option value="Pix">Pix</Option>
+            <Option value="Dinheiro">Dinheiro</Option>
+            <Option value="Cartão de Débito">Cartão de Débito</Option>
+            <Option value="Transferência">Transferência</Option>
           </Select>
         </Form.Item>
         <Form.Item name="notes" label="Observações (Opcional)">

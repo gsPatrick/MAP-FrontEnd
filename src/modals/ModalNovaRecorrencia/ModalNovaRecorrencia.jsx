@@ -65,6 +65,7 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
                     interval: 1,
                     startDate: dayjs().add(1, 'day'),
                     autoCreateTransaction: true,
+                    paymentMethod: 'Pix',
                     isActive: true,
                 });
             }
@@ -114,6 +115,15 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
                     <Col span={12}><Form.Item name="value" label="Valor (R$)" rules={[{ required: true }]}><InputNumber style={{ width: '100%' }} min={0.01} precision={2} /></Form.Item></Col>
                 </Row>
                 <Form.Item name="financialCategoryId" label="Categoria" rules={[{ required: true }]}><Select loading={loadingCategories} showSearch>{categories.map(c => <Option key={c.id} value={c.id}>{c.name}</Option>)}</Select></Form.Item>
+                <Form.Item name="paymentMethod" label="Forma de Pagamento" rules={[{ required: true }]}>
+                    <Select>
+                        <Option value="Pix">Pix</Option>
+                        <Option value="Dinheiro">Dinheiro</Option>
+                        <Option value="Cartão de Crédito">Cartão de Crédito</Option>
+                        <Option value="Cartão de Débito">Cartão de Débito</Option>
+                        <Option value="Transferência">Transferência</Option>
+                    </Select>
+                </Form.Item>
                 <Form.Item name="frequency" label="Frequência" rules={[{ required: true }]}><Select><Option value="daily">Diária</Option><Option value="weekly">Semanal</Option><Option value="bi-weekly">Quinzenal</Option><Option value="monthly">Mensal</Option></Select></Form.Item>
                 
                 {(frequencia === 'weekly' || frequencia === 'bi-weekly') && <Form.Item name="dayOfWeek" label="Dia da Semana" rules={[{ required: true }]}><Select>{diasDaSemanaModal.map(d => <Option key={d.value} value={d.value}>{d.label}</Option>)}</Select></Form.Item>}
