@@ -156,7 +156,7 @@ const PainelUsuario = () => {
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }),
-            apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params: { isActive: true, dateStart: dayjs().format('YYYY-MM-DD'), sortBy: 'nextDueDate', sortOrder: 'ASC' } })
+            apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params: { isActive: true, sortBy: 'nextDueDate', sortOrder: 'ASC' } })
           ]);
 
           // Processa o resumo financeiro
@@ -568,13 +568,17 @@ const PainelUsuario = () => {
             {dashboardLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : (
               recurrences.length > 0 ? (
                 <ul className="upcoming-list">
-                  {recurrences.map(item => (
+                  {recurrences.map(item => {
+                    const late = dayjs(item.dueDate).endOf('day').isBefore(dayjs());
+                    return (
                     <li key={item.id} className="upcoming-list-item">
                       <div className="item-avatar recurrence"><FaRetweet /></div>
                       <div className="item-details">
                         <p className="item-title">{item.title}</p>
                         <p className="item-description">
-                          {`Próxima ${dayjs(item.dueDate).format('DD/MM/YY')} (${dayjs(item.dueDate).fromNow()})`}
+                          {late
+                            ? `Venceu ${dayjs(item.dueDate).format('DD/MM/YY')} (${dayjs(item.dueDate).fromNow()})`
+                            : `Próxima ${dayjs(item.dueDate).format('DD/MM/YY')} (${dayjs(item.dueDate).fromNow()})`}
                           {item.amount ? <span> | {formatCurrency(item.amount)}</span> : null}
                         </p>
                       </div>
@@ -582,7 +586,8 @@ const PainelUsuario = () => {
                         {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
                       </span>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               ) : <div className="empty-state">Nenhuma recorrência ativa.</div>
             )}
