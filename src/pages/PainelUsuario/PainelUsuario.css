@@ -267,16 +267,25 @@ body.painel-active {
 }
 
 .card-value {
-  font-size: 1.75rem;
+  /* Fonte fluida: encolhe para caber e NUNCA quebra em duas linhas */
+  font-size: clamp(1.1rem, 1.45vw + 0.4rem, 1.75rem);
   font-weight: 700;
   color: var(--texto-primario);
   margin: 0;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Garante que o conteúdo do card possa encolher (flexbox) sem empurrar/quebrar */
+.card-content {
+  min-width: 0;
 }
 
 @media (max-width: 767px) {
   .card-value {
-    font-size: 1.35rem;
+    font-size: clamp(1rem, 4.2vw, 1.5rem);
   }
 
   .summary-card {
@@ -1010,4 +1019,25 @@ body.painel-active {
   background: #389e0d;
   color: #fff;
   border-color: #389e0d;
+}
+
+/* Botão "Nova" no card de Recorrências */
+.btn-new-recurrence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #91caff;
+  background: #e6f4ff;
+  color: #1677ff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-new-recurrence:hover {
+  background: #1677ff;
+  color: #fff;
+  border-color: #1677ff;
 }

@@ -601,7 +601,12 @@ const PainelUsuario = () => {
 
           {/* Card dedicado de Recorrências */}
           <div className="card list-card animated-card" style={{ animationDelay: '0.7s' }}>
-            <h4 className="card-section-title"><FaRetweet /> Recorrências Ativas</h4>
+            <div className="list-card-header">
+              <h4 className="card-section-title"><FaRetweet /> Recorrências Ativas</h4>
+              <button className="btn-new-recurrence" onClick={() => { setEditingItem(null); setIsRecorrenciaModalVisible(true); }}>
+                <FaPlus /> Nova
+              </button>
+            </div>
             {dashboardLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : (
               recurrences.length > 0 ? (
                 <ul className="upcoming-list">
