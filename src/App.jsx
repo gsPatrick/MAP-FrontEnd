@@ -1,7 +1,23 @@
 // src/App.jsx
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy as reactLazy } from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
+
+// Carregamento lazy à prova de "tela branca": se um chunk antigo falhar ao
+// carregar (acontece logo após um deploy, quando o navegador tem o index.html
+// em cache apontando para arquivos JS que não existem mais), recarrega a página
+// UMA vez para buscar o build novo. O flag é limpo em qualquer carga bem-sucedida.
+const lazy = (factory) =>
+  reactLazy(() =>
+    factory()
+      .then((mod) => { sessionStorage.removeItem('__chunkReloaded'); return mod; })
+      .catch((err) => {
+        if (sessionStorage.getItem('__chunkReloaded')) throw err; // já tentou: evita loop
+        sessionStorage.setItem('__chunkReloaded', '1');
+        window.location.reload();
+        return new Promise(() => {}); // mantém o Suspense até a página recarregar
+      })
+  );
 import { Spin, ConfigProvider, App as AntApp } from 'antd';
 import ptBR from 'antd/locale/pt_BR';
 
