@@ -26,15 +26,18 @@ const ProtectedRoute = ({ children, role: requiredRole }) => {
       return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // A verificação de 'role' agora é mais robusta
-    const userRole = decodedToken.role;
+    // O papel é derivado do 'role' (admins) ou do 'type' do token.
+    // Tokens de cliente não têm 'role', mas têm type 'client'/'client_shared_access'.
+    const userRole =
+      decodedToken.role ||
+      (decodedToken.type === 'user_admin' ? 'admin' : 'client');
     console.log(`[ProtectedRoute] Role requerida: '${requiredRole}'. Role do usuário: '${userRole}'.`);
 
     if (requiredRole && userRole !== requiredRole) {
-      console.log('[ProtectedRoute] Redirecionando: Role do usuário não autorizada.');
-      // Se um cliente tentar acessar /admin, jogue-o para o painel dele.
-      // Se um usuário sem role definida tentar acessar uma rota de admin, jogue-o para o login.
-      return <Navigate to={userRole ? "/painel" : "/login"} replace />;
+      console.log('[ProtectedRoute] Redirecionando: papel não autorizado para esta rota.');
+      // Manda cada usuário para a sua área correta, evitando loop de redirecionamento.
+      const home = userRole === 'admin' ? '/admin/dashboard' : '/painel';
+      return <Navigate to={home} replace />;
     }
 
     console.log('[ProtectedRoute] Acesso concedido.');

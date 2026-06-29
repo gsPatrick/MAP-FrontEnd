@@ -78,7 +78,7 @@ const AppRoutes = () => (
       <Route path="/agendar/:financialAccountId" element={<PublicBookingPage />} />
 
       {/* Rota de Admin com rotas filhas */}
-      <Route path="/admin/dashboard" element={<AdminPage />}>
+      <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminPage /></ProtectedRoute>}>
         <Route index element={<DashboardOverview />} />
         <Route path="users" element={<UserManagementPage />} />
         <Route path="affiliates" element={<AffiliateManagementPage />} />
@@ -92,7 +92,7 @@ const AppRoutes = () => (
     {/* === ROTAS PROTEGIDAS DO PAINEL === */}
     <Route
       element={
-        <ProtectedRoute>
+        <ProtectedRoute role="client">
           <PainelLayout />
         </ProtectedRoute>
       }
