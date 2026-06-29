@@ -6,7 +6,7 @@ import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
   UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined,
-  CheckSquareOutlined
+  CheckSquareOutlined, CustomerServiceOutlined
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -50,6 +50,7 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     { key: '/painel/afiliados', icon: <CrownOutlined />, label: <Link to="/painel/afiliados">Indicações</Link> },
     { type: 'divider' },
     { key: '/painel/meu-perfil', icon: <UserOutlined />, label: <Link to="/painel/meu-perfil">Meu Perfil</Link> },
+    { key: '/painel/suporte', icon: <CustomerServiceOutlined />, label: <Link to="/painel/suporte">Suporte</Link> },
     { key: '/painel/configuracoes', icon: <SettingOutlined />, label: <Link to="/painel/configuracoes">Configurações</Link> },
   ].filter(Boolean);
 

@@ -5,7 +5,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import HeaderPanel from '../componentsPanel/HeaderPanel/HeaderPanel';
 import SidebarPanel from '../componentsPanel/SidebarPanel/SidebarPanel';
 import { useProfile } from '../contexts/ProfileContext';
-import SupportFloatingButton from '../components/Support/SupportFloatingButton';
 
 const { Content } = Layout;
 const MOBILE_BREAKPOINT = 992;
@@ -82,7 +81,6 @@ const PainelLayout = () => {
           isMobile={isMobile}
           onMenuClick={handleToggleDrawer}
         />
-        <SupportFloatingButton />
         <Outlet />
       </Layout>
     </Layout>

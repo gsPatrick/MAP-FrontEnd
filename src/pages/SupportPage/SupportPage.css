@@ -1,0 +1,20 @@
+/* src/pages/SupportPage/SupportPage.css */
+.support-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.support-page-header {
+  margin-bottom: 24px;
+}
+.support-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .support-page {
+    padding: 12px;
+  }
+}
