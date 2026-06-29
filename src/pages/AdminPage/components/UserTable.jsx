@@ -1,6 +1,6 @@
 // src/pages/AdminPage/components/UserTable.jsx
 import React, { useState } from 'react';
-import { Table, Tag, Button, Space, message, Popconfirm, Tooltip } from 'antd';
+import { Table, Tag, Button, Space, message, Popconfirm, Tooltip, Avatar } from 'antd';
 import { UserSwitchOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 import ChangePlanModal from './ChangePlanModal';
@@ -9,6 +9,7 @@ import EditUserModal from './EditUserModal';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/pt-br';
+import './UserTable.css';
 
 dayjs.extend(relativeTime);
 dayjs.locale('pt-br');
@@ -24,7 +25,6 @@ const planNameMapping = {
   vitalicio_avancado: 'Vitalício Avançado',
 };
 
-// Cor do selo do plano: pago = verde/azul; sem plano (inadimplente/gratuito) = vermelho.
 const planTagColor = (level) => {
   if (!level) return 'default';
   if (level.startsWith('vitalicio_')) return 'gold';
@@ -32,6 +32,42 @@ const planTagColor = (level) => {
   if (level.includes('avancado')) return 'geekblue';
   if (level.includes('basico')) return 'blue';
   return 'default';
+};
+
+// Situação UNIFICADA: combina status + plano + expiração em um único estado claro,
+// eliminando a redundância entre "status" e "accessLevel".
+const getSituacao = (record) => {
+  if (record.status === 'Inativo') return { label: 'Excluído', color: 'default' };
+  if (record.status === 'Bloqueado') return { label: 'Bloqueado', color: 'red' };
+  if (record.status === 'Aguardando Pagamento') return { label: 'Aguardando pagamento', color: 'gold' };
+
+  const lvl = record.accessLevel;
+  if (lvl && lvl.startsWith('vitalicio_')) return { label: 'Ativo (vitalício)', color: 'green' };
+  if (!lvl || lvl === 'inadimplente' || lvl === 'gratuito') return { label: 'Inadimplente', color: 'red' };
+
+  if (record.accessExpiresAt) {
+    const expired = dayjs(record.accessExpiresAt).endOf('day').isBefore(dayjs());
+    return expired
+      ? { label: 'Expirado', color: 'volcano' }
+      : { label: 'Ativo', color: 'green' };
+  }
+  return { label: 'Ativo', color: 'green' };
+};
+
+const initials = (name) =>
+  (name || '?')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
+const avatarColor = (str) => {
+  const colors = ['#b24a0a', '#1677ff', '#52c41a', '#722ed1', '#eb2f96', '#13c2c2', '#fa8c16'];
+  let h = 0;
+  for (const c of String(str || '')) h = c.charCodeAt(0) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
 };
 
 const UserTable = ({ users, loading, onActionSuccess }) => {
@@ -50,70 +86,90 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
   };
 
   const columns = [
-    { title: 'Nome', dataIndex: 'name', key: 'name', sorter: (a, b) => a.name.localeCompare(b.name), fixed: 'left', width: 200 },
-    { title: 'Email', dataIndex: 'email', key: 'email', width: 250 },
-    { title: 'Telefone', dataIndex: 'phone', key: 'phone', width: 150 },
+    {
+      title: 'Usuário',
+      key: 'user',
+      fixed: 'left',
+      width: 280,
+      sorter: (a, b) => (a.name || '').localeCompare(b.name || ''),
+      render: (_, record) => (
+        <div className="admin-user-cell">
+          <Avatar style={{ backgroundColor: avatarColor(record.name || record.email), flexShrink: 0 }}>
+            {initials(record.name)}
+          </Avatar>
+          <div className="admin-user-cell-info">
+            <span className="admin-user-name">{record.name || 'Sem nome'}</span>
+            <span className="admin-user-email">{record.email || 'sem e-mail'}</span>
+          </div>
+        </div>
+      ),
+    },
+    { title: 'Telefone', dataIndex: 'phone', key: 'phone', width: 150, render: (p) => p || '—' },
     {
       title: 'Plano',
       dataIndex: 'accessLevel',
       key: 'accessLevel',
+      width: 160,
+      render: (level, record) => (
+        <div className="admin-plan-cell">
+          <Tag color={planTagColor(level)} style={{ marginInlineEnd: 0 }}>
+            {planNameMapping[level] || level || '—'}
+          </Tag>
+          {record.accessExpiresAt && (
+            <span className="admin-plan-expiry">
+              até {new Date(record.accessExpiresAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Situação',
+      key: 'situacao',
       width: 150,
-      render: (level) => <Tag color={planTagColor(level)}>{planNameMapping[level] || level}</Tag>,
-    },
-    {
-      title: 'Expira em',
-      dataIndex: 'accessExpiresAt',
-      key: 'accessExpiresAt',
-      width: 120,
-      render: (date) => (date ? new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A'),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (status, record) => {
-        let color = status === 'Ativo' ? 'green' : 'volcano';
-        let label = status;
-
-        // Sobrescrita visual baseada na atividade
-        if (status === 'Ativo' && record.lastActiveAt) {
-          const diffDays = dayjs().diff(dayjs(record.lastActiveAt), 'day');
-          if (diffDays > 30) { color = 'default'; label = 'Parado'; }
-          else if (diffDays > 15) { color = 'warning'; label = 'Inativo'; }
-        }
-
-        return <Tag color={color}>{label}</Tag>;
+      filters: [
+        { text: 'Ativo', value: 'Ativo' },
+        { text: 'Inadimplente', value: 'Inadimplente' },
+        { text: 'Aguardando pagamento', value: 'Aguardando pagamento' },
+        { text: 'Bloqueado', value: 'Bloqueado' },
+      ],
+      onFilter: (value, record) => getSituacao(record).label.startsWith(value),
+      render: (_, record) => {
+        const s = getSituacao(record);
+        return <Tag color={s.color}>{s.label}</Tag>;
       },
     },
     {
-      title: 'Última Atividade',
+      title: 'Última atividade',
       dataIndex: 'lastActiveAt',
       key: 'lastActiveAt',
       width: 150,
-      render: (date) => (date ? dayjs(date).fromNow() : 'Nunca'),
+      render: (date) => (date ? dayjs(date).fromNow() : <span className="admin-muted">Nunca</span>),
       sorter: (a, b) => new Date(a.lastActiveAt || 0) - new Date(b.lastActiveAt || 0),
     },
     {
       title: 'Ações',
       key: 'actions',
       fixed: 'right',
+      width: 150,
+      align: 'center',
       className: 'admin-table-actions',
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Editar dados">
-            <Button icon={<EditOutlined />} onClick={() => { setSelectedUser(record); setIsEditModalVisible(true); }} />
+            <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedUser(record); setIsEditModalVisible(true); }} />
           </Tooltip>
           <Tooltip title="Alterar plano">
-            <Button icon={<UserSwitchOutlined />} onClick={() => { setSelectedUser(record); setIsPlanModalVisible(true); }} />
+            <Button size="small" type="primary" ghost icon={<UserSwitchOutlined />} onClick={() => { setSelectedUser(record); setIsPlanModalVisible(true); }} />
           </Tooltip>
           <Popconfirm
-            title={`Excluir ${record.name}?`}
+            title={`Excluir ${record.name || 'este usuário'}?`}
+            description="O usuário ficará inativo e sairá da listagem."
             onConfirm={() => handleDelete(record.id)}
             okText="Sim" cancelText="Não"
           >
             <Tooltip title="Excluir usuário">
-              <Button danger icon={<DeleteOutlined />} />
+              <Button size="small" danger icon={<DeleteOutlined />} />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -124,12 +180,14 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
   return (
     <>
       <Table
+        className="admin-user-table"
         columns={columns}
         dataSource={users}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 1200 }}
+        size="middle"
+        pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (t) => `${t} usuário(s)` }}
+        scroll={{ x: 940 }}
       />
       {isEditModalVisible && (
         <EditUserModal
