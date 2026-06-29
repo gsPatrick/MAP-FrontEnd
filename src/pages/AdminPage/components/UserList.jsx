@@ -8,6 +8,7 @@ import EditUserModal from './EditUserModal';
 
 const planNameMapping = {
     gratuito: 'Gratuito',
+    inadimplente: 'Inadimplente',
     basico_mensal: 'Básico Mensal',
     basico_anual: 'Básico Anual',
     avancado_mensal: 'Avançado Mensal',

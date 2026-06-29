@@ -63,7 +63,14 @@ const AdminPage = () => {
         </Drawer>
       ) : (
         <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="dark">
-          <div className="admin-logo" />
+          <div className="admin-brand">
+            <span className="admin-brand-mark">M</span>
+            {!collapsed && (
+              <span className="admin-brand-text">
+                MAP <small>Admin</small>
+              </span>
+            )}
+          </div>
           {sidebarContent}
         </Sider>
       )}

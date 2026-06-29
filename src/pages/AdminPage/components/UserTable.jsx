@@ -15,12 +15,23 @@ dayjs.locale('pt-br');
 
 const planNameMapping = {
   gratuito: 'Gratuito',
+  inadimplente: 'Inadimplente',
   basico_mensal: 'Básico Mensal',
   basico_anual: 'Básico Anual',
   avancado_mensal: 'Avançado Mensal',
   avancado_anual: 'Avançado Anual',
   vitalicio_basico: 'Vitalício Básico',
   vitalicio_avancado: 'Vitalício Avançado',
+};
+
+// Cor do selo do plano: pago = verde/azul; sem plano (inadimplente/gratuito) = vermelho.
+const planTagColor = (level) => {
+  if (!level) return 'default';
+  if (level.startsWith('vitalicio_')) return 'gold';
+  if (level === 'inadimplente' || level === 'gratuito') return 'red';
+  if (level.includes('avancado')) return 'geekblue';
+  if (level.includes('basico')) return 'blue';
+  return 'default';
 };
 
 const UserTable = ({ users, loading, onActionSuccess }) => {
@@ -47,7 +58,7 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       dataIndex: 'accessLevel',
       key: 'accessLevel',
       width: 150,
-      render: (level) => <Tag color="blue">{planNameMapping[level] || level}</Tag>,
+      render: (level) => <Tag color={planTagColor(level)}>{planNameMapping[level] || level}</Tag>,
     },
     {
       title: 'Expira em',

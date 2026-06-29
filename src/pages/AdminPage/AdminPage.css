@@ -3,16 +3,55 @@
     min-height: 100vh;
 }
 
-.admin-logo {
-    height: 32px;
-    margin: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
+/* --- Marca / logo da sidebar --- */
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    margin: 12px 16px;
+    padding: 0 4px;
+    overflow: hidden;
+}
+
+.admin-brand-mark {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #b24a0a, #e8740c);
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.admin-brand-text {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.admin-brand-text small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 2px;
 }
 
 .admin-page-content-wrapper {
     padding: 24px;
     background: #f0f2f5;
+    min-width: 0; /* permite que tabelas internas façam scroll em vez de empurrar o layout */
 }
 
 .admin-page-content {
@@ -39,6 +78,38 @@
     margin-bottom: 16px;
 }
 
+/* --- Coluna de Ações sempre visível e legível --- */
 .admin-table-actions {
-    min-width: 120px;
+    min-width: 140px;
+}
+
+/* Garante fundo opaco nas células fixas (evita sobreposição transparente ao rolar) */
+.ant-table-cell-fix-right,
+.ant-table-cell-fix-left {
+    background: #fff !important;
+}
+.ant-table-thead .ant-table-cell-fix-right,
+.ant-table-thead .ant-table-cell-fix-left {
+    background: #fafafa !important;
+}
+
+/* Cards de métricas com leve elevação */
+.admin-summary-card {
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.admin-summary-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+    .admin-page-content-wrapper {
+        padding: 12px;
+    }
+    .admin-header {
+        align-items: flex-start;
+    }
 }
