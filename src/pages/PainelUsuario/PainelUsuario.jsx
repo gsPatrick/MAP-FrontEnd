@@ -114,7 +114,11 @@ const PainelUsuario = () => {
         let startDate, endDate;
 
         // Define o intervalo de datas com base no modo de filtro e no mês atual
-        if (filterMode === 'day') {
+        if (filterMode === 'all') {
+          // Geral: sem data -> traz tudo (o backend ignora o filtro de período).
+          startDate = undefined;
+          endDate = undefined;
+        } else if (filterMode === 'day') {
           startDate = currentMonth.format('YYYY-MM-DD');
           endDate = startDate;
         } else if (filterMode === 'week') {
@@ -366,9 +370,11 @@ const PainelUsuario = () => {
               <button onClick={() => handleFilterButtonClick('day')} className={filterMode === 'day' ? 'active' : ''}>Hoje</button>
               <button onClick={() => handleFilterButtonClick('week')} className={filterMode === 'week' ? 'active' : ''}>Semana</button>
               <button onClick={() => handleFilterButtonClick('month')} className={filterMode === 'month' ? 'active' : ''}>Mês</button>
+              <button onClick={() => handleFilterButtonClick('all')} className={filterMode === 'all' ? 'active' : ''}>Geral</button>
             </div>
 
-            {/* Navegador de Mês */}
+            {/* Navegador de Mês (oculto no modo Geral) */}
+            {filterMode !== 'all' && (
             <div className="month-navigator">
               <button className="nav-arrow" onClick={() => handleNavigateMonth('prev')} title="Mês Anterior">
                 <FaChevronLeft />
@@ -378,6 +384,7 @@ const PainelUsuario = () => {
                 <FaChevronRight />
               </button>
             </div>
+            )}
 
             {/* RangePicker REMOVIDO conforme solicitação */}
           </div>
