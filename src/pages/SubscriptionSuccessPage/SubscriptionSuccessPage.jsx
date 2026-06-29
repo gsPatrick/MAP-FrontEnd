@@ -106,7 +106,7 @@ const SubscriptionSuccessPage = () => {
                         icon={<WhatsAppOutlined />} 
                         size="large" 
                         className="whatsapp-button"
-                        href="https://wa.me/5571982862912"
+                        href="https://wa.me/5521998597002"
                         target="_blank"
                     >
                         Iniciar Conversa

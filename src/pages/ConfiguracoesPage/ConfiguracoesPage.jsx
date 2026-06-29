@@ -752,7 +752,7 @@ const ConfiguracoesPage = () => {
                         O convidado usará o número de telefone para interagir via WhatsApp. As credenciais de acesso ao painel web serão configuradas pelo próprio convidado no primeiro uso, se ele ainda não tiver um cadastro.
                     </Paragraph>
                     <Form.Item name="sharedAccessPhone" label="Telefone WhatsApp do Convidado" rules={[{ required: true, message: 'O Telefone WhatsApp do convidado é obrigatório!' }]}>
-                        <Input prefix={<WhatsAppOutlined />} placeholder="Ex: 71982862912" disabled={!!editingAccessUser} />
+                        <Input prefix={<WhatsAppOutlined />} placeholder="Ex: 21999998888" disabled={!!editingAccessUser} />
                     </Form.Item>
                     {editingAccessUser && <Paragraph type="secondary" style={{ fontSize: '11px', marginTop: '-10px', marginBottom: '15px' }}><InfoCircleOutlined/> O telefone não pode ser alterado após o acesso ser criado.</Paragraph>}
                     {/* Campos sharedAccessEmail e sharedAccessPassword foram removidos daqui */}
