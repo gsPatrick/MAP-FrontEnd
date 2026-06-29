@@ -164,6 +164,7 @@ const CartoesPage = () => {
     const cardPayload = {
       name: values.name,
       limit: parseFloat(values.limitTotal),
+      blockedLimit: values.limiteBloqueado ? parseFloat(values.limiteBloqueado) : 0,
       closingDay: parseInt(values.closingDay),
       paymentDay: parseInt(values.paymentDay),
       lastFourDigits: values.numeroCartao ? String(values.numeroCartao).slice(-4) : null,
@@ -263,16 +264,20 @@ const CartoesPage = () => {
     }
   };
 
-  const limiteDisponivel = selectedCardDetails?.availableLimit || selectedCard?.availableLimit || 0;
-  const limiteTotalCard = selectedCardDetails?.totalLimit || selectedCard?.limit || 0;
-  const utilizado = Math.max(0, parseFloat(limiteTotalCard) - parseFloat(limiteDisponivel));
-  const percentualUsado = limiteTotalCard > 0 ? (utilizado / limiteTotalCard) * 100 : 0;
+  const limiteTotalCard = parseFloat(selectedCard?.limit ?? selectedCardDetails?.totalLimit ?? 0);
+  const limiteBloqueado = parseFloat(selectedCard?.blockedLimit ?? selectedCardDetails?.blockedLimit ?? 0);
+  const limiteDisponivel = parseFloat(selectedCardDetails?.availableLimit ?? selectedCard?.availableLimit ?? Math.max(0, limiteTotalCard - limiteBloqueado));
+  const limiteUsado = parseFloat(selectedCard?.usedLimit ?? selectedCardDetails?.usedLimit ?? Math.max(0, limiteTotalCard - limiteDisponivel - limiteBloqueado));
+  const fmtBRL = (v) => parseFloat(v || 0).toLocaleString('pt-br', { minimumFractionDigits: 2 });
+  // Barra: parte usada + parte bloqueada (success/verde) sobre o total.
+  const percentualUsado = limiteTotalCard > 0 ? (limiteUsado / limiteTotalCard) * 100 : 0;
+  const percentualBloqueado = limiteTotalCard > 0 ? (limiteBloqueado / limiteTotalCard) * 100 : 0;
 
   const cardOptionsMenu = (card) => (
     <Menu onClick={(e) => e.domEvent.stopPropagation()}>
       <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => {
         setEditingCard(card);
-        cardForm.setFieldsValue({ ...card, limitTotal: card.limit, numeroCartao: card.lastFourDigits });
+        cardForm.setFieldsValue({ ...card, limitTotal: card.limit, limiteBloqueado: card.blockedLimit || 0, numeroCartao: card.lastFourDigits });
         setIsAddCardModalVisible(true);
       }}>Editar</Menu.Item>
       <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDeleteCard(card.id)}>Excluir</Menu.Item>
@@ -372,17 +377,23 @@ const CartoesPage = () => {
                 {/* Limit Progress */}
                 <div className="banking-limit-section">
                   <div className="banking-limit-info">
-                    <span className="available">Disponível: R$ {parseFloat(limiteDisponivel).toLocaleString('pt-br', { minimumFractionDigits: 2 })}</span>
-                    <span className="used">Limite de R$ {parseFloat(limiteTotalCard).toLocaleString('pt-br', { minimumFractionDigits: 2 })}</span>
+                    <span className="available">Disponível: R$ {fmtBRL(limiteDisponivel)}</span>
+                    <span className="used">Limite total: R$ {fmtBRL(limiteTotalCard)}</span>
                   </div>
                   <Progress
-                    percent={percentualUsado}
+                    percent={Math.min(100, percentualUsado + percentualBloqueado)}
+                    success={{ percent: Math.min(100, percentualBloqueado), strokeColor: '#f59e0b' }}
                     showInfo={false}
-                    strokeColor={percentualUsado > 90 ? '#f43f5e' : '#1e293b'}
+                    strokeColor={(percentualUsado + percentualBloqueado) > 90 ? '#f43f5e' : '#1e293b'}
                     trailColor="#f1f5f9"
                     strokeWidth={8}
                     strokeLinecap="round"
                   />
+                  <div className="banking-limit-legend">
+                    <span><i className="dot dot-used" /> Usado: R$ {fmtBRL(limiteUsado)}</span>
+                    <span><i className="dot dot-blocked" /> Bloqueado: R$ {fmtBRL(limiteBloqueado)}</span>
+                    <span><i className="dot dot-available" /> Disponível: R$ {fmtBRL(limiteDisponivel)}</span>
+                  </div>
 
                   <div className="banking-actions-bar">
                     <Button
@@ -464,6 +475,9 @@ const CartoesPage = () => {
             <Col span={12}><Form.Item name="paymentDay" label="Vencimento"><InputNumber min={1} max={31} style={{ width: '100%' }} /></Form.Item></Col>
           </Row>
           <Form.Item name="limitTotal" label="Limite Total (R$)"><InputNumber min={0} style={{ width: '100%' }} formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')} parser={v => v.replace(/\./g, '')} /></Form.Item>
+          <Form.Item name="limiteBloqueado" label="Limite Bloqueado (R$)" tooltip="Valor do limite que você quer reservar e NÃO gastar (economizar). Fica indisponível para compras.">
+            <InputNumber min={0} style={{ width: '100%' }} precision={2} placeholder="0,00" />
+          </Form.Item>
           <Button type="primary" block htmlType="submit" style={{ background: '#0f172a' }}>Salvar</Button>
         </Form>
       </Modal>
