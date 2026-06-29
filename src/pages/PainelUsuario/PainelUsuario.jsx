@@ -24,7 +24,7 @@ import ModalPjClientAppointment from '../../modals/ModalPjClientAppointment/Moda
 import ModalPjServiceAppointment from '../../modals/ModalPjServiceAppointment/ModalPjServiceAppointment';
 
 // --- Importação do Ant Design básica ---
-import { Spin, message, Skeleton } from 'antd';
+import { Spin, message, Skeleton, Modal } from 'antd';
 
 import './PainelUsuario.css';
 
@@ -259,6 +259,36 @@ const PainelUsuario = () => {
     } catch (e) {
       message.error(e.response?.data?.message || 'Não foi possível atualizar o item.');
     }
+  };
+
+  // Conclui de uma vez todos os itens ATRASADOS visíveis (transações e compromissos).
+  const handleClearOverdue = async () => {
+    const overdue = upcomingItems.filter(i =>
+      (i.itemType === 'transaction' || i.itemType === 'appointment') &&
+      dayjs(i.dueDate).endOf('day').isBefore(dayjs())
+    );
+    if (overdue.length === 0) return;
+    Modal.confirm({
+      title: 'Limpar atrasados',
+      centered: true,
+      content: `Marcar como concluído(s) ${overdue.length} item(ns) atrasado(s)? Eles sairão da lista.`,
+      okText: 'Sim, concluir todos',
+      cancelText: 'Cancelar',
+      onOk: async () => {
+        try {
+          await Promise.all(overdue.map(item =>
+            item.itemType === 'transaction'
+              ? apiClient.post(`/financial-accounts/${currentProfile.id}/transactions/${item.rawId}/settle`)
+              : apiClient.post(`/financial-accounts/${currentProfile.id}/appointments/${item.rawId}/complete`)
+          ));
+          message.success('Itens atrasados concluídos!');
+        } catch (e) {
+          message.error('Alguns itens não puderam ser atualizados.');
+        } finally {
+          setRefreshKey(k => k + 1);
+        }
+      },
+    });
   };
 
   // --- LÓGICA DE MANIPULAÇÃO DOS MODAIS ---
@@ -523,7 +553,14 @@ const PainelUsuario = () => {
           </div>
 
           <div className="card list-card animated-card" style={{ animationDelay: '0.6s' }}>
-            <h4 className="card-section-title"><FaCalendarAlt /> Próximos Vencimentos e Lembretes</h4>
+            <div className="list-card-header">
+              <h4 className="card-section-title"><FaCalendarAlt /> Próximos Vencimentos e Lembretes</h4>
+              {upcomingItems.some(i => (i.itemType === 'transaction' || i.itemType === 'appointment') && dayjs(i.dueDate).endOf('day').isBefore(dayjs())) && (
+                <button className="btn-clear-overdue" onClick={handleClearOverdue}>
+                  <FaCheck /> Limpar atrasados
+                </button>
+              )}
+            </div>
             {dashboardLoading ? <Skeleton active paragraph={{ rows: 5 }} /> : (
               upcomingItems.length > 0 ? (
                 <ul className="upcoming-list">
