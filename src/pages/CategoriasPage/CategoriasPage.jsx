@@ -9,6 +9,7 @@ import {
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 
 // As importações de Layout, HeaderPanel e SidebarPanel foram removidas.
 // import HeaderPanel from '../../componentsPanel/HeaderPanel/HeaderPanel';
@@ -183,19 +184,15 @@ const CategoriasPage = () => {
                   <Tooltip title="Editar Categoria" key="edit">
                     <EditOutlined onClick={() => showModal(cat)} style={{color: 'var(--map-dourado)'}}/>
                   </Tooltip>,
-                  <Popconfirm
-                    key={`delete-${cat.id}`}
-                    title={<Text>Excluir "<Text strong>{cat.name}</Text>"?</Text>}
-                    description="Transações associadas ficarão sem categoria. Continuar?"
-                    onConfirm={() => handleDeleteCategoria(cat)}
-                    okText="Sim, Excluir"
-                    cancelText="Não"
-                    okButtonProps={{ danger: true }}
-                  >
-                    <Tooltip title="Excluir Categoria">
-                      <DeleteOutlined style={{color: 'var(--map-vermelho-escuro)'}}/>
-                    </Tooltip>
-                  </Popconfirm>
+                  <Tooltip title="Excluir Categoria" key={`delete-${cat.id}`}>
+                    <DeleteOutlined
+                      style={{ color: 'var(--map-vermelho-escuro)' }}
+                      onClick={() => confirmDelete({
+                        content: `Excluir "${cat.name}"? Transações associadas ficarão sem categoria.`,
+                        onOk: () => handleDeleteCategoria(cat),
+                      })}
+                    />
+                  </Tooltip>
                 ]}
               >
                 <Card.Meta

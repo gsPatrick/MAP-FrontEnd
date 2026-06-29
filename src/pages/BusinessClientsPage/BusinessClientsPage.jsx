@@ -16,6 +16,7 @@ import 'dayjs/locale/pt-br';
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 import ModalBusinessClientForm from '../../modals/ModalBusinessClientForm/ModalBusinessClientForm';
 
 import './BusinessClientsPage.css';
@@ -76,16 +77,9 @@ const NextAppointmentCard = ({ appointment, onAction, onWhatsAppClick }) => {
                     Concluir Atendimento
                 </Button>
             )}
-            <Popconfirm
-                title="Deseja cancelar este agendamento?"
-                onConfirm={() => onAction('cancel', appointment.id)}
-                okText="Sim, Cancelar"
-                cancelText="Não"
-            >
-                <Button danger icon={<CloseCircleOutlined />} block>
-                    Cancelar Agendamento
-                </Button>
-            </Popconfirm>
+            <Button danger icon={<CloseCircleOutlined />} block onClick={() => confirmDelete({ title: 'Cancelar agendamento', content: 'Deseja cancelar este agendamento?', okText: 'Sim, cancelar', onOk: () => onAction('cancel', appointment.id) })}>
+                Cancelar Agendamento
+            </Button>
             <Button 
                 icon={<WhatsAppOutlined />} 
                 onClick={onWhatsAppClick}
@@ -317,7 +311,7 @@ const BusinessClientsPage = () => {
                         Contato
                     </Button>
                   <Tooltip title="Editar Cliente"><Button icon={<EditOutlined />} onClick={() => showModal(selectedClientDetails)}/></Tooltip>
-                  <Popconfirm title="Excluir este cliente?" onConfirm={() => handleDelete(selectedClientDetails)} okText="Sim" cancelText="Não"><Tooltip title="Excluir"><Button danger icon={<DeleteOutlined />}/></Tooltip></Popconfirm>
+                  <Tooltip title="Excluir"><Button danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ content: `Excluir o cliente "${selectedClientDetails?.name}"?`, onOk: () => handleDelete(selectedClientDetails) })}/></Tooltip>
                 </Space>
               </div>
               <Divider/>

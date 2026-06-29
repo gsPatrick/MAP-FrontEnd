@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
+import confirmDelete from '../../utils/confirmDelete';
 import './ServicesAndCrmPage.css';
 import dayjs from 'dayjs';
 import apiClient from '../../services/api';
@@ -233,9 +234,7 @@ const ServicesAndCrmPage = () => {
                   <Paragraph className="service-manage-description" ellipsis={{ rows: 2, expandable: true, symbol: 'mais' }}>{service.description || 'Nenhuma descrição.'}</Paragraph>
                   <div className="service-card-actions">
                     <Button type="text" icon={<EditOutlined />} onClick={() => showModal(service)}>Editar</Button>
-                    <Popconfirm title="Excluir este serviço?" onConfirm={() => handleDelete(service.id)} okText="Sim" cancelText="Não" placement="topRight">
-                      <Button type="text" danger icon={<DeleteOutlined />}>Excluir</Button>
-                    </Popconfirm>
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ content: `Excluir o serviço "${service.name}"?`, onOk: () => handleDelete(service.id) })}>Excluir</Button>
                   </div>
                 </Card>
               </motion.div>

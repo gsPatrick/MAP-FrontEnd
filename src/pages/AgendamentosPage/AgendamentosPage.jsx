@@ -21,6 +21,7 @@ import ptBR from 'antd/lib/locale/pt_BR';
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 
 import ModalPfAppointment from '../../modals/ModalPfAppointment/ModalPfAppointment';
 import ModalPjClientAppointment from '../../modals/ModalPjClientAppointment/ModalPjClientAppointment';
@@ -256,7 +257,7 @@ const AgendamentosPage = () => {
                     {event.isPf && <Button onClick={() => handleLifecycleAction(isCompleted ? 'schedule' : 'complete', event)} icon={<CheckCircleOutlined />}>{isCompleted ? "Reabrir" : "Concluir"}</Button>}
                     {isPending && !event.isPf && <Button onClick={() => handleLifecycleAction('confirm', event)} icon={<LikeOutlined />}>Confirmar</Button>}
                     {isConfirmed && !event.isPf && <Button onClick={() => handleLifecycleAction('complete', event)} icon={<CheckCircleOutlined />}>Concluir</Button>}
-                    <Popconfirm title="Tem certeza?" onConfirm={() => handleDelete(event.appointmentId)} okText="Sim"><Button danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
+                    <Button danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ content: 'Tem certeza que deseja excluir este agendamento?', onOk: () => handleDelete(event.appointmentId) })}>Excluir</Button>
                 </Space>
             </div>
         );
@@ -519,7 +520,7 @@ const AgendamentosPage = () => {
                                         {event.isPf && <Button size="small" onClick={() => handleLifecycleAction(isCompleted ? 'schedule' : 'complete', event)} icon={<CheckCircleOutlined />}>{isCompleted ? "Reabrir" : "Concluir"}</Button>}
                                         {isPending && !event.isPf && <Button size="small" onClick={() => handleLifecycleAction('confirm', event)} icon={<LikeOutlined />}>Confirmar</Button>}
                                         {isConfirmed && !event.isPf && <Button size="small" onClick={() => handleLifecycleAction('complete', event)} icon={<CheckCircleOutlined />}>Concluir</Button>}
-                                        <Popconfirm title="Tem certeza?" onConfirm={() => handleDelete(event.appointmentId)} okText="Sim"><Button size="small" danger icon={<DeleteOutlined />}>Excluir</Button></Popconfirm>
+                                        <Button size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ content: 'Tem certeza que deseja excluir este agendamento?', onOk: () => handleDelete(event.appointmentId) })}>Excluir</Button>
                                     </Space>
                                 </List.Item>
                             );

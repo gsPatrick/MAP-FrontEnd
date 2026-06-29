@@ -192,6 +192,7 @@ const CartoesPage = () => {
     modal.confirm({
       title: 'Excluir Cartão',
       content: 'Tem certeza que deseja remover este cartão? As despesas cadastradas continuarão no sistema.',
+      centered: true,
       okText: 'Excluir',
       okType: 'danger',
       onOk: async () => {

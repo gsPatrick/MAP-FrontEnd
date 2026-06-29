@@ -16,6 +16,7 @@ dayjs.locale('pt-br');
 // Contexto
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 
 // Componentes do Painel REMOVIDOS: HeaderPanel, SidebarPanel
 import './ProdutosEstoquePage.css';
@@ -325,20 +326,17 @@ const ProdutosEstoquePage = () => {
           <Tooltip title="Editar">
             <Button icon={<EditOutlined />} onClick={() => showProductModal(record)} className="action-btn edit-btn" />
           </Tooltip>
-          <Popconfirm
-            title={<Text>Excluir <Text strong className="delete-confirm-product-name">"{record.name}"</Text>?</Text>}
-            description="Esta ação não pode ser desfeita."
-            onConfirm={() => handleDeleteProduct(record.id, record.name)}
-            okText="Sim, Excluir"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true, className: 'delete-confirm-ok-btn' }}
-            cancelButtonProps={{ className: 'delete-confirm-cancel-btn'}}
-            overlayClassName="delete-popconfirm"
-          >
-            <Tooltip title="Excluir">
-              <Button icon={<DeleteOutlined />} danger className="action-btn delete-btn" />
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Excluir">
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              className="action-btn delete-btn"
+              onClick={() => confirmDelete({
+                content: `Excluir "${record.name}"? Esta ação não pode ser desfeita.`,
+                onOk: () => handleDeleteProduct(record.id, record.name),
+              })}
+            />
+          </Tooltip>
         </Space>
       ),
     },

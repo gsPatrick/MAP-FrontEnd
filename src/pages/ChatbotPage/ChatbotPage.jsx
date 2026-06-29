@@ -260,6 +260,7 @@ const ChatbotPage = () => {
     Modal.confirm({
         title: 'Confirmar Exclusão',
         content: `Tem certeza que deseja excluir "${resourceName}"? Esta ação não pode ser desfeita.`,
+        centered: true,
         okText: 'Excluir',
         okType: 'danger',
         cancelText: 'Cancelar',

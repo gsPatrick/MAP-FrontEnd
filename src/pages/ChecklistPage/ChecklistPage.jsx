@@ -14,6 +14,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 import './ChecklistPage.css';
 
 dayjs.locale('pt-br');
@@ -262,7 +263,7 @@ const ChecklistPage = () => {
                             <Button type="text" shape="circle" icon={<EditOutlined />} onClick={() => showEditModal(item)} />
                         </Tooltip>
                         <Tooltip title="Excluir Tarefa">
-                            <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => handleDeleteItem(item.id)} />
+                            <Button type="text" shape="circle" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ content: `Excluir a tarefa "${item.text || item.description || ''}"?`, onOk: () => handleDeleteItem(item.id) })} />
                         </Tooltip>
                       </Space>
                   ] : []}

@@ -17,6 +17,7 @@ import moment from 'moment';
 
 import { useProfile } from '../../contexts/ProfileContext';
 import apiClient from '../../services/api';
+import confirmDelete from '../../utils/confirmDelete';
 
 import './ConfiguracoesPage.css';
 
@@ -383,6 +384,7 @@ const ConfiguracoesPage = () => {
         Modal.confirm({
             title: 'Desconectar Google Agenda?',
             content: 'Isso removerá a sincronização e o acesso à sua agenda. Agendamentos existentes não serão afetados.',
+            centered: true,
             okText: 'Sim, Desconectar', okType: 'danger', cancelText: 'Não', className: 'modal-confirm-map',
             onOk: async () => {
                 setLoadingGoogleStatus(true);
@@ -580,7 +582,7 @@ const ConfiguracoesPage = () => {
                                         <List.Item
                                             actions={[
                                                 <Tooltip title="Editar Permissões" key={`edit-${sharedAccessRecord.id}`}><Button type="text" icon={<EditOutlined />} onClick={() => showAccessModal(sharedAccessRecord)} className="list-action-btn edit" /></Tooltip>,
-                                                <Popconfirm key={`delete-${sharedAccessRecord.id}`} title={`Remover acesso de "${sharedAccessRecord.sharedAccessPhone}"?`} onConfirm={() => handleDeleteAccessUser(sharedAccessRecord.id, sharedAccessRecord.sharedAccessPhone)} okText="Sim" cancelText="Não" okButtonProps={{ danger: true, className: 'popconfirm-delete-btn' }}><Tooltip title="Remover Acesso"><Button type="text" danger icon={<DeleteOutlined />} className="list-action-btn delete" /></Tooltip></Popconfirm>
+                                                <Tooltip title="Remover Acesso" key={`delete-${sharedAccessRecord.id}`}><Button type="text" danger icon={<DeleteOutlined />} className="list-action-btn delete" onClick={() => confirmDelete({ title: 'Remover acesso', content: `Remover acesso de "${sharedAccessRecord.sharedAccessPhone}"?`, okText: 'Remover', onOk: () => handleDeleteAccessUser(sharedAccessRecord.id, sharedAccessRecord.sharedAccessPhone) })} /></Tooltip>
                                             ]}>
                                             <List.Item.Meta
                                                 avatar={<Avatar icon={<UserOutlined />} className="shared-user-avatar" />}
@@ -659,9 +661,7 @@ const ConfiguracoesPage = () => {
                                         renderItem={item => (
                                             <List.Item
                                                 actions={[
-                                                    <Popconfirm title="Remover esta folga?" onConfirm={() => handleDeleteDayOff(item.id)} okText="Sim" cancelText="Não">
-                                                        <Tooltip title="Remover Folga"><Button type="text" danger icon={<DeleteOutlined />} /></Tooltip>
-                                                    </Popconfirm>
+                                                    <Tooltip title="Remover Folga"><Button type="text" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ title: 'Remover folga', content: 'Remover esta folga?', okText: 'Remover', onOk: () => handleDeleteDayOff(item.id) })} /></Tooltip>
                                                 ]}
                                             >
                                                 <List.Item.Meta
