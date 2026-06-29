@@ -16,6 +16,7 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
   const [loadingCreditCards, setLoadingCreditCards] = useState(false);
   const [isParcelada, setIsParcelada] = useState(false);
   const [showCreditCardSelect, setShowCreditCardSelect] = useState(false);
+  const [isAPagar, setIsAPagar] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!currentProfile?.id) return;
@@ -47,26 +48,40 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
           financialCategoryId: editingTransaction.financialCategoryId,
           notes: editingTransaction.notes,
           paymentMethod: editingTransaction.paymentMethod || 'Pix',
-          creditCardId: editingTransaction.creditCardId
+          creditCardId: editingTransaction.creditCardId,
+          isPayableOrReceivable: !!editingTransaction.isPayableOrReceivable,
+          dueDate: editingTransaction.dueDate ? dayjs(editingTransaction.dueDate) : null
         });
         setShowCreditCardSelect(editingTransaction.paymentMethod === 'Cartão de Crédito');
+        setIsAPagar(!!editingTransaction.isPayableOrReceivable);
       } else {
         form.resetFields();
-        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix' });
+        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix', isPayableOrReceivable: false });
         setIsParcelada(false);
         setShowCreditCardSelect(false);
+        setIsAPagar(false);
       }
     }
   }, [open, editingTransaction, form, fetchData]);
   
+  // Dispara quando a validação do formulário falha. Sem isto, clicar em "Salvar"
+  // com um campo obrigatório vazio não dá nenhum feedback (o onFinish nem roda),
+  // e no mobile a mensagem de erro do campo pode ficar fora da área visível.
+  const handleFinishFailed = ({ errorFields }) => {
+    const firstError = errorFields?.[0]?.errors?.[0];
+    message.error(firstError || 'Preencha todos os campos obrigatórios destacados em vermelho.');
+  };
+
   const handleFinish = async (values) => {
     setLoading(true);
     const payload = {
       ...values,
       type: 'Saída',
       transactionDate: values.transactionDate.format('YYYY-MM-DD'),
+      isPayableOrReceivable: !!values.isPayableOrReceivable,
+      dueDate: values.isPayableOrReceivable && values.dueDate ? values.dueDate.format('YYYY-MM-DD') : null,
     };
-    
+
     const isParcelledPurchase = values.paymentMethod === 'Cartão de Crédito' && values.isParcelada;
     
     try {
@@ -100,7 +115,10 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
         onSuccess();
         onCancel();
     } catch (error) {
-       // Interceptor já cuida do erro
+       // Mostra o erro real do backend (antes era engolido, dando sensação de "não funciona").
+       if (error.response) {
+         message.error(error.response.data?.message || 'Não foi possível salvar a despesa. Tente novamente.');
+       }
     } finally {
         setLoading(false);
     }
@@ -120,11 +138,13 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
       footer={null}
       destroyOnClose
       width={600}
+      style={{ maxWidth: 'calc(100vw - 24px)' }}
       className="modal-nova-transacao"
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={(changedValues) => {
+      <Form form={form} layout="vertical" scrollToFirstError onFinish={handleFinish} onFinishFailed={handleFinishFailed} onValuesChange={(changedValues) => {
           if (changedValues.paymentMethod !== undefined) setShowCreditCardSelect(changedValues.paymentMethod === 'Cartão de Crédito');
           if (changedValues.isParcelada !== undefined) setIsParcelada(changedValues.isParcelada);
+          if (changedValues.isPayableOrReceivable !== undefined) setIsAPagar(changedValues.isPayableOrReceivable);
       }}>
         <Form.Item name="description" label="Descrição" rules={[{ required: true, message: 'Insira a descrição!' }]}>
           <Input placeholder="Ex: Almoço, Compra Supermercado" />
@@ -166,6 +186,20 @@ const ModalNovaDespesa = ({ open, onCancel, onSuccess, currentProfile, editingTr
                     </Form.Item>
                 )}
             </>
+        )}
+        {!isParcelada && (
+          <>
+            <Form.Item name="isPayableOrReceivable" valuePropName="checked">
+              <Checkbox onChange={e => setIsAPagar(e.target.checked)}>
+                É uma conta a pagar? (entra em "Próximos Vencimentos" e pode ser marcada como paga)
+              </Checkbox>
+            </Form.Item>
+            {isAPagar && (
+              <Form.Item name="dueDate" label="Data de Vencimento" rules={[{ required: true, message: 'Informe a data de vencimento!' }]}>
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+              </Form.Item>
+            )}
+          </>
         )}
         <Form.Item name="notes" label="Observações (Opcional)">
           <Input.TextArea rows={2} placeholder="Detalhes adicionais sobre a despesa" />

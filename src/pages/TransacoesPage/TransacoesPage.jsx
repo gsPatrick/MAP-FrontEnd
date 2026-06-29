@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { FaPlus, FaPen, FaTrash, FaTag, FaEllipsisV, FaSearch, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt } from 'react-icons/fa';
+import { FaPlus, FaPen, FaTrash, FaTag, FaEllipsisV, FaSearch, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt, FaCheckCircle } from 'react-icons/fa';
 import { SiPix } from 'react-icons/si';
+import { message } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -17,7 +18,7 @@ import './TransacoesPage.css';
 dayjs.locale('pt-br');
 
 // --- Componente de Card de Transação (NOVO LAYOUT) ---
-const TransactionCard = ({ transaction, onEdit, onDelete }) => {
+const TransactionCard = ({ transaction, onEdit, onDelete, onMarkAsPaid }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -76,6 +77,11 @@ const TransactionCard = ({ transaction, onEdit, onDelete }) => {
                     </button>
                     {menuOpen && (
                         <div className="card-menu">
+                            {transaction.isPayableOrReceivable && !transaction.isPaidOrReceived && (
+                                <button onClick={() => { onMarkAsPaid(transaction); setMenuOpen(false); }}>
+                                    <FaCheckCircle /> {isIncome ? 'Marcar como recebido' : 'Marcar como pago'}
+                                </button>
+                            )}
                             <button onClick={() => { onEdit(transaction); setMenuOpen(false); }}><FaPen /> Editar</button>
                             <button onClick={() => { onDelete(transaction); setMenuOpen(false); }} className="danger"><FaTrash /> Excluir</button>
                         </div>
@@ -193,12 +199,26 @@ const TransacoesPage = () => {
         if (!transactionToDelete || !currentProfile) return;
         try {
             await apiClient.delete(`/financial-accounts/${currentProfile.id}/transactions/${transactionToDelete.id}`);
+            message.success('Transação excluída com sucesso!');
             fetchTransactions();
         } catch (error) {
             console.error("Erro ao excluir transação:", error);
+            message.error(error.response?.data?.message || 'Não foi possível excluir a transação.');
         } finally {
             setIsConfirmDeleteModalVisible(false);
             setTransactionToDelete(null);
+        }
+    };
+
+    const handleMarkAsPaid = async (transaction) => {
+        if (!transaction || !currentProfile) return;
+        try {
+            await apiClient.post(`/financial-accounts/${currentProfile.id}/transactions/${transaction.id}/settle`);
+            message.success(transaction.type === 'Entrada' ? 'Marcado como recebido!' : 'Marcado como pago!');
+            fetchTransactions();
+        } catch (error) {
+            console.error("Erro ao marcar como pago/recebido:", error);
+            message.error(error.response?.data?.message || 'Não foi possível atualizar o status.');
         }
     };
     
@@ -241,11 +261,12 @@ const TransacoesPage = () => {
                     <p className="loading-text">Carregando transações...</p>
                 ) : paginatedTransactions.length > 0 ? (
                     paginatedTransactions.map(t => (
-                        <TransactionCard 
-                            key={t.id} 
+                        <TransactionCard
+                            key={t.id}
                             transaction={t}
                             onEdit={() => handleOpenModal(t.type, t)}
                             onDelete={() => handleDeleteClick(t)}
+                            onMarkAsPaid={() => handleMarkAsPaid(t)}
                         />
                     ))
                 ) : (

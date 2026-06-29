@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaPlus, FaPen, FaTrash, FaRetweet, FaBell, FaCheckCircle, FaEllipsisV, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt } from 'react-icons/fa';
 import { SiPix } from 'react-icons/si';
+import { message } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -172,9 +173,11 @@ const RecorrenciasPage = () => {
     if (!recurrenceToDelete || !currentProfile) return;
     try {
         await apiClient.delete(`/financial-accounts/${currentProfile.id}/recurring-rules/${recurrenceToDelete.id}`);
+        message.success('Recorrência excluída com sucesso!');
         fetchRecurrences();
     } catch (error) {
         console.error("Erro ao excluir recorrência:", error);
+        message.error(error.response?.data?.message || 'Não foi possível excluir a recorrência.');
     } finally {
         setIsConfirmDeleteModalVisible(false);
         setRecurrenceToDelete(null);

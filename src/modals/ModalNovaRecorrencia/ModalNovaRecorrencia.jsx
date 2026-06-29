@@ -65,12 +65,18 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
                     interval: 1,
                     startDate: dayjs().add(1, 'day'),
                     autoCreateTransaction: true,
+                    isPayableOrReceivable: true,
                     paymentMethod: 'Pix',
                     isActive: true,
                 });
             }
         }
     }, [open, editingRecorrencia, form, fetchCategories]);
+
+    const handleFinishFailed = ({ errorFields }) => {
+        const firstError = errorFields?.[0]?.errors?.[0];
+        message.error(firstError || 'Preencha todos os campos obrigatórios destacados em vermelho.');
+    };
 
     const handleFinish = async (values) => {
         setLoading(true);
@@ -90,7 +96,10 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
             onSuccess();
             onCancel();
         } catch (error) {
-            // Interceptor
+            // Mostra o erro real do backend (antes era engolido, dando sensação de "não funciona").
+            if (error.response) {
+                message.error(error.response.data?.message || 'Não foi possível salvar a recorrência. Tente novamente.');
+            }
         } finally {
             setLoading(false);
         }
@@ -103,9 +112,10 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
             onCancel={onCancel}
             footer={null}
             destroyOnClose width={700}
+            style={{ maxWidth: 'calc(100vw - 24px)' }}
             className="modal-nova-recorrencia"
         >
-            <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={(changed) => {
+            <Form form={form} layout="vertical" scrollToFirstError onFinish={handleFinish} onFinishFailed={handleFinishFailed} onValuesChange={(changed) => {
                 if (changed.frequency) setFrequencia(changed.frequency);
                 if (changed.type) setTipo(changed.type);
             }}>
@@ -136,6 +146,10 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
                 <Form.Item name="autoCreateTransaction" valuePropName="checked">
                     <Switch checkedChildren="Gerar Transação" unCheckedChildren="Apenas Lembrar" />
                     <Tooltip title="Se marcado, uma transação será criada automaticamente."><InfoCircleOutlined style={{ marginLeft: 8 }} /></Tooltip>
+                </Form.Item>
+                <Form.Item name="isPayableOrReceivable" valuePropName="checked">
+                    <Switch checkedChildren="Conta a pagar/receber" unCheckedChildren="Lançamento simples" />
+                    <Tooltip title="Se marcado, cada ocorrência entra em 'Próximos Vencimentos' e pode ser marcada como paga/recebida."><InfoCircleOutlined style={{ marginLeft: 8 }} /></Tooltip>
                 </Form.Item>
                 <Form.Item style={{ textAlign: 'right', marginTop: '20px', marginBottom: 0 }}>
                     <Button onClick={onCancel} style={{ marginRight: 8 }} className="modal-btn-cancel">Cancelar</Button>

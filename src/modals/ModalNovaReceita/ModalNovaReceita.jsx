@@ -1,6 +1,6 @@
 // src/modals/ModalNovaReceita/ModalNovaReceita.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message, Space } from 'antd';
+import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message, Space, Checkbox } from 'antd';
 import { DollarCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import apiClient from '../../services/api';
@@ -12,6 +12,7 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [isAReceber, setIsAReceber] = useState(false);
 
   const fetchCategories = useCallback(async () => {
     if (!currentProfile?.id) return;
@@ -39,13 +40,22 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
           financialCategoryId: editingTransaction.financialCategoryId,
           notes: editingTransaction.notes,
           paymentMethod: editingTransaction.paymentMethod || 'Pix',
+          isPayableOrReceivable: !!editingTransaction.isPayableOrReceivable,
+          dueDate: editingTransaction.dueDate ? dayjs(editingTransaction.dueDate) : null,
         });
+        setIsAReceber(!!editingTransaction.isPayableOrReceivable);
       } else {
         form.resetFields();
-        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix' });
+        form.setFieldsValue({ transactionDate: dayjs(), paymentMethod: 'Pix', isPayableOrReceivable: false });
+        setIsAReceber(false);
       }
     }
   }, [open, editingTransaction, form, fetchCategories]);
+
+  const handleFinishFailed = ({ errorFields }) => {
+    const firstError = errorFields?.[0]?.errors?.[0];
+    message.error(firstError || 'Preencha todos os campos obrigatórios destacados em vermelho.');
+  };
 
   const handleFinish = async (values) => {
     setLoading(true);
@@ -53,6 +63,8 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
       ...values,
       type: 'Entrada',
       transactionDate: values.transactionDate.format('YYYY-MM-DD'),
+      isPayableOrReceivable: !!values.isPayableOrReceivable,
+      dueDate: values.isPayableOrReceivable && values.dueDate ? values.dueDate.format('YYYY-MM-DD') : null,
     };
 
     try {
@@ -68,7 +80,10 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
       onSuccess();
       onCancel();
     } catch (error) {
-      // O interceptor do apiClient já deve lidar com a mensagem de erro.
+      // Mostra o erro real do backend (antes era engolido, dando sensação de "não funciona").
+      if (error.response) {
+        message.error(error.response.data?.message || 'Não foi possível salvar a receita. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -86,9 +101,12 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
       onCancel={onCancel}
       footer={null}
       destroyOnClose
+      style={{ maxWidth: 'calc(100vw - 24px)' }}
       className="modal-nova-transacao"
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form form={form} layout="vertical" scrollToFirstError onFinish={handleFinish} onFinishFailed={handleFinishFailed} onValuesChange={(changedValues) => {
+          if (changedValues.isPayableOrReceivable !== undefined) setIsAReceber(changedValues.isPayableOrReceivable);
+      }}>
         <Form.Item name="description" label="Descrição" rules={[{ required: true, message: 'Insira a descrição!' }]}>
           <Input placeholder="Ex: Salário, Venda do Produto X" />
         </Form.Item>
@@ -111,6 +129,16 @@ const ModalNovaReceita = ({ open, onCancel, onSuccess, currentProfile, editingTr
             <Option value="Transferência">Transferência</Option>
           </Select>
         </Form.Item>
+        <Form.Item name="isPayableOrReceivable" valuePropName="checked">
+          <Checkbox onChange={e => setIsAReceber(e.target.checked)}>
+            É um valor a receber? (entra em "Próximos Vencimentos" e pode ser marcado como recebido)
+          </Checkbox>
+        </Form.Item>
+        {isAReceber && (
+          <Form.Item name="dueDate" label="Data Prevista de Recebimento" rules={[{ required: true, message: 'Informe a data prevista!' }]}>
+            <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+          </Form.Item>
+        )}
         <Form.Item name="notes" label="Observações (Opcional)">
           <Input.TextArea rows={2} placeholder="Detalhes adicionais sobre a receita" />
         </Form.Item>
