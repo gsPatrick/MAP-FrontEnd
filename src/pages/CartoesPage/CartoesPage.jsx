@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Layout, Typography, Button, Row, Col, Card, Avatar, Select, DatePicker,
   List, Tag, Statistic, Progress, Empty, Tooltip, Modal, Form, Input,
-  InputNumber, Checkbox, Dropdown, Menu, Space, message, Spin, Timeline, Alert
+  InputNumber, Checkbox, Dropdown, Menu, Space, message, Spin, Timeline, Alert, ColorPicker
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, CreditCardOutlined,
@@ -308,6 +308,15 @@ const CartoesPage = () => {
     </div>
   );
 
+  const cardEditValues = (c) => ({
+    ...c,
+    limitTotal: c.limit,
+    limiteBloqueado: c.blockedLimit || 0,
+    numeroCartao: c.lastFourDigits,
+    bandeira: c.flag,
+    corDominante: c.dominantColor || '#6A0DAD',
+  });
+
   const openCard = (card) => {
     setSelectedCard(card);
     setSelectedMonthYearForInvoice(dayjs());
@@ -318,7 +327,7 @@ const CartoesPage = () => {
     <Menu onClick={(e) => e.domEvent.stopPropagation()}>
       <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => {
         setEditingCard(card);
-        cardForm.setFieldsValue({ ...card, limitTotal: card.limit, limiteBloqueado: card.blockedLimit || 0, numeroCartao: card.lastFourDigits });
+        cardForm.setFieldsValue(cardEditValues(card));
         setIsAddCardModalVisible(true);
       }}>Editar</Menu.Item>
       <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDeleteCard(card.id)}>Excluir</Menu.Item>
@@ -358,7 +367,7 @@ const CartoesPage = () => {
                       <div className="cg-row"><span>Bloqueado</span><b className="warn">R$ {fmtBRL(blo)}</b></div>
                       <div className="cg-row"><span>Utilizado</span><b>R$ {fmtBRL(usado)}</b></div>
                       <div className="cartao-grid-actions" onClick={e => e.stopPropagation()}>
-                        <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingCard(card); cardForm.setFieldsValue({ ...card, limitTotal: card.limit, limiteBloqueado: card.blockedLimit || 0, numeroCartao: card.lastFourDigits }); setIsAddCardModalVisible(true); }}>Editar</Button>
+                        <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingCard(card); cardForm.setFieldsValue(cardEditValues(card)); setIsAddCardModalVisible(true); }}>Editar</Button>
                         <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDeleteCard(card.id)}>Apagar</Button>
                       </div>
                     </div>
@@ -386,7 +395,7 @@ const CartoesPage = () => {
             <div className="dm-item"><span>Utilizado</span><b>R$ {fmtBRL(limiteUsado)}</b></div>
           </div>
           <div className="detail-actions">
-            <Button block icon={<EditOutlined />} onClick={() => { setEditingCard(selectedCard); cardForm.setFieldsValue({ ...selectedCard, limitTotal: selectedCard.limit, limiteBloqueado: selectedCard.blockedLimit || 0, numeroCartao: selectedCard.lastFourDigits }); setIsAddCardModalVisible(true); }}>Editar</Button>
+            <Button block icon={<EditOutlined />} onClick={() => { setEditingCard(selectedCard); cardForm.setFieldsValue(cardEditValues(selectedCard)); setIsAddCardModalVisible(true); }}>Editar</Button>
             <Button block danger icon={<DeleteOutlined />} onClick={() => handleDeleteCard(selectedCard.id)}>Apagar</Button>
           </div>
         </Col>
@@ -527,6 +536,9 @@ const CartoesPage = () => {
         className="modal-style-map"
       >
         <Form form={cardForm} layout="vertical" onFinish={handleAddOrEditCard}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <CardPreview form={cardForm} currentProfile={currentProfile} />
+          </div>
           <Form.Item name="name" label="Nome do Cartão" rules={[{ required: true }]}><Input placeholder="Ex: Nubank" /></Form.Item>
           <Row gutter={16}>
             <Col span={12}><Form.Item name="bandeira" label="Bandeira"><Select><Option value="Mastercard">Mastercard</Option><Option value="Visa">Visa</Option></Select></Form.Item></Col>
@@ -539,6 +551,21 @@ const CartoesPage = () => {
           <Form.Item name="limitTotal" label="Limite Total (R$)"><InputNumber min={0} style={{ width: '100%' }} formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')} parser={v => v.replace(/\./g, '')} /></Form.Item>
           <Form.Item name="limiteBloqueado" label="Limite Bloqueado (R$)" tooltip="Valor do limite que você quer reservar e NÃO gastar (economizar). Fica indisponível para compras.">
             <InputNumber min={0} style={{ width: '100%' }} precision={2} placeholder="0,00" />
+          </Form.Item>
+          <Form.Item
+            name="corDominante"
+            label="Cor do cartão"
+            tooltip="Cor de fundo do cartão exibido na galeria."
+            getValueFromEvent={(color) => (typeof color === 'string' ? color : color?.toHexString?.() || '#6A0DAD')}
+          >
+            <ColorPicker
+              showText
+              format="hex"
+              presets={[{
+                label: 'Sugestões',
+                colors: ['#820AD1', '#EC7000', '#CC092F', '#003399', '#0F172A', '#16A34A', '#0EA5E9', '#DB2777', '#475569', '#F59E0B'],
+              }]}
+            />
           </Form.Item>
           <Button type="primary" block htmlType="submit" style={{ background: '#0f172a' }}>Salvar</Button>
         </Form>
