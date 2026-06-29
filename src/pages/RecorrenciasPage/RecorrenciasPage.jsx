@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaPlus, FaPen, FaTrash, FaRetweet, FaBell, FaCheckCircle, FaEllipsisV, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt } from 'react-icons/fa';
 import { SiPix } from 'react-icons/si';
-import { message } from 'antd';
+import { message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -165,23 +165,25 @@ const RecorrenciasPage = () => {
   };
   
   const handleDeleteClick = (recurrence) => {
-    setRecurrenceToDelete(recurrence);
-    setIsConfirmDeleteModalVisible(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!recurrenceToDelete || !currentProfile) return;
-    try {
-        await apiClient.delete(`/financial-accounts/${currentProfile.id}/recurring-rules/${recurrenceToDelete.id}`);
-        message.success('Recorrência excluída com sucesso!');
-        fetchRecurrences();
-    } catch (error) {
-        console.error("Erro ao excluir recorrência:", error);
-        message.error(error.response?.data?.message || 'Não foi possível excluir a recorrência.');
-    } finally {
-        setIsConfirmDeleteModalVisible(false);
-        setRecurrenceToDelete(null);
-    }
+    if (!recurrence || !currentProfile) return;
+    Modal.confirm({
+      title: 'Confirmar exclusão',
+      centered: true,
+      content: `Tem certeza que deseja excluir a recorrência "${recurrence.description}"?`,
+      okText: 'Excluir',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancelar',
+      onOk: async () => {
+        try {
+          await apiClient.delete(`/financial-accounts/${currentProfile.id}/recurring-rules/${recurrence.id}`);
+          message.success('Recorrência excluída com sucesso!');
+          fetchRecurrences();
+        } catch (error) {
+          console.error("Erro ao excluir recorrência:", error);
+          message.error(error.response?.data?.message || 'Não foi possível excluir a recorrência.');
+        }
+      }
+    });
   };
 
   if (loadingProfiles) return <div className="loading-container"><p>Carregando perfil...</p></div>;
@@ -241,15 +243,6 @@ const RecorrenciasPage = () => {
         currentProfile={currentProfile}
         editingRecorrencia={editingRecurrence}
       />
-      
-      <ConfirmationModal
-          isOpen={isConfirmDeleteModalVisible}
-          onClose={() => setIsConfirmDeleteModalVisible(false)}
-          onConfirm={confirmDelete}
-          title="Confirmar Exclusão"
-      >
-          Tem certeza que deseja excluir a recorrência "{recurrenceToDelete?.description}"?
-      </ConfirmationModal>
     </main>
   );
 };

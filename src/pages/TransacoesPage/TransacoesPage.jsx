@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FaPlus, FaPen, FaTrash, FaTag, FaEllipsisV, FaSearch, FaWallet, FaCreditCard, FaMoneyBillWave, FaExchangeAlt, FaCheckCircle } from 'react-icons/fa';
 import { SiPix } from 'react-icons/si';
-import { message } from 'antd';
+import { message, Modal } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
@@ -191,23 +191,25 @@ const TransacoesPage = () => {
     };
 
     const handleDeleteClick = (transaction) => {
-        setTransactionToDelete(transaction);
-        setIsConfirmDeleteModalVisible(true);
-    };
-
-    const confirmDelete = async () => {
-        if (!transactionToDelete || !currentProfile) return;
-        try {
-            await apiClient.delete(`/financial-accounts/${currentProfile.id}/transactions/${transactionToDelete.id}`);
-            message.success('Transação excluída com sucesso!');
-            fetchTransactions();
-        } catch (error) {
-            console.error("Erro ao excluir transação:", error);
-            message.error(error.response?.data?.message || 'Não foi possível excluir a transação.');
-        } finally {
-            setIsConfirmDeleteModalVisible(false);
-            setTransactionToDelete(null);
-        }
+        if (!transaction || !currentProfile) return;
+        Modal.confirm({
+            title: 'Confirmar exclusão',
+            centered: true,
+            content: `Tem certeza que deseja excluir "${transaction.description}"? Esta ação não pode ser desfeita.`,
+            okText: 'Excluir',
+            okButtonProps: { danger: true },
+            cancelText: 'Cancelar',
+            onOk: async () => {
+                try {
+                    await apiClient.delete(`/financial-accounts/${currentProfile.id}/transactions/${transaction.id}`);
+                    message.success('Transação excluída com sucesso!');
+                    fetchTransactions();
+                } catch (error) {
+                    console.error("Erro ao excluir transação:", error);
+                    message.error(error.response?.data?.message || 'Não foi possível excluir a transação.');
+                }
+            }
+        });
     };
 
     const handleMarkAsPaid = async (transaction) => {
@@ -303,15 +305,6 @@ const TransacoesPage = () => {
                   />
               )
             )}
-
-            <ConfirmationModal
-                isOpen={isConfirmDeleteModalVisible}
-                onClose={() => setIsConfirmDeleteModalVisible(false)}
-                onConfirm={confirmDelete}
-                title="Confirmar Exclusão"
-            >
-                Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.
-            </ConfirmationModal>
         </main>
     );
 };
