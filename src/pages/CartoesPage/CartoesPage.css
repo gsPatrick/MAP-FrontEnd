@@ -417,3 +417,23 @@
 .banking-limit-legend .dot-used { background: #1e293b; }
 .banking-limit-legend .dot-blocked { background: #f59e0b; }
 .banking-limit-legend .dot-available { background: #cbd5e1; }
+
+/* Subgrupos do histórico: Em aberto / Fatura paga */
+.banking-subgroup-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+  margin: 14px 0 6px;
+}
+.banking-subgroup-title.paid { color: #16a34a; }
+
+/* Lançamento já pago: riscado e esmaecido */
+.banking-transaction-item.paid .transaction-desc,
+.banking-transaction-item.paid .transaction-value {
+  text-decoration: line-through;
+}
+.banking-transaction-item.paid {
+  opacity: 0.6;
+}

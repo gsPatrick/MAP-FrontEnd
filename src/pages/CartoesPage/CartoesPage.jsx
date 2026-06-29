@@ -273,6 +273,40 @@ const CartoesPage = () => {
   const percentualUsado = limiteTotalCard > 0 ? (limiteUsado / limiteTotalCard) * 100 : 0;
   const percentualBloqueado = limiteTotalCard > 0 ? (limiteBloqueado / limiteTotalCard) * 100 : 0;
 
+  // Separa os lançamentos da fatura entre PAGOS e EM ABERTO. Como o pagamento é
+  // por fatura (e adiantamentos abatem do total), marcamos como pagos os mais
+  // antigos até cobrir o valor já pago (FIFO).
+  const { abertosTx, pagosTx } = useMemo(() => {
+    const paidAmount = parseFloat(selectedCardDetails?.totalPaidForThisInvoice || 0);
+    let acc = 0;
+    const abertosTx = [], pagosTx = [];
+    (invoiceExpenses || []).forEach((tx) => {
+      acc += parseFloat(tx.value || 0);
+      if (acc <= paidAmount + 0.001) pagosTx.push(tx); else abertosTx.push(tx);
+    });
+    return { abertosTx, pagosTx };
+  }, [invoiceExpenses, selectedCardDetails]);
+
+  const renderInvoiceTx = (tx, idx, paid = false) => (
+    <div key={`${paid ? 'p' : 'a'}-${tx.id || idx}`} className={`banking-transaction-item${paid ? ' paid' : ''}`}>
+      <div className="transaction-icon">
+        {tx.type === 'Saída' ? <ArrowUpOutlined style={{ color: '#f43f5e' }} /> : <ArrowDownOutlined style={{ color: '#10b981' }} />}
+      </div>
+      <div className="transaction-main">
+        <span className="transaction-desc">{tx.description}</span>
+        <span className="transaction-meta">
+          {dayjs(tx.transactionDate).format('DD MMM')} • {tx.category?.name || 'Geral'}
+        </span>
+      </div>
+      <div className="transaction-value">
+        <span className={`transaction-value ${tx.type === 'Saída' ? 'out' : 'in'}`}>
+          {tx.type === 'Saída' ? '-' : '+'} R$ {parseFloat(tx.value).toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+        </span>
+        {tx.isParcel && <span className="transaction-parcel">{tx.parcelNumber}/{tx.totalParcels}</span>}
+      </div>
+    </div>
+  );
+
   const cardOptionsMenu = (card) => (
     <Menu onClick={(e) => e.domEvent.stopPropagation()}>
       <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => {
@@ -428,25 +462,20 @@ const CartoesPage = () => {
                   {invoiceExpenses.length === 0 ? (
                     <Empty description="Nenhum lançamento neste período" />
                   ) : (
-                    invoiceExpenses.map((tx, idx) => (
-                      <div key={idx} className="banking-transaction-item">
-                        <div className="transaction-icon">
-                          {tx.type === 'Saída' ? <ArrowUpOutlined style={{ color: '#f43f5e' }} /> : <ArrowDownOutlined style={{ color: '#10b981' }} />}
-                        </div>
-                        <div className="transaction-main">
-                          <span className="transaction-desc">{tx.description}</span>
-                          <span className="transaction-meta">
-                            {dayjs(tx.transactionDate).format('DD MMM')} • {tx.category?.name || 'Geral'}
-                          </span>
-                        </div>
-                        <div className="transaction-value">
-                          <span className={`transaction-value ${tx.type === 'Saída' ? 'out' : 'in'}`}>
-                            {tx.type === 'Saída' ? '-' : '+'} R$ {parseFloat(tx.value).toLocaleString('pt-br', { minimumFractionDigits: 2 })}
-                          </span>
-                          {tx.isParcel && <span className="transaction-parcel">{tx.parcelNumber}/{tx.totalParcels}</span>}
-                        </div>
-                      </div>
-                    ))
+                    <>
+                      {abertosTx.length > 0 && (
+                        <>
+                          <div className="banking-subgroup-title">Em aberto</div>
+                          {abertosTx.map((tx, idx) => renderInvoiceTx(tx, idx, false))}
+                        </>
+                      )}
+                      {pagosTx.length > 0 && (
+                        <>
+                          <div className="banking-subgroup-title paid">✅ Fatura paga (adiantamento)</div>
+                          {pagosTx.map((tx, idx) => renderInvoiceTx(tx, idx, true))}
+                        </>
+                      )}
+                    </>
                   )}
                 </div>
               </Spin>
