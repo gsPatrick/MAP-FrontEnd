@@ -1,4 +1,7 @@
 // src/main.jsx
+// Patch oficial p/ antd v5 funcionar com React 19 (Modal.confirm, message,
+// notification estáticos). Sem isso, os métodos estáticos NÃO renderizam.
+import '@ant-design/v5-patch-for-react-19';
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
