@@ -69,6 +69,7 @@ const TransactionCard = ({ transaction, onEdit, onDelete, onMarkAsPaid }) => {
                 </span>
                 <span className="card-payment-method">
                     {getPaymentIcon(transaction.paymentMethod)} {transaction.paymentMethod}
+                    {transaction.creditCard?.name ? ` · ${transaction.creditCard.name}${transaction.creditCard.lastFourDigits ? ` (•${transaction.creditCard.lastFourDigits})` : ''}` : ''}
                 </span>
                 <span className="card-date">{dayjs(transaction.transactionDate).format('DD/MM/YYYY')}</span>
                 <div className="card-menu-container" ref={menuRef}>
