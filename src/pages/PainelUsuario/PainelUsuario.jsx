@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FaArrowUp, FaArrowDown, FaPlus, FaCalendarAlt, FaRetweet,
   FaPiggyBank, FaChartPie, FaExclamationTriangle, FaTimes,
-  FaChevronLeft, FaChevronRight
+  FaChevronLeft, FaChevronRight, FaCheck
 } from 'react-icons/fa';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -68,6 +68,8 @@ const PainelUsuario = () => {
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [upcomingItems, setUpcomingItems] = useState([]);
+  const [recurrences, setRecurrences] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [totalToPayPending, setTotalToPayPending] = useState(0);
   const [dashboardCard, setDashboardCard] = useState(null); // Cartão principal para o widget
   // --- ESTADOS DOS MODAIS ESPECÍFICOS ---
@@ -172,16 +174,20 @@ const PainelUsuario = () => {
 
           // Processa itens futuros
           let combinedUpcoming = [];
-          if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
-          if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
-          if (upcomingRecurrencesRes.data?.status === 'success') {
-            const rules = upcomingRecurrencesRes.data.data?.rules || [];
-            combinedUpcoming.push(...rules
-              .filter(r => r.nextDueDate)
-              .map(r => ({ id: `rec_${r.id}`, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), itemType: 'recurrence', transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' })));
-          }
+          if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, rawId: t.id, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
+          if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, rawId: app.id, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
           combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
-          setUpcomingItems(combinedUpcoming.slice(0, 5));
+          setUpcomingItems(combinedUpcoming.slice(0, 6));
+
+          // Recorrências ativas vão para um card próprio.
+          if (upcomingRecurrencesRes.data?.status === 'success') {
+            const rules = (upcomingRecurrencesRes.data.data?.rules || [])
+              .filter(r => r.nextDueDate)
+              .map(r => ({ id: `rec_${r.id}`, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), frequency: r.frequency, transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' }));
+            setRecurrences(rules.slice(0, 6));
+          } else {
+            setRecurrences([]);
+          }
         } catch (summaryErr) {
           console.error("[DASHBOARD] Erro ao carregar dados financeiros principais:", summaryErr);
           // Não lançamos erro aqui para permitir que o cartão tente carregar
@@ -232,8 +238,24 @@ const PainelUsuario = () => {
 
     fetchAllData();
 
-  }, [isAuthenticated, currentProfile, filterMode, currentMonth]); // Dependências corretas
+  }, [isAuthenticated, currentProfile, filterMode, currentMonth, refreshKey]); // Dependências corretas
 
+
+  // Marca um item de "Próximos Vencimentos" como concluído (pago/recebido ou compromisso feito).
+  const handleMarkDone = async (item) => {
+    if (!currentProfile) return;
+    try {
+      if (item.itemType === 'transaction') {
+        await apiClient.post(`/financial-accounts/${currentProfile.id}/transactions/${item.rawId}/settle`);
+      } else if (item.itemType === 'appointment') {
+        await apiClient.post(`/financial-accounts/${currentProfile.id}/appointments/${item.rawId}/complete`);
+      }
+      message.success('Marcado como concluído!');
+      setRefreshKey(k => k + 1);
+    } catch (e) {
+      message.error(e.response?.data?.message || 'Não foi possível atualizar o item.');
+    }
+  };
 
   // --- LÓGICA DE MANIPULAÇÃO DOS MODAIS ---
   const handleNovoAgendamentoClick = () => {
@@ -498,25 +520,64 @@ const PainelUsuario = () => {
             {dashboardLoading ? <Skeleton active paragraph={{ rows: 5 }} /> : (
               upcomingItems.length > 0 ? (
                 <ul className="upcoming-list">
-                  {upcomingItems.map(item => (
-                    <li key={item.id} className="upcoming-list-item">
-                      <div className={`item-avatar ${item.transactionType || item.itemType}`}>
-                        {(item.itemType === 'transaction' || item.itemType === 'recurrence') ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
+                  {upcomingItems.map(item => {
+                    const overdue = dayjs(item.dueDate).endOf('day').isBefore(dayjs());
+                    const canComplete = item.itemType === 'transaction' || item.itemType === 'appointment';
+                    return (
+                    <li key={item.id} className={`upcoming-list-item ${overdue ? 'overdue' : ''}`}>
+                      <div className={`item-avatar ${overdue ? 'overdue' : (item.transactionType || item.itemType)}`}>
+                        {item.itemType === 'transaction' ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
                       </div>
                       <div className="item-details">
                         <p className="item-title">{item.title}</p>
                         <p className="item-description">
-                          {`Vence ${dayjs(item.dueDate).fromNow()} (${dayjs(item.dueDate).format('DD/MM/YY')})`}
+                          {overdue
+                            ? `Atrasado desde ${dayjs(item.dueDate).format('DD/MM/YY')}`
+                            : `Vence ${dayjs(item.dueDate).fromNow()} (${dayjs(item.dueDate).format('DD/MM/YY')})`}
                           {item.amount !== null && <span> | {formatCurrency(item.amount)}</span>}
                         </p>
                       </div>
-                      <span className={`item-tag ${item.transactionType || item.itemType}`}>
-                        {item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : item.itemType === 'recurrence' ? 'RECORRÊNCIA' : 'LEMBRETE'}
+                      <div className="item-right">
+                        <span className={`item-tag ${overdue ? 'overdue' : (item.transactionType || item.itemType)}`}>
+                          {overdue ? 'ATRASADO' : item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : 'LEMBRETE'}
+                        </span>
+                        {canComplete && (
+                          <button className="item-done-btn" title="Marcar como feito" onClick={() => handleMarkDone(item)}>
+                            <FaCheck />
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                    );
+                  })}
+                </ul>
+              ) : <div className="empty-state">Nenhuma conta ou lembrete próximo.</div>
+            )}
+          </div>
+
+          {/* Card dedicado de Recorrências */}
+          <div className="card list-card animated-card" style={{ animationDelay: '0.7s' }}>
+            <h4 className="card-section-title"><FaRetweet /> Recorrências Ativas</h4>
+            {dashboardLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : (
+              recurrences.length > 0 ? (
+                <ul className="upcoming-list">
+                  {recurrences.map(item => (
+                    <li key={item.id} className="upcoming-list-item">
+                      <div className="item-avatar recurrence"><FaRetweet /></div>
+                      <div className="item-details">
+                        <p className="item-title">{item.title}</p>
+                        <p className="item-description">
+                          {`Próxima ${dayjs(item.dueDate).format('DD/MM/YY')} (${dayjs(item.dueDate).fromNow()})`}
+                          {item.amount ? <span> | {formatCurrency(item.amount)}</span> : null}
+                        </p>
+                      </div>
+                      <span className={`item-tag ${item.transactionType}`}>
+                        {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
                       </span>
                     </li>
                   ))}
                 </ul>
-              ) : <div className="empty-state">Nenhuma conta ou lembrete próximo.</div>
+              ) : <div className="empty-state">Nenhuma recorrência ativa.</div>
             )}
           </div>
 

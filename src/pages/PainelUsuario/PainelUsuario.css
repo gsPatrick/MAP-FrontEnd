@@ -938,3 +938,41 @@ body.painel-active {
     grid-column: span 12;
   }
 }
+/* --- Itens atrasados + ação de concluir (Próximos Vencimentos) --- */
+.upcoming-list-item .item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.upcoming-list-item.overdue {
+  background: #fff1f0;
+  border-radius: 10px;
+}
+.item-avatar.overdue {
+  background: #fff1f0;
+  color: #cf1322;
+}
+.item-tag.overdue {
+  background: #cf1322;
+  color: #fff;
+}
+.item-done-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #b7eb8f;
+  background: #f6ffed;
+  color: #389e0d;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.item-done-btn:hover {
+  background: #389e0d;
+  color: #fff;
+  border-color: #389e0d;
+}
