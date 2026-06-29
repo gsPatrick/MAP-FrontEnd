@@ -1,7 +1,7 @@
 // src/pages/AdminPage/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Drawer, Button } from 'antd';
-import { TeamOutlined, DollarCircleOutlined, MenuOutlined, ReadOutlined, SendOutlined, RobotOutlined, CustomerServiceOutlined } from '@ant-design/icons';
+import { TeamOutlined, DollarCircleOutlined, MenuOutlined, ReadOutlined, SendOutlined, RobotOutlined, CustomerServiceOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 
@@ -30,13 +30,23 @@ const AdminPage = () => {
 
   const selectedKey = location.pathname.split('/')[3] || 'users';
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('selectedProfileId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
+
   const menuItems = [
     { key: 'users', icon: <TeamOutlined />, label: <Link to="/admin/dashboard/users">Usuários</Link> },
     { key: 'affiliates', icon: <DollarCircleOutlined />, label: <Link to="/admin/dashboard/affiliates">Afiliados</Link> },
     { key: 'plans', icon: <ReadOutlined />, label: <Link to="/admin/dashboard/plans">Planos</Link> },
     { key: 'broadcast', icon: <SendOutlined />, label: <Link to="/admin/dashboard/broadcast">Transmissão</Link> },
     { key: 'support', icon: <CustomerServiceOutlined />, label: <Link to="/admin/dashboard/support">Suporte</Link> },
-    { key: 'settings', icon: <RobotOutlined />, label: <Link to="/admin/dashboard/settings">Configurações</Link> }, // <<< Novo Item
+    { key: 'settings', icon: <RobotOutlined />, label: <Link to="/admin/dashboard/settings">Configurações</Link> },
+    { type: 'divider', style: { borderColor: 'rgba(255,255,255,0.15)', margin: '8px 0' } },
+    { key: 'logout', icon: <LogoutOutlined />, label: 'Sair', danger: true, onClick: handleLogout },
   ];
 
   const sidebarContent = (
@@ -45,7 +55,9 @@ const AdminPage = () => {
       mode="inline"
       selectedKeys={[selectedKey]}
       items={menuItems}
-      onClick={() => isMobile && setDrawerVisible(false)}
+      onClick={({ key }) => {
+        if (isMobile && key !== 'logout') setDrawerVisible(false);
+      }}
     />
   );
 
