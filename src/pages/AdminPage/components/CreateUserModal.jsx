@@ -1,6 +1,6 @@
 // src/pages/AdminPage/components/CreateUserModal.jsx
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { Modal, Form, Input, Select, Button, message, Alert } from 'antd';
 import apiClient from '../../../services/api';
 
 const { Option } = Select;
@@ -44,7 +44,13 @@ const CreateUserModal = ({ visible, onClose, onSuccess }) => {
                 <Form.Item name="name" label="Nome Completo" rules={[{ required: true }]}><Input /></Form.Item>
                 <Form.Item name="phone" label="WhatsApp" rules={[{ required: true }]}><Input placeholder="55119..."/></Form.Item>
                 <Form.Item name="email" label="E-mail" rules={[{ type: 'email' }]}><Input /></Form.Item>
-                <Form.Item name="password" label="Senha" rules={[{ required: true, min: 6 }]}><Input.Password /></Form.Item>
+                <Alert
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                    message="Senha gerada automaticamente"
+                    description="O sistema cria uma senha aleatória e envia ao usuário no WhatsApp (com link e e-mail de acesso)."
+                />
                 <Form.Item name="planId" label="Plano Inicial" rules={[{ required: true }]}>
                     <Select placeholder="Escolha um plano">
                         {plans.map(p => <Option key={p.id} value={p.id}>{p.name}</Option>)}

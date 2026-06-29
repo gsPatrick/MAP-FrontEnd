@@ -1,10 +1,11 @@
 // src/pages/AdminPage/components/UserTable.jsx
 import React, { useState } from 'react';
-import { Table, Tag, Button, Space, message, Popconfirm, Tooltip, Avatar } from 'antd';
-import { UserSwitchOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Tag, Button, Space, message, Tooltip, Avatar, Modal } from 'antd';
+import { UserSwitchOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 import ChangePlanModal from './ChangePlanModal';
 import EditUserModal from './EditUserModal';
+import { getPlano, getSituacao } from './userStatus';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -13,46 +14,6 @@ import './UserTable.css';
 
 dayjs.extend(relativeTime);
 dayjs.locale('pt-br');
-
-const planNameMapping = {
-  gratuito: 'Gratuito',
-  inadimplente: 'Inadimplente',
-  basico_mensal: 'Básico Mensal',
-  basico_anual: 'Básico Anual',
-  avancado_mensal: 'Avançado Mensal',
-  avancado_anual: 'Avançado Anual',
-  vitalicio_basico: 'Vitalício Básico',
-  vitalicio_avancado: 'Vitalício Avançado',
-};
-
-const planTagColor = (level) => {
-  if (!level) return 'default';
-  if (level.startsWith('vitalicio_')) return 'gold';
-  if (level === 'inadimplente' || level === 'gratuito') return 'red';
-  if (level.includes('avancado')) return 'geekblue';
-  if (level.includes('basico')) return 'blue';
-  return 'default';
-};
-
-// Situação UNIFICADA: combina status + plano + expiração em um único estado claro,
-// eliminando a redundância entre "status" e "accessLevel".
-const getSituacao = (record) => {
-  if (record.status === 'Inativo') return { label: 'Excluído', color: 'default' };
-  if (record.status === 'Bloqueado') return { label: 'Bloqueado', color: 'red' };
-  if (record.status === 'Aguardando Pagamento') return { label: 'Aguardando pagamento', color: 'gold' };
-
-  const lvl = record.accessLevel;
-  if (lvl && lvl.startsWith('vitalicio_')) return { label: 'Ativo (vitalício)', color: 'green' };
-  if (!lvl || lvl === 'inadimplente' || lvl === 'gratuito') return { label: 'Inadimplente', color: 'red' };
-
-  if (record.accessExpiresAt) {
-    const expired = dayjs(record.accessExpiresAt).endOf('day').isBefore(dayjs());
-    return expired
-      ? { label: 'Expirado', color: 'volcano' }
-      : { label: 'Ativo', color: 'green' };
-  }
-  return { label: 'Ativo', color: 'green' };
-};
 
 const initials = (name) =>
   (name || '?')
@@ -74,15 +35,34 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isPlanModalVisible, setIsPlanModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [modal, modalContextHolder] = Modal.useModal();
 
-  const handleDelete = async (clientId) => {
+  const doDelete = async (clientId) => {
     try {
       await apiClient.delete(`/admin/clients/${clientId}`);
-      message.success('Cliente excluído com sucesso!');
+      message.success('Usuário excluído com sucesso!');
       onActionSuccess();
     } catch (error) {
-      message.error(error.response?.data?.message || 'Erro ao excluir o cliente.');
+      message.error(error.response?.data?.message || 'Erro ao excluir o usuário.');
     }
+  };
+
+  const confirmDelete = (record) => {
+    modal.confirm({
+      title: 'Excluir usuário',
+      icon: <ExclamationCircleFilled style={{ color: '#cf1322' }} />,
+      centered: true,
+      content: (
+        <span>
+          Tem certeza que deseja excluir <strong>{record.name || 'este usuário'}</strong>?<br />
+          Ele ficará <strong>inativo</strong>, sairá da listagem e não receberá mais mensagens do sistema.
+        </span>
+      ),
+      okText: 'Sim, excluir',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancelar',
+      onOk: () => doDelete(record.id),
+    });
   };
 
   const columns = [
@@ -110,30 +90,24 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       dataIndex: 'accessLevel',
       key: 'accessLevel',
       width: 160,
-      render: (level, record) => (
-        <div className="admin-plan-cell">
-          <Tag color={planTagColor(level)} style={{ marginInlineEnd: 0 }}>
-            {planNameMapping[level] || level || '—'}
-          </Tag>
-          {record.accessExpiresAt && (
-            <span className="admin-plan-expiry">
-              até {new Date(record.accessExpiresAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-            </span>
-          )}
-        </div>
-      ),
+      render: (level, record) => {
+        const plano = getPlano(level);
+        return (
+          <div className="admin-plan-cell">
+            <Tag color={plano.color} style={{ marginInlineEnd: 0 }}>{plano.label}</Tag>
+            {plano.group !== 'sem_plano' && record.accessExpiresAt && (
+              <span className="admin-plan-expiry">
+                até {new Date(record.accessExpiresAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: 'Situação',
       key: 'situacao',
-      width: 150,
-      filters: [
-        { text: 'Ativo', value: 'Ativo' },
-        { text: 'Inadimplente', value: 'Inadimplente' },
-        { text: 'Aguardando pagamento', value: 'Aguardando pagamento' },
-        { text: 'Bloqueado', value: 'Bloqueado' },
-      ],
-      onFilter: (value, record) => getSituacao(record).label.startsWith(value),
+      width: 170,
       render: (_, record) => {
         const s = getSituacao(record);
         return <Tag color={s.color}>{s.label}</Tag>;
@@ -162,16 +136,9 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
           <Tooltip title="Alterar plano">
             <Button size="small" type="primary" ghost icon={<UserSwitchOutlined />} onClick={() => { setSelectedUser(record); setIsPlanModalVisible(true); }} />
           </Tooltip>
-          <Popconfirm
-            title={`Excluir ${record.name || 'este usuário'}?`}
-            description="O usuário ficará inativo e sairá da listagem."
-            onConfirm={() => handleDelete(record.id)}
-            okText="Sim" cancelText="Não"
-          >
-            <Tooltip title="Excluir usuário">
-              <Button size="small" danger icon={<DeleteOutlined />} />
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Excluir usuário">
+            <Button size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete(record)} />
+          </Tooltip>
         </Space>
       ),
     },
@@ -179,6 +146,7 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
 
   return (
     <>
+      {modalContextHolder}
       <Table
         className="admin-user-table"
         columns={columns}
@@ -187,7 +155,7 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
         loading={loading}
         size="middle"
         pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (t) => `${t} usuário(s)` }}
-        scroll={{ x: 940 }}
+        scroll={{ x: 960 }}
       />
       {isEditModalVisible && (
         <EditUserModal
