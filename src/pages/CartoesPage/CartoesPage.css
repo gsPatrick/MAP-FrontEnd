@@ -437,3 +437,93 @@
 .banking-transaction-item.paid {
   opacity: 0.6;
 }
+
+/* ===== Redesign Cartões (2 etapas) ===== */
+.cartoes-top-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+/* Etapa 1 — galeria */
+.cartoes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 24px;
+}
+.cartao-grid-cell {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 18px;
+  padding: 18px;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.cartao-grid-cell:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(15,23,42,.12);
+}
+.cartao-grid-summary { margin-top: 16px; }
+.cg-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #64748b;
+  padding: 6px 0;
+  border-bottom: 1px dashed #f1f5f9;
+}
+.cg-row:last-of-type { border-bottom: none; }
+.cg-row b { color: #0f172a; font-weight: 700; }
+.cg-row b.ok { color: #16a34a; }
+.cg-row b.warn { color: #f59e0b; }
+.cartao-grid-actions { display: flex; gap: 8px; margin-top: 12px; }
+.cartao-grid-actions .ant-btn { flex: 1; }
+
+/* Placeholder adicionar cartão */
+.cartao-grid-cell.add-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cbd5e1;
+  background: #f8fafc;
+  min-height: 230px;
+}
+.add-card-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* Etapa 2 — métricas + ações na coluna do cartão */
+.detail-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+.dm-item {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dm-item span { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: #94a3b8; }
+.dm-item b { font-size: 16px; color: #0f172a; }
+.dm-item b.ok { color: #16a34a; }
+.dm-item b.warn { color: #f59e0b; }
+.detail-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+@media (max-width: 575px) {
+  .cartoes-grid { grid-template-columns: 1fr; }
+}

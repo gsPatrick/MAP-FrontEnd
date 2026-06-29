@@ -10,7 +10,7 @@ import {
   ShoppingCartOutlined, PieChartOutlined, WalletOutlined,
   ScanOutlined, HistoryOutlined, CheckCircleOutlined,
   BankOutlined, ArrowRightOutlined, CalendarOutlined,
-  ArrowDownOutlined, ArrowUpOutlined, CloseCircleOutlined
+  ArrowDownOutlined, ArrowUpOutlined, CloseCircleOutlined, ArrowLeftOutlined
 } from '@ant-design/icons';
 import { Pie } from '@ant-design/charts';
 import dayjs from 'dayjs';
@@ -53,6 +53,7 @@ const CartoesPage = () => {
   const [modal, contextHolder] = useModal();
 
   const [cards, setCards] = useState([]);
+  const [view, setView] = useState('list'); // 'list' (galeria de cartões) | 'detail' (fatura)
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCardDetails, setSelectedCardDetails] = useState(null);
   const [selectedMonthYearForInvoice, setSelectedMonthYearForInvoice] = useState(dayjs());
@@ -307,6 +308,12 @@ const CartoesPage = () => {
     </div>
   );
 
+  const openCard = (card) => {
+    setSelectedCard(card);
+    setSelectedMonthYearForInvoice(dayjs());
+    setView('detail');
+  };
+
   const cardOptionsMenu = (card) => (
     <Menu onClick={(e) => e.domEvent.stopPropagation()}>
       <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => {
@@ -324,44 +331,69 @@ const CartoesPage = () => {
 
   return (
     <Content className="cartoes-content">
-      <Row gutter={[24, 24]} className="cartoes-page-row">
-        {/* SIDEBAR: Accounts List */}
-        <Col xs={24} lg={8} className="cards-list-col">
-          <div className="cards-list-header">
-            <Typography.Title level={4}>Contas e Cartões</Typography.Title>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCard(null); cardForm.resetFields(); setIsAddCardModalVisible(true); }} className="add-card-btn">Novo</Button>
+      {view === 'list' ? (
+        <>
+          {/* ETAPA 1: galeria de cartões personalizados */}
+          <div className="cartoes-top-header">
+            <div>
+              <Typography.Title level={3} style={{ margin: 0 }}>Cartões</Typography.Title>
+              <Typography.Text type="secondary">Gerencie seus cartões e gastos no crédito</Typography.Text>
+            </div>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCard(null); cardForm.resetFields(); setIsAddCardModalVisible(true); }} className="add-card-btn">Novo Cartão</Button>
           </div>
-          <div className="cards-scrollable-list">
-            {loadingCards ? <Spin style={{ margin: '20px auto' }} /> :
-              cards.map(card => (
-                <div
-                  key={card.id}
-                  className={`cartao-gallery-item ${selectedCard?.id === card.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedCard(card)}
-                >
-                  <div className="sidebar-card-icon">
-                    <CreditCardOutlined />
+          {loadingCards ? (
+            <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
+          ) : (
+            <div className="cartoes-grid">
+              {cards.map(card => {
+                const disp = card.availableLimit ?? 0;
+                const blo = parseFloat(card.blockedLimit || 0);
+                const usado = card.usedLimit ?? Math.max(0, parseFloat(card.limit || 0) - disp - blo);
+                return (
+                  <div key={card.id} className="cartao-grid-cell" onClick={() => openCard(card)}>
+                    <VisualCard card={card} currentProfile={currentProfile} showDetails />
+                    <div className="cartao-grid-summary">
+                      <div className="cg-row"><span>Limite Total</span><b>R$ {fmtBRL(card.limit)}</b></div>
+                      <div className="cg-row"><span>Disponível</span><b className="ok">R$ {fmtBRL(disp)}</b></div>
+                      <div className="cg-row"><span>Bloqueado</span><b className="warn">R$ {fmtBRL(blo)}</b></div>
+                      <div className="cg-row"><span>Utilizado</span><b>R$ {fmtBRL(usado)}</b></div>
+                      <div className="cartao-grid-actions" onClick={e => e.stopPropagation()}>
+                        <Button size="small" icon={<EditOutlined />} onClick={() => { setEditingCard(card); cardForm.setFieldsValue({ ...card, limitTotal: card.limit, limiteBloqueado: card.blockedLimit || 0, numeroCartao: card.lastFourDigits }); setIsAddCardModalVisible(true); }}>Editar</Button>
+                        <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDeleteCard(card.id)}>Apagar</Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="sidebar-card-info">
-                    <span className="sidebar-card-name">{card.name}</span>
-                    <span className="sidebar-card-digits">•••• {card.lastFourDigits}</span>
-                  </div>
-                  <Dropdown overlay={cardOptionsMenu(card)} trigger={['click']}>
-                    <Button type="text" icon={<MoreOutlined />} shape="circle" onClick={e => e.stopPropagation()} />
-                  </Dropdown>
-                </div>
-              ))
-            }
+                );
+              })}
+              <div className="cartao-grid-cell add-placeholder" onClick={() => { setEditingCard(null); cardForm.resetFields(); setIsAddCardModalVisible(true); }}>
+                <div className="add-card-placeholder"><PlusOutlined style={{ fontSize: 30 }} /><span>Adicionar cartão</span></div>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+      <Row gutter={[24, 24]} className="cartoes-page-row">
+        {/* ETAPA 2 — coluna esquerda: cartão + métricas + ações */}
+        <Col xs={24} lg={8} className="cards-list-col">
+          <div className="cartoes-top-header" style={{ marginBottom: 16 }}>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => setView('list')}>Voltar</Button>
+          </div>
+          {selectedCard && <VisualCard card={selectedCard} currentProfile={currentProfile} showDetails />}
+          <div className="detail-metrics">
+            <div className="dm-item"><span>Limite Total</span><b>R$ {fmtBRL(limiteTotalCard)}</b></div>
+            <div className="dm-item"><span>Disponível</span><b className="ok">R$ {fmtBRL(limiteDisponivel)}</b></div>
+            <div className="dm-item"><span>Bloqueado</span><b className="warn">R$ {fmtBRL(limiteBloqueado)}</b></div>
+            <div className="dm-item"><span>Utilizado</span><b>R$ {fmtBRL(limiteUsado)}</b></div>
+          </div>
+          <div className="detail-actions">
+            <Button block icon={<EditOutlined />} onClick={() => { setEditingCard(selectedCard); cardForm.setFieldsValue({ ...selectedCard, limitTotal: selectedCard.limit, limiteBloqueado: selectedCard.blockedLimit || 0, numeroCartao: selectedCard.lastFourDigits }); setIsAddCardModalVisible(true); }}>Editar</Button>
+            <Button block danger icon={<DeleteOutlined />} onClick={() => handleDeleteCard(selectedCard.id)}>Apagar</Button>
           </div>
         </Col>
 
-        {/* DETAIL AREA: Banking Invoice */}
+        {/* ETAPA 2 — coluna direita: fatura */}
         <Col xs={24} lg={16} className="card-details-col">
-          {!selectedCard ? (
-            <div className="selected-card-details-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Empty description="Selecione um cartão para ver os detalhes" />
-            </div>
-          ) : (
+          {selectedCard && (
             <div className="selected-card-details-wrapper animated-details">
               <Spin spinning={loadingInvoice}>
                 {/* Header: Financial Totals */}
@@ -483,6 +515,7 @@ const CartoesPage = () => {
           )}
         </Col>
       </Row>
+      )}
 
       {/* MODALS (Simplified for the banking theme) */}
       <Modal
