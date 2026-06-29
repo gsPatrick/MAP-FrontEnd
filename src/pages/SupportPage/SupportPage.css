@@ -1,16 +1,33 @@
 /* src/pages/SupportPage/SupportPage.css */
 .support-page {
-  padding: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+  padding: 32px;
+  width: 100%;
 }
 .support-page-header {
   margin-bottom: 24px;
 }
+/* As colunas ocupam toda a largura e os dois cards ficam com a mesma altura */
+.support-page .ant-row {
+  align-items: stretch;
+}
 .support-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.support-card .ant-card-body {
+  flex: 1;
+}
+/* Garante uma altura mínima confortável para a área de chamados */
+.support-card { min-height: 460px; }
+
+@media (max-width: 767px) {
+  .support-page {
+    padding: 16px;
+  }
+  .support-card { min-height: auto; }
 }
 
 @media (max-width: 767px) {
