@@ -144,12 +144,13 @@ const PainelUsuario = () => {
 
         // Busca dados financeiros (Summary, Gráficos, Próximos Itens)
         try {
-          const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes] = await Promise.all([
+          const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes, upcomingRecurrencesRes] = await Promise.all([
             apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
-            apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } })
+            apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params: { isActive: true, dateStart: dayjs().format('YYYY-MM-DD'), sortBy: 'nextDueDate', sortOrder: 'ASC' } })
           ]);
 
           // Processa o resumo financeiro
@@ -173,6 +174,12 @@ const PainelUsuario = () => {
           let combinedUpcoming = [];
           if (upcomingTransactionsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingTransactionsRes.data.transactions.map(t => ({ id: `trans_${t.id}`, title: t.description, dueDate: t.dueDate, amount: parseFloat(t.value), itemType: 'transaction', transactionType: t.type === 'Entrada' ? 'receber' : 'pagar' }))); }
           if (upcomingAppointmentsRes.data?.status === 'success') { combinedUpcoming.push(...upcomingAppointmentsRes.data.data.map(app => ({ id: `appt_${app.id}`, title: app.title, dueDate: app.eventDateTime, amount: app.associatedValue ? parseFloat(app.associatedValue) : null, itemType: 'appointment', transactionType: 'lembrete' }))); }
+          if (upcomingRecurrencesRes.data?.status === 'success') {
+            const rules = upcomingRecurrencesRes.data.data?.rules || [];
+            combinedUpcoming.push(...rules
+              .filter(r => r.nextDueDate)
+              .map(r => ({ id: `rec_${r.id}`, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), itemType: 'recurrence', transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' })));
+          }
           combinedUpcoming.sort((a, b) => dayjs(a.dueDate).valueOf() - dayjs(b.dueDate).valueOf());
           setUpcomingItems(combinedUpcoming.slice(0, 5));
         } catch (summaryErr) {
@@ -494,7 +501,7 @@ const PainelUsuario = () => {
                   {upcomingItems.map(item => (
                     <li key={item.id} className="upcoming-list-item">
                       <div className={`item-avatar ${item.transactionType || item.itemType}`}>
-                        {item.itemType === 'transaction' ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
+                        {(item.itemType === 'transaction' || item.itemType === 'recurrence') ? (item.transactionType === 'pagar' ? <FaArrowDown /> : <FaArrowUp />) : <FaCalendarAlt />}
                       </div>
                       <div className="item-details">
                         <p className="item-title">{item.title}</p>
@@ -504,7 +511,7 @@ const PainelUsuario = () => {
                         </p>
                       </div>
                       <span className={`item-tag ${item.transactionType || item.itemType}`}>
-                        {item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : 'LEMBRETE'}
+                        {item.itemType === 'transaction' ? `A ${item.transactionType.toUpperCase()}` : item.itemType === 'recurrence' ? 'RECORRÊNCIA' : 'LEMBRETE'}
                       </span>
                     </li>
                   ))}
