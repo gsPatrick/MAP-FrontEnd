@@ -32,7 +32,8 @@ const HeaderPanel = ({ isMobile, onMenuClick }) => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userData');
     setSelectedProfileId(null);
-    navigate('/login');
+    // Reload completo limpa o estado em memória do ProfileContext.
+    window.location.assign('/login');
   };
 
   // --- MENU DO USUÁRIO PARA CLIENTES (COMPORTAMENTO ORIGINAL RESTAURADO) ---

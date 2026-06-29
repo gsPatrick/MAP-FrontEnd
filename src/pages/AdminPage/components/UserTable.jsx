@@ -1,5 +1,5 @@
 // src/pages/AdminPage/components/UserTable.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Space, message, Tooltip, Avatar, Modal } from 'antd';
 import { UserSwitchOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import apiClient from '../../../services/api';
@@ -37,6 +37,15 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [modal, modalContextHolder] = Modal.useModal();
 
+  // No mobile, deixamos só a coluna de Ações fixa; a de Usuário desacopla
+  // para não espremer o conteúdo do meio.
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const doDelete = async (clientId) => {
     try {
       await apiClient.delete(`/admin/clients/${clientId}`);
@@ -69,7 +78,7 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
     {
       title: 'Usuário',
       key: 'user',
-      fixed: 'left',
+      fixed: isMobile ? false : 'left',
       width: 280,
       sorter: (a, b) => (a.name || '').localeCompare(b.name || ''),
       render: (_, record) => (

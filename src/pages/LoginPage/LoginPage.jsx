@@ -38,15 +38,15 @@ const LoginPage = () => {
     const searchParams = new URLSearchParams(location.search);
     const redirectPath = searchParams.get('redirect');
 
+    // Entrar no app com reload completo garante que o ProfileContext reinicialize
+    // do zero (evita sidebar/dados da conta anterior ao trocar de conta).
     if (redirectPath) {
-      navigate(redirectPath);
-      message.success('Login bem-sucedido! Redirecionando...');
+      window.location.assign(redirectPath);
       return;
     }
 
     if (role === 'admin') {
-      navigate('/admin/dashboard');
-      message.success(`Login de administrador bem-sucedido! Bem-vindo(a), ${user.name}!`);
+      window.location.assign('/admin/dashboard');
       return;
     }
 
@@ -74,7 +74,7 @@ const LoginPage = () => {
       localStorage.setItem('selectedProfileId', profile.id.toString());
     }
 
-    navigate('/painel');
+    window.location.assign('/painel');
 
   }, [navigate, location.search]);
 

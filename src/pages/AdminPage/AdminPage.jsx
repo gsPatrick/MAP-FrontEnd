@@ -35,7 +35,8 @@ const AdminPage = () => {
     localStorage.removeItem('selectedProfileId');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userData');
-    navigate('/login');
+    // Reload completo limpa o estado em memória (ProfileContext) ao trocar de conta.
+    window.location.assign('/login');
   };
 
   const menuItems = [
