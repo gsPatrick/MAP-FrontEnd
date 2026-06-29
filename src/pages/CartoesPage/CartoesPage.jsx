@@ -225,24 +225,42 @@ const CartoesPage = () => {
 
   const handleAddExpense = async (values) => {
     if (!selectedCard || !currentProfile?.id) return;
-    const expensePayload = {
-      description: values.description,
-      value: parseFloat(values.value),
-      transactionDate: dayjs(values.data).format('YYYY-MM-DD'),
-      financialCategoryName: values.categoria,
-      type: 'Saída',
-      creditCardId: selectedCard.id,
-      isParcel: values.isParceladaCheck,
-      numberOfParcels: values.isParceladaCheck ? parseInt(values.numeroParcelas) : 1,
-    };
+    const dateStr = dayjs(values.data || dayjs()).format('YYYY-MM-DD');
     try {
-      const endpoint = values.isParceladaCheck ? `/financial-accounts/${currentProfile.id}/transactions/parcelled` : `/financial-accounts/${currentProfile.id}/transactions`;
-      await apiClient.post(endpoint, expensePayload);
+      if (values.isParceladaCheck) {
+        // Compra parcelada no cartão -> endpoint de parcelamento.
+        await apiClient.post(`/financial-accounts/${currentProfile.id}/transactions/parcelled`, {
+          description: values.description,
+          type: 'Saída',
+          totalValue: parseFloat(values.value),
+          numberOfParcels: parseInt(values.numeroParcelas, 10),
+          initialDueDate: dateStr,
+          transactionDate: dateStr,
+          paymentMethod: 'Cartão de Crédito',
+          creditCardId: selectedCard.id,
+          financialCategoryId: values.categoria,
+        });
+      } else {
+        // Compra à vista no cartão.
+        await apiClient.post(`/financial-accounts/${currentProfile.id}/transactions`, {
+          description: values.description,
+          type: 'Saída',
+          value: parseFloat(values.value),
+          transactionDate: dateStr,
+          paymentMethod: 'Cartão de Crédito',
+          creditCardId: selectedCard.id,
+          financialCategoryId: values.categoria,
+        });
+      }
       message.success("Despesa adicionada!");
       setIsAddExpenseToCardModalVisible(false);
+      addExpenseToCardForm.resetFields();
+      setIsParceladaExpense(false);
       fetchInvoiceDetails(selectedCard.id, 'aberta');
       fetchAvailableLimit(selectedCard.id);
-    } catch (error) { message.error("Erro ao adicionar despesa."); }
+    } catch (error) {
+      message.error(error.response?.data?.message || "Erro ao adicionar despesa.");
+    }
   };
 
   const limiteDisponivel = selectedCardDetails?.availableLimit || selectedCard?.availableLimit || 0;
@@ -464,7 +482,7 @@ const CartoesPage = () => {
             <Col span={12}><Form.Item name="value" label="Valor (R$)" rules={[{ required: true }]}><InputNumber min={0.01} style={{ width: '100%' }} precision={2} /></Form.Item></Col>
             <Col span={12}><Form.Item name="data" label="Data"><DatePicker format="DD/MM" style={{ width: '100%' }} /></Form.Item></Col>
           </Row>
-          <Form.Item name="categoria" label="Categoria" rules={[{ required: true }]}><Select placeholder="Selecione">{categorias.map(c => <Option key={c.id} value={c.name}>{c.name}</Option>)}</Select></Form.Item>
+          <Form.Item name="categoria" label="Categoria" rules={[{ required: true }]}><Select placeholder="Selecione">{categorias.map(c => <Option key={c.id} value={c.id}>{c.name}</Option>)}</Select></Form.Item>
           <Form.Item name="isParceladaCheck" valuePropName="checked"><Checkbox onChange={e => setIsParceladaExpense(e.target.checked)}>Compra Parcelada?</Checkbox></Form.Item>
           {isParceladaExpense && <Form.Item name="numeroParcelas" label="Parcelas"><InputNumber min={2} max={48} style={{ width: '100%' }} /></Form.Item>}
           <Button type="primary" block htmlType="submit" style={{ background: '#0f172a' }}>Adicionar</Button>
