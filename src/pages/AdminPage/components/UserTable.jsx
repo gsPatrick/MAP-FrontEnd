@@ -1,9 +1,10 @@
 // src/pages/AdminPage/components/UserTable.jsx
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Space, message, Tooltip, Avatar, Modal } from 'antd';
-import { UserSwitchOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { UserSwitchOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled, DollarOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 import ChangePlanModal from './ChangePlanModal';
+import ConfirmPaymentModal from './ConfirmPaymentModal';
 import EditUserModal from './EditUserModal';
 import { getPlano, getSituacao } from './userStatus';
 
@@ -34,6 +35,7 @@ const avatarColor = (str) => {
 const UserTable = ({ users, loading, onActionSuccess }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isPlanModalVisible, setIsPlanModalVisible] = useState(false);
+  const [isConfirmPayVisible, setIsConfirmPayVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [modal, modalContextHolder] = Modal.useModal();
 
@@ -134,13 +136,16 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       title: 'Ações',
       key: 'actions',
       fixed: 'right',
-      width: 150,
+      width: 200,
       align: 'center',
       className: 'admin-table-actions',
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Editar dados">
             <Button size="small" icon={<EditOutlined />} onClick={() => { setSelectedUser(record); setIsEditModalVisible(true); }} />
+          </Tooltip>
+          <Tooltip title="Confirmar como pago (liberar acesso)">
+            <Button size="small" icon={<DollarOutlined />} style={{ color: '#16a34a', borderColor: '#16a34a' }} onClick={() => { setSelectedUser(record); setIsConfirmPayVisible(true); }} />
           </Tooltip>
           <Tooltip title="Alterar plano">
             <Button size="small" type="primary" ghost icon={<UserSwitchOutlined />} onClick={() => { setSelectedUser(record); setIsPlanModalVisible(true); }} />
@@ -184,6 +189,17 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
           onClose={() => setIsPlanModalVisible(false)}
           onSuccess={() => {
             setIsPlanModalVisible(false);
+            onActionSuccess();
+          }}
+        />
+      )}
+      {isConfirmPayVisible && (
+        <ConfirmPaymentModal
+          client={selectedUser}
+          visible={isConfirmPayVisible}
+          onClose={() => setIsConfirmPayVisible(false)}
+          onSuccess={() => {
+            setIsConfirmPayVisible(false);
             onActionSuccess();
           }}
         />
