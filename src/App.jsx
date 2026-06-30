@@ -34,6 +34,7 @@ const SignupPage = lazy(() => import('./pages/Signup/Signup'));
 const SubscriptionSuccessPage = lazy(() => import('./pages/SubscriptionSuccessPage/SubscriptionSuccessPage'));
 const ChatbotPage = lazy(() => import('./pages/ChatbotPage/ChatbotPage'));
 const SupportPage = lazy(() => import('./pages/SupportPage/SupportPage'));
+const HistoricoPage = lazy(() => import('./pages/HistoricoPage/HistoricoPage'));
 const CartoesPage = lazy(() => import('./pages/CartoesPage/CartoesPage'));
 const TransacoesPage = lazy(() => import('./pages/TransacoesPage/TransacoesPage'));
 const RecorrenciasPage = lazy(() => import('./pages/RecorrenciasPage/RecorrenciasPage'));
@@ -118,6 +119,7 @@ const AppRoutes = () => (
         <Route path="/painel" element={<PainelUsuario />} />
         <Route path="/painel/chat" element={<ChatbotPage />} />
         <Route path="/painel/suporte" element={<SupportPage />} />
+        <Route path="/painel/historico" element={<HistoricoPage />} />
         <Route path="/painel/cartoes" element={<CartoesPage />} />
         <Route path="/painel/transacoes" element={<TransacoesPage />} />
         <Route path="/painel/recorrencias" element={<RecorrenciasPage />} />

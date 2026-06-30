@@ -6,7 +6,7 @@ import {
   PieChartOutlined, SwapOutlined, ScheduleOutlined, CreditCardOutlined,
   ShoppingCartOutlined, CalendarOutlined, MessageOutlined, SettingOutlined,
   UserOutlined, LineChartOutlined, TeamOutlined, TagsOutlined, CrownOutlined,
-  CheckSquareOutlined, CustomerServiceOutlined
+  CheckSquareOutlined, CustomerServiceOutlined, HistoryOutlined
 } from '@ant-design/icons';
 import './SidebarPanel.css';
 
@@ -26,6 +26,7 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     { key: '/painel', icon: <PieChartOutlined />, label: <Link to="/painel">Visão Geral</Link> },
     { key: '/painel/transacoes', icon: <SwapOutlined />, label: <Link to="/painel/transacoes">Transações</Link> },
     { key: '/painel/recorrencias', icon: <ScheduleOutlined />, label: <Link to="/painel/recorrencias">Recorrências</Link> },
+    { key: '/painel/historico', icon: <HistoryOutlined />, label: <Link to="/painel/historico">Histórico</Link> },
     { key: '/painel/categorias', icon: <TagsOutlined />, label: <Link to="/painel/categorias">Categorias</Link> },
     { key: '/painel/cartoes', icon: <CreditCardOutlined />, label: <Link to="/painel/cartoes">Cartões</Link> },
     (selectedProfileType === 'PJ' || selectedProfileType === 'MEI') && {

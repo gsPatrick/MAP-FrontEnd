@@ -1,0 +1,42 @@
+/* src/pages/HistoricoPage/HistoricoPage.css */
+.historico-page { padding: 24px; width: 100%; }
+.historico-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.month-nav .month-label { min-width: 160px; font-weight: 600; text-transform: capitalize; pointer-events: none; }
+
+.historico-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.historico-summary .sum { font-size: 1.15rem; font-weight: 700; margin-top: 2px; }
+.historico-summary .sum.ok { color: #16a34a; }
+.historico-summary .sum.bad { color: #cf1322; }
+
+.historico-recurrences { margin-bottom: 16px; border-radius: 12px; }
+.rec-list { display: flex; flex-direction: column; gap: 8px; }
+.rec-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+}
+.rec-info { display: flex; flex-direction: column; }
+.rec-meta { font-size: 12px; color: #64748b; }
+
+.historico-table-card { border-radius: 12px; }
+
+@media (max-width: 767px) {
+  .historico-page { padding: 12px; }
+  .historico-summary { grid-template-columns: 1fr; }
+}
