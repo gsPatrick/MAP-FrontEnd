@@ -78,10 +78,13 @@ const SignupPage = () => {
 
       localStorage.setItem('authToken', token);
       localStorage.setItem('userData', JSON.stringify(client));
+      // Guarda o plano escolhido para redirecionar à tela de afiliado/WhatsApp APÓS o pagamento.
+      localStorage.setItem('pendingPlanId', String(planId));
 
-      message.success({ content: 'Conta criada com sucesso!', key: 'signup_process' });
+      message.success({ content: 'Conta criada! Vamos para o pagamento...', key: 'signup_process' });
 
-      navigate(`/cadastro-sucesso/${planId}`);
+      // Fluxo: cadastro -> PAGAMENTO -> (pago) -> afiliado/WhatsApp.
+      navigate(`/checkout/${planId}`);
 
     } catch (error) {
       message.destroy('signup_process');

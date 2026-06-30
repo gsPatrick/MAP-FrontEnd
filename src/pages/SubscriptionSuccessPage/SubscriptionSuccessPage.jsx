@@ -1,22 +1,20 @@
 // src/pages/SubscriptionSuccessPage/SubscriptionSuccessPage.jsx
-import React, { useEffect, useState, useCallback } from 'react';
+// Tela exibida APÓS o pagamento: boas-vindas + link de afiliado + WhatsApp.
+import React, { useEffect, useState } from 'react';
 import { Layout, Card, Typography, Button, Spin, message } from 'antd';
-import { CheckCircleOutlined, WhatsAppOutlined } from '@ant-design/icons';
-import { useParams, useNavigate } from 'react-router-dom';
+import { CheckCircleOutlined, WhatsAppOutlined, DashboardOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
-import apiClient from '../../services/api';
 import './SubscriptionSuccessPage.css';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 const SubscriptionSuccessPage = () => {
-    const { planId } = useParams();
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [countdown, setCountdown] = useState(5);
 
     useEffect(() => {
         const userJson = localStorage.getItem('userData');
@@ -26,40 +24,10 @@ const SubscriptionSuccessPage = () => {
             message.error("Sua sessão não foi encontrada. Por favor, faça login para continuar.");
             navigate('/login');
         }
+        // Já passou pelo pagamento — limpa o plano pendente.
+        localStorage.removeItem('pendingPlanId');
         setLoading(false);
     }, [navigate]);
-
-    const handleCheckout = useCallback(async () => {
-        try {
-            const checkoutResponse = await apiClient.post('/mercado-pago/checkout', { planId: parseInt(planId, 10) });
-            
-            // <<< CORREÇÃO PRINCIPAL AQUI >>>
-            // Alterado de 'checkoutUrl' para 'init_point' para corresponder à resposta da API do Mercado Pago.
-            if (checkoutResponse.data?.data?.init_point) {
-                window.location.href = checkoutResponse.data.data.init_point;
-            } else {
-                throw new Error('Link de pagamento (init_point) não foi encontrado na resposta.');
-            }
-        } catch (error) {
-            message.error('Falha ao redirecionar para o pagamento. Por favor, contate o suporte.', 10);
-            console.error("Erro ao gerar checkout:", error);
-        }
-    }, [planId]);
-
-    useEffect(() => {
-        if (!loading && userData) {
-            if (countdown === 0) {
-                handleCheckout();
-                return;
-            }
-
-            const timer = setInterval(() => {
-                setCountdown((prevCountdown) => prevCountdown - 1);
-            }, 1000);
-
-            return () => clearInterval(timer);
-        }
-    }, [loading, userData, countdown, handleCheckout]);
 
     const affiliateLink = userData ? `${window.location.origin}/#planos?ref=${userData.affiliateCode}` : '';
 
@@ -77,9 +45,9 @@ const SubscriptionSuccessPage = () => {
             <Content className="success-page-content">
                 <Card className="success-card-container">
                     <CheckCircleOutlined className="success-icon" />
-                    <Title level={2} className="success-title">Conta Criada com Sucesso!</Title>
+                    <Title level={2} className="success-title">Pagamento confirmado! 🎉</Title>
                     <Paragraph className="success-subtitle">
-                        Estamos preparando tudo para você.
+                        Seu acesso está liberado. Bem-vindo(a) ao MAP no Controle!
                     </Paragraph>
 
                     {userData && userData.affiliateCode && (
@@ -93,24 +61,31 @@ const SubscriptionSuccessPage = () => {
                             </Paragraph>
                         </div>
                     )}
-                    
-                    <Paragraph className="redirect-countdown">
-                        Redirecionando para o pagamento em <strong>{countdown}...</strong>
-                    </Paragraph>
 
                     <Paragraph className="whatsapp-prompt">
-                        Enquanto isso, que tal já me dar um "oi" no WhatsApp para começarmos?
+                        Para começar a usar, me dá um "oi" no WhatsApp que eu te guio na configuração da sua conta! 👇
                     </Paragraph>
-                    <Button 
-                        type="primary" 
-                        icon={<WhatsAppOutlined />} 
-                        size="large" 
+                    <Button
+                        type="primary"
+                        icon={<WhatsAppOutlined />}
+                        size="large"
                         className="whatsapp-button"
                         href="https://wa.me/5521998597002"
                         target="_blank"
                     >
-                        Iniciar Conversa
+                        Iniciar Conversa no WhatsApp
                     </Button>
+
+                    <div style={{ marginTop: 16 }}>
+                        <Button
+                            type="default"
+                            icon={<DashboardOutlined />}
+                            size="large"
+                            onClick={() => navigate('/painel')}
+                        >
+                            Ir para o Painel
+                        </Button>
+                    </div>
                 </Card>
             </Content>
             <FooterLP />

@@ -9,7 +9,7 @@ const statusConfig = {
         status: 'success',
         icon: <CheckCircleOutlined />,
         title: 'Pagamento Confirmado!',
-        subTitle: 'Sua assinatura está sendo ativada. Você será redirecionado para o painel em instantes. Bem-vindo(a) ao controle total!',
+        subTitle: 'Sua assinatura está sendo ativada. Você será redirecionado em instantes. Bem-vindo(a) ao controle total!',
     },
     failure: {
         status: 'error',
@@ -34,10 +34,15 @@ const PaymentStatusPage = () => {
         const path = location.pathname;
         if (path.includes('success')) {
             setConfig(statusConfig.success);
-            // Redireciona para o painel após 5 segundos para dar tempo ao webhook
+            // Após o pagamento, leva para a tela de afiliado/WhatsApp (boas-vindas).
+            const pendingPlanId = localStorage.getItem('pendingPlanId');
             setTimeout(() => {
-                navigate('/painel');
-            }, 5000);
+                if (pendingPlanId) {
+                    navigate(`/cadastro-sucesso/${pendingPlanId}`);
+                } else {
+                    navigate('/painel');
+                }
+            }, 4000);
         } else if (path.includes('failure')) {
             setConfig(statusConfig.failure);
         } else if (path.includes('pending')) {
