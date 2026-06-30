@@ -103,6 +103,15 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       width: 160,
       render: (level, record) => {
         const plano = getPlano(level);
+        // Ainda não pagou, mas escolheu um plano no cadastro -> mostra o plano pendente.
+        if (plano.group === 'sem_plano' && record.pendingPlanName) {
+          return (
+            <div className="admin-plan-cell">
+              <Tag color="gold" style={{ marginInlineEnd: 0 }}>{record.pendingPlanName}</Tag>
+              <span className="admin-plan-expiry">pendente</span>
+            </div>
+          );
+        }
         return (
           <div className="admin-plan-cell">
             <Tag color={plano.color} style={{ marginInlineEnd: 0 }}>{plano.label}</Tag>
