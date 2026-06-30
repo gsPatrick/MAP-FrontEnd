@@ -182,16 +182,28 @@ body {
 .card-category.expense { color: var(--vermelho-escuro, #CF1322); }
  
 .card-payment-method {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     background-color: var(--fundo-app);
     padding: 4px 8px;
     border-radius: 6px;
+    max-width: 220px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
- 
+.card-payment-method .method-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .method-icon {
     font-size: 0.9rem;
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
 }
 .method-icon.pix { color: #32BCAD; }
 .method-icon.card { color: #1677ff; }

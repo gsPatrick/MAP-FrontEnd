@@ -67,9 +67,13 @@ const TransactionCard = ({ transaction, onEdit, onDelete, onMarkAsPaid }) => {
                 <span className={`card-category ${isIncome ? 'income' : 'expense'}`}>
                     <FaTag /> {transaction.category?.name || 'Sem Categoria'}
                 </span>
-                <span className="card-payment-method">
-                    {getPaymentIcon(transaction.paymentMethod)} {transaction.paymentMethod}
-                    {transaction.creditCard?.name ? ` · ${transaction.creditCard.name}${transaction.creditCard.lastFourDigits ? ` (•${transaction.creditCard.lastFourDigits})` : ''}` : ''}
+                <span className="card-payment-method" title={transaction.creditCard?.name ? `${transaction.paymentMethod} · ${transaction.creditCard.name}` : transaction.paymentMethod}>
+                    {getPaymentIcon(transaction.paymentMethod)}
+                    <span className="method-label">
+                        {transaction.creditCard?.name
+                            ? `${transaction.creditCard.name}${transaction.creditCard.lastFourDigits ? ` ••${transaction.creditCard.lastFourDigits}` : ''}`
+                            : transaction.paymentMethod}
+                    </span>
                 </span>
                 <span className="card-date">{dayjs(transaction.transactionDate).format('DD/MM/YYYY')}</span>
                 <div className="card-menu-container" ref={menuRef}>
