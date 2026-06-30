@@ -11,7 +11,8 @@ export const ProfileProvider = ({ children }) => {
   const [selectedProfileId, setSelectedProfileIdState] = useState(null);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentProfile, setCurrentProfile] = useState(null); 
+  const [currentProfile, setCurrentProfile] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null); // 'active' | 'expired' | 'free_tier'
 
   const mapProfileTypeToIcon = (type) => {
     switch (type) {
@@ -51,12 +52,14 @@ export const ProfileProvider = ({ children }) => {
         };
         setUserProfiles([adminProfile]);
         setSelectedProfileIdState(adminProfile.id);
-        setCurrentProfile(adminProfile); 
+        setCurrentProfile(adminProfile);
+        setSubscriptionStatus('active'); // admin sempre tem acesso
       } else if (userRole === 'client') {
         const response = await apiClient.get('/auth/client/me');
 
         if (response.data && response.data.status === 'success') {
           const financialAccounts = response.data.data.financialAccounts || [];
+          setSubscriptionStatus(response.data.data.client?.subscriptionStatus || 'active');
           
           const fetchedProfiles = financialAccounts.map(acc => ({
             id: acc.id.toString(),
@@ -105,10 +108,11 @@ export const ProfileProvider = ({ children }) => {
       setSelectedProfileIdState(null);
       setCurrentProfile(null);
       setIsAuthenticated(false);
+      setSubscriptionStatus(null);
     } finally {
       setLoadingProfiles(false);
     }
-  }, []); 
+  }, []);
 
   useEffect(() => {
     fetchUserProfiles();
@@ -134,8 +138,9 @@ export const ProfileProvider = ({ children }) => {
     currentProfileName: currentProfile?.name,
     loadingProfiles,
     isAuthenticated,
+    subscriptionStatus,
     fetchUserProfiles
-  }), [userProfiles, selectedProfileId, currentProfile, loadingProfiles, isAuthenticated, fetchUserProfiles]);
+  }), [userProfiles, selectedProfileId, currentProfile, loadingProfiles, isAuthenticated, subscriptionStatus, fetchUserProfiles]);
 
   return (
     <ProfileContext.Provider value={value}>

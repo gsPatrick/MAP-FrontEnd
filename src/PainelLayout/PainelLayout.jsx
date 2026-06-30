@@ -1,7 +1,7 @@
 // src/pages/PainelLayout/PainelLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { Layout, Drawer } from 'antd';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import HeaderPanel from '../componentsPanel/HeaderPanel/HeaderPanel';
 import SidebarPanel from '../componentsPanel/SidebarPanel/SidebarPanel';
 import { useProfile } from '../contexts/ProfileContext';
@@ -10,8 +10,22 @@ const { Content } = Layout;
 const MOBILE_BREAKPOINT = 992;
 
 const PainelLayout = () => {
-  const { currentProfile } = useProfile();
+  const { currentProfile, subscriptionStatus, loadingProfiles, isAuthenticated } = useProfile();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Trava de assinatura: cliente sem plano ativo (expirado/inadimplente/sem plano)
+  // NÃO acessa o painel — vai para a tela de pagamento (mesmo navegando direto na URL).
+  useEffect(() => {
+    if (
+      !loadingProfiles &&
+      isAuthenticated &&
+      currentProfile?.type !== 'ADMIN' &&
+      (subscriptionStatus === 'expired' || subscriptionStatus === 'free_tier')
+    ) {
+      navigate('/planos', { replace: true });
+    }
+  }, [loadingProfiles, isAuthenticated, currentProfile, subscriptionStatus, navigate]);
 
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT);
