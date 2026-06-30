@@ -1,39 +1,24 @@
 // src/pages/AdminPage/components/ConfirmPaymentModal.jsx
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Select, Button, message, Alert, Typography } from 'antd';
+import React, { useState } from 'react';
+import { Modal, Button, message, Alert, Typography } from 'antd';
 import { CheckCircleOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 
-const { Option } = Select;
-const { Text } = Typography;
+const { Paragraph } = Typography;
 
 /**
- * Confirma o pagamento de um usuário (ativa a assinatura e LIBERA o acesso).
- * Reutiliza o endpoint /admin/clients/change-plan, que cria a assinatura como
- * 'Ativa', define a expiração e envia um WhatsApp avisando que o acesso foi liberado.
+ * Confirma o pagamento de um usuário ATIVANDO o plano que ele JÁ escolheu no
+ * cadastro (assinatura 'Pendente'). Não há seleção de plano — o backend usa o
+ * plano pendente do cliente. Reutiliza o fluxo de ativação (libera acesso +
+ * WhatsApp + onboarding).
  */
 const ConfirmPaymentModal = ({ client, visible, onClose, onSuccess }) => {
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [allPlans, setAllPlans] = useState([]);
 
-  useEffect(() => {
-    if (visible) {
-      form.resetFields();
-      apiClient.get('/admin/plans')
-        .then((response) => setAllPlans(response.data.data || []))
-        .catch(() => message.error('Falha ao carregar a lista de planos.'));
-    }
-  }, [visible, form]);
-
-  const handleConfirm = async (values) => {
+  const handleConfirm = async () => {
     setLoading(true);
     try {
-      await apiClient.post('/admin/clients/change-plan', {
-        clientId: client.id,
-        planId: values.planId,
-        // sem customMessage -> usa a mensagem padrão de "assinatura ativada / já pode usar"
-      });
+      await apiClient.post(`/admin/clients/${client.id}/confirm-payment`);
       message.success(`Pagamento de ${client.name || 'usuário'} confirmado! Acesso liberado.`);
       onSuccess();
     } catch (error) {
@@ -48,38 +33,25 @@ const ConfirmPaymentModal = ({ client, visible, onClose, onSuccess }) => {
       title={<span><CheckCircleOutlined style={{ color: '#16a34a', marginRight: 8 }} />Confirmar pagamento</span>}
       open={visible}
       onCancel={onClose}
-      footer={null}
       centered
       destroyOnClose
+      footer={[
+        <Button key="cancel" onClick={onClose}>Cancelar</Button>,
+        <Button key="ok" type="primary" loading={loading} onClick={handleConfirm} style={{ background: '#16a34a', borderColor: '#16a34a' }}>
+          Confirmar e liberar acesso
+        </Button>,
+      ]}
     >
       <Alert
         type="success"
         showIcon
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 12 }}
         message="Liberar acesso"
-        description={<>Confirma o pagamento de <strong>{client?.name || 'usuário'}</strong>, ativa a assinatura e libera o uso do sistema. O cliente recebe um WhatsApp avisando que o acesso foi liberado.</>}
+        description={<>Confirma o pagamento de <strong>{client?.name || 'usuário'}</strong> no <strong>plano que ele escolheu no cadastro</strong>. A assinatura é ativada, o acesso é liberado e o cliente recebe um WhatsApp avisando.</>}
       />
-      <Form form={form} layout="vertical" onFinish={handleConfirm}>
-        <Form.Item name="planId" label="Plano contratado" rules={[{ required: true, message: 'Selecione o plano pago.' }]}>
-          <Select placeholder="Escolha o plano que o cliente pagou">
-            {allPlans.map((plan) => (
-              <Option key={plan.id} value={plan.id}>
-                {`${plan.name} (R$ ${parseFloat(plan.price).toFixed(2)})`}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-        {client?.accessLevel && (
-          <Text type="secondary" style={{ display: 'block', marginTop: -8, marginBottom: 12 }}>
-            Plano atual do cadastro: <strong>{client.accessLevel}</strong>
-          </Text>
-        )}
-        <Form.Item style={{ marginBottom: 0 }}>
-          <Button type="primary" htmlType="submit" loading={loading} block style={{ background: '#16a34a', borderColor: '#16a34a' }}>
-            Confirmar pagamento e liberar acesso
-          </Button>
-        </Form.Item>
-      </Form>
+      <Paragraph type="secondary" style={{ margin: 0 }}>
+        Se o cliente não tiver um plano pendente, use a opção <strong>"Alterar plano"</strong> para definir um manualmente.
+      </Paragraph>
     </Modal>
   );
 };
