@@ -527,3 +527,23 @@
 @media (max-width: 575px) {
   .cartoes-grid { grid-template-columns: 1fr; }
 }
+
+/* Quebra do valor da fatura: total / adiantado / a pagar */
+.invoice-amount-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: #475569;
+}
+.invoice-amount-breakdown .dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.invoice-amount-breakdown .dot-total { background: #64748b; }
+.invoice-amount-breakdown .dot-paid { background: #16a34a; }
+.invoice-amount-breakdown .dot-due { background: #f43f5e; }

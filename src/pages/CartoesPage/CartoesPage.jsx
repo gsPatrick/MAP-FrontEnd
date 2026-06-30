@@ -409,18 +409,27 @@ const CartoesPage = () => {
                 <div className="invoice-banking-header">
                   <div className="invoice-header-top">
                     <div className="invoice-amount-section">
-                      <span className="label">Fatura {selectedCardDetails?.invoicePeriodDescription || "Aberta"}</span>
+                      <span className="label">Fatura {selectedCardDetails?.invoicePeriodDescription || "Aberta"} — a pagar</span>
                       <span className="amount">
                         <Text type="secondary" style={{ fontSize: '1.2rem', marginRight: 4 }}>R$</Text>
                         {(selectedCardDetails?.totalAmount || 0).toLocaleString('pt-br', { minimumFractionDigits: 2 })}
                       </span>
+                      <div className="invoice-amount-breakdown">
+                        <span><i className="dot dot-total" /> Total da fatura: R$ {fmtBRL(selectedCardDetails?.totalSpendsOriginal || 0)}</span>
+                        <span><i className="dot dot-paid" /> Adiantado/Pago: R$ {fmtBRL(selectedCardDetails?.totalPaidForThisInvoice || 0)}</span>
+                        <span><i className="dot dot-due" /> A pagar: R$ {fmtBRL(selectedCardDetails?.totalAmount || 0)}</span>
+                      </div>
                     </div>
-                    <Tag
-                      color={selectedCardDetails?.isPaid ? 'success' : 'processing'}
-                      className="header-status-badge"
-                    >
-                      {selectedCardDetails?.isPaid ? 'FATURA PAGA' : 'FATURA ABERTA'}
-                    </Tag>
+                    {(() => {
+                      const totalGasto = parseFloat(selectedCardDetails?.totalSpendsOriginal || 0);
+                      const aPagar = parseFloat(selectedCardDetails?.totalAmount || 0);
+                      const quitada = totalGasto > 0 && aPagar <= 0.009;
+                      return (
+                        <Tag color={quitada ? 'success' : 'processing'} className="header-status-badge">
+                          {quitada ? 'FATURA QUITADA' : 'FATURA ABERTA'}
+                        </Tag>
+                      );
+                    })()}
                   </div>
 
                   <div className="invoice-dates-grid">
