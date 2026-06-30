@@ -152,7 +152,7 @@ const HistoricoPage = () => {
                       {r.type === 'Entrada' ? 'Receber adiantado' : 'Adiantar pagamento'}
                     </Button>
                   ) : (
-                    <Tag color="green"><CheckOutlined /> Em dia</Tag>
+                    <Tag color="green"><CheckOutlined /> {r.lastPaidDate ? `Pago ${dayjs(r.lastPaidDate).format('DD/MM')}` : 'Em dia'}</Tag>
                   )}
                 </div>
               );

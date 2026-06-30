@@ -204,7 +204,7 @@ const PainelUsuario = () => {
           if (upcomingRecurrencesRes.data?.status === 'success') {
             const rules = (upcomingRecurrencesRes.data.data?.rules || [])
               .filter(r => r.nextDueDate)
-              .map(r => ({ id: `rec_${r.id}`, rawId: r.id, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), frequency: r.frequency, transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' }));
+              .map(r => ({ id: `rec_${r.id}`, rawId: r.id, title: r.description, dueDate: r.nextDueDate, lastPaidDate: r.lastPaidDate, amount: parseFloat(r.value), frequency: r.frequency, transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' }));
             setRecurrences(rules.slice(0, 6));
           } else {
             setRecurrences([]);
@@ -671,7 +671,7 @@ const PainelUsuario = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="item-tag em-dia"><FaCheck /> EM DIA</span>
+                          <span className="item-tag em-dia"><FaCheck /> {item.lastPaidDate ? `PAGO ${dayjs(item.lastPaidDate).format('DD/MM')}` : 'EM DIA'}</span>
                         )}
                       </div>
                     </li>
