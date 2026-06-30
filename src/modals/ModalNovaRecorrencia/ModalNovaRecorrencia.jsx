@@ -84,6 +84,9 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
             ...values,
             startDate: values.startDate.format('YYYY-MM-DD'),
             endDate: values.endDate ? values.endDate.format('YYYY-MM-DD') : null,
+            // Toda recorrência agora gera uma conta a pagar/receber (sem opção de "apenas lembrar"/"lançamento simples").
+            autoCreateTransaction: true,
+            isPayableOrReceivable: true,
         };
         try {
             const endpoint = editingRecorrencia
@@ -143,14 +146,6 @@ const ModalNovaRecorrencia = ({ open, onCancel, onSuccess, currentProfile, editi
                     <Col span={12}><Form.Item name="startDate" label="Data de Início" rules={[{ required: true }]}><DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" /></Form.Item></Col>
                     <Col span={12}><Form.Item name="endDate" label="Data de Término (Opcional)"><DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" /></Form.Item></Col>
                 </Row>
-                <Form.Item name="autoCreateTransaction" valuePropName="checked">
-                    <Switch checkedChildren="Gerar Transação" unCheckedChildren="Apenas Lembrar" />
-                    <Tooltip title="Se marcado, uma transação será criada automaticamente."><InfoCircleOutlined style={{ marginLeft: 8 }} /></Tooltip>
-                </Form.Item>
-                <Form.Item name="isPayableOrReceivable" valuePropName="checked">
-                    <Switch checkedChildren="Conta a pagar/receber" unCheckedChildren="Lançamento simples" />
-                    <Tooltip title="Se marcado, cada ocorrência entra em 'Próximos Vencimentos' e pode ser marcada como paga/recebida."><InfoCircleOutlined style={{ marginLeft: 8 }} /></Tooltip>
-                </Form.Item>
                 <Form.Item style={{ textAlign: 'right', marginTop: '20px', marginBottom: 0 }}>
                     <Button onClick={onCancel} style={{ marginRight: 8 }} className="modal-btn-cancel">Cancelar</Button>
                     <Button type="primary" htmlType="submit" loading={loading} className="modal-btn-submit neutral">{editingRecorrencia ? 'Salvar' : 'Criar'}</Button>
