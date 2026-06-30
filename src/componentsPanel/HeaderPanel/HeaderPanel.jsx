@@ -140,15 +140,6 @@ const HeaderPanel = ({ isMobile, onMenuClick }) => {
               ))}
               </Select>
             )}
-            <Tooltip title="Abrir Chatbot" placement="bottom">
-              <Button
-                  type="text"
-                  shape="circle"
-                  icon={<MessageOutlined />}
-                  className="header-panel-action-btn header-item"
-                  onClick={() => navigate('/painel/chat')}
-              />
-            </Tooltip>
           </Space>
         )}
 
