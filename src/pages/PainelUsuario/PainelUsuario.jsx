@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FaArrowUp, FaArrowDown, FaPlus, FaCalendarAlt, FaRetweet,
   FaPiggyBank, FaChartPie, FaExclamationTriangle, FaTimes,
-  FaChevronLeft, FaChevronRight, FaCheck
+  FaChevronLeft, FaChevronRight, FaCheck, FaExchangeAlt
 } from 'react-icons/fa';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -69,6 +69,7 @@ const PainelUsuario = () => {
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [upcomingItems, setUpcomingItems] = useState([]);
   const [recurrences, setRecurrences] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [totalToPayPending, setTotalToPayPending] = useState(0);
   const [dashboardCard, setDashboardCard] = useState(null); // Cartão principal para o widget
@@ -150,14 +151,30 @@ const PainelUsuario = () => {
 
         // Busca dados financeiros (Summary, Gráficos, Próximos Itens)
         try {
-          const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes, upcomingRecurrencesRes] = await Promise.all([
+          const [summaryRes, incomeChartRes, expenseChartRes, upcomingTransactionsRes, upcomingAppointmentsRes, upcomingRecurrencesRes, recentTransactionsRes] = await Promise.all([
             apiClient.get(`/financial-accounts/${currentProfile.id}/summary`, { params: summaryParams }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Entrada' } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { ...chartParams, type: 'Saída' } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { isPayableOrReceivable: true, isPaidOrReceived: false, dueAfter: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), sortBy: 'dueDate', sortOrder: 'ASC', limit: 5 } }),
             apiClient.get(`/financial-accounts/${currentProfile.id}/appointments`, { params: { status: 'Scheduled', eventDateTime_gte: dayjs().toISOString(), sortBy: 'eventDateTime', sortOrder: 'ASC', limit: 5 } }),
-            apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params: { isActive: true, sortBy: 'nextDueDate', sortOrder: 'ASC' } })
+            apiClient.get(`/financial-accounts/${currentProfile.id}/recurring-rules`, { params: { isActive: true, sortBy: 'nextDueDate', sortOrder: 'ASC' } }),
+            apiClient.get(`/financial-accounts/${currentProfile.id}/transactions`, { params: { sortBy: 'transactionDate', sortOrder: 'DESC', limit: 6 } })
           ]);
+
+          // Transações recentes (últimas movimentações)
+          if (recentTransactionsRes.data?.status === 'success') {
+            setRecentTransactions((recentTransactionsRes.data.transactions || []).map(t => ({
+              id: t.id,
+              title: t.description,
+              date: t.transactionDate,
+              amount: parseFloat(t.value),
+              type: t.type,
+              category: t.category?.name,
+              paid: t.isPayableOrReceivable ? t.isPaidOrReceived : true,
+            })));
+          } else {
+            setRecentTransactions([]);
+          }
 
           // Processa o resumo financeiro
           if (summaryRes.data?.status === 'success') {
@@ -187,7 +204,7 @@ const PainelUsuario = () => {
           if (upcomingRecurrencesRes.data?.status === 'success') {
             const rules = (upcomingRecurrencesRes.data.data?.rules || [])
               .filter(r => r.nextDueDate)
-              .map(r => ({ id: `rec_${r.id}`, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), frequency: r.frequency, transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' }));
+              .map(r => ({ id: `rec_${r.id}`, rawId: r.id, title: r.description, dueDate: r.nextDueDate, amount: parseFloat(r.value), frequency: r.frequency, transactionType: r.type === 'Entrada' ? 'receber' : 'pagar' }));
             setRecurrences(rules.slice(0, 6));
           } else {
             setRecurrences([]);
@@ -258,6 +275,18 @@ const PainelUsuario = () => {
       setRefreshKey(k => k + 1);
     } catch (e) {
       message.error(e.response?.data?.message || 'Não foi possível atualizar o item.');
+    }
+  };
+
+  // Paga adiantado a ocorrência atual de uma recorrência (gera a conta já paga e avança a regra).
+  const handlePayAdvance = async (item) => {
+    if (!currentProfile || !item?.rawId) return;
+    try {
+      await apiClient.post(`/financial-accounts/${currentProfile.id}/recurring-rules/${item.rawId}/pay-advance`);
+      message.success(`"${item.title}" paga adiantado! ✅`);
+      setRefreshKey(k => k + 1);
+    } catch (e) {
+      message.error(e.response?.data?.message || 'Não foi possível pagar adiantado.');
     }
   };
 
@@ -624,14 +653,53 @@ const PainelUsuario = () => {
                           {item.amount ? <span> | {formatCurrency(item.amount)}</span> : null}
                         </p>
                       </div>
-                      <span className={`item-tag ${item.transactionType}`}>
-                        {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
-                      </span>
+                      <div className="recurrence-actions">
+                        <span className={`item-tag ${item.transactionType}`}>
+                          {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
+                        </span>
+                        <button
+                          className="item-payadvance-btn"
+                          title={item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
+                          onClick={() => handlePayAdvance(item)}
+                        >
+                          <FaCheck /> {item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
+                        </button>
+                      </div>
                     </li>
                     );
                   })}
                 </ul>
               ) : <div className="empty-state">Nenhuma recorrência ativa.</div>
+            )}
+          </div>
+
+          {/* Transações recentes */}
+          <div className="card list-card animated-card" style={{ animationDelay: '0.8s' }}>
+            <div className="list-card-header">
+              <h4 className="card-section-title"><FaExchangeAlt /> Transações Recentes</h4>
+            </div>
+            {dashboardLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : (
+              recentTransactions.length > 0 ? (
+                <ul className="upcoming-list">
+                  {recentTransactions.map(tx => (
+                    <li key={tx.id} className="upcoming-list-item">
+                      <div className={`item-avatar ${tx.type === 'Entrada' ? 'income' : 'expense'}`}>
+                        {tx.type === 'Entrada' ? <FaArrowUp /> : <FaArrowDown />}
+                      </div>
+                      <div className="item-details">
+                        <p className="item-title">{tx.title}</p>
+                        <p className="item-description">
+                          {dayjs(tx.date).format('DD/MM/YY')}{tx.category ? ` • ${tx.category}` : ''}
+                          {!tx.paid ? ' • pendente' : ''}
+                        </p>
+                      </div>
+                      <span className={`item-amount ${tx.type === 'Entrada' ? 'income' : 'expense'}`}>
+                        {tx.type === 'Entrada' ? '+' : '-'} {formatCurrency(tx.amount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <div className="empty-state">Nenhuma transação recente.</div>
             )}
           </div>
 

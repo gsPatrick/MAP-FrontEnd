@@ -1041,3 +1041,34 @@ body.painel-active {
   color: #fff;
   border-color: #1677ff;
 }
+
+/* ===== Transações recentes + pagar adiantado (página inicial) ===== */
+.item-avatar.income { background: #e6f7ed; color: #16a34a; }
+.item-avatar.expense { background: #fde8ea; color: #cf1322; }
+
+.item-amount { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+.item-amount.income { color: #16a34a; }
+.item-amount.expense { color: #cf1322; }
+
+.recurrence-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.item-payadvance-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #16a34a;
+  color: #16a34a;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.item-payadvance-btn:hover { background: #16a34a; color: #fff; }
