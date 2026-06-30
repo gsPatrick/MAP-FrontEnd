@@ -137,17 +137,26 @@ const HistoricoPage = () => {
       {recurrences.length > 0 && (
         <Card className="historico-recurrences" title={<span><RetweetOutlined /> Recorrências ativas</span>} size="small">
           <div className="rec-list">
-            {recurrences.map(r => (
-              <div key={r.id} className="rec-item">
-                <div className="rec-info">
-                  <b>{r.description}</b>
-                  <span className="rec-meta">{r.type === 'Entrada' ? 'Receita' : 'Despesa'} • {fmt(r.value)} • próx. {dayjs(r.nextDueDate).format('DD/MM/YY')}</span>
+            {recurrences.map(r => {
+              // Só adianta a ocorrência do mês atual (ou atrasada). Se a próxima já é
+              // de mês futuro, a deste mês já foi paga -> mostra "Em dia".
+              const dueThisCycle = !dayjs(r.nextDueDate).isAfter(dayjs().endOf('month'));
+              return (
+                <div key={r.id} className="rec-item">
+                  <div className="rec-info">
+                    <b>{r.description}</b>
+                    <span className="rec-meta">{r.type === 'Entrada' ? 'Receita' : 'Despesa'} • {fmt(r.value)} • próx. {dayjs(r.nextDueDate).format('DD/MM/YY')}</span>
+                  </div>
+                  {dueThisCycle ? (
+                    <Button size="small" icon={<ThunderboltOutlined />} onClick={() => handlePayAdvance(r)}>
+                      {r.type === 'Entrada' ? 'Receber adiantado' : 'Adiantar pagamento'}
+                    </Button>
+                  ) : (
+                    <Tag color="green"><CheckOutlined /> Em dia</Tag>
+                  )}
                 </div>
-                <Button size="small" icon={<ThunderboltOutlined />} onClick={() => handlePayAdvance(r)}>
-                  {r.type === 'Entrada' ? 'Receber adiantado' : 'Adiantar pagamento'}
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}

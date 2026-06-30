@@ -1072,3 +1072,14 @@ body.painel-active {
   white-space: nowrap;
 }
 .item-payadvance-btn:hover { background: #16a34a; color: #fff; }
+
+/* Recorrência já paga no ciclo / não vencível ainda */
+.item-tag.em-dia {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e6f7ed;
+  color: #16a34a;
+  border: 1px solid #b7ebc6;
+  font-weight: 700;
+}

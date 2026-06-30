@@ -641,6 +641,9 @@ const PainelUsuario = () => {
                 <ul className="upcoming-list">
                   {recurrences.map(item => {
                     const late = dayjs(item.dueDate).endOf('day').isBefore(dayjs());
+                    // Só dá para adiantar a ocorrência DESTE mês (ou atrasada). Se a próxima
+                    // já é de um mês futuro, a do mês atual já foi paga -> mostra "Em dia".
+                    const dueThisCycle = !dayjs(item.dueDate).isAfter(dayjs().endOf('month'));
                     return (
                     <li key={item.id} className="upcoming-list-item">
                       <div className="item-avatar recurrence"><FaRetweet /></div>
@@ -654,16 +657,22 @@ const PainelUsuario = () => {
                         </p>
                       </div>
                       <div className="recurrence-actions">
-                        <span className={`item-tag ${item.transactionType}`}>
-                          {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
-                        </span>
-                        <button
-                          className="item-payadvance-btn"
-                          title={item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
-                          onClick={() => handlePayAdvance(item)}
-                        >
-                          <FaCheck /> {item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
-                        </button>
+                        {dueThisCycle ? (
+                          <>
+                            <span className={`item-tag ${item.transactionType}`}>
+                              {item.transactionType === 'pagar' ? 'A PAGAR' : 'A RECEBER'}
+                            </span>
+                            <button
+                              className="item-payadvance-btn"
+                              title={item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
+                              onClick={() => handlePayAdvance(item)}
+                            >
+                              <FaCheck /> {item.transactionType === 'pagar' ? 'Pagar adiantado' : 'Receber adiantado'}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="item-tag em-dia"><FaCheck /> EM DIA</span>
+                        )}
                       </div>
                     </li>
                     );
