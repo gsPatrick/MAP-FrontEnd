@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Card, Typography, Button, Spin, Result, Avatar, message } from 'antd';
 import { UserOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import HeaderLP from '../../componentsLP/Header/Header';
 import FooterLP from '../../componentsLP/FooterLP/FooterLP';
 import apiClient from '../../services/api';
@@ -14,6 +14,8 @@ const { Title, Paragraph } = Typography;
 const AffiliateLandingPage = () => {
   const navigate = useNavigate();
   const { affiliateCode } = useParams();
+  const location = useLocation();
+  const planId = new URLSearchParams(location.search).get('plano');
   const [referrerInfo, setReferrerInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,8 +36,9 @@ const AffiliateLandingPage = () => {
           // Persiste o código para uso posterior no checkout
           localStorage.setItem('mapReferralCode', affiliateCode);
 
-          // Registra o clique na API (Silenciosamente)
-          apiClient.post(`/affiliates/click/${affiliateCode}`).catch(err => {
+          // Registra o clique na API (Silenciosamente). Se for link de plano
+          // específico, já registra o plano/etapa.
+          apiClient.post(`/affiliates/click/${affiliateCode}`, planId ? { planId, stage: 'checkout' } : { stage: 'link' }).catch(err => {
             console.warn("Erro ao registrar clique:", err);
           });
         } else {
@@ -50,11 +53,15 @@ const AffiliateLandingPage = () => {
     };
 
     fetchReferrerInfo();
-  }, [affiliateCode, navigate]);
+  }, [affiliateCode, navigate, planId]);
 
   const handleProceed = () => {
-    // Navega para a página dedicada de planos, mantendo o contexto de indicação
-    navigate(`/planos?ref=${affiliateCode}`);
+    // Link de plano específico -> vai direto pro checkout desse plano; senão, planos.
+    if (planId) {
+      navigate(`/assinar/${planId}?ref=${affiliateCode}`);
+    } else {
+      navigate(`/planos?ref=${affiliateCode}`);
+    }
   };
 
   const renderContent = () => {
@@ -95,7 +102,7 @@ const AffiliateLandingPage = () => {
             onClick={handleProceed}
             icon={<ArrowRightOutlined />}
           >
-            Ver Planos e Continuar
+            {planId ? 'Continuar para a assinatura' : 'Ver Planos e Continuar'}
           </Button>
         </Card>
       );

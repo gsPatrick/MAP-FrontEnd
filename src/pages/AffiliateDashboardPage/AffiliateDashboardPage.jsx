@@ -86,7 +86,8 @@ const AffiliateDashboardPage = () => {
   const metrics = dashboardData?.metrics || {};
   const identifier = summary.affiliateSlug || summary.affiliateCode || '';
   const generalLink = `${SITE}/indicacao/${identifier}`;
-  const planLink = linkPlanId ? `${SITE}/assinar/${linkPlanId}?ref=${identifier}` : '';
+  // Link do plano específico usa a MESMA URL personalizada do link geral.
+  const planLink = linkPlanId ? `${SITE}/indicacao/${identifier}?plano=${linkPlanId}` : '';
 
   const copy = (text, label) => {
     navigator.clipboard.writeText(text);
@@ -175,13 +176,12 @@ const AffiliateDashboardPage = () => {
           </Col>
           <Col xs={24} md={12}>
             <Text strong>Link para um plano específico</Text>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <Select placeholder="Escolha o plano" style={{ width: 200 }} value={linkPlanId} onChange={setLinkPlanId}>
-                {PLANS.map(p => <Option key={p.id} value={p.id}>{p.name}</Option>)}
-              </Select>
+            <Select placeholder="Escolha o plano" style={{ width: '100%', marginTop: 8 }} value={linkPlanId} onChange={setLinkPlanId}
+              options={PLANS.map(p => ({ value: p.id, label: p.name }))} />
+            <div className="link-copy-box" style={{ marginTop: 8 }}>
+              <Text code ellipsis style={{ flex: 1 }}>{planLink || 'Selecione um plano acima'}</Text>
               <Button type="primary" icon={<CopyOutlined />} disabled={!linkPlanId} onClick={() => copy(planLink, 'Link do plano')}>Copiar</Button>
             </div>
-            {planLink && <Text code style={{ display: 'block', marginTop: 8, wordBreak: 'break-all' }}>{planLink}</Text>}
           </Col>
         </Row>
       </Card>
