@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Card, Row, Col, Statistic, Typography, Table, Tag, Button, message, Empty,
-  Divider, Modal, Form, Input, Segmented, Tabs, Select, Space, Alert
+  Divider, Modal, Form, Input, Tabs, Select, Space, Alert, Collapse
 } from 'antd';
 import {
   TeamOutlined, DollarOutlined, LinkOutlined, TrophyOutlined, EyeOutlined,
@@ -29,9 +29,7 @@ const AffiliateDashboardPage = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [referrals, setReferrals] = useState([]);
   const [payouts, setPayouts] = useState([]);
-  const [commissionsData, setCommissionsData] = useState(null);
-  const [period, setPeriod] = useState('mes');
-  const [loadingCommissions, setLoadingCommissions] = useState(false);
+  const [openComm, setOpenComm] = useState({ total: 0, commissions: [] });
   const [requestingPayout, setRequestingPayout] = useState(false);
   const [isSlugModalVisible, setIsSlugModalVisible] = useState(false);
   const [slugLoading, setSlugLoading] = useState(false);
@@ -41,14 +39,16 @@ const AffiliateDashboardPage = () => {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const [dash, refs, pays] = await Promise.all([
+      const [dash, refs, pays, open] = await Promise.all([
         apiClient.get('/affiliate/dashboard'),
         apiClient.get('/affiliate/referrals'),
         apiClient.get('/affiliate/payouts'),
+        apiClient.get('/affiliate/open-commissions'),
       ]);
       setDashboardData(dash.data?.data || null);
       setReferrals(Array.isArray(refs.data?.data) ? refs.data.data : []);
       setPayouts(Array.isArray(pays.data?.data) ? pays.data.data : []);
+      setOpenComm(open.data?.data || { total: 0, commissions: [] });
     } catch {
       message.error('Erro ao carregar dados de afiliado.');
     } finally {
@@ -56,17 +56,7 @@ const AffiliateDashboardPage = () => {
     }
   };
 
-  const fetchCommissions = async (p) => {
-    try {
-      setLoadingCommissions(true);
-      const res = await apiClient.get('/affiliate/commissions', { params: { period: p } });
-      setCommissionsData(res.data?.data || null);
-    } catch { setCommissionsData(null); }
-    finally { setLoadingCommissions(false); }
-  };
-
   useEffect(() => { fetchAll(); }, []);
-  useEffect(() => { fetchCommissions(period); }, [period]);
 
   const summary = dashboardData?.summary || {};
   const metrics = dashboardData?.metrics || {};
@@ -104,7 +94,6 @@ const AffiliateDashboardPage = () => {
   };
 
   const pendingPayouts = payouts.filter(p => p.status === 'Solicitado');
-  const historyPayouts = payouts.filter(p => p.status !== 'Solicitado');
 
   const referralColumns = [
     { title: 'Data', dataIndex: 'joinDate', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
@@ -194,9 +183,13 @@ const AffiliateDashboardPage = () => {
                       </Button>
                     </Col>
                   </Row>
-                  <Alert style={{ marginTop: 12 }} type="info" showIcon message="Saque mínimo de R$ 50,00. Ao solicitar, o valor vai para o histórico e o pagamento é feito manualmente pela equipe." />
-                  <Divider>Saques pendentes</Divider>
-                  <Table columns={payoutColumns} dataSource={pendingPayouts} rowKey="id" pagination={false} locale={{ emptyText: <Empty description="Nenhum saque pendente." /> }} />
+                  <Alert style={{ marginTop: 12 }} type="info" showIcon message="Saque mínimo de R$ 50,00. Ao solicitar, todas as comissões em aberto viram um saque no histórico e o pagamento é feito manualmente pela equipe." />
+                  <Divider>Comissões em aberto (compõem o saldo)</Divider>
+                  <Table columns={commissionColumns} dataSource={openComm.commissions || []} rowKey="id" pagination={{ pageSize: 6 }} locale={{ emptyText: <Empty description="Nenhuma comissão em aberto." /> }} />
+                  {pendingPayouts.length > 0 && <>
+                    <Divider>Saques aguardando pagamento</Divider>
+                    <Table columns={payoutColumns} dataSource={pendingPayouts} rowKey="id" pagination={false} />
+                  </>}
                 </>
               ),
             },
@@ -204,19 +197,29 @@ const AffiliateDashboardPage = () => {
               key: 'historico',
               label: 'Histórico',
               children: (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                    <Title level={5} style={{ margin: 0 }}>Comissões</Title>
-                    <Segmented value={period} onChange={setPeriod} options={[
-                      { label: 'Hoje', value: 'hoje' }, { label: 'Semana', value: 'semana' },
-                      { label: 'Mês', value: 'mes' }, { label: 'Ano', value: 'ano' },
-                    ]} />
-                  </div>
-                  <Statistic style={{ marginTop: 8 }} title="Total no período" value={commissionsData?.total || 0} precision={2} prefix="R$" valueStyle={{ color: '#3f8600' }} />
-                  <Table style={{ marginTop: 12 }} loading={loadingCommissions} columns={commissionColumns} dataSource={commissionsData?.commissions || []} rowKey="id" pagination={{ pageSize: 6 }} locale={{ emptyText: <Empty description="Nenhuma comissão no período." /> }} />
-                  <Divider>Saques realizados</Divider>
-                  <Table columns={payoutColumns} dataSource={historyPayouts} rowKey="id" pagination={{ pageSize: 6 }} locale={{ emptyText: <Empty description="Nenhum saque realizado ainda." /> }} />
-                </>
+                payouts.length === 0
+                  ? <Empty description="Nenhum saque ainda. Quando você solicitar um saque, ele aparece aqui como um fechamento." />
+                  : (
+                    <Collapse
+                      accordion
+                      items={payouts.map(p => ({
+                        key: String(p.id),
+                        label: (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, width: '100%' }}>
+                            <span><strong>Dia: {new Date(p.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>{' '}
+                              <Tag color={p.status === 'Pago' ? 'green' : (p.status === 'Cancelado' ? 'red' : 'gold')}>{p.status}</Tag></span>
+                            <strong>{money(p.amount)}</strong>
+                          </div>
+                        ),
+                        children: (
+                          <>
+                            {p.paidAt && <Text type="secondary">Pago em {new Date(p.paidAt).toLocaleDateString('pt-BR')}</Text>}
+                            <Table size="small" style={{ marginTop: 8 }} columns={commissionColumns} dataSource={p.commissions || []} rowKey="id" pagination={false} locale={{ emptyText: <Empty description="Sem comissões neste saque." /> }} />
+                          </>
+                        ),
+                      }))}
+                    />
+                  )
               ),
             },
             {
