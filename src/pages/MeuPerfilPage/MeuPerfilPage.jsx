@@ -90,7 +90,7 @@ const MeuPerfilPage = () => {
 
   const [mainUserData, setMainUserData] = useState(null);
   const [affiliateData, setAffiliateData] = useState(null);
-  const [loadingAffiliateData, setLoadingAffiliateData] = useState(true);
+  const [loadingAffiliateData, setLoadingAffiliateData] = useState(false);
   const [affiliateHistory, setAffiliateHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -113,7 +113,6 @@ const MeuPerfilPage = () => {
   useEffect(() => {
     if (isAuthenticated && !loadingProfiles) {
       fetchMainUserData();
-      fetchAffiliateData();
     }
   }, [isAuthenticated, loadingProfiles]);
 
@@ -387,95 +386,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
               )}
             </Card>
 
-            {/* Card de Programa de Afiliados */}
-            <Card title={<Space><WalletOutlined className="card-title-icon" />Programa de Afiliados</Space>} className="perfil-card benefits-card animated-card" bordered={false} style={{ animationDelay: '0.3s' }}>
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <Text strong>Seu Link de Convite Personalizado:</Text>
-                  <Button size="small" type="link" icon={<EditOutlined />} onClick={() => {
-                    slugForm.setFieldsValue({ slug: affiliateData?.summary?.affiliateSlug });
-                    setIsSlugModalVisible(true);
-                  }}>
-                    Personalizar Link
-                  </Button>
-                </div>
-                <Input.Group compact>
-                  <Input
-                    style={{ width: 'calc(100% - 100px)', fontWeight: 'bold' }}
-                    value={`map.com.br/p/${affiliateData?.summary?.affiliateSlug || affiliateData?.summary?.affiliateCode}`}
-                    readOnly
-                  />
-                  <Button type="primary" icon={<LinkOutlined />} onClick={copyReferralCode}>Copiar</Button>
-                </Input.Group>
-              </div>
-
-              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={12} sm={6}>
-                  <Statistic
-                    title="Cliques"
-                    value={affiliateData?.metrics?.totalClicks || 0}
-                    prefix={<EyeOutlined />}
-                  />
-                </Col>
-                <Col xs={12} sm={6}>
-                  <Statistic
-                    title="Indicados"
-                    value={affiliateData?.metrics?.totalReferrals || 0}
-                    prefix={<TeamOutlined />}
-                  />
-                </Col>
-                <Col xs={12} sm={6}>
-                  <Statistic
-                    title="Ativos"
-                    value={affiliateData?.metrics?.activeReferrals || 0}
-                    prefix={<TrophyOutlined style={{ color: '#faad14' }} />}
-                  />
-                </Col>
-                <Col xs={12} sm={6}>
-                  <Statistic
-                    title="Taxa Conv."
-                    value={affiliateData?.metrics?.conversionRate || 0}
-                    suffix="%"
-                    prefix={<PercentageOutlined />}
-                    valueStyle={{ color: (affiliateData?.metrics?.conversionRate || 0) > 5 ? '#3f8600' : '#cf1322', fontSize: '16px' }}
-                  />
-                </Col>
-              </Row>
-
-              <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={12}>
-                  <Statistic
-                    title="Saldo Atual"
-                    value={referralBalance}
-                    precision={2}
-                    prefix="R$"
-                    valueStyle={{ color: 'var(--map-laranja)', fontWeight: 600 }}
-                  />
-                </Col>
-                <Col span={12}>
-                  <Statistic
-                    title="Receita Gerada"
-                    value={affiliateData?.metrics?.totalRevenueGenerated || 0}
-                    precision={2}
-                    prefix="R$"
-                    valueStyle={{ fontSize: '16px' }}
-                  />
-                </Col>
-              </Row>
-
-              <Divider orientation="left">Histórico de Indicações (Ciclo Atual)</Divider>
-              <AffiliateHistoryTable history={affiliateHistory} loading={loadingHistory} />
-
-              <Divider />
-
-              <Button type="default" block className="withdraw-benefits-btn" disabled={referralBalance < 50} onClick={handleWithdrawClick}>
-                Solicitar Saque de Comissões
-              </Button>
-              <Paragraph className="benefits-footer-text">
-                O valor mínimo para saque é de R$ 50,00.
-              </Paragraph>
-            </Card>
-
             {/* Card de Plano */}
             <Card title={<Space><CrownOutlined className="card-title-icon" />Seu Plano Atual</Space>} className="perfil-card plan-card animated-card" bordered={false} style={{ animationDelay: '0.4s' }}>
               <div className="current-plan-info">
@@ -531,54 +441,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         </Form>
       </Modal>
 
-      {/* NOVO/MODIFICADO: Modal Unificado para Solicitar Saque via WhatsApp */}
-      <Modal
-        title={<Space><DollarCircleOutlined /> Solicitar Saque de Comissões</Space>}
-        open={isWithdrawModalVisible}
-        onCancel={() => setIsWithdrawModalVisible(false)}
-        footer={null}
-        className="withdraw-modal modal-style-map"
-        destroyOnClose // Garante que o formulário seja resetado ao fechar
-      >
-        <Spin spinning={submitting}>
-          <div className="balance-info">
-            <Text>Saldo Disponível</Text>
-            <Title level={2} className="balance-value">R$ {referralBalance.toFixed(2).replace('.', ',')}</Title>
-          </div>
-          <Alert
-            message="Solicitação via WhatsApp"
-            description="Seu pedido de saque será enviado diretamente para nossa equipe via WhatsApp. Certifique-se de que os dados abaixo estão corretos."
-            type="info"
-            showIcon
-            style={{ marginBottom: '20px' }}
-          />
-          <Form form={withdrawForm} layout="vertical" onFinish={handleRequestWithdrawal}>
-            <Form.Item
-              name="cpf"
-              label="Seu CPF (para verificação)"
-              rules={[{ required: true, message: 'Por favor, insira seu CPF!' }]}
-            >
-              <Input placeholder="000.000.000-00" prefix={<IdcardOutlined />} />
-            </Form.Item>
-            <Form.Item
-              name="pixKey"
-              label="Sua Chave PIX de Destino"
-              rules={[{ required: true, message: 'Por favor, insira sua chave PIX!' }]}
-            >
-              <Input placeholder="Email, CPF, CNPJ ou Telefone" prefix={<KeyOutlined />} />
-            </Form.Item>
-            <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: '15px' }}>
-              *O valor total disponível de R$ {referralBalance.toFixed(2).replace('.', ',')} será considerado para o saque.*
-            </Paragraph>
-            <Form.Item style={{ marginTop: '20px' }}>
-              <Button type="primary" htmlType="submit" loading={submitting} block size="large" className="submit-btn-form">
-                Enviar Solicitação de Saque via WhatsApp
-              </Button>
-            </Form.Item>
-          </Form>
-        </Spin>
-      </Modal>
-
       {/* --- NOVO MODAL: Trocar Plano --- */}
       <Modal
         title={<Space><CrownOutlined /> Escolher Novo Plano</Space>}
@@ -618,43 +480,6 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         </Row>
       </Modal>
       {/* --- FIM NOVO MODAL --- */}
-
-      {/* Modal de Personalização de Slug */}
-      <Modal
-        title="Personalizar seu Link de Afiliado"
-        open={isSlugModalVisible}
-        onCancel={() => setIsSlugModalVisible(false)}
-        footer={null}
-        destroyOnClose
-      >
-        <Form form={slugForm} layout="vertical" onFinish={handleUpdateSlug}>
-          <Form.Item
-            name="slug"
-            label="Final do seu Link"
-            rules={[
-              { required: true, message: 'Digite o final do seu link!' },
-              { pattern: /^[a-z0-9-]+$/, message: 'Use apenas letras minúsculas, números e hifens.' }
-            ]}
-          >
-            <Input
-              prefix="map.com.br/p/"
-              placeholder="seu-nome"
-              maxLength={30}
-            />
-          </Form.Item>
-          <Paragraph type="secondary" style={{ fontSize: '12px' }}>
-            Isso facilitará a lembrança do seu link: <strong>map.com.br/p/seu-nome</strong>
-          </Paragraph>
-          <div style={{ textAlign: 'right', marginTop: 16 }}>
-            <Button onClick={() => setIsSlugModalVisible(false)} style={{ marginRight: 8 }}>
-              Cancelar
-            </Button>
-            <Button type="primary" htmlType="submit" loading={slugLoading}>
-              Salvar Alterações
-            </Button>
-          </div>
-        </Form>
-      </Modal>
 
     </Content>
   );
