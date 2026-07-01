@@ -20,9 +20,11 @@ const dth = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
 const LEAD_STATUS = {
   aberto: { label: 'Abriu o link', color: 'blue' },
   cadastrou: { label: 'Criou a conta', color: 'gold' },
-  pendente: { label: 'Pagamento pendente', color: 'orange' },
-  pago: { label: 'Efetuou pagamento', color: 'green' },
   abandonado: { label: 'Abandonado', color: 'red' },
+};
+const PAYMENT_STATUS = {
+  pendente: { label: 'Pendente', color: 'orange' },
+  pago: { label: 'Pagamento efetuado', color: 'green' },
 };
 
 const AffiliatesTab = () => {
@@ -130,20 +132,21 @@ const AffiliatesTab = () => {
   ];
   const leadColumns = [
     { title: 'Horário que abriu', dataIndex: 'openedAt', render: dth },
+    { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v ? <Text strong>{v}</Text> : <Text type="secondary">anônimo</Text> },
     {
-      title: 'Possível cliente', dataIndex: 'clientName',
-      render: (v, r) => v ? (
+      title: 'Contato', key: 'contato',
+      render: (_, r) => (r.clientEmail || r.clientPhone) ? (
         <Space direction="vertical" size={0}>
-          <Text strong>{v}</Text>
-          {r.clientEmail && <Text type="secondary" style={{ fontSize: 12 }}>{r.clientEmail}</Text>}
-          {r.clientPhone && <Text type="secondary" style={{ fontSize: 12 }}>{r.clientPhone}</Text>}
+          {r.clientEmail && <Text style={{ fontSize: 12 }}>{r.clientEmail}</Text>}
+          {r.clientPhone && <Text style={{ fontSize: 12 }}>{r.clientPhone}</Text>}
         </Space>
-      ) : <Text type="secondary">anônimo</Text>
+      ) : '—'
     },
     { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
     { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
     { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
-    { title: 'Status', dataIndex: 'status', align: 'center', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
+    { title: 'Status', dataIndex: 'leadStatus', align: 'center', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
+    { title: 'Pagamento', dataIndex: 'paymentStatus', align: 'center', render: (s) => s ? <Tag color={(PAYMENT_STATUS[s] || {}).color}>{(PAYMENT_STATUS[s] || {}).label || s}</Tag> : '—' },
   ];
 
   // ============ DETALHE (clone da página do usuário) ============
