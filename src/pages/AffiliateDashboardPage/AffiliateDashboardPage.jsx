@@ -1,6 +1,6 @@
 // src/pages/AffiliateDashboardPage/AffiliateDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, message, Space, Alert, Tooltip, Empty, Divider, Modal, Form, Input } from 'antd';
+import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, message, Space, Alert, Tooltip, Empty, Divider, Modal, Form, Input, Segmented } from 'antd';
 import { TeamOutlined, DollarOutlined, LinkOutlined, TrophyOutlined, EyeOutlined, PercentageOutlined, SolutionOutlined, EditOutlined } from '@ant-design/icons';
 import apiClient from '../../services/api';
 import './AffiliateDashboardPage.css';
@@ -13,17 +13,20 @@ const AffiliateDashboardPage = () => {
     const [referrals, setReferrals] = useState([]);
     const [isSlugModalVisible, setIsSlugModalVisible] = useState(false);
     const [slugLoading, setSlugLoading] = useState(false);
+    const [commissionsData, setCommissionsData] = useState(null);
+    const [period, setPeriod] = useState('mes');
+    const [loadingCommissions, setLoadingCommissions] = useState(false);
     const [form] = Form.useForm();
 
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
             const [dashboardRes, referralsRes] = await Promise.all([
-                apiClient.get('/affiliates/dashboard'),
-                apiClient.get('/affiliates/referrals')
+                apiClient.get('/affiliate/dashboard'),
+                apiClient.get('/affiliate/referrals')
             ]);
-            setDashboardData(dashboardRes.data.data);
-            setReferrals(referralsRes.data.data);
+            setDashboardData(dashboardRes.data?.data || null);
+            setReferrals(Array.isArray(referralsRes.data?.data) ? referralsRes.data.data : []);
         } catch (error) {
             message.error('Erro ao carregar dados de afiliado.');
         } finally {
@@ -31,9 +34,25 @@ const AffiliateDashboardPage = () => {
         }
     };
 
+    const fetchCommissions = async (p) => {
+        try {
+            setLoadingCommissions(true);
+            const res = await apiClient.get('/affiliate/commissions', { params: { period: p } });
+            setCommissionsData(res.data?.data || null);
+        } catch (error) {
+            setCommissionsData(null);
+        } finally {
+            setLoadingCommissions(false);
+        }
+    };
+
     useEffect(() => {
         fetchDashboardData();
     }, []);
+
+    useEffect(() => {
+        fetchCommissions(period);
+    }, [period]);
 
     const copyAffiliateLink = () => {
         const identifier = dashboardData?.summary?.affiliateSlug || dashboardData?.summary?.affiliateCode;
@@ -45,7 +64,7 @@ const AffiliateDashboardPage = () => {
     const handleUpdateSlug = async (values) => {
         try {
             setSlugLoading(true);
-            await apiClient.put('/affiliates/update-slug', { slug: values.slug });
+            await apiClient.put('/affiliate/update-slug', { slug: values.slug });
             message.success('Seu link personalizado foi atualizado!');
             setIsSlugModalVisible(false);
             fetchDashboardData();
@@ -88,6 +107,16 @@ const AffiliateDashboardPage = () => {
         }
     ];
 
+    const commissionColumns = [
+        { title: 'Data', dataIndex: 'date', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
+        { title: 'Indicado', dataIndex: 'referredName', render: (t) => <Text strong>{t}</Text> },
+        { title: 'Plano', dataIndex: 'planName', render: (p) => p || '-' },
+        {
+            title: 'Comissão', dataIndex: 'amount', align: 'right',
+            render: (v) => <Text type="success" strong>{Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Text>
+        },
+    ];
+
     if (loading) return <Card loading={true} style={{ minHeight: '400px' }} />;
 
     const { metrics, summary } = dashboardData || {};
@@ -115,7 +144,7 @@ const AffiliateDashboardPage = () => {
                             </div>
                             <div className="link-copy-box">
                                 <Text code ellipsis style={{ flex: 1, color: '#b24a0a', fontWeight: 'bold' }}>
-                                    {`map.com.br/p/${summary?.affiliateSlug || summary?.affiliateCode || summary?.name?.toLowerCase().replace(/\s+/g, '-') || 'parceiro'}`}
+                                    {`map-nocontrole.com.br/indicacao/${summary?.affiliateSlug || summary?.affiliateCode || 'parceiro'}`}
                                 </Text>
                                 <Button type="primary" icon={<LinkOutlined />} onClick={copyAffiliateLink}>
                                     Copiar
@@ -189,16 +218,11 @@ const AffiliateDashboardPage = () => {
                             valueStyle={{ fontSize: '28px', fontWeight: 'bold', color: '#3f8600' }}
                         />
                         <Divider />
-                        <div className="pix-info">
-                            <Text type="secondary">Sua Chave PIX:</Text>
-                            <Paragraph strong style={{ fontSize: '15px' }}>{summary?.asaasPayoutPixKey || 'Não configurada'}</Paragraph>
-                            <Button type="link" style={{ padding: 0 }}>Configurar Recebimento</Button>
-                        </div>
                         <Alert
-                            message="Os pagamentos são processados após o fechamento do ciclo mensal."
+                            message="Para solicitar o saque, fale com o suporte no WhatsApp. O pagamento é feito manualmente pela nossa equipe."
                             type="info"
                             showIcon
-                            style={{ marginTop: 16, fontSize: '11px' }}
+                            style={{ marginTop: 16, fontSize: '12px' }}
                         />
                     </Card>
                 </Col>
@@ -215,6 +239,42 @@ const AffiliateDashboardPage = () => {
                         ) : (
                             <Empty description="Nenhuma indicação ainda. Envie seu link para começar!" />
                         )}
+                    </Card>
+                </Col>
+
+                <Col span={24}>
+                    <Card
+                        title={<span><DollarOutlined /> Histórico de Comissões</span>}
+                        className="premium-card-shadow"
+                        extra={
+                            <Segmented
+                                value={period}
+                                onChange={setPeriod}
+                                options={[
+                                    { label: 'Hoje', value: 'hoje' },
+                                    { label: 'Semana', value: 'semana' },
+                                    { label: 'Mês', value: 'mes' },
+                                    { label: 'Ano', value: 'ano' },
+                                ]}
+                            />
+                        }
+                    >
+                        <Statistic
+                            title="Total no período"
+                            value={commissionsData?.total || 0}
+                            precision={2}
+                            prefix="R$"
+                            valueStyle={{ color: '#3f8600' }}
+                        />
+                        <Divider />
+                        <Table
+                            loading={loadingCommissions}
+                            columns={commissionColumns}
+                            dataSource={commissionsData?.commissions || []}
+                            rowKey="id"
+                            pagination={{ pageSize: 8 }}
+                            locale={{ emptyText: <Empty description="Nenhuma comissão neste período." /> }}
+                        />
                     </Card>
                 </Col>
             </Row>
@@ -236,13 +296,13 @@ const AffiliateDashboardPage = () => {
                         ]}
                     >
                         <Input
-                            prefix="map.com.br/p/"
+                            prefix="/indicacao/"
                             placeholder="meu-nome-parceiro"
                             maxLength={30}
                         />
                     </Form.Item>
                     <Paragraph type="secondary" style={{ fontSize: '12px' }}>
-                        Isso criará um link amigável como: <strong>map.com.br/p/meu-nome</strong>
+                        Isso criará um link amigável como: <strong>map-nocontrole.com.br/indicacao/meu-nome</strong>
                     </Paragraph>
                     <div style={{ textAlign: 'right', marginTop: 16 }}>
                         <Button onClick={() => setIsSlugModalVisible(false)} style={{ marginRight: 8 }}>
