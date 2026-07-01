@@ -218,7 +218,16 @@ const AffiliateDashboardPage = () => {
                     pagination={{ pageSize: 8 }}
                     columns={[
                       { title: 'Horário que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
-                      { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v || <Text type="secondary">anônimo</Text> },
+                      {
+                        title: 'Possível cliente', dataIndex: 'clientName',
+                        render: (v, r) => v ? (
+                          <Space direction="vertical" size={0}>
+                            <Text strong>{v}</Text>
+                            {r.clientEmail && <Text type="secondary" style={{ fontSize: 12 }}>{r.clientEmail}</Text>}
+                            {r.clientPhone && <Text type="secondary" style={{ fontSize: 12 }}>{r.clientPhone}</Text>}
+                          </Space>
+                        ) : <Text type="secondary">anônimo</Text>
+                      },
                       { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
                       { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
                       { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
