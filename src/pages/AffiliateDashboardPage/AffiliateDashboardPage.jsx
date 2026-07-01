@@ -199,6 +199,21 @@ const AffiliateDashboardPage = () => {
                     <Divider>Saques aguardando pagamento</Divider>
                     <Table columns={payoutColumns} dataSource={pendingPayouts} rowKey="id" pagination={false} />
                   </>}
+                  <Divider>Acompanhamento das aberturas do link (comprou ou não)</Divider>
+                  <Table
+                    dataSource={leads}
+                    rowKey="id"
+                    pagination={{ pageSize: 8 }}
+                    columns={[
+                      { title: 'Horário que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
+                      { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v || <Text type="secondary">anônimo</Text> },
+                      { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
+                      { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
+                      { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
+                      { title: 'Status', dataIndex: 'status', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
+                    ]}
+                    locale={{ emptyText: <Empty description="Ninguém abriu seu link ainda." /> }}
+                  />
                 </>
               ),
             },
@@ -236,25 +251,6 @@ const AffiliateDashboardPage = () => {
               label: 'Meus indicados',
               children: (
                 <Table columns={referralColumns} dataSource={referrals} rowKey="referredClientId" pagination={{ pageSize: 8 }} locale={{ emptyText: <Empty description="Nenhuma indicação ainda. Envie seu link para começar!" /> }} />
-              ),
-            },
-            {
-              key: 'aberturas',
-              label: 'Aberturas do link',
-              children: (
-                <Table
-                  dataSource={leads}
-                  rowKey="id"
-                  pagination={{ pageSize: 10 }}
-                  columns={[
-                    { title: 'Horário que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
-                    { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v || <Text type="secondary">anônimo</Text> },
-                    { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
-                    { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
-                    { title: 'Status', dataIndex: 'status', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
-                  ]}
-                  locale={{ emptyText: <Empty description="Ninguém abriu seu link ainda." /> }}
-                />
               ),
             },
           ]}

@@ -184,6 +184,8 @@ const AffiliatesTab = () => {
                       <Divider>Saques aguardando pagamento</Divider>
                       <Table columns={payoutColumns} dataSource={pendingPayouts} rowKey="id" pagination={false} />
                     </>}
+                    <Divider>Acompanhamento das aberturas do link (comprou ou não)</Divider>
+                    <Table columns={leadColumns} dataSource={leads} rowKey="id" pagination={{ pageSize: 8 }} locale={{ emptyText: <Empty description="Ninguém abriu o link ainda." /> }} />
                   </>
                 ),
               },
@@ -211,10 +213,6 @@ const AffiliatesTab = () => {
               {
                 key: 'indicados', label: 'Indicados',
                 children: <Table columns={referralColumns} dataSource={referrals} rowKey="referredClientId" pagination={{ pageSize: 8 }} locale={{ emptyText: <Empty description="Nenhuma indicação." /> }} />,
-              },
-              {
-                key: 'aberturas', label: 'Aberturas do link',
-                children: <Table columns={leadColumns} dataSource={leads} rowKey="id" pagination={{ pageSize: 10 }} locale={{ emptyText: <Empty description="Ninguém abriu o link ainda." /> }} />,
               },
             ]}
           />
