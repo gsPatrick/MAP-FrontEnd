@@ -1,7 +1,7 @@
 // src/pages/AdminPage/components/AffiliatesTab.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Tag, Button, Space, message, Popconfirm, Typography, Alert, Row, Col, Card, Statistic, Collapse, Empty, Tabs, Select, Divider } from 'antd';
-import { DollarOutlined, EyeOutlined, SolutionOutlined, ArrowLeftOutlined, HistoryOutlined, LinkOutlined, CopyOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
+import { DollarOutlined, EyeOutlined, SolutionOutlined, ArrowLeftOutlined, LinkOutlined, CopyOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 
 const { Text, Title } = Typography;
@@ -26,7 +26,7 @@ const LEAD_STATUS = {
 const AffiliatesTab = () => {
   const [affiliates, setAffiliates] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState('list'); // list | detail | history
+  const [view, setView] = useState('list'); // list | detail
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -223,17 +223,6 @@ const AffiliatesTab = () => {
     );
   }
 
-  // ============ HISTÓRICO GERAL (saques pagos por dia) ============
-  if (view === 'history') {
-    return (
-      <div className="affiliates-tab-content">
-        <Button icon={<ArrowLeftOutlined />} onClick={() => setView('list')} style={{ marginBottom: 16 }}>Voltar</Button>
-        <Title level={4} style={{ marginTop: 0 }}>Histórico de pagamentos (fechados)</Title>
-        <HistoryPaid />
-      </div>
-    );
-  }
-
   // ============ LISTA (só a listagem, sem cards de dados) ============
   const columns = [
     { title: 'Afiliado', dataIndex: 'name', render: (t, r) => (<Space direction="vertical" size={0}><Text strong>{t}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.affiliateCode}{r.affiliateSlug ? ` · /${r.affiliateSlug}` : ''}</Text></Space>) },
@@ -245,10 +234,7 @@ const AffiliatesTab = () => {
 
   return (
     <div className="affiliates-tab-content">
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <Title level={3} style={{ margin: 0 }}>Gerenciamento de Afiliados</Title>
-        <Button icon={<HistoryOutlined />} onClick={() => setView('history')}>Histórico de pagamentos</Button>
-      </div>
+      <Title level={3} style={{ marginBottom: 16 }}>Gerenciamento de Afiliados</Title>
       <Table
         columns={columns}
         dataSource={activeAffiliates}
@@ -259,51 +245,6 @@ const AffiliatesTab = () => {
         locale={{ emptyText: <Empty description="Nenhum afiliado com atividade ainda." /> }}
       />
     </div>
-  );
-};
-
-// Histórico de saques PAGOS (fechados), agrupados por dia.
-const HistoryPaid = () => {
-  const [loading, setLoading] = useState(true);
-  const [groups, setGroups] = useState([]);
-  useEffect(() => {
-    (async () => {
-      try {
-        const affRes = await apiClient.get('/admin/dashboard/affiliates');
-        const affs = (affRes.data?.data || []).filter(a => (a.totalReferrals || 0) > 0 || parseFloat(a.balance || 0) > 0 || (a.totalClicks || 0) > 0);
-        const all = [];
-        for (const a of affs) {
-          try {
-            const pr = await apiClient.get(`/admin/affiliates/${a.id}/payouts`);
-            (pr.data?.data || []).filter(p => p.status === 'Pago').forEach(p => all.push({ ...p, affiliateName: a.name }));
-          } catch { /* ignora */ }
-        }
-        const byDay = {};
-        all.forEach(p => {
-          const day = new Date(p.paidAt || p.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-          (byDay[day] = byDay[day] || []).push(p);
-        });
-        setGroups(Object.entries(byDay).map(([day, items]) => ({ day, items, total: items.reduce((s, i) => s + parseFloat(i.amount || 0), 0) })));
-      } catch { setGroups([]); }
-      finally { setLoading(false); }
-    })();
-  }, []);
-
-  if (loading) return <Card loading />;
-  if (groups.length === 0) return <Empty description="Nenhum pagamento fechado ainda." />;
-  return (
-    <Collapse accordion items={groups.map((g, i) => ({
-      key: String(i),
-      label: <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><strong>Dia: {g.day}</strong><strong>{money(g.total)}</strong></div>,
-      children: (
-        <Table size="small" dataSource={g.items} rowKey="id" pagination={false} columns={[
-          { title: 'Afiliado', dataIndex: 'affiliateName' },
-          { title: 'Valor', dataIndex: 'amount', align: 'right', render: money },
-          { title: 'Pedido em', dataIndex: 'createdAt', render: dt },
-          { title: 'Pago em', dataIndex: 'paidAt', render: dt },
-        ]} />
-      ),
-    }))} />
   );
 };
 
