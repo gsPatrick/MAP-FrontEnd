@@ -304,6 +304,13 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
 
   const referralBalance = parseFloat(affiliateData?.summary?.balance || 0);
 
+  // Regras de troca de plano: só pode trocar quando o plano atual expira.
+  const isVitalicio = mainUserData?.accessLevel?.startsWith('vitalicio');
+  const isFreeOrInadimplente = !mainUserData?.accessLevel || ['gratuito', 'inadimplente'].includes(mainUserData.accessLevel);
+  const hasFutureAccess = !!mainUserData?.accessExpiresAt && !isVitalicio && !isFreeOrInadimplente
+    && dayjs(mainUserData.accessExpiresAt).isAfter(dayjs(), 'day');
+  const canChangePlan = !hasFutureAccess; // livre p/ gratuito, inadimplente, vitalício e planos já expirando hoje/expirados
+
   return (
     <Content className="page-content-wrapper perfil-content-wrapper">
       <Title level={2} className="page-title-custom perfil-page-title">
@@ -311,7 +318,7 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
       </Title>
 
       <Row gutter={[24, 24]}>
-        <Col xs={24} lg={16}>
+        <Col xs={24} lg={15}>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             {/* Card de Informações Pessoais */}
             <Card className="perfil-card animated-card" bordered={false}>
@@ -386,27 +393,35 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
               )}
             </Card>
 
-            {/* Card de Plano */}
-            <Card title={<Space><CrownOutlined className="card-title-icon" />Seu Plano Atual</Space>} className="perfil-card plan-card animated-card" bordered={false} style={{ animationDelay: '0.4s' }}>
-              <div className="current-plan-info">
-                <Title level={4} className="current-plan-name">
-                  {formatPlanName(mainUserData?.accessLevel)}
-                </Title>
-                {mainUserData?.accessExpiresAt && !mainUserData.accessLevel?.startsWith('vitalicio') ? (
-                  <Text className="current-plan-detail">Válido até: {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Text>
-                ) : mainUserData?.accessLevel?.startsWith('vitalicio') ? (
-                  <Text className="current-plan-detail">Acesso Vitalício!</Text>
-                ) : (
-                  <Text className="current-plan-detail">Você está utilizando o plano gratuito.</Text>
-                )}
-              </div>
-              {/* --- NOVO BOTÃO: Trocar Plano --- */}
-              <Button type="primary" block className="manage-plan-btn" onClick={() => setIsPlanChangeModalVisible(true)}>
-                Trocar Plano
-              </Button>
-              {/* --- FIM NOVO BOTÃO --- */}
-            </Card>
           </Space>
+        </Col>
+
+        {/* Coluna direita: Plano */}
+        <Col xs={24} lg={9}>
+          <Card title={<Space><CrownOutlined className="card-title-icon" />Seu Plano Atual</Space>} className="perfil-card plan-card animated-card" bordered={false} style={{ animationDelay: '0.4s' }}>
+            <div className="current-plan-info" style={{ textAlign: 'center', padding: '8px 0 16px' }}>
+              <Title level={3} className="current-plan-name" style={{ marginBottom: 4 }}>
+                {formatPlanName(mainUserData?.accessLevel)}
+              </Title>
+              {isVitalicio ? (
+                <Tag color="gold" style={{ fontSize: 13 }}>Acesso Vitalício</Tag>
+              ) : hasFutureAccess ? (
+                <Text type="success">Válido até {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Text>
+              ) : mainUserData?.accessExpiresAt ? (
+                <Tag color="red">Expirado em {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Tag>
+              ) : (
+                <Text type="secondary">Plano gratuito</Text>
+              )}
+            </div>
+            <Button type="primary" block size="large" className="manage-plan-btn" icon={<CrownOutlined />} onClick={() => setIsPlanChangeModalVisible(true)}>
+              Trocar Plano
+            </Button>
+            {hasFutureAccess && (
+              <Paragraph type="secondary" style={{ fontSize: 12, textAlign: 'center', marginTop: 10, marginBottom: 0 }}>
+                A troca fica disponível a partir de {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}, quando seu plano expira.
+              </Paragraph>
+            )}
+          </Card>
         </Col>
       </Row>
 
@@ -451,24 +466,50 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         className="plan-change-modal modal-style-map"
         destroyOnClose
       >
-        <Paragraph type="secondary" style={{ marginBottom: '20px' }}>
-          Seu plano atual é **{formatPlanName(mainUserData?.accessLevel)}**. Escolha um novo plano abaixo. O pagamento será processado pelo Mercado Pago.
-        </Paragraph>
+        {/* Plano atual em destaque */}
+        <Alert
+          type="info"
+          showIcon
+          icon={<CrownOutlined />}
+          style={{ marginBottom: 16 }}
+          message={<span>Seu plano atual: <strong>{formatPlanName(mainUserData?.accessLevel)}</strong></span>}
+          description={
+            isVitalicio ? 'Acesso vitalício.'
+              : hasFutureAccess ? `Válido até ${dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}.`
+              : mainUserData?.accessExpiresAt ? `Expirou em ${dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}.`
+              : 'Plano gratuito.'
+          }
+        />
+
+        {!canChangePlan ? (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message="Troca disponível apenas no vencimento"
+            description={`Você só poderá trocar de plano a partir de ${dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}, quando seu plano atual expira. Assim você não perde o tempo que já pagou nem é cobrado em dobro.`}
+          />
+        ) : (
+          <Paragraph type="secondary" style={{ marginBottom: 20 }}>
+            Escolha um novo plano abaixo. O pagamento será processado pelo Mercado Pago.
+          </Paragraph>
+        )}
+
         <Row gutter={[24, 24]} justify="center">
           {plansForModal.length > 0 ? plansForModal.map(plan => (
             <Col xs={24} md={12} key={plan.id}>
-              <Card className="plan-selection-card" hoverable onClick={() => handlePlanChangeSelect(plan.id)}>
+              <Card className="plan-selection-card" hoverable={canChangePlan} onClick={() => canChangePlan && handlePlanChangeSelect(plan.id)} style={!canChangePlan ? { opacity: 0.6 } : undefined}>
                 <Title level={4} className="plan-selection-name">{plan.name}</Title>
                 <Paragraph className="plan-selection-price">
                   <Text strong>R$ {plan.price}{plan.priceSuffix}</Text> {plan.period}
                 </Paragraph>
                 <List
                   className="plan-selection-features"
-                  dataSource={plan.features.slice(0, 3)} // Exibe apenas 3 para brevidade
+                  dataSource={plan.features.slice(0, 3)}
                   renderItem={(item) => (<List.Item><CheckCircleFilled className="feature-icon" /> {item}</List.Item>)}
                 />
-                <Button type="primary" size="large" block style={{ marginTop: '15px' }} icon={<ArrowRightOutlined />}>
-                  {plan.name.toLowerCase().includes('avançado') ? 'Fazer Upgrade' : 'Selecionar Plano'}
+                <Button type="primary" size="large" block style={{ marginTop: '15px' }} icon={<ArrowRightOutlined />} disabled={!canChangePlan}>
+                  {!canChangePlan ? 'Indisponível agora' : (plan.name.toLowerCase().includes('avançado') ? 'Fazer Upgrade' : 'Selecionar Plano')}
                 </Button>
               </Card>
             </Col>
