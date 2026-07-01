@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Tag, Button, Space, message, Popconfirm, Typography, Alert, Row, Col, Card, Statistic, Collapse, Empty, Tabs, Select, Divider } from 'antd';
 import { DollarOutlined, EyeOutlined, SolutionOutlined, ArrowLeftOutlined, LinkOutlined, CopyOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
+import { getSocket } from '../../../services/socket';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -43,16 +44,29 @@ const AffiliatesTab = () => {
 
   useEffect(() => { fetchAffiliates(); }, [fetchAffiliates]);
 
-  // Tempo (quase) real: enquanto o detalhe está aberto, atualiza a cada 20s (silencioso).
+  // Tempo real: enquanto o detalhe está aberto, observa a sala do afiliado via
+  // WebSocket e recarrega na hora; fallback de 60s caso o socket caia.
   useEffect(() => {
     if (view !== 'detail' || !selected) return;
-    const t = setInterval(async () => {
+    const reload = async () => {
       try {
         const res = await apiClient.get(`/admin/affiliates/${selected.id}/full`);
         setDetail(res.data?.data || null);
       } catch { /* silencioso */ }
-    }, 20000);
-    return () => clearInterval(t);
+    };
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('watch-affiliate', selected.id);
+      socket.on('affiliate:update', reload);
+    }
+    const t = setInterval(reload, 60000);
+    return () => {
+      clearInterval(t);
+      if (socket) {
+        socket.emit('unwatch-affiliate', selected.id);
+        socket.off('affiliate:update', reload);
+      }
+    };
   }, [view, selected]);
 
   const openDetail = async (record) => {

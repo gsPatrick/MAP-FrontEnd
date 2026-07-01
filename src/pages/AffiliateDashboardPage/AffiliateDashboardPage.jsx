@@ -9,6 +9,7 @@ import {
   PercentageOutlined, EditOutlined, CopyOutlined
 } from '@ant-design/icons';
 import apiClient from '../../services/api';
+import { getSocket } from '../../services/socket';
 import './AffiliateDashboardPage.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -67,9 +68,15 @@ const AffiliateDashboardPage = () => {
 
   useEffect(() => {
     fetchAll();
-    // Atualização em tempo (quase) real: refetch silencioso a cada 20s.
-    const t = setInterval(() => fetchAll(true), 20000);
-    return () => clearInterval(t);
+    // Tempo real via WebSocket: quando algo muda, recarrega na hora.
+    const socket = getSocket();
+    if (socket) socket.on('affiliate:update', () => fetchAll(true));
+    // Fallback: refetch silencioso a cada 60s (caso o socket caia).
+    const t = setInterval(() => fetchAll(true), 60000);
+    return () => {
+      clearInterval(t);
+      if (socket) socket.off('affiliate:update');
+    };
   }, []);
 
   const summary = dashboardData?.summary || {};
