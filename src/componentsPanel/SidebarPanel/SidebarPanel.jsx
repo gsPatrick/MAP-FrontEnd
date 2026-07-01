@@ -47,7 +47,7 @@ const SidebarPanel = ({ collapsed, onCollapse, selectedProfileType, onMenuItemCl
     // <<<< FIM DA MUDANÇA >>>>
     { key: '/painel/agendamentos', icon: <CalendarOutlined />, label: <Link to="/painel/agendamentos">Agendamentos</Link> },
     { key: '/painel/hidratacao', icon: <CreditCardOutlined />, label: <Link to="/painel/hidratacao">Hidratação</Link> },
-    { key: '/painel/afiliados', icon: <CrownOutlined />, label: <Link to="/painel/afiliados">Indicações</Link> },
+    { key: '/painel/afiliados', icon: <CrownOutlined />, label: <Link to="/painel/afiliados">Afiliados</Link> },
     { type: 'divider' },
     { key: '/painel/meu-perfil', icon: <UserOutlined />, label: <Link to="/painel/meu-perfil">Meu Perfil</Link> },
     { key: '/painel/suporte', icon: <CustomerServiceOutlined />, label: <Link to="/painel/suporte">Suporte</Link> },

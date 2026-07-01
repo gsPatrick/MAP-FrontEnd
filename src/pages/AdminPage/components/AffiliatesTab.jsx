@@ -1,7 +1,7 @@
 // src/pages/AdminPage/components/AffiliatesTab.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Tag, Button, Space, Modal, message, Popconfirm, Tooltip, Typography, Alert, Row, Col, Card, Statistic, Divider } from 'antd';
-import { DollarOutlined, HistoryOutlined, TeamOutlined, TrophyOutlined, EyeOutlined, PercentageOutlined } from '@ant-design/icons';
+import { Table, Tag, Button, Space, Modal, message, Popconfirm, Tooltip, Typography, Alert, Row, Col, Card, Statistic, Divider, Tabs, Empty } from 'antd';
+import { DollarOutlined, HistoryOutlined, TeamOutlined, TrophyOutlined, EyeOutlined, PercentageOutlined, SolutionOutlined } from '@ant-design/icons';
 import apiClient from '../../../services/api';
 
 const { Text, Title } = Typography;
@@ -14,6 +14,20 @@ const AffiliatesTab = () => {
   const [rankingModalVisible, setRankingModalVisible] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState(null);
   const [pendingPayouts, setPendingPayouts] = useState([]);
+  const [detailPayouts, setDetailPayouts] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openAffiliateDetails = async (record) => {
+    setSelectedAffiliate(record);
+    setHistoryModalVisible(true);
+    setDetailPayouts([]);
+    try {
+      setDetailLoading(true);
+      const res = await apiClient.get(`/admin/affiliates/${record.id}/payouts`);
+      setDetailPayouts(Array.isArray(res.data?.data) ? res.data.data : []);
+    } catch { setDetailPayouts([]); }
+    finally { setDetailLoading(false); }
+  };
 
   const fetchAffiliates = useCallback(async () => {
     setLoading(true);
@@ -128,24 +142,19 @@ const AffiliatesTab = () => {
       align: 'center',
       render: (_, record) => (
         <Space>
-          <Tooltip title="Ver Histórico">
-            <Button
-              icon={<HistoryOutlined />}
-              onClick={() => {
-                setSelectedAffiliate(record);
-                setHistoryModalVisible(true);
-              }}
-            />
-          </Tooltip>
+          <Button icon={<SolutionOutlined />} onClick={() => openAffiliateDetails(record)}>
+            Ver detalhes
+          </Button>
           <Popconfirm
-            title="Zerar Saldo e Reiniciar Ciclo?"
-            description="Isso marcará o saldo como pago e zerará o contador de indicados."
+            title="Registrar pagamento do saldo?"
+            description={`Marca o saldo de ${parseFloat(record.balance || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} como pago (vai pro histórico). Os indicados são preservados.`}
             onConfirm={() => handleClearBalance(record.id)}
             okText="Paguei"
             cancelText="Cancelar"
+            disabled={parseFloat(record.balance || 0) <= 0}
           >
-            <Button type="primary" danger icon={<DollarOutlined />} size="small">
-              Pagar
+            <Button type="primary" icon={<DollarOutlined />} size="small" disabled={parseFloat(record.balance || 0) <= 0}>
+              Pagar saldo
             </Button>
           </Popconfirm>
         </Space>
@@ -235,29 +244,84 @@ const AffiliatesTab = () => {
 
       <Table
         columns={affiliateColumns}
-        dataSource={affiliates}
+        dataSource={affiliates.filter(a => (a.totalReferrals || 0) > 0 || (a.totalClicks || 0) > 0 || parseFloat(a.balance || 0) > 0)}
         rowKey="id"
         loading={loading}
         className="affiliates-table-custom"
         pagination={{ pageSize: 10 }}
+        onRow={(record) => ({ onClick: () => openAffiliateDetails(record), style: { cursor: 'pointer' } })}
+        locale={{ emptyText: <Empty description="Nenhum afiliado com atividade ainda." /> }}
       />
 
       <Modal
-        title={`Histórico - ${selectedAffiliate?.name}`}
+        title={<span><SolutionOutlined /> {selectedAffiliate?.name} — detalhes de afiliado</span>}
         open={historyModalVisible}
         onCancel={() => setHistoryModalVisible(false)}
         footer={null}
-        width={800}
+        width={820}
       >
-        <Table
-          dataSource={selectedAffiliate?.referrals}
-          columns={[
-            { title: 'Data', dataIndex: 'createdAt', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
-            { title: 'Indicado', dataIndex: ['referred', 'name'] },
-            { title: 'Plano', dataIndex: ['plan', 'name'], render: (p) => <Tag color="blue">{p}</Tag> },
-            { title: 'Comissão', dataIndex: 'commissionAmount', render: (v) => `R$ ${parseFloat(v).toFixed(2)}` }
+        <Row gutter={16} style={{ marginBottom: 8 }}>
+          <Col xs={12} md={6}><Statistic title="Saldo atual (em aberto)" value={selectedAffiliate?.balance} precision={2} prefix="R$" valueStyle={{ color: '#3f8600' }} /></Col>
+          <Col xs={12} md={6}><Statistic title="Indicados" value={selectedAffiliate?.totalReferrals} /></Col>
+          <Col xs={12} md={6}><Statistic title="Ativos" value={selectedAffiliate?.activeReferrals} /></Col>
+          <Col xs={12} md={6}><Statistic title="Cliques" value={selectedAffiliate?.totalClicks} /></Col>
+        </Row>
+        {parseFloat(selectedAffiliate?.balance || 0) > 0 && (
+          <Popconfirm
+            title="Registrar pagamento do saldo?"
+            description="Marca o saldo atual como pago (vai pro histórico)."
+            okText="Paguei" cancelText="Cancelar"
+            onConfirm={() => { handleClearBalance(selectedAffiliate.id); setHistoryModalVisible(false); }}
+          >
+            <Button type="primary" icon={<DollarOutlined />} style={{ marginBottom: 12 }}>Pagar saldo atual</Button>
+          </Popconfirm>
+        )}
+        <Tabs
+          defaultActiveKey="indicados"
+          items={[
+            {
+              key: 'indicados',
+              label: 'Indicados / Comissões',
+              children: (
+                <Table
+                  dataSource={selectedAffiliate?.referrals || []}
+                  rowKey={(r, i) => `${r.referredClientId || i}`}
+                  columns={[
+                    { title: 'Data', dataIndex: 'createdAt', render: (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—' },
+                    { title: 'Indicado', dataIndex: ['referred', 'name'], render: (v, r) => v || r.name || '—' },
+                    { title: 'Plano', dataIndex: ['plan', 'name'], render: (p) => p ? <Tag color="blue">{p}</Tag> : '—' },
+                    { title: 'Comissão', dataIndex: 'commissionAmount', align: 'right', render: (v) => v != null ? `R$ ${parseFloat(v).toFixed(2)}` : '—' },
+                  ]}
+                  pagination={{ pageSize: 6 }}
+                  locale={{ emptyText: <Empty description="Sem indicados." /> }}
+                />
+              ),
+            },
+            {
+              key: 'saques',
+              label: 'Saques',
+              children: (
+                <Table
+                  loading={detailLoading}
+                  dataSource={detailPayouts}
+                  rowKey="id"
+                  columns={[
+                    { title: 'Data do pedido', dataIndex: 'createdAt', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
+                    { title: 'Valor', dataIndex: 'amount', align: 'right', render: (v) => `R$ ${parseFloat(v).toFixed(2)}` },
+                    { title: 'Status', dataIndex: 'status', render: (s) => <Tag color={s === 'Pago' ? 'green' : (s === 'Cancelado' ? 'red' : 'gold')}>{s}</Tag> },
+                    { title: 'Pago em', dataIndex: 'paidAt', render: (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—' },
+                    {
+                      title: 'Ação', key: 'acao', render: (_, r) => r.status === 'Solicitado'
+                        ? <Popconfirm title="Confirmar pagamento?" okText="Paguei" cancelText="Cancelar" onConfirm={() => handlePayPayout(r.id).then(() => openAffiliateDetails(selectedAffiliate))}><Button size="small" type="primary">Marcar pago</Button></Popconfirm>
+                        : null
+                    },
+                  ]}
+                  pagination={{ pageSize: 6 }}
+                  locale={{ emptyText: <Empty description="Nenhum saque." /> }}
+                />
+              ),
+            },
           ]}
-          pagination={{ pageSize: 5 }}
         />
       </Modal>
 
