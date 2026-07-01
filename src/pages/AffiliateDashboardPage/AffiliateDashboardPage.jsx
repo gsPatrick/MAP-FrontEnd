@@ -218,10 +218,11 @@ const AffiliateDashboardPage = () => {
                   <Table
                     dataSource={leads}
                     rowKey="id"
+                    bordered
                     pagination={{ pageSize: 8 }}
                     scroll={{ x: 1300 }}
                     columns={[
-                      { title: 'Horário que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
+                      { title: 'Última vez que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
                       { title: 'Nome do cliente', dataIndex: 'clientName', render: (v) => v ? <Text strong>{v}</Text> : <Text type="secondary">anônimo</Text> },
                       { title: 'Email', dataIndex: 'clientEmail', render: (v) => v || '—' },
                       { title: 'Telefone', dataIndex: 'clientPhone', render: (v) => v || '—' },
