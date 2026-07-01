@@ -20,6 +20,7 @@ const dth = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
 const LEAD_STATUS = {
   aberto: { label: 'Abriu o link', color: 'blue' },
   cadastrou: { label: 'Criou a conta', color: 'gold' },
+  pendente: { label: 'Pagamento pendente', color: 'orange' },
   pago: { label: 'Efetuou pagamento', color: 'green' },
   abandonado: { label: 'Abandonado', color: 'red' },
 };
