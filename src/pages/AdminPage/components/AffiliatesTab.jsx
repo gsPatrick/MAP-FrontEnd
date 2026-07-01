@@ -218,7 +218,7 @@ const AffiliatesTab = () => {
                       <Table columns={payoutColumns} dataSource={pendingPayouts} rowKey="id" pagination={false} />
                     </>}
                     <Divider>Acompanhamento das aberturas do link (comprou ou não)</Divider>
-                    <Table columns={leadColumns} dataSource={leads} rowKey="id" pagination={{ pageSize: 8 }} locale={{ emptyText: <Empty description="Ninguém abriu o link ainda." /> }} />
+                    <Table columns={leadColumns} dataSource={leads} rowKey="id" pagination={{ pageSize: 8 }} scroll={{ x: 1300 }} locale={{ emptyText: <Empty description="Ninguém abriu o link ainda." /> }} />
                   </>
                 ),
               },
