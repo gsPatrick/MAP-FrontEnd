@@ -127,10 +127,19 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
     {
       title: 'Situação',
       key: 'situacao',
-      width: 170,
+      width: 190,
       render: (_, record) => {
         const s = getSituacao(record);
-        return <Tag color={s.color}>{s.label}</Tag>;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
+            <Tag color={s.color}>{s.label}</Tag>
+            {record.subscriptionCancelAt && (
+              <Tag color="red" style={{ marginInlineEnd: 0 }}>
+                Cancela em {new Date(record.subscriptionCancelAt).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+              </Tag>
+            )}
+          </div>
+        );
       },
     },
     {
