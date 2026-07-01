@@ -235,6 +235,7 @@ const AffiliateDashboardPage = () => {
                       { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
                       { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
                       { title: 'Status', dataIndex: 'leadStatus', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
+                      { title: 'Criou link de pagamento', dataIndex: 'createdPaymentLink', align: 'center', render: (v) => v ? <Tag color="green">Sim</Tag> : <Tag>Não</Tag> },
                       { title: 'Pagamento', dataIndex: 'paymentStatus', render: (s) => s ? <Tag color={(PAYMENT_STATUS[s] || {}).color}>{(PAYMENT_STATUS[s] || {}).label || s}</Tag> : '—' },
                     ]}
                     locale={{ emptyText: <Empty description="Ninguém abriu seu link ainda." /> }}
