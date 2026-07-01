@@ -23,6 +23,11 @@ const PLANS = [
   { id: 10, name: 'Avançado Anual' },
 ];
 const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const LEAD_STATUS = {
+  pago: { label: 'Efetuou pagamento', color: 'green' },
+  aberto: { label: 'Abriu o link', color: 'blue' },
+  abandonado: { label: 'Abandonado', color: 'default' },
+};
 
 const AffiliateDashboardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -30,6 +35,7 @@ const AffiliateDashboardPage = () => {
   const [referrals, setReferrals] = useState([]);
   const [payouts, setPayouts] = useState([]);
   const [openComm, setOpenComm] = useState({ total: 0, commissions: [] });
+  const [leads, setLeads] = useState([]);
   const [requestingPayout, setRequestingPayout] = useState(false);
   const [isSlugModalVisible, setIsSlugModalVisible] = useState(false);
   const [slugLoading, setSlugLoading] = useState(false);
@@ -39,16 +45,18 @@ const AffiliateDashboardPage = () => {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const [dash, refs, pays, open] = await Promise.all([
+      const [dash, refs, pays, open, lds] = await Promise.all([
         apiClient.get('/affiliate/dashboard'),
         apiClient.get('/affiliate/referrals'),
         apiClient.get('/affiliate/payouts'),
         apiClient.get('/affiliate/open-commissions'),
+        apiClient.get('/affiliate/leads'),
       ]);
       setDashboardData(dash.data?.data || null);
       setReferrals(Array.isArray(refs.data?.data) ? refs.data.data : []);
       setPayouts(Array.isArray(pays.data?.data) ? pays.data.data : []);
       setOpenComm(open.data?.data || { total: 0, commissions: [] });
+      setLeads(Array.isArray(lds.data?.data) ? lds.data.data : []);
     } catch {
       message.error('Erro ao carregar dados de afiliado.');
     } finally {
@@ -227,6 +235,25 @@ const AffiliateDashboardPage = () => {
               label: 'Meus indicados',
               children: (
                 <Table columns={referralColumns} dataSource={referrals} rowKey="referredClientId" pagination={{ pageSize: 8 }} locale={{ emptyText: <Empty description="Nenhuma indicação ainda. Envie seu link para começar!" /> }} />
+              ),
+            },
+            {
+              key: 'aberturas',
+              label: 'Aberturas do link',
+              children: (
+                <Table
+                  dataSource={leads}
+                  rowKey="id"
+                  pagination={{ pageSize: 10 }}
+                  columns={[
+                    { title: 'Horário que abriu', dataIndex: 'openedAt', render: (d) => new Date(d).toLocaleString('pt-BR') },
+                    { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v || <Text type="secondary">anônimo</Text> },
+                    { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
+                    { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
+                    { title: 'Status', dataIndex: 'status', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
+                  ]}
+                  locale={{ emptyText: <Empty description="Ninguém abriu seu link ainda." /> }}
+                />
               ),
             },
           ]}

@@ -6,6 +6,11 @@ import apiClient from '../../../services/api';
 
 const { Text, Title } = Typography;
 const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const LEAD_STATUS = {
+  pago: { label: 'Efetuou pagamento', color: 'green' },
+  aberto: { label: 'Abriu o link', color: 'blue' },
+  abandonado: { label: 'Abandonado', color: 'default' },
+};
 const dt = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
 const dth = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
 
@@ -93,7 +98,7 @@ const AffiliatesTab = () => {
       { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="blue">{p}</Tag> : '—' },
       { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
       { title: 'Comissão do afiliado', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
-      { title: 'Converteu?', dataIndex: 'converteu', align: 'center', render: (c) => c ? <Tag color="green">Convertido</Tag> : <Tag color="default">Não converteu</Tag> },
+      { title: 'Status', dataIndex: 'status', align: 'center', render: (s) => <Tag color={(LEAD_STATUS[s] || {}).color}>{(LEAD_STATUS[s] || {}).label || s}</Tag> },
     ];
     return (
       <div className="affiliates-tab-content">
