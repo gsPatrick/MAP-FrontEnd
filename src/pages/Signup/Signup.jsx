@@ -53,6 +53,12 @@ const SignupPage = () => {
     };
     fetchReferrerInfo();
 
+    // Rastreia que o visitante ABRIU este plano (atualiza o lead do afiliado
+    // na janela de 4h/IP). Não cria clique novo se já houver um recente.
+    if (affiliateCode && plansInfo[planId]) {
+      apiClient.post(`/affiliates/click/${affiliateCode}`, { planId, stage: 'checkout' }).catch(() => {});
+    }
+
   }, [planId, navigate, affiliateCode]);
 
   const onFinish = async (values) => {

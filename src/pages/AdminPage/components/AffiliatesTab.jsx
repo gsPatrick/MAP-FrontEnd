@@ -43,6 +43,18 @@ const AffiliatesTab = () => {
 
   useEffect(() => { fetchAffiliates(); }, [fetchAffiliates]);
 
+  // Tempo (quase) real: enquanto o detalhe está aberto, atualiza a cada 20s (silencioso).
+  useEffect(() => {
+    if (view !== 'detail' || !selected) return;
+    const t = setInterval(async () => {
+      try {
+        const res = await apiClient.get(`/admin/affiliates/${selected.id}/full`);
+        setDetail(res.data?.data || null);
+      } catch { /* silencioso */ }
+    }, 20000);
+    return () => clearInterval(t);
+  }, [view, selected]);
+
   const openDetail = async (record) => {
     setSelected(record);
     setView('detail');

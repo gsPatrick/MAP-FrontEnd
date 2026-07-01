@@ -43,9 +43,9 @@ const AffiliateDashboardPage = () => {
   const [linkPlanId, setLinkPlanId] = useState(null);
   const [form] = Form.useForm();
 
-  const fetchAll = async () => {
+  const fetchAll = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [dash, refs, pays, open, lds] = await Promise.all([
         apiClient.get('/affiliate/dashboard'),
         apiClient.get('/affiliate/referrals'),
@@ -59,13 +59,18 @@ const AffiliateDashboardPage = () => {
       setOpenComm(open.data?.data || { total: 0, commissions: [] });
       setLeads(Array.isArray(lds.data?.data) ? lds.data.data : []);
     } catch {
-      message.error('Erro ao carregar dados de afiliado.');
+      if (!silent) message.error('Erro ao carregar dados de afiliado.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+    // Atualização em tempo (quase) real: refetch silencioso a cada 20s.
+    const t = setInterval(() => fetchAll(true), 20000);
+    return () => clearInterval(t);
+  }, []);
 
   const summary = dashboardData?.summary || {};
   const metrics = dashboardData?.metrics || {};
