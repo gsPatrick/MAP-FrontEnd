@@ -186,6 +186,20 @@ const RecorrenciasPage = () => {
     });
   };
 
+  const handlePayAdvance = async (rec) => {
+    if (!rec || !currentProfile) return;
+    try {
+      await apiClient.post(`/financial-accounts/${currentProfile.id}/recurring-rules/${rec.id}/pay-advance`);
+      message.success(`"${rec.description}" ${rec.type === 'Entrada' ? 'recebida' : 'paga'} adiantado!`);
+      fetchRecurrences();
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Não foi possível adiantar o pagamento.');
+    }
+  };
+
+  // Recorrências ativas com data (para o bloco de pagamento do mês).
+  const activeWithDate = recurrences.filter(r => r.isActive && r.nextDueDate);
+
   if (loadingProfiles) return <div className="loading-container"><p>Carregando perfil...</p></div>;
   if (!isAuthenticated) return <div className="loading-container"><p>Acesso negado.</p></div>;
   if (!currentProfile) return <div className="loading-container"><p>Nenhum perfil selecionado.</p></div>;
@@ -216,6 +230,35 @@ const RecorrenciasPage = () => {
         </div>
         <button className="btn-add-recurrence" onClick={() => handleOpenModal()}><FaPlus /> Nova Recorrência</button>
       </section>
+
+      {!loading && activeWithDate.length > 0 && (
+        <section className="recurrence-payments">
+          <h3 className="recurrence-payments-title"><FaRetweet /> Pagamentos das recorrências</h3>
+          <div className="recurrence-payments-list">
+            {activeWithDate.map(rec => {
+              const dueThisCycle = !dayjs(rec.nextDueDate).isAfter(dayjs().endOf('month'));
+              const money = (parseFloat(rec.value) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+              return (
+                <div key={`pay_${rec.id}`} className="rp-item">
+                  <div className="rp-info">
+                    <b>{rec.description}</b>
+                    <span className="rp-meta">
+                      {rec.type === 'Entrada' ? 'Receita' : 'Despesa'} • {money} • próx. {dayjs(rec.nextDueDate).format('DD/MM/YY')}
+                    </span>
+                  </div>
+                  {dueThisCycle ? (
+                    <button className="rp-payadvance-btn" onClick={() => handlePayAdvance(rec)}>
+                      ⚡ {rec.type === 'Entrada' ? 'Receber adiantado' : 'Pagar adiantado'}
+                    </button>
+                  ) : (
+                    <span className="rp-paid-badge">✅ {rec.lastPaidDate ? `Pago ${dayjs(rec.lastPaidDate).format('DD/MM')}` : 'Em dia'}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="recurrence-list">
         {loading ? (

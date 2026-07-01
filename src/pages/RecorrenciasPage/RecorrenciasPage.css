@@ -196,3 +196,62 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+/* ===== Bloco de pagamento das recorrências (topo) ===== */
+.recurrence-payments {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.recurrence-payments-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px;
+}
+.recurrence-payments-list { display: flex; flex-direction: column; gap: 8px; }
+.rp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+}
+.rp-info { display: flex; flex-direction: column; }
+.rp-meta { font-size: 12px; color: #64748b; }
+.rp-payadvance-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #16a34a;
+  color: #16a34a;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.rp-payadvance-btn:hover { background: #16a34a; color: #fff; }
+.rp-paid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e6f7ed;
+  color: #16a34a;
+  border: 1px solid #b7ebc6;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
