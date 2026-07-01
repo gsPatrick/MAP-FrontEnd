@@ -142,6 +142,19 @@ const UserTable = ({ users, loading, onActionSuccess }) => {
       sorter: (a, b) => new Date(a.lastActiveAt || 0) - new Date(b.lastActiveAt || 0),
     },
     {
+      title: 'Indicado por',
+      key: 'referredBy',
+      width: 180,
+      render: (_, record) => record.referredBy ? (
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+          <span style={{ fontWeight: 600 }}>{record.referredBy.name}</span>
+          {record.referredBy.affiliateCode && (
+            <Tag color="purple" style={{ width: 'fit-content', marginTop: 2 }}>{record.referredBy.affiliateCode}</Tag>
+          )}
+        </div>
+      ) : <span className="admin-muted">—</span>,
+    },
+    {
       title: 'Ações',
       key: 'actions',
       fixed: 'right',
