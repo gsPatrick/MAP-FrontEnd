@@ -132,16 +132,9 @@ const AffiliatesTab = () => {
   ];
   const leadColumns = [
     { title: 'Horário que abriu', dataIndex: 'openedAt', render: dth },
-    { title: 'Possível cliente', dataIndex: 'clientName', render: (v) => v ? <Text strong>{v}</Text> : <Text type="secondary">anônimo</Text> },
-    {
-      title: 'Contato', key: 'contato',
-      render: (_, r) => (r.clientEmail || r.clientPhone) ? (
-        <Space direction="vertical" size={0}>
-          {r.clientEmail && <Text style={{ fontSize: 12 }}>{r.clientEmail}</Text>}
-          {r.clientPhone && <Text style={{ fontSize: 12 }}>{r.clientPhone}</Text>}
-        </Space>
-      ) : '—'
-    },
+    { title: 'Nome do cliente', dataIndex: 'clientName', render: (v) => v ? <Text strong>{v}</Text> : <Text type="secondary">anônimo</Text> },
+    { title: 'Email', dataIndex: 'clientEmail', render: (v) => v || '—' },
+    { title: 'Telefone', dataIndex: 'clientPhone', render: (v) => v || '—' },
     { title: 'Plano', dataIndex: 'plano', render: (p) => p ? <Tag color="geekblue">{p}</Tag> : '—' },
     { title: 'Valor do plano', dataIndex: 'planValue', align: 'right', render: (v) => v != null ? money(v) : '—' },
     { title: 'Comissão', dataIndex: 'commission', align: 'right', render: (v) => v != null ? <Text type="success" strong>{money(v)}</Text> : '—' },
