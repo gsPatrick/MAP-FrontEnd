@@ -8,7 +8,7 @@ import {
   GlobalOutlined, SolutionOutlined, LoadingOutlined, DollarCircleOutlined,
   KeyOutlined, WalletOutlined, CrownOutlined, ArrowRightOutlined, CheckCircleFilled,
   EditOutlined, EyeOutlined, PercentageOutlined, TrophyOutlined, LinkOutlined,
-  TeamOutlined, DollarOutlined
+  TeamOutlined, DollarOutlined, PhoneOutlined, CalendarOutlined, ClockCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
@@ -311,6 +311,17 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
     && dayjs(mainUserData.accessExpiresAt).isAfter(dayjs(), 'day');
   const canChangePlan = !hasFutureAccess; // livre p/ gratuito, inadimplente, vitalício e planos já expirando hoje/expirados
 
+  // Detalhes ricos do plano (tier, benefícios, dias restantes).
+  const _lvl = (mainUserData?.accessLevel || '').toLowerCase();
+  const planTier = _lvl.includes('avancado') ? 'Avançado' : _lvl.startsWith('vitalicio') ? 'Vitalício' : (isFreeOrInadimplente ? 'Gratuito' : 'Básico');
+  const isAdvanced = _lvl.includes('avancado') || _lvl === 'vitalicio_avancado';
+  const planFeatures = isFreeOrInadimplente
+    ? ['Recursos básicos do sistema', 'Assine para desbloquear tudo']
+    : isAdvanced
+      ? ['Perfis Pessoais ilimitados', 'Perfis Empresariais (PJ/MEI)', 'CRM, Serviços e Agenda Online', 'Controle de Produtos e Estoque', 'Suporte prioritário no WhatsApp']
+      : ['Perfis Pessoais ilimitados', 'Gestão de Contas e Cartões', 'Sincronização com Google Agenda', 'Assistente no WhatsApp'];
+  const daysRemaining = hasFutureAccess ? Math.max(0, dayjs(mainUserData.accessExpiresAt).endOf('day').diff(dayjs(), 'day')) : 0;
+
   return (
     <Content className="page-content-wrapper perfil-content-wrapper">
       <Title level={2} className="page-title-custom perfil-page-title">
@@ -331,6 +342,21 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
                   <Text className="user-email-perfil">{mainUserData?.email || 'Não informado'}</Text>
                 </div>
               </div>
+              <Divider style={{ margin: '16px 0' }} />
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={8}>
+                  <Text type="secondary" style={{ fontSize: 12 }}><PhoneOutlined /> Telefone</Text>
+                  <div><Text strong>{mainUserData?.phone || '—'}</Text></div>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Text type="secondary" style={{ fontSize: 12 }}><CalendarOutlined /> Membro desde</Text>
+                  <div><Text strong>{mainUserData?.createdAt ? dayjs(mainUserData.createdAt).format('DD/MM/YYYY') : '—'}</Text></div>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Text type="secondary" style={{ fontSize: 12 }}><CrownOutlined /> Plano</Text>
+                  <div><Text strong>{formatPlanName(mainUserData?.accessLevel)}</Text></div>
+                </Col>
+              </Row>
             </Card>
 
             {/* Card de Perfis de Conta */}
@@ -399,22 +425,34 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
         {/* Coluna direita: Plano */}
         <Col xs={24} lg={9}>
           <Card title={<Space><CrownOutlined className="card-title-icon" />Seu Plano Atual</Space>} className="perfil-card plan-card animated-card" bordered={false} style={{ animationDelay: '0.4s' }}>
-            <div className="current-plan-info" style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-              <Title level={3} className="current-plan-name" style={{ marginBottom: 4 }}>
+            <div className="current-plan-info" style={{ textAlign: 'center', padding: '8px 0 12px' }}>
+              <Tag color={planTier === 'Avançado' ? 'gold' : planTier === 'Vitalício' ? 'purple' : 'blue'} style={{ marginBottom: 8 }}>{planTier}</Tag>
+              <Title level={3} className="current-plan-name" style={{ margin: '0 0 4px' }}>
                 {formatPlanName(mainUserData?.accessLevel)}
               </Title>
               {isVitalicio ? (
                 <Tag color="gold" style={{ fontSize: 13 }}>Acesso Vitalício</Tag>
               ) : hasFutureAccess ? (
-                <Text type="success">Válido até {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Text>
+                <div>
+                  <Text type="success">Válido até {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Text>
+                  <div><Text type="secondary" style={{ fontSize: 12 }}><ClockCircleOutlined /> {daysRemaining} dia(s) restante(s)</Text></div>
+                </div>
               ) : mainUserData?.accessExpiresAt ? (
                 <Tag color="red">Expirado em {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}</Tag>
               ) : (
                 <Text type="secondary">Plano gratuito</Text>
               )}
             </div>
-            <Button type="primary" block size="large" className="manage-plan-btn" icon={<CrownOutlined />} onClick={() => setIsPlanChangeModalVisible(true)}>
-              Trocar Plano
+
+            <Divider style={{ margin: '8px 0 12px' }}>O que está incluído</Divider>
+            <List
+              size="small"
+              dataSource={planFeatures}
+              renderItem={(item) => (<List.Item style={{ padding: '4px 0', border: 'none' }}><CheckCircleFilled style={{ color: '#52c41a', marginRight: 8 }} /> {item}</List.Item>)}
+            />
+
+            <Button type="primary" block size="large" className="manage-plan-btn" icon={<CrownOutlined />} style={{ marginTop: 12 }} onClick={() => setIsPlanChangeModalVisible(true)}>
+              {isFreeOrInadimplente ? 'Assinar um plano' : 'Trocar Plano'}
             </Button>
             {hasFutureAccess && (
               <Paragraph type="secondary" style={{ fontSize: 12, textAlign: 'center', marginTop: 10, marginBottom: 0 }}>

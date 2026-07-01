@@ -1,7 +1,7 @@
 // src/pages/AdminPage/pages/SupportManagementPage.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Tag, Button, Card, Typography, message, Modal, Select, Row, Col, Statistic, Empty, Spin, Input, Divider, Segmented } from 'antd';
-import { CustomerServiceOutlined, ClockCircleOutlined, CheckCircleOutlined, SyncOutlined, MessageOutlined, SendOutlined } from '@ant-design/icons';
+import { Tag, Button, Card, Typography, message, Select, Row, Col, Statistic, Empty, Spin, Input, Divider, Segmented, Descriptions } from 'antd';
+import { CustomerServiceOutlined, ClockCircleOutlined, CheckCircleOutlined, SyncOutlined, MessageOutlined, SendOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import apiClient from '../../../services/api';
 
@@ -19,7 +19,7 @@ const SupportManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Todos');
 
-  // Chat
+  // Chat (página cheia)
   const [chatTicket, setChatTicket] = useState(null);
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -45,12 +45,13 @@ const SupportManagementPage = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
   useEffect(() => {
-    if (chatTicket) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-  }, [chatTicket]);
+    if (chatTicket?.messages) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  }, [chatTicket?.messages]);
 
   const openChat = async (ticketId) => {
     setChatLoading(true);
     setChatTicket({ id: ticketId, messages: [] });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       const res = await apiClient.get(`/support/admin/tickets/${ticketId}`);
       setChatTicket(res.data?.data || null);
@@ -62,16 +63,20 @@ const SupportManagementPage = () => {
     }
   };
 
+  const reloadChat = async () => {
+    if (!chatTicket) return;
+    const res = await apiClient.get(`/support/admin/tickets/${chatTicket.id}`);
+    setChatTicket(res.data?.data || null);
+  };
+
   const sendMessage = async () => {
     if (!text.trim() || !chatTicket) return;
     setSending(true);
     try {
       await apiClient.post(`/support/admin/tickets/${chatTicket.id}/messages`, { message: text });
       setText('');
-      const res = await apiClient.get(`/support/admin/tickets/${chatTicket.id}`);
-      setChatTicket(res.data?.data || null);
+      await reloadChat();
       fetchData();
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (error) {
       message.error(error.response?.data?.message || 'Erro ao enviar mensagem.');
     } finally {
@@ -94,6 +99,68 @@ const SupportManagementPage = () => {
     }
   };
 
+  // ===== PÁGINA DE CHAT =====
+  if (chatTicket) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => setChatTicket(null)} style={{ marginBottom: 16 }}>Voltar aos chamados</Button>
+        {chatLoading ? (
+          <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
+        ) : (
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={16}>
+              <Card
+                title={<span><MessageOutlined /> {chatTicket.subject}</span>}
+                extra={
+                  <Select value={chatTicket.status} onChange={changeStatus} loading={statusLoading} style={{ width: 170 }}>
+                    {STATUS_OPTIONS.map(s => <Option key={s} value={s}>{s}</Option>)}
+                  </Select>
+                }
+              >
+                <div className="admin-chat-window">
+                  {(chatTicket.messages || []).length === 0 ? (
+                    <Empty description="Sem mensagens." />
+                  ) : (chatTicket.messages || []).map((m) => {
+                    const admin = m.senderType === 'admin';
+                    return (
+                      <div key={m.id} style={{ display: 'flex', justifyContent: admin ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
+                        <div style={{ maxWidth: '78%', background: admin ? '#d24d1e' : '#fff', color: admin ? '#fff' : '#000', border: admin ? 'none' : '1px solid #eee', borderRadius: 12, padding: '8px 12px', boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
+                          <div style={{ fontSize: 11, opacity: 0.85, marginBottom: 2 }}>{m.senderName || (admin ? 'Suporte' : 'Cliente')}</div>
+                          <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{m.message}</div>
+                          <div style={{ fontSize: 10, opacity: 0.7, marginTop: 4, textAlign: 'right' }}>{m.createdAt ? dayjs(m.createdAt).format('DD/MM HH:mm') : ''}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={bottomRef} />
+                </div>
+                <Divider style={{ margin: '12px 0' }} />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <TextArea value={text} onChange={(e) => setText(e.target.value)} autoSize={{ minRows: 1, maxRows: 4 }} placeholder="Responder ao cliente..." onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
+                  <Button type="primary" icon={<SendOutlined />} loading={sending} onClick={sendMessage}>Enviar</Button>
+                </div>
+              </Card>
+            </Col>
+            <Col xs={24} lg={8}>
+              <Card title="Cliente / chamado">
+                <Descriptions column={1} size="small">
+                  <Descriptions.Item label="Cliente">{chatTicket.client?.name || '—'}</Descriptions.Item>
+                  <Descriptions.Item label="E-mail">{chatTicket.client?.email || '—'}</Descriptions.Item>
+                  <Descriptions.Item label="Telefone">{chatTicket.client?.phone || '—'}</Descriptions.Item>
+                  <Descriptions.Item label="Tipo"><Tag color={TYPE_COLOR[chatTicket.type] || 'default'}>{chatTicket.type}</Tag></Descriptions.Item>
+                  <Descriptions.Item label="Prioridade">{chatTicket.priority}</Descriptions.Item>
+                  <Descriptions.Item label="Aberto em">{chatTicket.createdAt ? dayjs(chatTicket.createdAt).format('DD/MM/YYYY HH:mm') : '—'}</Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </Col>
+          </Row>
+        )}
+        <style>{`.admin-chat-window{max-height:55vh;min-height:320px;overflow-y:auto;padding:8px 4px;background:#fafafa;border-radius:10px;}`}</style>
+      </div>
+    );
+  }
+
+  // ===== LISTA =====
   const filtered = filter === 'Todos' ? tickets : tickets.filter(t => t.status === filter);
 
   return (
@@ -138,51 +205,6 @@ const SupportManagementPage = () => {
           ))}
         </Row>
       )}
-
-      {/* Modal de chat + status */}
-      <Modal
-        open={!!chatTicket}
-        onCancel={() => setChatTicket(null)}
-        footer={null}
-        width={680}
-        title={chatTicket ? (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingRight: 24 }}>
-            <span><MessageOutlined /> {chatTicket.subject || 'Chamado'} <Text type="secondary" style={{ fontWeight: 400, fontSize: 13 }}>— {chatTicket.client?.name}</Text></span>
-            <Select value={chatTicket.status} onChange={changeStatus} loading={statusLoading} style={{ width: 160 }} size="small">
-              {STATUS_OPTIONS.map(s => <Option key={s} value={s}>{s}</Option>)}
-            </Select>
-          </div>
-        ) : 'Chamado'}
-      >
-        {chatLoading ? (
-          <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
-        ) : (
-          <>
-            <div style={{ maxHeight: 400, overflowY: 'auto', padding: '8px 4px', background: '#fafafa', borderRadius: 8 }}>
-              {(chatTicket?.messages || []).length === 0 ? (
-                <Empty description="Sem mensagens." />
-              ) : (chatTicket.messages || []).map((m) => {
-                const admin = m.senderType === 'admin';
-                return (
-                  <div key={m.id} style={{ display: 'flex', justifyContent: admin ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
-                    <div style={{ maxWidth: '75%', background: admin ? '#d24d1e' : '#fff', color: admin ? '#fff' : '#000', border: admin ? 'none' : '1px solid #eee', borderRadius: 10, padding: '8px 12px' }}>
-                      <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 2 }}>{m.senderName || (admin ? 'Suporte' : 'Cliente')}</div>
-                      <div style={{ whiteSpace: 'pre-wrap' }}>{m.message}</div>
-                      <div style={{ fontSize: 10, opacity: 0.7, marginTop: 4, textAlign: 'right' }}>{m.createdAt ? dayjs(m.createdAt).format('DD/MM HH:mm') : ''}</div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={bottomRef} />
-            </div>
-            <Divider style={{ margin: '12px 0' }} />
-            <div style={{ display: 'flex', gap: 8 }}>
-              <TextArea value={text} onChange={(e) => setText(e.target.value)} autoSize={{ minRows: 1, maxRows: 4 }} placeholder="Responder ao cliente..." onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
-              <Button type="primary" icon={<SendOutlined />} loading={sending} onClick={sendMessage}>Enviar</Button>
-            </div>
-          </>
-        )}
-      </Modal>
     </div>
   );
 };
