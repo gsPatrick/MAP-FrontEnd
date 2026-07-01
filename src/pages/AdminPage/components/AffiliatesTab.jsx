@@ -257,15 +257,11 @@ const AffiliatesTab = () => {
   // ============ LISTA (só a listagem, sem cards de dados) ============
   const columns = [
     { title: 'Afiliado', dataIndex: 'name', render: (t, r) => (<Space direction="vertical" size={0}><Text strong>{t}</Text><Text type="secondary" style={{ fontSize: 11 }}>{r.affiliateCode}{r.affiliateSlug ? ` · /${r.affiliateSlug}` : ''}</Text></Space>) },
-    { title: 'Aberturas', dataIndex: 'totalClicks', align: 'center', render: (v) => <Text strong>{v || 0}</Text> },
-    { title: 'Indicados', key: 'ref', align: 'center', render: (_, r) => <span><Text strong>{r.activeReferrals}</Text> <Text type="secondary">/ {r.totalReferrals}</Text></span> },
-    { title: 'Saldo atual', dataIndex: 'balance', align: 'right', render: (v) => <Text type="success" strong>{money(v)}</Text> },
     { title: '', key: 'act', align: 'right', render: (_, r) => <Button icon={<SolutionOutlined />} onClick={(e) => { e.stopPropagation(); openDetail(r); }}>Ver detalhes</Button> },
   ];
 
   return (
     <div className="affiliates-tab-content">
-      <Title level={3} style={{ marginBottom: 16 }}>Gerenciamento de Afiliados</Title>
       <Table
         columns={columns}
         dataSource={activeAffiliates}
