@@ -79,8 +79,11 @@ const AffiliatesTab = () => {
     } catch (e) { message.error(e.response?.data?.message || 'Erro ao pagar saldo.'); }
   };
 
-  // Só afiliados que ENVIARAM o link e alguém ABRIU (clicks > 0).
-  const activeAffiliates = affiliates.filter(a => (a.totalClicks || 0) > 0);
+  // Afiliados com QUALQUER atividade: alguém abriu o link (clicks), indicou alguém
+  // ou tem saldo. (Cliques antigos não eram rastreados, então indicados/saldo contam.)
+  const activeAffiliates = affiliates.filter(a =>
+    (a.totalClicks || 0) > 0 || (a.totalReferrals || 0) > 0 || parseFloat(a.balance || 0) > 0
+  );
 
   const totals = affiliates.reduce((acc, c) => ({
     clicks: acc.clicks + (c.totalClicks || 0),
@@ -201,7 +204,7 @@ const AffiliatesTab = () => {
         loading={loading}
         pagination={{ pageSize: 10 }}
         onRow={(r) => ({ onClick: () => openDetail(r), style: { cursor: 'pointer' } })}
-        locale={{ emptyText: <Empty description="Nenhum afiliado com link aberto ainda." /> }}
+        locale={{ emptyText: <Empty description="Nenhum afiliado com atividade ainda." /> }}
       />
     </div>
   );
