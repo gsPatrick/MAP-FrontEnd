@@ -13,6 +13,7 @@ const AffiliatesTab = () => {
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
   const [rankingModalVisible, setRankingModalVisible] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState(null);
+  const [pendingPayouts, setPendingPayouts] = useState([]);
 
   const fetchAffiliates = useCallback(async () => {
     setLoading(true);
@@ -26,6 +27,25 @@ const AffiliatesTab = () => {
     }
   }, []);
 
+  const fetchPendingPayouts = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/admin/affiliates/pending-payouts');
+      setPendingPayouts(Array.isArray(response.data?.data) ? response.data.data : []);
+    } catch (error) {
+      setPendingPayouts([]);
+    }
+  }, []);
+
+  const handlePayPayout = async (payoutId) => {
+    try {
+      await apiClient.post(`/admin/affiliates/payouts/${payoutId}/pay`);
+      message.success('Saque marcado como pago!');
+      fetchPendingPayouts();
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Erro ao marcar saque como pago.');
+    }
+  };
+
   const fetchRanking = async () => {
     try {
       const response = await apiClient.get('/affiliates/ranking');
@@ -38,7 +58,8 @@ const AffiliatesTab = () => {
 
   useEffect(() => {
     fetchAffiliates();
-  }, [fetchAffiliates]);
+    fetchPendingPayouts();
+  }, [fetchAffiliates, fetchPendingPayouts]);
 
   const handleClearBalance = async (clientId) => {
     try {
@@ -176,6 +197,34 @@ const AffiliatesTab = () => {
           </Card>
         </Col>
       </Row>
+
+      {pendingPayouts.length > 0 && (
+        <Card
+          title={<span><DollarOutlined /> Saques pendentes ({pendingPayouts.length})</span>}
+          style={{ marginBottom: 20, borderColor: '#faad14' }}
+          headStyle={{ background: '#fffbe6' }}
+        >
+          <Table
+            dataSource={pendingPayouts}
+            rowKey="id"
+            pagination={false}
+            columns={[
+              { title: 'Data do pedido', dataIndex: 'createdAt', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
+              { title: 'Afiliado', dataIndex: ['affiliate', 'name'], render: (v, r) => <><Text strong>{v}</Text><br /><Text type="secondary" style={{ fontSize: 11 }}>{r.affiliate?.phone}</Text></> },
+              { title: 'Valor', dataIndex: 'amount', align: 'right', render: (v) => <Text strong>R$ {parseFloat(v).toFixed(2)}</Text> },
+              { title: 'Chave PIX', dataIndex: 'pixKey', render: (v) => v || <Text type="secondary">não informada</Text> },
+              {
+                title: 'Ação', key: 'acao', align: 'center',
+                render: (_, r) => (
+                  <Popconfirm title={`Confirmar pagamento de R$ ${parseFloat(r.amount).toFixed(2)}?`} okText="Sim, paguei" cancelText="Cancelar" onConfirm={() => handlePayPayout(r.id)}>
+                    <Button type="primary" size="small" icon={<DollarOutlined />}>Marcar como pago</Button>
+                  </Popconfirm>
+                )
+              },
+            ]}
+          />
+        </Card>
+      )}
 
       <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={4} style={{ margin: 0 }}>Parceiros Afiliados</Title>

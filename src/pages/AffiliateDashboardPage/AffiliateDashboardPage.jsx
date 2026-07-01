@@ -16,21 +16,43 @@ const AffiliateDashboardPage = () => {
     const [commissionsData, setCommissionsData] = useState(null);
     const [period, setPeriod] = useState('mes');
     const [loadingCommissions, setLoadingCommissions] = useState(false);
+    const [payouts, setPayouts] = useState([]);
+    const [requestingPayout, setRequestingPayout] = useState(false);
     const [form] = Form.useForm();
 
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            const [dashboardRes, referralsRes] = await Promise.all([
+            const [dashboardRes, referralsRes, payoutsRes] = await Promise.all([
                 apiClient.get('/affiliate/dashboard'),
-                apiClient.get('/affiliate/referrals')
+                apiClient.get('/affiliate/referrals'),
+                apiClient.get('/affiliate/payouts')
             ]);
             setDashboardData(dashboardRes.data?.data || null);
             setReferrals(Array.isArray(referralsRes.data?.data) ? referralsRes.data.data : []);
+            setPayouts(Array.isArray(payoutsRes.data?.data) ? payoutsRes.data.data : []);
         } catch (error) {
             message.error('Erro ao carregar dados de afiliado.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRequestPayout = async () => {
+        const balance = parseFloat(dashboardData?.summary?.balance || 0);
+        if (balance < 50) {
+            message.warning('O saldo mínimo para saque é R$ 50,00.');
+            return;
+        }
+        try {
+            setRequestingPayout(true);
+            await apiClient.post('/affiliate/request-payout');
+            message.success('Saque solicitado! Seu saldo foi para o histórico e o pagamento será processado pela equipe.');
+            fetchDashboardData();
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Não foi possível solicitar o saque.');
+        } finally {
+            setRequestingPayout(false);
         }
     };
 
@@ -115,6 +137,19 @@ const AffiliateDashboardPage = () => {
             title: 'Comissão', dataIndex: 'amount', align: 'right',
             render: (v) => <Text type="success" strong>{Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Text>
         },
+    ];
+
+    const payoutColumns = [
+        { title: 'Data do pedido', dataIndex: 'createdAt', render: (d) => new Date(d).toLocaleDateString('pt-BR') },
+        {
+            title: 'Valor', dataIndex: 'amount', align: 'right',
+            render: (v) => <Text strong>{Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Text>
+        },
+        {
+            title: 'Status', dataIndex: 'status',
+            render: (s) => <Tag color={s === 'Pago' ? 'green' : (s === 'Cancelado' ? 'red' : 'gold')}>{s}</Tag>
+        },
+        { title: 'Pago em', dataIndex: 'paidAt', render: (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—' },
     ];
 
     if (loading) return <Card loading={true} style={{ minHeight: '400px' }} />;
@@ -218,11 +253,21 @@ const AffiliateDashboardPage = () => {
                             valueStyle={{ fontSize: '28px', fontWeight: 'bold', color: '#3f8600' }}
                         />
                         <Divider />
+                        <Button
+                            type="primary"
+                            block
+                            icon={<DollarOutlined />}
+                            loading={requestingPayout}
+                            disabled={parseFloat(summary?.balance || 0) < 50}
+                            onClick={handleRequestPayout}
+                        >
+                            Solicitar Saque
+                        </Button>
                         <Alert
-                            message="Para solicitar o saque, fale com o suporte no WhatsApp. O pagamento é feito manualmente pela nossa equipe."
+                            message="Saque mínimo de R$ 50,00. Ao solicitar, o saldo vai para o histórico e o pagamento é feito manualmente pela equipe."
                             type="info"
                             showIcon
-                            style={{ marginTop: 16, fontSize: '12px' }}
+                            style={{ marginTop: 12, fontSize: '12px' }}
                         />
                     </Card>
                 </Col>
@@ -274,6 +319,18 @@ const AffiliateDashboardPage = () => {
                             rowKey="id"
                             pagination={{ pageSize: 8 }}
                             locale={{ emptyText: <Empty description="Nenhuma comissão neste período." /> }}
+                        />
+                    </Card>
+                </Col>
+
+                <Col span={24}>
+                    <Card title={<span><DollarOutlined /> Histórico de Saques</span>} className="premium-card-shadow">
+                        <Table
+                            columns={payoutColumns}
+                            dataSource={payouts}
+                            rowKey="id"
+                            pagination={{ pageSize: 6 }}
+                            locale={{ emptyText: <Empty description="Nenhum saque solicitado ainda." /> }}
                         />
                     </Card>
                 </Col>
