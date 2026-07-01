@@ -264,6 +264,33 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
     navigate(`/checkout/${planId}`);
   };
 
+  const handleCancelSubscription = () => {
+    Modal.confirm({
+      title: 'Cancelar assinatura?',
+      content: `Sua assinatura continua ativa até ${mainUserData?.accessExpiresAt ? dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY') : 'o vencimento'}. Nessa data o acesso é encerrado e não haverá renovação. Você pode reativar antes disso quando quiser.`,
+      okText: 'Sim, cancelar', cancelText: 'Voltar', okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await apiClient.post('/subscriptions/cancel');
+          message.success('Cancelamento agendado para o vencimento.');
+          await fetchMainUserData();
+        } catch (e) {
+          message.error(e.response?.data?.message || 'Erro ao cancelar.');
+        }
+      },
+    });
+  };
+
+  const handleReactivateSubscription = async () => {
+    try {
+      await apiClient.post('/subscriptions/reactivate');
+      message.success('Assinatura reativada! A renovação volta a valer.');
+      await fetchMainUserData();
+    } catch (e) {
+      message.error(e.response?.data?.message || 'Erro ao reativar.');
+    }
+  };
+
   const filterPlansForUser = (plans, currentLevel) => {
     // Concatena todos os planos em um array simples para facilitar o filtro
     const allPlans = [...(plans.monthly || []), ...(plans.yearly || [])];
@@ -321,6 +348,8 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
       ? ['Perfis Pessoais ilimitados', 'Perfis Empresariais (PJ/MEI)', 'CRM, Serviços e Agenda Online', 'Controle de Produtos e Estoque', 'Suporte prioritário no WhatsApp']
       : ['Perfis Pessoais ilimitados', 'Gestão de Contas e Cartões', 'Sincronização com Google Agenda', 'Assistente no WhatsApp'];
   const daysRemaining = hasFutureAccess ? Math.max(0, dayjs(mainUserData.accessExpiresAt).endOf('day').diff(dayjs(), 'day')) : 0;
+  const isCancelScheduled = !!mainUserData?.subscriptionCancelAt;
+  const canCancel = hasFutureAccess && !isCancelScheduled;
 
   return (
     <Content className="page-content-wrapper perfil-content-wrapper">
@@ -451,14 +480,35 @@ Por favor, prossiga com o pagamento para a chave PIX informada.
               renderItem={(item) => (<List.Item style={{ padding: '4px 0', border: 'none' }}><CheckCircleFilled style={{ color: '#52c41a', marginRight: 8 }} /> {item}</List.Item>)}
             />
 
+            {isCancelScheduled && (
+              <Alert
+                type="error"
+                showIcon
+                style={{ marginTop: 12 }}
+                message="Assinatura cancelada"
+                description={`Seu acesso continua até ${dayjs(mainUserData.subscriptionCancelAt).format('DD/MM/YYYY')}. Nessa data a assinatura será encerrada.`}
+              />
+            )}
+
             <Button type="primary" block size="large" className="manage-plan-btn" icon={<CrownOutlined />} style={{ marginTop: 12 }} onClick={() => setIsPlanChangeModalVisible(true)}>
               {isFreeOrInadimplente ? 'Assinar um plano' : 'Trocar Plano'}
             </Button>
-            {hasFutureAccess && (
+
+            {hasFutureAccess && !isCancelScheduled && (
               <Paragraph type="secondary" style={{ fontSize: 12, textAlign: 'center', marginTop: 10, marginBottom: 0 }}>
                 A troca fica disponível a partir de {dayjs(mainUserData.accessExpiresAt).format('DD/MM/YYYY')}, quando seu plano expira.
               </Paragraph>
             )}
+
+            {isCancelScheduled ? (
+              <Button block type="default" style={{ marginTop: 10 }} onClick={handleReactivateSubscription}>
+                Reativar assinatura
+              </Button>
+            ) : canCancel ? (
+              <Button block danger type="text" style={{ marginTop: 10 }} onClick={handleCancelSubscription}>
+                Cancelar assinatura
+              </Button>
+            ) : null}
           </Card>
         </Col>
       </Row>
