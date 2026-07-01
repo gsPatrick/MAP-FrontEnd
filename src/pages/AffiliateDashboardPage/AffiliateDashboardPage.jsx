@@ -24,9 +24,10 @@ const PLANS = [
 ];
 const money = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const LEAD_STATUS = {
-  pago: { label: 'Efetuou pagamento', color: 'green' },
   aberto: { label: 'Abriu o link', color: 'blue' },
-  abandonado: { label: 'Abandonado', color: 'default' },
+  cadastrou: { label: 'Criou a conta', color: 'gold' },
+  pago: { label: 'Efetuou pagamento', color: 'green' },
+  abandonado: { label: 'Abandonado', color: 'red' },
 };
 
 const AffiliateDashboardPage = () => {
