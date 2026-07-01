@@ -20,6 +20,8 @@ const UserManagementPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [planoFilter, setPlanoFilter] = useState([]);      // ex: ['basico','vitalicio']
     const [situacaoFilter, setSituacaoFilter] = useState([]); // ex: ['Inadimplente']
+    const [affiliateFilter, setAffiliateFilter] = useState(undefined); // '__any__' | '__none__' | 'id:<n>'
+    const [cancelFilter, setCancelFilter] = useState(undefined);       // 'scheduled' | 'none'
 
     const fetchAdminStats = useCallback(async () => {
         setStatsLoading(true);
@@ -50,6 +52,20 @@ const UserManagementPage = () => {
         fetchAdminStats();
     }, [fetchAllUsers, fetchAdminStats]);
 
+    // Lista de afiliados (para o filtro), montada a partir de quem indicou alguém.
+    const affiliateOptions = useMemo(() => {
+        const map = new Map();
+        allUsers.forEach(u => { if (u.referredBy) map.set(u.referredBy.id, u.referredBy); });
+        const specific = [...map.values()]
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+            .map(a => ({ value: `id:${a.id}`, label: `${a.name}${a.affiliateCode ? ` (${a.affiliateCode})` : ''}` }));
+        return [
+            { value: '__any__', label: '✅ Veio de algum afiliado' },
+            { value: '__none__', label: '🚫 Sem indicação' },
+            ...(specific.length ? [{ label: 'Afiliados', options: specific }] : []),
+        ];
+    }, [allUsers]);
+
     const filteredUsers = useMemo(() => {
         return allUsers.filter((user) => {
             // 1) Busca
@@ -58,7 +74,9 @@ const UserManagementPage = () => {
                 const match =
                     user.name?.toLowerCase().includes(t) ||
                     user.email?.toLowerCase().includes(t) ||
-                    user.phone?.includes(t);
+                    user.phone?.includes(t) ||
+                    user.referredBy?.name?.toLowerCase().includes(t) ||
+                    user.referredBy?.affiliateCode?.toLowerCase().includes(t);
                 if (!match) return false;
             }
             // 2) Filtro de plano (OR dentro da categoria)
@@ -69,12 +87,24 @@ const UserManagementPage = () => {
             if (situacaoFilter.length > 0) {
                 if (!situacaoFilter.includes(getSituacao(user).label)) return false;
             }
+            // 4) Filtro de afiliado
+            if (affiliateFilter) {
+                if (affiliateFilter === '__any__' && !user.referredBy) return false;
+                if (affiliateFilter === '__none__' && user.referredBy) return false;
+                if (affiliateFilter.startsWith('id:')) {
+                    const id = parseInt(affiliateFilter.slice(3), 10);
+                    if (user.referredBy?.id !== id) return false;
+                }
+            }
+            // 5) Filtro de cancelamento
+            if (cancelFilter === 'scheduled' && !user.subscriptionCancelAt) return false;
+            if (cancelFilter === 'none' && user.subscriptionCancelAt) return false;
             return true;
         });
-    }, [allUsers, searchTerm, planoFilter, situacaoFilter]);
+    }, [allUsers, searchTerm, planoFilter, situacaoFilter, affiliateFilter, cancelFilter]);
 
-    const hasFilters = searchTerm || planoFilter.length > 0 || situacaoFilter.length > 0;
-    const clearFilters = () => { setSearchTerm(''); setPlanoFilter([]); setSituacaoFilter([]); };
+    const hasFilters = searchTerm || planoFilter.length > 0 || situacaoFilter.length > 0 || affiliateFilter || cancelFilter;
+    const clearFilters = () => { setSearchTerm(''); setPlanoFilter([]); setSituacaoFilter([]); setAffiliateFilter(undefined); setCancelFilter(undefined); };
 
     return (
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -110,17 +140,17 @@ const UserManagementPage = () => {
                 </div>
 
                 {/* Filtros combináveis */}
-                <Row gutter={[12, 12]} style={{ marginBottom: 16 }} align="middle">
-                    <Col xs={24} md={9}>
+                <Row gutter={[12, 12]} style={{ marginBottom: 12 }} align="middle">
+                    <Col xs={24} md={10}>
                         <Input
                             allowClear
                             prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-                            placeholder="Buscar por nome, e-mail ou telefone..."
+                            placeholder="Buscar por nome, e-mail, telefone ou afiliado..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </Col>
-                    <Col xs={12} md={6}>
+                    <Col xs={12} md={7}>
                         <Select
                             mode="multiple"
                             allowClear
@@ -132,7 +162,7 @@ const UserManagementPage = () => {
                             maxTagCount="responsive"
                         />
                     </Col>
-                    <Col xs={12} md={6}>
+                    <Col xs={12} md={7}>
                         <Select
                             mode="multiple"
                             allowClear
@@ -144,12 +174,42 @@ const UserManagementPage = () => {
                             maxTagCount="responsive"
                         />
                     </Col>
-                    <Col xs={24} md={3}>
+                    <Col xs={12} md={10}>
+                        <Select
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
+                            style={{ width: '100%' }}
+                            placeholder="Indicado por afiliado..."
+                            options={affiliateOptions}
+                            value={affiliateFilter}
+                            onChange={setAffiliateFilter}
+                        />
+                    </Col>
+                    <Col xs={12} md={7}>
+                        <Select
+                            allowClear
+                            style={{ width: '100%' }}
+                            placeholder="Cancelamento"
+                            value={cancelFilter}
+                            onChange={setCancelFilter}
+                            options={[
+                                { value: 'scheduled', label: 'Cancelamento agendado' },
+                                { value: 'none', label: 'Sem cancelamento' },
+                            ]}
+                        />
+                    </Col>
+                    <Col xs={24} md={7}>
                         <Button block icon={<ClearOutlined />} onClick={clearFilters} disabled={!hasFilters}>
-                            Limpar
+                            Limpar filtros
                         </Button>
                     </Col>
                 </Row>
+                {hasFilters && (
+                    <div style={{ marginBottom: 12, color: '#8c8c8c', fontSize: 13 }}>
+                        {filteredUsers.length} usuário(s) encontrado(s)
+                    </div>
+                )}
 
                 {loading && allUsers.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '50px' }}><Spin size="large" /></div>
